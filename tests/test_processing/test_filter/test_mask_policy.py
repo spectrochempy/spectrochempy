@@ -1,0 +1,110 @@
+# ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+
+import numpy as np
+import pytest
+
+import spectrochempy as scp
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {"method": "avg"},
+        {"method": "han"},
+        {"method": "median"},
+        {"method": "savgol"},
+        {"method": "whittaker"},
+        {"method": "gaussian", "sigma": 2, "sigma_units": "coordinate"},
+        {"method": "butterworth", "cutoff": 0.15},
+        {"method": "notch", "period": 5},
+        {"method": "wavelet"},
+    ],
+)
+def test_split_filters_each_spectrum_along_selected_dimension(settings):
+    if settings["method"] == "wavelet":
+        pytest.importorskip("pywt")
+    rng = np.random.default_rng(1852)
+    data = rng.normal(size=(48, 3))
+    data[24:, :] += 10
+    mask = np.zeros(data.shape, dtype=bool)
+    mask[20:24, 0] = True
+    mask[25:29, 1] = True
+    mask[:, 2] = True
+    data[mask] = np.nan
+    coord = scp.Coord(np.arange(48.0), units="cm")
+    source = scp.NDDataset(data, mask=mask, name="gapped", units="absorbance")
+    source.set_coordset(y=coord)
+    source.history = "Input history"
+
+    result = scp.Filter(mask_policy="split", **settings).transform(source, dim="y")
+
+    np.testing.assert_array_equal(result.mask, mask)
+    np.testing.assert_array_equal(result.data[mask], data[mask])
+    np.testing.assert_array_equal(source.data, data)
+    np.testing.assert_array_equal(result.y.data, coord.data)
+    assert result.name == source.name
+    assert result.units == source.units
+    assert result.history_entries[:-1] == source.history_entries
+    history = result.history_entries[-1]["parameters"]
+    assert history["mask_policy"] == "split"
+    for column, start, stop in [(0, 0, 20), (0, 24, 48), (1, 0, 25), (1, 29, 48)]:
+        piece = scp.NDDataset(data[start:stop, column], coordset=[coord[start:stop]])
+        expected = scp.Filter(**settings).transform(piece)
+        np.testing.assert_allclose(result.data[start:stop, column], expected.data)
+    if settings["method"] == "wavelet":
+        assert len(history["segments"]) == 4
+        assert history["segments"][0]["start"] == 0
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {"method": "savgol", "size": 5},
+        {"method": "whittaker", "order": 2},
+        {"method": "butterworth", "cutoff": 0.15},
+        {"method": "notch", "period": 5},
+        {"method": "wavelet"},
+        {"method": "wavelet", "wavelet": "haar", "wavelet_level": 3},
+    ],
+)
+def test_split_rejects_short_segment(settings):
+    if settings["method"] == "wavelet":
+        pytest.importorskip("pywt")
+    source = scp.NDDataset(np.arange(25.0), coordset=[scp.Coord(np.arange(25.0))])
+    source[20:23] = scp.MASKED
+
+    with pytest.raises(ValueError, match=r"segment \[23:25\)"):
+        scp.Filter(mask_policy="split", **settings).transform(source)
+    assert not source.history_entries
+
+
+def test_split_derivative_uses_signed_spacing_and_preserves_mask():
+    coord = scp.Coord(np.arange(20.0, 0, -0.5), units="cm")
+    source = scp.NDDataset(
+        3 * coord.data, coordset=[coord], units="absorbance", title="signal"
+    )
+    source[12:20] = scp.MASKED
+    result = source.savgol(deriv=1, mask_policy="split")
+    np.testing.assert_allclose(result.data[~source.mask], 3)
+    np.testing.assert_array_equal(result.mask, source.mask)
+    assert result.units == source.units / coord.units
+    assert result.title == "signal (1st derivative)"
+    assert result.history_entries[-1]["parameters"]["delta"] == -0.5
+
+
+def test_split_fully_masked_dataset_is_copied():
+    source = scp.NDDataset([1.0, 2.0], mask=[True, True])
+    result = scp.Filter(method="wavelet", mask_policy="split").transform(source)
+    assert result is not source
+    np.testing.assert_array_equal(result.data, source.data)
+    np.testing.assert_array_equal(result.mask, source.mask)
+
+
+def test_split_rejects_unmasked_nonfinite_sample():
+    source = scp.NDDataset([0.0, np.nan, 2.0], mask=[True, False, False])
+    with pytest.raises(ValueError, match="requires finite data"):
+        scp.Filter(method="avg", mask_policy="split").transform(source)

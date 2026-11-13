@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
+  segments independently and report segments too short for the chosen filter.
 - Add wavelet denoising to ``Filter`` with the optional ``wavelets`` extra. (#1852)
 - Add Butterworth low-pass, FTIR fringe notch and Gaussian methods to
   ``Filter``. Measure their effects with ``rms()`` and
