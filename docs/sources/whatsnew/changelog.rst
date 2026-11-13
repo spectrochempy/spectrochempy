@@ -19,6 +19,8 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
+  segments independently and report segments too short for the chosen filter.
 - Use ``NDDataset.argsort()`` to obtain the original indices of 1D data sorted
   by value.
 - Plot distributions of finite, unmasked dataset values with
