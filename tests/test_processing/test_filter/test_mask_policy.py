@@ -82,10 +82,11 @@ def test_split_rejects_short_segment(settings):
     assert not source.history_entries
 
 
-def test_split_derivative_uses_signed_spacing_and_preserves_mask():
+@pytest.mark.parametrize("units", ["absorbance", "V"])
+def test_split_derivative_uses_signed_spacing_and_preserves_mask(units):
     coord = scp.Coord(np.arange(20.0, 0, -0.5), units="cm")
     source = scp.NDDataset(
-        3 * coord.data, coordset=[coord], units="absorbance", title="signal"
+        3 * coord.data, coordset=[coord], units=units, title="signal"
     )
     source[12:20] = scp.MASKED
     result = source.savgol(deriv=1, mask_policy="split")
@@ -104,7 +105,32 @@ def test_split_fully_masked_dataset_is_copied():
     np.testing.assert_array_equal(result.mask, source.mask)
 
 
-def test_split_rejects_unmasked_nonfinite_sample():
-    source = scp.NDDataset([0.0, np.nan, 2.0], mask=[True, False, False])
+@pytest.mark.parametrize("mask", [[True, False, False], [False, False, False]])
+def test_split_rejects_unmasked_nonfinite_sample(mask):
+    source = scp.NDDataset([0.0, np.nan, 2.0], mask=mask)
     with pytest.raises(ValueError, match="requires finite data"):
         scp.Filter(method="avg", mask_policy="split").transform(source)
+
+
+def test_split_derivative_warns_once_on_irregular_spacing():
+    source = scp.NDDataset(
+        np.arange(48.0).reshape(2, 24),
+        coordset=[scp.Coord([0, 1]), scp.Coord(np.arange(24.0) ** 2)],
+    )
+    source[:, 10:14] = scp.MASKED
+
+    with pytest.warns(UserWarning, match="index-based delta") as records:
+        result = source.savgol(deriv=1, mask_policy="split")
+
+    assert len(records) == 1
+    np.testing.assert_allclose(result.data[~source.mask], 1.0)
+
+
+@pytest.mark.parametrize("masked", [False, True])
+def test_split_rejects_complex_window_filter_input(masked):
+    source = scp.NDDataset(np.arange(10.0) * (1 + 2j))
+    if masked:
+        source[5] = scp.MASKED
+
+    with pytest.raises(ValueError, match="requires real data"):
+        scp.Filter(method="median", mask_policy="split").transform(source)

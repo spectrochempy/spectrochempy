@@ -204,6 +204,8 @@ class Filter(ProcessingConfigurable):
     segment lengths are the window size for Savitzky–Golay in interp mode,
     one more than the difference order for Whittaker, and the usual padding
     or decomposition minimum for IIR and wavelet filters, respectively.
+    Split filtering requires real data for window filters, Savitzky–Golay,
+    Whittaker and wavelets.
 
     By default, Butterworth, notch, Gaussian and wavelet filters require
     finite, unmasked data. Butterworth, notch and
@@ -396,7 +398,7 @@ and ‘nearest’.
             The filtered dataset.
 
         """
-        if self.mask_policy == "split" and np.any(dataset.mask):
+        if self.mask_policy == "split":
             return self._transform_segments(dataset, dim)
         if self.method not in _SPECTRAL_METHODS:
             return super().transform(dataset, dim=dim)
@@ -431,8 +433,10 @@ and ‘nearest’.
             raise ValueError(f"{self.method} filtering requires a dimension")
         axis, dimension = dataset.get_axis(dim, negative_axis=True)
         data = np.moveaxis(dataset.data, axis, -1)
-        mask = np.moveaxis(dataset.mask, axis, -1)
+        mask = np.moveaxis(np.broadcast_to(dataset.mask, dataset.shape), axis, -1)
         spectral = self.method in _SPECTRAL_METHODS
+        if not spectral and dataset.has_complex_dims and not mask.all():
+            raise ValueError(f"{self.method} split filtering requires real data")
         coord = getattr(dataset, dimension, None)
         output = None
         parameters = {}
@@ -443,6 +447,10 @@ and ‘nearest’.
         elif self.method == "whittaker":
             minimum = self.order + 1
 
+        spacing_info = None
+        physical_spectral = self.method in {"butterworth", "notch"} or (
+            self.method == "gaussian" and self.sigma_units == "coordinate"
+        )
         for index in np.ndindex(data.shape[:-1]):
             boundaries = np.flatnonzero(
                 np.diff(~mask[index], prepend=False, append=False)
@@ -456,11 +464,27 @@ and ‘nearest’.
                     if not np.isfinite(segment).all():
                         raise ValueError("requires finite data")
                     if spectral:
+                        if physical_spectral and spacing_info is None:
+                            spacing_info = self._spectral_spacing(coord)
                         values, parameters = self._spectral_transform(
-                            segment, -1, dimension, coord
+                            segment, -1, dimension, coord, spacing_info=spacing_info
                         )
                     else:
-                        values = self._transform(segment, dataset=dataset, axis=axis)
+                        if (
+                            spacing_info is None
+                            and self.method == "savgol"
+                            and self.deriv
+                            and self.delta is None
+                        ):
+                            spacing_info = _detect_uniform_spacing(dataset, axis)
+                            if spacing_info[0] is None:
+                                self._warn_index_spacing(spacing_info[1])
+                        values = self._transform(
+                            segment,
+                            dataset=dataset,
+                            axis=axis,
+                            spacing_info=spacing_info,
+                        )
                 except ValueError as exc:
                     raise ValueError(
                         f"{self.method} filter on dimension {dimension!r}, "
@@ -491,8 +515,8 @@ and ‘nearest’.
         if output is not None and not spectral:
             entry = self._processing_history_entry(dataset=dataset, axis=axis)
             if self._output_units is not None:
-                result.units = self._output_units
-            if self._output_title_suffix:
+                result._units = self._output_units
+            if self._output_title_suffix and result.title:
                 result.title = f"{result.title} {self._output_title_suffix}"
         if wavelet_segments:
             entry["parameters"] = {
@@ -505,7 +529,15 @@ and ‘nearest’.
         self._transformed = True
         return result
 
-    def _spectral_transform(self, data, axis, dimension, coord):
+    @staticmethod
+    def _spectral_spacing(coord):
+        if isinstance(coord, CoordSet):
+            coord = coord.default
+        return _uniform_spacing(coord), (
+            str(coord.units) if coord is not None and coord.units is not None else None
+        )
+
+    def _spectral_transform(self, data, axis, dimension, coord, *, spacing_info=None):
         if self.method == "wavelet":
             return self._wavelet_transform(data, axis)
 
@@ -521,9 +553,9 @@ and ‘nearest’.
         spacing = 1.0
         parameters = {parameter: value}
         if physical_units:
-            if isinstance(coord, CoordSet):
-                coord = coord.default
-            delta, message = _uniform_spacing(coord)
+            if spacing_info is None:
+                spacing_info = self._spectral_spacing(coord)
+            (delta, message), coordinate_units = spacing_info
             if delta is None or not np.isfinite(delta) or delta == 0:
                 raise ValueError(
                     f"{self.method} filtering requires a uniformly spaced coordinate"
@@ -532,7 +564,7 @@ and ‘nearest’.
             spacing = abs(delta)
             parameters.update(
                 spacing=spacing,
-                coordinate_units=str(coord.units) if coord.units is not None else None,
+                coordinate_units=coordinate_units,
             )
 
         if gaussian:
@@ -701,7 +733,17 @@ and ‘nearest’.
             "threshold": effective_threshold,
         }
 
-    def _transform(self, X, *, dataset=None, axis=None):
+    @staticmethod
+    def _warn_index_spacing(message):
+        warnings.warn(
+            f"Savitzky-Golay derivative requested but {message}. "
+            "Falling back to index-based delta=1.0. "
+            "To obtain physically scaled derivatives, provide "
+            "a uniformly spaced coordinate or set delta explicitly.",
+            stacklevel=3,
+        )
+
+    def _transform(self, X, *, dataset=None, axis=None, spacing_info=None):
         split = dataset is not None
         if not split:
             dataset, axis = self._X, self._dim
@@ -759,9 +801,10 @@ and ‘nearest’.
 
             if self.delta is None:
                 if self.deriv:
-                    delta_signed, msg = _detect_uniform_spacing(
-                        dataset,
-                        axis,
+                    delta_signed, msg = (
+                        spacing_info
+                        if split
+                        else _detect_uniform_spacing(dataset, axis)
                     )
                     if delta_signed is None and not split and np.any(self._X_mask):
                         delta_signed, msg = _detect_uniform_spacing(
@@ -775,13 +818,8 @@ and ‘nearest’.
                     else:
                         delta_used = 1.0
                         delta_source = "fallback"
-                        warnings.warn(
-                            f"Savitzky-Golay derivative requested but {msg}. "
-                            "Falling back to index-based delta=1.0. "
-                            "To obtain physically scaled derivatives, provide "
-                            "a uniformly spaced coordinate or set delta explicitly.",
-                            stacklevel=2,
-                        )
+                        if not split:
+                            self._warn_index_spacing(msg)
                 else:
                     # deriv=0: delta is irrelevant; scipy needs a float
                     delta_used = 1.0
@@ -1146,7 +1184,8 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     gaps (for example, twice the original step when every other sample is
     removed). This corrects the scaling but not the effects of crossing gaps.
 
-    Removing a masked block joins its two sides in the filtered series.
+    With the default mask policy, removing a masked block joins its two
+    sides in the filtered series.
     Windows spanning this gap can therefore give unreliable values at
     unmasked points near the gap, even with physical units and spacing.
     Interior convolution windows can affect up to ``size // 2`` retained
