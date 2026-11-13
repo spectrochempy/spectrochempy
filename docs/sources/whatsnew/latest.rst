@@ -42,5 +42,8 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- Link to the PULSAR powder line shape simulation and fitting examples from
+  the Modeling and simulation gallery.
+
 - List NMR examples in the gallery sidebar and include their import cards in
   the main Import / Export grid. (#1872)
