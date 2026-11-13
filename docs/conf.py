@@ -378,6 +378,12 @@ html_theme_options = {
     ],
 }
 
+if local_preview:
+    html_theme_options.update(
+        navbar_start=["navbar-logo", "scp-preview-version"],
+        navbar_center=["scp-preview-nav"],
+    )
+
 # Add any paths that contain custom themes here, relative to this directory.
 
 # The name for this set of Sphinx documents.  If None, it defaults to
