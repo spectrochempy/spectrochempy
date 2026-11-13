@@ -859,7 +859,17 @@ nbsphinx_kernel_name = "python3"
 # Support for notebook formats other than .ipynb
 nbsphinx_custom_formats = {}
 if local_preview == "tutorial":
-    nbsphinx_custom_formats[".py"] = ["jupytext.reads", {"fmt": "py:percent"}]
+    import jupytext
+
+    def read_preview_notebook(source):
+        notebook = jupytext.reads(source, fmt="py:percent")
+        settings = notebook.metadata.setdefault("nbsphinx", {})
+        settings["allow_errors"] = False
+        if noexec:
+            settings["execute"] = "never"
+        return notebook
+
+    nbsphinx_custom_formats[".py"] = read_preview_notebook
 
 # Configure sphinxcontrib-bibtex
 
@@ -1230,14 +1240,17 @@ class LinkToPublishedPreviewPages(SphinxTransform):
             path = unquote(uri.path)
             if uri.scheme or uri.netloc or path.startswith("/"):
                 continue
-            if not path.endswith(".ipynb"):
+            stem, suffix = posixpath.splitext(path)
+            if suffix not in (".ipynb", ".py", ".rst"):
                 continue
             target = posixpath.normpath(
-                posixpath.join(posixpath.dirname(self.env.docname), path[:-6])
+                posixpath.join(posixpath.dirname(self.env.docname), stem)
             )
             if target in self.env.found_docs or target.startswith("../"):
                 continue
-            if (SRC / f"{target}.py").is_file():
+            if (SRC / f"{target}.py").is_file() or (
+                suffix == ".rst" and (SRC / f"{target}.rst").is_file()
+            ):
                 node["refuri"] = uri._replace(
                     scheme="https",
                     netloc="www.spectrochempy.fr",

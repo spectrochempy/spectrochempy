@@ -639,7 +639,7 @@ class BuildDocumentation:
         extension = os.path.splitext(singledoc)[-1]
         if extension in (".rst", ".ipynb"):
             if (self.SRC / singledoc).exists():
-                return singledoc
+                return Path(singledoc).as_posix()
             raise FileNotFoundError(f"File {str(self.SRC / singledoc)} not found")
 
         if singledoc.startswith("spectrochempy."):
@@ -1541,8 +1541,8 @@ def _main():
             warnings_as_errors=args.warning_is_error,
         )
 
-    if args.directory and not args.directory.endswith("/"):
-        args.directory += "/"
+    if args.directory:
+        args.directory = Path(args.directory).as_posix().rstrip("/") + "/"
 
     if not args.tag_name:
         # build the documentation for the latest version
