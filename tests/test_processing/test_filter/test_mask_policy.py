@@ -134,3 +134,15 @@ def test_split_rejects_complex_window_filter_input(masked):
 
     with pytest.raises(ValueError, match="requires real data"):
         scp.Filter(method="median", mask_policy="split").transform(source)
+
+
+def test_split_keeps_promoted_output_dtype():
+    source = scp.NDDataset([0, 1, 0, 1, 0, 1, 0], dtype=np.int64)
+    source[3] = scp.MASKED
+    filtered = scp.Filter(method="gaussian", sigma=1, mask_policy="split")(source)
+    expected = scp.Filter(method="gaussian", sigma=1)(source[:3])
+
+    assert filtered.dtype == np.float64
+    np.testing.assert_allclose(filtered.data[:3], expected.data)
+    assert filtered.data[3] == source.data[3]
+    np.testing.assert_array_equal(filtered.mask, source.mask)

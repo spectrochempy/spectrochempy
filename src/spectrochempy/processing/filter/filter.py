@@ -505,8 +505,8 @@ and ‘nearest’.
 
         result = dataset.copy(keepname=True)
         if output is not None:
-            result._data = np.moveaxis(output, -1, axis)
             result._dtype = output.dtype
+            result._data = np.moveaxis(output, -1, axis)
         entry = {
             "operation": self.method,
             "parameters": {"dimension": dimension, "axis": axis, **parameters},
