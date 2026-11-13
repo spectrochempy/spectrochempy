@@ -44,6 +44,7 @@ _PLOT_FUNCTIONS = {
         "scatter_pen",
     ),
     "bar": ("spectrochempy.plotting.plot1d", "plot_1D", "bar"),
+    "hist": ("spectrochempy.plotting.plot1d", "plot_1D", "hist"),
     "multiple": ("spectrochempy.plotting.plot1d", "plot_multiple", None),
     "lines": ("spectrochempy.plotting.plot2d", "plot_2D", "lines"),
     "contour": ("spectrochempy.plotting.plot2d", "plot_2D", "contour"),

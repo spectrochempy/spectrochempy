@@ -6,8 +6,8 @@
 # ======================================================================================
 # ruff: noqa
 """
-Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum
-================================================================
+Savitzky-Golay and Whittaker-Eilers smoothing of a Raman spectrum
+=================================================================
 In this example, we use the ``Filter`` processor to smooth a Raman spectrum.
 """
 
@@ -27,23 +27,33 @@ _ = X.plot()
 filter = scp.Filter(method="savgol", size=5, order=0)
 
 Xm = filter(X)
-_ = X.plot(color="b", label="original")
-ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="SG filter")
 diff = X - Xm
 s = round(diff.std(dim=-1).values, 2)
-ax = diff.plot(clear=False, ls="-", lw=1, label=f"difference (std={s})")
-_ = ax.legend(loc="best", fontsize=10)
-_ = ax.set_title("Savitzky-Golay filter (size=7, order=2)")
+_ = scp.plot_multiple(
+    [X, Xm, diff],
+    method="pen",
+    labels=["original", "SG filter", f"difference (std={s})"],
+    color=["b", "r", "C2"],
+    ls="-",
+    lw=[1, 1.5, 1],
+    legend="best",
+    title="Savitzky-Golay filter (size=5, order=0)",
+)
 
 # %%
 # Whittaker-Eilers smoothing
 # ---------------------------
 filter = scp.Filter(method="whittaker", order=2, lamb=1.5)
 Xm = filter(X)
-_ = X.plot(color="b", label="original")
-ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="WE filter")
 diff = X - Xm
 s = round(diff.std(dim=-1).values, 2)
-ax = diff.plot(clear=False, ls="-", lw=1, label=f"difference (std={s})")
-_ = ax.legend(loc="best", fontsize=10)
-_ = ax.set_title("Whittaker-Eiler filter (order=2, lamb=1.5)")
+_ = scp.plot_multiple(
+    [X, Xm, diff],
+    method="pen",
+    labels=["original", "WE filter", f"difference (std={s})"],
+    color=["b", "r", "C2"],
+    ls="-",
+    lw=[1, 1.5, 1],
+    legend="best",
+    title="Whittaker-Eilers filter (order=2, lamb=1.5)",
+)
