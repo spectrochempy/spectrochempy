@@ -206,7 +206,7 @@ jobs:
         run: |
           set -e
           start=$SECONDS
-          python -m pip install ".[test]"
+          python -m pip install ".[${{ matrix.plugins && 'test,wavelets' || 'test' }}]"
           # check the MPL setup
           python src/spectrochempy/data/setup.py
           duration=$((SECONDS - start))

@@ -112,6 +112,7 @@ test = [
   "numpydoc",
   "xarray",
 ]
+wavelets = ["pywavelets"]
 
 [project.urls]
 documentation = "https://www.spectrochempy.fr/"

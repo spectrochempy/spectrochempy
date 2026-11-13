@@ -493,6 +493,7 @@ html_context = {
     "current_whatsnew_doc": current_whatsnew_doc,
     "current_version": docs_context,
     "docs_context": docs_context,
+    "rtd_pull_request": os.environ.get("READTHEDOCS_VERSION_TYPE") == "external",
     "docs_build_version": release,
     "docs_preview_name": preview_name,
     "development_url": f"{root}/latest/index.html",

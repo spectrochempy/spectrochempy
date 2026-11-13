@@ -16,6 +16,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.optional import import_optional_dependency
 
 __dataset_methods__ = [
     "differentiate",
@@ -101,7 +102,7 @@ def _uniform_spacing(coord):
     return float(mean_diff), None
 
 
-_SPECTRAL_METHODS = {"butterworth", "notch", "gaussian"}
+_SPECTRAL_METHODS = {"butterworth", "notch", "gaussian", "wavelet"}
 
 
 _common_see_also = """
@@ -126,7 +127,7 @@ class Filter(ProcessingConfigurable):
 
     The filters can be applied to 1D datasets consisting in a single row
     with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`,
-    :term:`n_features`). Butterworth, notch and Gaussian filters also support
+    :term:`n_features`). Butterworth, notch, Gaussian and wavelet filters also support
     higher-dimensional datasets. Physical settings use the active coordinate
     on axes with multiple coordinates.
 
@@ -140,13 +141,14 @@ class Filter(ProcessingConfigurable):
     - Zero-phase Butterworth low-pass filter (`butterworth`)
     - Zero-phase narrow band-stop filter (`notch`)
     - Gaussian convolution (`gaussian`)
+    - Discrete wavelet denoising (`wavelet`)
 
     Parameters
     ----------
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
-    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``, ``"butterworth"``, ``"notch"``, ``"gaussian"``], optional, default: ``"savgol"``
+    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``, ``"butterworth"``, ``"notch"``, ``"gaussian"``, ``"wavelet"``], optional, default: ``"savgol"``
         The filter method to be applied. By default, the Savitzky-Golay (savgol) filter is applied.
     size : `int`, optional, default: 5
         The size of the filter window. size must be a positive odd integer.
@@ -175,9 +177,20 @@ class Filter(ProcessingConfigurable):
         Interpret Gaussian sigma in sample points or in units of the selected
         coordinate. FWHM equals sqrt(8 log(2)) times sigma.
 
+    wavelet : str, optional, default: "sym4"
+        Discrete wavelet family and order, using PyWavelets names.
+    wavelet_level : int or None, optional
+        Positive decomposition level. The default is the smaller of three and
+        the maximum level for the selected wavelet and axis length.
+    wavelet_threshold : float or None, optional
+        Nonnegative soft threshold in signal units. By default it is estimated
+        separately for each spectrum from the median absolute deviation of
+        the finest detail coefficients (MAD divided by 0.67449), multiplied
+        by sqrt(2 log(n)), where n is the selected axis length.
+
     Notes
     -----
-    These three filters require finite, unmasked data. Butterworth, notch and
+    These filters require finite, unmasked data. Butterworth, notch and
     coordinate-based Gaussian filtering require a uniformly spaced coordinate.
     Descending coordinates are supported. Butterworth and notch use odd
     extension with SciPy's default padding and require more than the padding
@@ -188,6 +201,11 @@ class Filter(ProcessingConfigurable):
     Inputs outside SciPy's supported floating-point dtypes are converted
     to double precision. Overflow during conversion is rejected.
     The default `interp` selects SciPy's `reflect` mode for this method.
+
+    Wavelet denoising uses symmetric extension and sample indices along the
+    selected axis. It soft-thresholds detail coefficients and preserves the
+    approximation coefficients. It accepts real data and computes in double
+    precision. It requires the optional dependency installed with ``pip install "spectrochempy[wavelets]"``.
 
     See Also
     --------
@@ -210,6 +228,7 @@ class Filter(ProcessingConfigurable):
             "butterworth",
             "notch",
             "gaussian",
+            "wavelet",
         ],
         default_value="savgol",
         help="The filter method to be applied. By default, "
@@ -251,6 +270,16 @@ class Filter(ProcessingConfigurable):
         ["points", "coordinate"],
         default_value="points",
         help="Interpret Gaussian sigma in points or in coordinate units.",
+    ).tag(config=True)
+
+    wavelet = tr.Unicode("sym4", help="Discrete wavelet name.").tag(config=True)
+
+    wavelet_level = tr.Integer(
+        None, allow_none=True, help="Discrete wavelet decomposition level."
+    ).tag(config=True)
+
+    wavelet_threshold = tr.Float(
+        None, allow_none=True, help="Soft threshold in signal units."
     ).tag(config=True)
 
     deriv = tr.Integer(
@@ -371,6 +400,9 @@ and ‘nearest’.
         return result
 
     def _spectral_transform(self, dataset, axis, dimension):
+        if self.method == "wavelet":
+            return self._wavelet_transform(dataset.data, axis)
+
         parameter = {"butterworth": "cutoff", "notch": "period", "gaussian": "sigma"}[
             self.method
         ]
@@ -494,6 +526,76 @@ and ‘nearest’.
             scipy.signal.sosfiltfilt(sos, data, axis=axis, padlen=padlen),
             parameters,
         )
+
+    def _wavelet_transform(self, data, axis):
+        pywt = import_optional_dependency(
+            "pywt", extra='Install it with pip install "spectrochempy[wavelets]".'
+        )
+        if np.iscomplexobj(data):
+            raise ValueError("wavelet filtering requires real data")
+        with np.errstate(over="ignore", under="ignore"):
+            data = data.astype(np.float64, copy=False)
+        if not np.isfinite(data).all():
+            raise ValueError("wavelet input exceeds the double-precision range")
+        wavelet = pywt.Wavelet(self.wavelet)
+        size = data.shape[axis]
+        maximum_level = pywt.dwt_max_level(size, wavelet.dec_len)
+        if maximum_level == 0:
+            raise ValueError(
+                f"wavelet {wavelet.name!r} requires at least "
+                f"{2 * (wavelet.dec_len - 1)} samples along the selected dimension"
+            )
+        level = self.wavelet_level
+        if level is None:
+            level = min(3, maximum_level)
+        if not 1 <= level <= maximum_level:
+            raise ValueError(f"wavelet_level must be between 1 and {maximum_level}")
+
+        threshold = self.wavelet_threshold
+        if threshold is not None and (not np.isfinite(threshold) or threshold < 0):
+            raise ValueError("wavelet_threshold must be finite and nonnegative")
+
+        mode = "symmetric"
+        coefficients = pywt.wavedec(data, wavelet, mode=mode, level=level, axis=axis)
+        rule = "fixed"
+        if threshold is None:
+            finest = coefficients[-1]
+            center = np.median(finest, axis=axis, keepdims=True)
+            mad = np.median(np.abs(finest - center), axis=axis, keepdims=True)
+            threshold = mad * (np.sqrt(2 * np.log(size)) / 0.6744897501960817)
+            if not np.isfinite(threshold).all():
+                raise ValueError(
+                    "wavelet threshold exceeds the supported numeric range"
+                )
+            rule = "universal_mad"
+
+        details = [
+            np.sign(detail) * np.maximum(np.abs(detail) - threshold, 0)
+            for detail in coefficients[1:]
+        ]
+        result = pywt.waverec(
+            [coefficients[0], *details], wavelet, mode=mode, axis=axis
+        )
+        extent = [slice(None)] * data.ndim
+        extent[axis] = slice(size)
+        result = result[tuple(extent)]
+        if not np.isfinite(result).all():
+            raise ValueError(
+                "wavelet reconstruction exceeds the supported numeric range"
+            )
+        effective_threshold = (
+            threshold.squeeze(axis=axis).tolist()
+            if rule == "universal_mad"
+            else threshold
+        )
+        return result, {
+            "wavelet": wavelet.name,
+            "level": level,
+            "mode": mode,
+            "threshold_mode": "soft",
+            "threshold_rule": rule,
+            "threshold": effective_threshold,
+        }
 
     def _transform(self, X):
         self._history_delta = None

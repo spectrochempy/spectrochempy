@@ -19,6 +19,7 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Add wavelet denoising to ``Filter`` with the optional ``wavelets`` extra. (#1852)
 - Add Butterworth low-pass, FTIR fringe notch and Gaussian methods to
   ``Filter``. Measure their effects with ``rms()`` and
   ``characterize_peaks_1d()``, which reports sampled peak position, height and
