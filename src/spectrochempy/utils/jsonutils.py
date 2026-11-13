@@ -327,6 +327,8 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
                     }
                     for entry in byte_obj._history
                 ]
+            elif name == "rounding":
+                val = byte_obj._rounding
             elif (
                 name in ["readonly"]
                 or (name == "dims" and "datasets" in objnames)

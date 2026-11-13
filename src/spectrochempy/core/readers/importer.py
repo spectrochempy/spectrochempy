@@ -863,14 +863,8 @@ def merge_datasets(datasets, **kwargs):
     if not datasets:
         return datasets
 
-    uvvis = [
-        ds for ds in datasets if ds.meta.get("jcamp_data_type") == "UV/VIS SPECTRUM"
-    ]
-    if uvvis:
-        other = [
-            ds for ds in datasets if ds.meta.get("jcamp_data_type") != "UV/VIS SPECTRUM"
-        ]
-        return [*merge_datasets(other, **kwargs), *uvvis]
+    if any(ds.meta.get("jcamp_data_type") == "UV/VIS SPECTRUM" for ds in datasets):
+        return datasets
 
     # Override merge setting if explicitly set in kwargs
     if "merge" in kwargs:

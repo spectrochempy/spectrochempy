@@ -470,8 +470,10 @@ def _read_uvvis_jcamp(dataset, filename, stream):
     dataset.filename = filename
     dataset.origin = headers.get("##ORIGIN") or "jcamp-uvvis"
     dataset.title = yunits or "intensity"
-    if yunits.casefold() in {"absorbance", "transmittance"}:
-        dataset.units = yunits.lower()
+    if yunits.casefold() == "transmittance":
+        dataset.units = "absolute_transmittance"
+    elif yunits.casefold() == "absorbance":
+        dataset.units = "absorbance"
     dataset.meta.jcamp_data_type = "UV/VIS SPECTRUM"
     dataset.meta.jcamp_xunits = xunits
     dataset.meta.jcamp_yunits = yunits

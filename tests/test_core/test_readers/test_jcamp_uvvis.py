@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -64,3 +66,32 @@ def test_uvvis_files_keep_their_own_wavelengths(options):
     assert [s.x.data[0] for s in spectra] == pytest.approx(
         [280.0001, 281.0001], rel=0, abs=1e-12
     )
+
+
+@pytest.mark.parametrize("options", [{}, {"merge": False}])
+def test_mixed_jcamp_files_keep_positional_names(options):
+    ir_path = Path(__file__).with_name("jcamp_data") / "jtpolys.dx"
+    spectra = scp.read_jcamp(
+        {"first.dx": UVVIS, "second.dx": ir_path.read_bytes()},
+        names=["ultraviolet", "infrared"],
+        **options,
+    )
+    by_name = {s.name: s for s in spectra}
+    assert by_name["ultraviolet"].x.units == scp.ur.nm
+    assert by_name["infrared"].x.units == scp.ur.Unit("cm^-1")
+
+
+def test_uvvis_native_roundtrip_preserves_wavelengths(tmp_path):
+    spectrum = scp.read_jcamp({"sample.dx": UVVIS})
+    path = spectrum.save_as(tmp_path / "sample.scp", confirm=False)
+    restored = scp.NDDataset.load(path)
+    np.testing.assert_array_equal(restored.x.data, spectrum.x.data)
+
+
+def test_uvvis_transmittance_is_a_fraction():
+    payload = UVVIS.replace(b"Logarithm epsilon", b"TRANSMITTANCE").replace(
+        b"2800.001,175", b"2800.001,50"
+    )
+    spectrum = scp.read_jcamp({"transmittance.dx": payload})
+    assert spectrum.units == scp.ur.absolute_transmittance
+    assert spectrum.data[0] == 0.5
