@@ -342,9 +342,8 @@ Fix any problem found before considering the task complete.
 
 ## When a Separate Review Is Required
 
-A separate review in a new independent OpenCode, Codex, or Claude Code
-session, without the implementation history, is required for changes that
-affect:
+An independent review in a temporary subagent session, without the
+implementation history, is required for changes that affect:
 
 * **Behavior** — any user-visible behavior change, bug fix with semantic
   impact, or algorithm modification.
@@ -366,9 +365,16 @@ Justify briefly when skipping the separate review based on actual risk.
 
 ## Handoff to Separate Review
 
-When a separate review is required, do **not** launch a second session or
-another model automatically. Instead, produce a short prompt directly usable
-in a new independent OpenCode, Codex, or Claude Code session. Include:
+When a separate review is required, prepare a short prompt and offer to start
+a temporary subagent session attached to the current task. Launch the initial
+review only at the maintainer's explicit request. Give the reviewer only the
+review prompt and access to the relevant repository, without inheriting the
+implementation conversation. Do not create a standalone chat or task. Close
+the subagent session when it returns its report. If the application cannot
+start an isolated temporary subagent, report the limitation and provide the
+review prompt.
+
+Include:
 
 1. **Need** — the original requirement or problem statement.
 2. **Branch / PR** — the branch name or PR number to review.
@@ -380,6 +386,16 @@ in a new independent OpenCode, Codex, or Claude Code session. Include:
 The reviewer works from this prompt, the applicable instructions, the diff,
 and the relevant sources. The implementer's report is information to verify,
 not authority.
+
+When the independent review returns, verify its findings against the code,
+apply the justified corrections, and run targeted validation. After making
+corrections, launch another temporary subagent session to review the updated
+diff without asking for approval again. Give the reviewer the updated scope
+and revision. Keep the implementation conversation and earlier reviews out
+of the subagent session. Repeat until an independent review finds no actionable
+issues. If a finding requires a maintainer decision or the application
+cannot launch another isolated temporary subagent, report what remains and provide
+the updated review prompt.
 
 Example handoff prompt:
 

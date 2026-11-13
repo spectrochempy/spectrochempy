@@ -108,7 +108,7 @@ Load the relevant skill before starting work:
 | Skill | When to load |
 |---|---|
 | `spectrochempy-dev` | Any development, refactoring, or bug fix |
-| `spectrochempy-review` | Separate review in a new session (see skill) |
+| `spectrochempy-review` | Independent review in a temporary subagent session (see skill) |
 | `spectrochempy-release` | Preparing a release (without publishing) |
 
 The skills are shared by OpenCode, Codex, and Claude Code. They live only in
