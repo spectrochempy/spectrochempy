@@ -95,3 +95,16 @@ def test_uvvis_transmittance_is_a_fraction():
     spectrum = scp.read_jcamp({"transmittance.dx": payload})
     assert spectrum.units == scp.ur.absolute_transmittance
     assert spectrum.data[0] == 0.5
+
+
+def test_uvvis_does_not_prevent_compatible_ir_merging():
+    ir_path = Path(__file__).with_name("jcamp_data") / "jtpolys.dx"
+    ir = ir_path.read_bytes()
+    spectra = scp.read_jcamp(
+        {"first.dx": ir, "middle.dx": UVVIS, "last.dx": ir}, merge=True
+    )
+    assert sorted(s.shape for s in spectra) == [(2, 1844), (4,)]
+
+
+def test_coordinate_equality_ignores_rounding_for_equal_values():
+    assert scp.Coord([1, 2]) == scp.Coord([1, 2], rounding=False)
