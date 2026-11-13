@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -241,11 +242,44 @@ def test_metadata_overrides_and_skipped_notebooks(workspace, monkeypatch):
         runner.verify()
 
 
-def test_rtd_uses_the_artifact_aware_entry_point():
+@pytest.mark.parametrize(
+    ("enabled", "version_type", "use_artifacts"),
+    [("", "branch", False), ("1", "external", False), ("1", "branch", True)],
+)
+def test_rtd_commands_select_the_build_mode(enabled, version_type, use_artifacts):
     root = Path(__file__).resolve().parents[2]
     config = yaml.safe_load((root / ".readthedocs.yaml").read_text())
-    assert config["build"]["jobs"]["build"]["html"] == [
-        "SCPY_DOCS_TRACE=1 python -u -m docs.rtd_build"
+    commands = config["build"]["jobs"]["build"]["html"]
+    env = {
+        **os.environ,
+        "SCPY_RTD_DOCS_ARTIFACTS": enabled,
+        "READTHEDOCS_VERSION_TYPE": version_type,
+    }
+    if os.name == "nt":
+        pytest.skip("Read the Docs uses a POSIX shell")
+    selected = [
+        subprocess.check_output(
+            ["sh", "-c", f'python() {{ echo "$*"; }}; {command}'],
+            env=env,
+            text=True,
+        ).strip()
+        for command in commands
+    ]
+    selected = [command for command in selected if command]
+    if use_artifacts:
+        assert selected == ["-u -m docs.rtd_build"]
+        return
+
+    expected = sorted(
+        path.with_suffix(".ipynb").relative_to(runner.SOURCES).as_posix()
+        for path in runner.BuildDocumentation()._get_notebook_files()
+    )
+    assert expected
+    assert selected == [
+        "-u -m docs.preexecute_notebooks prepare",
+        *(f"-u -m docs.preexecute_notebooks execute {name}" for name in expected),
+        "-u -m docs.preexecute_notebooks verify",
+        "-u docs/make.py html --warning-is-error --no-sync --no-data -j auto",
     ]
 
 

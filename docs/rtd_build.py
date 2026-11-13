@@ -7,8 +7,6 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
-import sys
 import tempfile
 import time
 from pathlib import Path
@@ -19,7 +17,6 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 
 from docs import ci_artifacts
-from docs import preexecute_notebooks as notebooks
 
 API = "https://api.github.com/repos/spectrochempy/spectrochempy/actions"
 WORKFLOW = "docs-artifact-prototype.yml"
@@ -125,28 +122,11 @@ def _render_from_actions(token):
             time.sleep(30)
 
 
-def _render_on_rtd():
-    notebooks.prepare()
-    manifest = json.loads(notebooks.MANIFEST.read_text(encoding="utf-8"))
-    for name in manifest["notebooks"]:
-        subprocess.run(
-            [sys.executable, "-u", "-m", "docs.preexecute_notebooks", "execute", name],
-            check=True,
-        )
-    notebooks.verify()
-    ci_artifacts.render_html(gallery_from_artifact=False)
-
-
 def main():
-    enabled = os.environ.get("SCPY_RTD_DOCS_ARTIFACTS") == "1"
-    external = os.environ.get("READTHEDOCS_VERSION_TYPE") == "external"
     token = os.environ.pop("SCPY_RTD_GITHUB_TOKEN", None)
-    if enabled and not external:
-        if not token:
-            raise RuntimeError("SCPY_RTD_GITHUB_TOKEN is required in artifact mode")
-        _render_from_actions(token)
-    else:
-        _render_on_rtd()
+    if not token:
+        raise RuntimeError("SCPY_RTD_GITHUB_TOKEN is required in artifact mode")
+    _render_from_actions(token)
 
 
 if __name__ == "__main__":

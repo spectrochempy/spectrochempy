@@ -65,12 +65,7 @@ def test_zip_checksum_is_checked_before_extraction(tmp_path, monkeypatch):
     assert (destination / "manifest.json").read_text() == "{}"
 
 
-@pytest.mark.parametrize("version_type", ["external", "branch"])
-def test_artifact_mode_is_private_and_excludes_external_builds(
-    monkeypatch, version_type
-):
-    monkeypatch.setenv("SCPY_RTD_DOCS_ARTIFACTS", "1")
-    monkeypatch.setenv("READTHEDOCS_VERSION_TYPE", version_type)
+def test_artifact_mode_removes_token_from_environment(monkeypatch):
     monkeypatch.setenv("SCPY_RTD_GITHUB_TOKEN", "test-token")
     called = []
 
@@ -80,9 +75,8 @@ def test_artifact_mode_is_private_and_excludes_external_builds(
         called.append("artifact")
 
     monkeypatch.setattr(rtd_build, "_render_from_actions", render)
-    monkeypatch.setattr(rtd_build, "_render_on_rtd", lambda: called.append("local"))
     rtd_build.main()
-    assert called == ["local" if version_type == "external" else "artifact"]
+    assert called == ["artifact"]
 
 
 @pytest.mark.parametrize("expired", [True, False], ids=["expired", "version-mismatch"])
