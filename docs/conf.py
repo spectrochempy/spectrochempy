@@ -10,6 +10,7 @@ import contextlib
 import inspect
 import json
 import os
+import posixpath
 import re
 import shutil
 import sys
@@ -18,12 +19,15 @@ import tomllib
 import warnings
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import unquote
+from urllib.parse import urlsplit
 
 import jinja2
 from docutils import nodes
 from packaging.version import InvalidVersion
 from packaging.version import Version
 from sphinx.ext.autodoc import ClassDocumenter
+from sphinx.transforms import SphinxTransform
 from sphinx.util.osutil import relative_uri
 
 # Ensure docs and executed notebooks import the in-tree source tree first.
@@ -91,6 +95,9 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 pattern = os.environ.get("SPHINX_PATTERN")
 single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
 
+local_preview = os.environ.get("SCPY_DOCS_LOCAL_PREVIEW")
+gallery_preview = local_preview == "gallery"
+
 include_api = pattern is None
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -127,7 +134,7 @@ extensions += [
     "IPython.sphinxext.ipython_directive",
     "nbsphinx",
 ]
-if not single_doc_or_dir:
+if not single_doc_or_dir or gallery_preview:
     extensions += [
         "sphinx_gallery.gen_gallery",
     ]
@@ -232,10 +239,14 @@ exclude_patterns = [
     "**.md5",
     "locales",  # ignore locales directory
 ]
+if gallery_preview:
+    exclude_patterns.append("gallery/*.ipynb")
 
 if pattern:
     for path in SRC.rglob("*"):
-        if path.suffix in (".rst", ".ipynb"):
+        if path.suffix in (".rst", ".ipynb") or (
+            local_preview == "tutorial" and path.suffix == ".py"
+        ):
             rel_path = path.relative_to(SRC)
 
             # Skip root index.rst
@@ -245,8 +256,8 @@ if pattern:
             # Handle directory builds
             if pattern.startswith("dir:"):
                 build_dir = pattern[4:]
-                if not str(rel_path).startswith(build_dir):
-                    exclude_patterns.append(str(rel_path))
+                if not rel_path.as_posix().startswith(build_dir):
+                    exclude_patterns.append(rel_path.as_posix())
                 continue
 
             # Handle other patterns
@@ -267,11 +278,11 @@ if pattern:
                 )
                 or (
                     single_doc_or_dir
-                    and str(rel_path) != pattern
+                    and rel_path.as_posix() != pattern
                     and rel_path.parts[-1] not in ["glossary.rst", "bibliography.rst"]
                 )
             ):
-                exclude_patterns.append(str(rel_path))
+                exclude_patterns.append(rel_path.as_posix())
 
 with open(os.path.join(SRC, "index.rst.tmpl"), encoding="utf-8") as f:
     t = jinja2.Template(f.read())
@@ -279,6 +290,7 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
     f.write(
         t.render(
             include_api=include_api,
+            gallery_preview=gallery_preview,
             single=single_doc_or_dir,
             pattern=pattern,
             current_whatsnew_doc=current_whatsnew_doc,
@@ -345,7 +357,7 @@ html_theme_options = {
     "navigation_depth": 4,
     "collapse_navigation": False,
     "show_toc_level": 2,
-    "use_edit_page_button": True,
+    "use_edit_page_button": not local_preview,
     "search_bar_text": "Search the documentation...",
     "icon_links": [
         {
@@ -366,6 +378,12 @@ html_theme_options = {
     ],
 }
 
+if local_preview:
+    html_theme_options.update(
+        navbar_start=["navbar-logo", "scp-preview-version"],
+        navbar_center=["scp-preview-nav"],
+    )
+
 # Add any paths that contain custom themes here, relative to this directory.
 
 # The name for this set of Sphinx documents.  If None, it defaults to
@@ -385,7 +403,11 @@ html_favicon = "_static/scpy.ico"
 # Add any paths that contain custom _static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin _static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = [str(STATIC)] if local_preview else ["_static"]
+if local_preview:
+    html_logo = str(STATIC / "scpy.png")
+    html_favicon = str(STATIC / "scpy.ico")
+    templates_path = [str(TEMPLATES)]
 
 html_css_files = [
     "css/spectrochempy.css",
@@ -735,7 +757,7 @@ def _get_default_image_scraper():
     return sphinx_gallery.scrapers.matplotlib_scraper
 
 
-if not single_doc_or_dir:
+if not single_doc_or_dir or gallery_preview:
     from sphinx_gallery.sorting import FileNameSortKey
 
     class GalleryExampleSortKey(FileNameSortKey):
@@ -743,7 +765,10 @@ if not single_doc_or_dir:
             return filename != "plot_plotting.py", super().__call__(filename)
 
 
-if not single_doc_or_dir:
+if gallery_preview:
+    gallery_examples_dirs = [str(SRC.parent / "examples")]
+    gallery_output_dirs = ["gallery"]
+elif not single_doc_or_dir:
     plugin_gallery_entries = _load_plugin_gallery_entries()
     example_source_dir = _stage_gallery_examples()
     _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
@@ -772,7 +797,7 @@ def reset_scp_preferences(gallery_conf, fname):
     preferences.reset()
 
 
-if not single_doc_or_dir:
+if not single_doc_or_dir or gallery_preview:
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,
         "doc_module": "spectrochempy",
@@ -780,14 +805,16 @@ if not single_doc_or_dir:
         "examples_dirs": gallery_examples_dirs,
         # Generated RST files in generated directory
         "gallery_dirs": gallery_output_dirs,
-        "backreferences_dir": f"{example_generated_dir}/backreferences",
+        "backreferences_dir": (
+            None if gallery_preview else f"{example_generated_dir}/backreferences"
+        ),
         "reference_url": {
             "spectrochempy": None,
         },
         "show_memory": False,
         "thumbnail_size": (400, 400),
-        "abort_on_example_error": False,
-        "only_warn_on_example_error": True,
+        "abort_on_example_error": gallery_preview,
+        "only_warn_on_example_error": not gallery_preview,
         "capture_repr": ("_repr_html_", "__repr__"),
         "expected_failing_examples": [],
         "download_all_examples": False,
@@ -797,7 +824,7 @@ if not single_doc_or_dir:
         "image_scrapers": (
             _get_default_image_scraper(),
         ),  # Use the function getter instead of direct function reference
-        "filename_pattern": "/plot",
+        "filename_pattern": r"[/\\]plot" if gallery_preview else "/plot",
         "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
@@ -831,9 +858,9 @@ nbsphinx_exclude_patterns = [
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "never" if noexec else "auto"
-if os.environ.get("SCPY_DOCS_PREEXECUTED") == "1":
+if not local_preview and os.environ.get("SCPY_DOCS_PREEXECUTED") == "1":
     nbsphinx_execute = "never"
-nbsphinx_allow_errors = True
+nbsphinx_allow_errors = not local_preview
 nbsphinx_timeout = 90
 
 # Code to be executed before each notebook cell
@@ -848,10 +875,19 @@ nbsphinx_epilog = """
 nbsphinx_kernel_name = "python3"
 
 # Support for notebook formats other than .ipynb
-nbsphinx_custom_formats = {
-    # ".pct.py": ["jupytext.reads", {"fmt": "py:percent"}],
-    # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
-}
+nbsphinx_custom_formats = {}
+if local_preview == "tutorial":
+    import jupytext
+
+    def read_preview_notebook(source):
+        notebook = jupytext.reads(source, fmt="py:percent")
+        settings = notebook.metadata.setdefault("nbsphinx", {})
+        settings["allow_errors"] = False
+        if noexec:
+            settings["execute"] = "never"
+        return notebook
+
+    nbsphinx_custom_formats[".py"] = read_preview_notebook
 
 # Configure sphinxcontrib-bibtex
 
@@ -880,6 +916,9 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "traitlets": ("https://traitlets.readthedocs.io/en/stable/", None),
 }
+
+if local_preview:
+    intersphinx_mapping = {}
 
 # linkcode -----------------------------------------------------------------------------
 
@@ -1236,7 +1275,64 @@ def place_external_gallery_examples(app, doctree):
                 break
 
 
+class LinkToPublishedPreviewPages(SphinxTransform):
+    """Resolve notebook links to pages outside a targeted preview."""
+
+    default_priority = 550
+
+    def apply(self, **kwargs):
+        for node in self.document.findall(nodes.reference):
+            uri = urlsplit(node.get("refuri", ""))
+            path = unquote(uri.path)
+            if uri.scheme or uri.netloc or path.startswith("/"):
+                continue
+            stem, suffix = posixpath.splitext(path)
+            if suffix not in (".ipynb", ".py", ".rst"):
+                continue
+            target = posixpath.normpath(
+                posixpath.join(posixpath.dirname(self.env.docname), stem)
+            )
+            if target.startswith("../"):
+                continue
+            if target in self.env.found_docs:
+                node["preview_target"] = (target, uri.query, uri.fragment)
+                del node["refuri"]
+                continue
+            generated_page = suffix == ".rst" and target.startswith(
+                ("reference/generated/", f"{example_generated_dir}/")
+            )
+            if (
+                generated_page
+                or (SRC / f"{target}.py").is_file()
+                or (suffix == ".rst" and (SRC / f"{target}.rst").is_file())
+            ):
+                node["refuri"] = uri._replace(
+                    scheme="https",
+                    netloc="www.spectrochempy.fr",
+                    path=f"/latest/{target}.html",
+                ).geturl()
+
+
+class ResolvePreviewPageLinks(SphinxTransform):
+    """Restore internal preview links after nbsphinx handles linked files."""
+
+    default_priority = 650
+
+    def apply(self, **kwargs):
+        for node in self.document.findall(nodes.reference):
+            if "preview_target" in node:
+                target, query, fragment = node["preview_target"]
+                path = self.app.builder.get_relative_uri(self.env.docname, target)
+                node["refuri"] = (
+                    urlsplit(path)._replace(query=query, fragment=fragment).geturl()
+                )
+                del node["preview_target"]
+
+
 def setup(app):
+    if local_preview == "tutorial":
+        app.add_transform(LinkToPublishedPreviewPages)
+        app.add_transform(ResolvePreviewPageLinks)
     app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
