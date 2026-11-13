@@ -153,8 +153,10 @@ finish before triggering RTD. External pull request previews execute their
 sources inside RTD.
 
 RTD waits up to 15 minutes for a successful workflow with both artifacts for
-its checkout. If artifacts expire, rerun the workflow on the same branch or
-tag at the same SHA and retry RTD once CI succeeds. If the ref has moved and
+its checkout. If artifacts expire, start a new workflow run with
+``workflow_dispatch`` in the upstream SpectroChemPy repository. Verify that
+the run uses the exact checkout SHA and retry RTD once CI succeeds. If the
+ref has moved and
 you need the old SHA, dispatch CI on a temporary branch at that SHA and build
 the corresponding RTD version of the temporary branch. To retry the original
 RTD version instead, generate artifacts for its current SHA. To restore
