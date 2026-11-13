@@ -10,6 +10,7 @@ import contextlib
 import inspect
 import json
 import os
+import posixpath
 import re
 import shutil
 import sys
@@ -18,11 +19,15 @@ import tomllib
 import warnings
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import unquote
+from urllib.parse import urlsplit
 
 import jinja2
+from docutils import nodes
 from packaging.version import InvalidVersion
 from packaging.version import Version
 from sphinx.ext.autodoc import ClassDocumenter
+from sphinx.transforms import SphinxTransform
 from sphinx.util.osutil import relative_uri
 
 # Ensure docs and executed notebooks import the in-tree source tree first.
@@ -251,8 +256,8 @@ if pattern:
             # Handle directory builds
             if pattern.startswith("dir:"):
                 build_dir = pattern[4:]
-                if not str(rel_path).startswith(build_dir):
-                    exclude_patterns.append(str(rel_path))
+                if not rel_path.as_posix().startswith(build_dir):
+                    exclude_patterns.append(rel_path.as_posix())
                 continue
 
             # Handle other patterns
@@ -273,11 +278,11 @@ if pattern:
                 )
                 or (
                     single_doc_or_dir
-                    and str(rel_path) != pattern
+                    and rel_path.as_posix() != pattern
                     and rel_path.parts[-1] not in ["glossary.rst", "bibliography.rst"]
                 )
             ):
-                exclude_patterns.append(str(rel_path))
+                exclude_patterns.append(rel_path.as_posix())
 
 with open(os.path.join(SRC, "index.rst.tmpl"), encoding="utf-8") as f:
     t = jinja2.Template(f.read())
@@ -801,7 +806,7 @@ if not single_doc_or_dir or gallery_preview:
         "image_scrapers": (
             _get_default_image_scraper(),
         ),  # Use the function getter instead of direct function reference
-        "filename_pattern": "/plot",
+        "filename_pattern": r"[/\\]plot" if gallery_preview else "/plot",
         "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
@@ -1214,7 +1219,35 @@ def isolate_scp_config(app, docname, source):
     os.environ["SCP_CONFIG_HOME"] = str(config_home)
 
 
+class LinkToPublishedPreviewPages(SphinxTransform):
+    """Resolve notebook links to pages outside a targeted preview."""
+
+    default_priority = 550
+
+    def apply(self, **kwargs):
+        for node in self.document.findall(nodes.reference):
+            uri = urlsplit(node.get("refuri", ""))
+            path = unquote(uri.path)
+            if uri.scheme or uri.netloc or path.startswith("/"):
+                continue
+            if not path.endswith(".ipynb"):
+                continue
+            target = posixpath.normpath(
+                posixpath.join(posixpath.dirname(self.env.docname), path[:-6])
+            )
+            if target in self.env.found_docs or target.startswith("../"):
+                continue
+            if (SRC / f"{target}.py").is_file():
+                node["refuri"] = uri._replace(
+                    scheme="https",
+                    netloc="www.spectrochempy.fr",
+                    path=f"/latest/{target}.html",
+                ).geturl()
+
+
 def setup(app):
+    if local_preview == "tutorial":
+        app.add_transform(LinkToPublishedPreviewPages)
     app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
