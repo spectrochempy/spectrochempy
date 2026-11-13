@@ -130,8 +130,13 @@ def _verified_files(bundle, kind, commit):
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     if (manifest["commit"], manifest["kind"]) != (commit, kind):
         raise RuntimeError(f"Unexpected commit or artifact kind in {bundle}")
-    if manifest.get("version") != version("spectrochempy"):
-        raise ArtifactVersionMismatchError(f"Incompatible package version in {bundle}")
+    artifact_version = manifest.get("version")
+    installed_version = version("spectrochempy")
+    if artifact_version != installed_version:
+        raise ArtifactVersionMismatchError(
+            f"{kind} artifact package version {artifact_version!r} "
+            f"does not match installed SpectroChemPy {installed_version!r}"
+        )
     root = bundle / "sources"
     files = _files(root, kind)
     inventory = {path.relative_to(root).as_posix(): _digest(path) for path in files}
