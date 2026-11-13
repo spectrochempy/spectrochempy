@@ -357,7 +357,7 @@ html_theme_options = {
     "navigation_depth": 4,
     "collapse_navigation": False,
     "show_toc_level": 2,
-    "use_edit_page_button": True,
+    "use_edit_page_button": not gallery_preview,
     "search_bar_text": "Search the documentation...",
     "icon_links": [
         {
@@ -1246,7 +1246,11 @@ class LinkToPublishedPreviewPages(SphinxTransform):
             target = posixpath.normpath(
                 posixpath.join(posixpath.dirname(self.env.docname), stem)
             )
-            if target in self.env.found_docs or target.startswith("../"):
+            if target.startswith("../"):
+                continue
+            if target in self.env.found_docs:
+                node["preview_target"] = (target, uri.query, uri.fragment)
+                del node["refuri"]
                 continue
             generated_page = suffix == ".rst" and target.startswith(
                 ("reference/generated/", f"{example_generated_dir}/")
@@ -1263,9 +1267,26 @@ class LinkToPublishedPreviewPages(SphinxTransform):
                 ).geturl()
 
 
+class ResolvePreviewPageLinks(SphinxTransform):
+    """Restore internal preview links after nbsphinx handles linked files."""
+
+    default_priority = 650
+
+    def apply(self, **kwargs):
+        for node in self.document.findall(nodes.reference):
+            if "preview_target" in node:
+                target, query, fragment = node["preview_target"]
+                path = self.app.builder.get_relative_uri(self.env.docname, target)
+                node["refuri"] = (
+                    urlsplit(path)._replace(query=query, fragment=fragment).geturl()
+                )
+                del node["preview_target"]
+
+
 def setup(app):
     if local_preview == "tutorial":
         app.add_transform(LinkToPublishedPreviewPages)
+        app.add_transform(ResolvePreviewPageLinks)
     app.connect("source-read", isolate_scp_config)
     app.connect("source-read", citing_papers)
     app.connect("source-read", rstjinja)
