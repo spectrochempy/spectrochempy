@@ -488,6 +488,7 @@ preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
     "include_gallery": not single_doc_or_dir,
+    "include_api": include_api,
     "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),
     "version_button_label": logo_version,
     "current_whatsnew_doc": current_whatsnew_doc,
@@ -1064,8 +1065,10 @@ def rstjinja(app, docname, source):
     Copied from site:
     https://ericholscher.com/blog/2016/jul/25/integrating-jinja-rst-sphinx/
     """
-    # Make sure we're outputting HTML
-    if app.builder.format != "html":
+    if app.builder.format != "html" and docname not in {
+        "credits/index",
+        "gettingstarted/examples/index",
+    }:
         return
     src = source[0]
     rendered = app.builder.templates.render_string(src, app.config.html_context)

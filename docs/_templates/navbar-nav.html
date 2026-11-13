@@ -1,7 +1,7 @@
 {% set sections = [
   ('Getting started', 'gettingstarted/index'),
   ('Guides', 'userguide/index'),
-  ('API', 'reference/navigation' if hasdoc('reference/navigation') else 'reference/glossary'),
+  ('API', 'reference/navigation' if include_api and hasdoc('reference/navigation') else 'reference/glossary'),
   ('Examples', 'gettingstarted/examples/index'),
   ('About', 'credits/index')
 ] %}
