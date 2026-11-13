@@ -166,7 +166,8 @@ class Filter(ProcessingConfigurable):
         With "split", filter each contiguous unmasked segment independently
         along the selected dimension, even when spectra have different masks.
         Preserve the mask and apply the configured boundary mode at each
-        segment's ends. Masked values are carried into the output dtype. If any unmasked segment is too short for the
+        segment's ends. Masked values are carried into the output dtype.
+        If any unmasked segment is too short for the
         configured filter, raise ValueError for the whole operation. Entirely
         masked spectra are copied unchanged. The default uses the method's
         original mask handling.
@@ -503,10 +504,12 @@ and ‘nearest’.
                         }
                     )
 
-        result = dataset.copy(keepname=True)
-        if output is not None:
-            result._dtype = output.dtype
-            result._data = np.moveaxis(output, -1, axis)
+        with np.errstate(over="ignore", under="ignore"):
+            result = dataset.copy(keepname=True)
+        result._dtype = data.dtype if output is None else output.dtype
+        result._data = (
+            dataset.data.copy() if output is None else np.moveaxis(output, -1, axis)
+        )
         entry = {
             "operation": self.method,
             "parameters": {"dimension": dimension, "axis": axis, **parameters},

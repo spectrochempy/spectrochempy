@@ -98,9 +98,10 @@ def test_split_derivative_uses_signed_spacing_and_preserves_mask(units):
 
 
 def test_split_fully_masked_dataset_is_copied():
-    source = scp.NDDataset([1.0, 2.0], mask=[True, True])
+    source = scp.NDDataset([2**53 + 1, 2], mask=[True, True], dtype=np.int64)
     result = scp.Filter(method="wavelet", mask_policy="split").transform(source)
     assert result is not source
+    assert result.dtype == source.dtype
     np.testing.assert_array_equal(result.data, source.data)
     np.testing.assert_array_equal(result.mask, source.mask)
 
@@ -137,13 +138,16 @@ def test_split_rejects_complex_window_filter_input(masked, dtype):
         scp.Filter(method="median", mask_policy="split").transform(source)
 
 
-def test_split_keeps_promoted_output_dtype():
-    source = scp.NDDataset([0, 1, 0, 1, 0, 1, 0], dtype=np.int64)
+@pytest.mark.parametrize(
+    ("dtype", "expected_dtype"), [(np.int64, np.float64), (np.float32, np.float32)]
+)
+def test_split_keeps_filter_output_dtype(dtype, expected_dtype):
+    source = scp.NDDataset([0, 1, 0, 1, 0, 1, 0], dtype=dtype)
     source[3] = scp.MASKED
     filtered = scp.Filter(method="gaussian", sigma=1, mask_policy="split")(source)
     expected = scp.Filter(method="gaussian", sigma=1)(source[:3])
 
-    assert filtered.dtype == np.float64
+    assert filtered.dtype == expected_dtype
     np.testing.assert_allclose(filtered.data[:3], expected.data)
     assert filtered.data[3] == source.data[3]
     np.testing.assert_array_equal(filtered.mask, source.mask)
