@@ -117,7 +117,7 @@ working Jupyter ``python3`` kernel. For prose or layout edits, add
 figures.
 
 After each coherent set of edits, the agent rebuilds the affected previews.
-In Codex, the agent checks whether a local HTTP server already serves
+The agent checks whether a local HTTP server already serves
 ``build/preview/`` from the current worktree and reuses it if so. Otherwise,
 it starts a server from the repository root and leaves it running for review::
 
@@ -125,10 +125,13 @@ it starts a server from the repository root and leaves it running for review::
 
 If that port is in use by another server, choose a free port and use it in
 the preview URLs. Append the printed HTML path relative to
-``build/preview/`` to the server URL. In the Codex browser, reload an
-existing tab for that URL or open it in the right pane. Verify that the
-updated page loads, keep its tab open, and include the direct HTTP link in
-the handoff. The links work while the server is running.
+``build/preview/`` to the server URL. Verify that the server returns the
+updated page and include its direct HTTP link in the handoff. If the agent
+has access to a browser preview, reload the existing tab or open a new one
+and leave it available for review. For example, Codex can display the page
+in its right pane. The same URL can be opened in a regular browser on the
+machine running the server, including when working with OpenCode or Claude
+Code. The links work while the server is running.
 
 If execution is blocked, the agent can provide an HTML preview
 built with ``--no-exec`` and report that the code and figures were not verified.
