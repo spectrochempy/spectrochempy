@@ -316,6 +316,8 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
         objnames = byte_obj._attributes_()
 
         dic = {}
+        if byte_obj._implements("Coord") and not byte_obj._rounding:
+            dic["rounding"] = False
         for name in objnames:
             if name == "history" and hasattr(byte_obj, "_history"):
                 # ``history`` is a rendered compatibility view.  Persist the

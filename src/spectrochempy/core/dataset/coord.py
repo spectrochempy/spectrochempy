@@ -581,6 +581,12 @@ class Coord(NDMath, NDArray):
     # ----------------------------------------------------------------------------------
     # special methods
     # ----------------------------------------------------------------------------------
+    def copy(self, deep=True, keepname=False, **kwargs):
+        """Copy this coordinate and preserve its display rounding policy."""
+        result = super().copy(deep=deep, keepname=keepname, **kwargs)
+        result._rounding = self._rounding
+        return result
+
     def __copy__(self):
         res = self.copy(deep=False)  # we keep name of the coordinate by default
         res.name = self.name
