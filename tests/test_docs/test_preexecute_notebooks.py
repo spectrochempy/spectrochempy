@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -241,24 +242,45 @@ def test_metadata_overrides_and_skipped_notebooks(workspace, monkeypatch):
         runner.verify()
 
 
-def test_rtd_commands_cover_inventory_and_preserve_gallery():
+@pytest.mark.parametrize(
+    ("enabled", "version_type", "use_artifacts"),
+    [("", "branch", False), ("1", "external", False), ("1", "branch", True)],
+)
+def test_rtd_commands_select_the_build_mode(enabled, version_type, use_artifacts):
     root = Path(__file__).resolve().parents[2]
     config = yaml.safe_load((root / ".readthedocs.yaml").read_text())
     commands = config["build"]["jobs"]["build"]["html"]
+    env = {
+        **os.environ,
+        "SCPY_RTD_DOCS_ARTIFACTS": enabled,
+        "READTHEDOCS_VERSION_TYPE": version_type,
+    }
+    if os.name == "nt":
+        pytest.skip("Read the Docs uses a POSIX shell")
+    selected = [
+        subprocess.check_output(
+            ["sh", "-c", f'python() {{ echo "$*"; }}; {command}'],
+            env=env,
+            text=True,
+        ).strip()
+        for command in commands
+    ]
+    selected = [command for command in selected if command]
+    if use_artifacts:
+        assert selected == ["-u -m docs.rtd_build"]
+        return
+
     expected = sorted(
         path.with_suffix(".ipynb").relative_to(runner.SOURCES).as_posix()
         for path in runner.BuildDocumentation()._get_notebook_files()
     )
     assert expected
-    assert commands[1:-2] == [
-        f"python -u -m docs.preexecute_notebooks execute {name}" for name in expected
+    assert selected == [
+        "-u -m docs.preexecute_notebooks prepare",
+        *(f"-u -m docs.preexecute_notebooks execute {name}" for name in expected),
+        "-u -m docs.preexecute_notebooks verify",
+        "-u docs/make.py html --warning-is-error --no-sync --no-data -j auto",
     ]
-    assert commands[0].endswith("docs.preexecute_notebooks prepare")
-    assert commands[-2].endswith("docs.preexecute_notebooks verify")
-    assert commands[-1] == (
-        "SCPY_DOCS_PREEXECUTED=1 SCPY_DOCS_TRACE=1 python -u docs/make.py "
-        "html --warning-is-error --no-sync --no-data -j auto"
-    )
 
 
 def test_documentation_clis_are_not_collected_as_notebook_examples():
@@ -266,5 +288,9 @@ def test_documentation_clis_are_not_collected_as_notebook_examples():
     assert Path(runner.__file__).resolve() not in examples.scripts
     assert (
         Path(runner.__file__).with_name("ci_artifacts.py").resolve()
+        not in examples.scripts
+    )
+    assert (
+        Path(runner.__file__).with_name("rtd_build.py").resolve()
         not in examples.scripts
     )

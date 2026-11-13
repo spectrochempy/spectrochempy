@@ -2,6 +2,9 @@ name: Documentation artifact prototype
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    tags: ["spectrochempy-v*", "v[0-9]*", "[0-9]*"]
 
 permissions:
   contents: read
@@ -51,7 +54,7 @@ jobs:
           name: docs-${{ matrix.kind }}-${{ github.sha }}
           path: ${{ runner.temp }}/bundle
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90
 
   render:
     name: Render integrated Sphinx site
@@ -62,6 +65,12 @@ jobs:
       - *checkout
       - *python
       - *install
+      - name: Test Read the Docs artifact integration
+        run: |
+          python -m pip install pytest
+          python -m pytest --noconftest -o addopts= \
+            tests/test_docs/test_rtd_build.py \
+            tests/test_docs/test_preexecute_notebooks.py::test_rtd_commands_select_the_build_mode
       - name: Set output directory
         run: echo "READTHEDOCS_OUTPUT=$RUNNER_TEMP/docs-output" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v8
@@ -87,4 +96,4 @@ jobs:
           name: docs-html-${{ github.sha }}
           path: ${{ runner.temp }}/docs-output/html
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90

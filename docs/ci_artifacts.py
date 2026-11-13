@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from importlib.metadata import version
 from pathlib import Path
 
 import nbformat
@@ -107,16 +108,35 @@ def produce(kind, bundle, *, no_data=False):
         shutil.copyfile(source, target)
         entries[name] = _digest(target)
     (bundle / "manifest.json").write_text(
-        json.dumps({"commit": _commit(), "kind": kind, "files": entries}, indent=2)
+        json.dumps(
+            {
+                "commit": _commit(),
+                "version": version("spectrochempy"),
+                "kind": kind,
+                "files": entries,
+            },
+            indent=2,
+        )
         + "\n",
         encoding="utf-8",
     )
+
+
+class ArtifactVersionMismatchError(RuntimeError):
+    """The artifact was built with different core package metadata."""
 
 
 def _verified_files(bundle, kind, commit):
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     if (manifest["commit"], manifest["kind"]) != (commit, kind):
         raise RuntimeError(f"Unexpected commit or artifact kind in {bundle}")
+    artifact_version = manifest.get("version")
+    installed_version = version("spectrochempy")
+    if artifact_version != installed_version:
+        raise ArtifactVersionMismatchError(
+            f"{kind} artifact package version {artifact_version!r} "
+            f"does not match installed SpectroChemPy {installed_version!r}"
+        )
     root = bundle / "sources"
     files = _files(root, kind)
     inventory = {path.relative_to(root).as_posix(): _digest(path) for path in files}
@@ -154,11 +174,15 @@ def render(artifacts):
                     raise RuntimeError(f"Invalid gallery backreference: {target}")
                 example[1] = example[2] = str(target)
         path.write_text(json.dumps(backreferences), encoding="utf-8")
+    render_html(gallery_from_artifact=True)
+
+
+def render_html(*, gallery_from_artifact):
     subprocess.run(
         [
             sys.executable,
-            "-m",
-            "docs.make",
+            "-u",
+            "docs/make.py",
             "html",
             "--no-sync",
             "--no-data",
@@ -169,7 +193,7 @@ def render(artifacts):
         env={
             **os.environ,
             "SCPY_DOCS_PREEXECUTED": "1",
-            "SCPY_DOCS_GALLERY_ARTIFACT": "1",
+            "SCPY_DOCS_GALLERY_ARTIFACT": "1" if gallery_from_artifact else "0",
         },
         check=True,
     )
