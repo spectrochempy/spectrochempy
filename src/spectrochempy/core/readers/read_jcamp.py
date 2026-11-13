@@ -30,7 +30,7 @@ from spectrochempy.utils.exceptions import SpectroChemPyError
 
 def read_jcamp(*paths, **kwargs):
     r"""
-    Open infrared and supported processed 1D and real 2D NMR ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
+    Open infrared, UV-visible, and supported processed 1D and real 2D NMR ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
 
     This is the explicit JCAMP reader in the public import API. Use
     :func:`spectrochempy.read` for generic format autodetection and
@@ -44,13 +44,14 @@ def read_jcamp(*paths, **kwargs):
 
     The infrared reader supports AFFN and DIFDUP encoding
     (see :cite:t:`mcdonald:1988`).
+    UV-visible spectra use explicit ASCII X/Y pairs in XYDATA or XYPOINTS.
     Processed NMR spectra use the optional NMR plugin's interop reader.
 
     Parameters
     ----------
     *paths : str or path-like, optional
         JCAMP-DX file paths, URLs, or a list of paths.
-    jcamp_kind : {"auto", "ir", "nmr"}, optional
+    jcamp_kind : {"auto", "ir", "nmr", "uvvis"}, optional
         Route by the declared data type by default. Set a kind explicitly
         when the declaration is ambiguous. Containers with conflicting
         declared spectrum types are rejected. Processed real 2D NMR spectra
@@ -167,8 +168,8 @@ def _routing_headers(stream):
 
 
 def _declared_kind(stream, requested):
-    if requested not in ("auto", "ir", "nmr"):
-        raise SpectroChemPyError("jcamp_kind must be 'auto', 'ir' or 'nmr'")
+    if requested not in ("auto", "ir", "nmr", "uvvis"):
+        raise SpectroChemPyError("jcamp_kind must be 'auto', 'ir', 'nmr' or 'uvvis'")
 
     spectrum_types = set()
     linked = False
@@ -209,6 +210,8 @@ def _declared_kind(stream, requested):
         )
     kind = {
         "INFRAREDSPECTRUM": "ir",
+        "UVVISSPECTRUM": "uvvis",
+        "UV/VISSPECTRUM": "uvvis",
         "NMRSPECTRUM": "nmr",
         "NDNMRSPECTRUM": "nmr",
     }.get(declared)
@@ -232,7 +235,7 @@ def _declared_kind(stream, requested):
     if linked and not spectrum_types:
         return "ir", linked, dimension
     raise SpectroChemPyError(
-        "Cannot determine JCAMP-DX spectrum type. Set jcamp_kind='ir' or 'nmr'."
+        "Cannot determine JCAMP-DX spectrum type. Set jcamp_kind='ir', 'nmr' or 'uvvis'."
     )
 
 
@@ -288,6 +291,12 @@ def _read_jdx(dataset, filename, **kwargs):
     if kind == "nmr":
         return _read_nmr_jcamp(filename, content, dimension)
     with _open_jcamp(filename, content) as stream:
+        if kind == "uvvis":
+            if linked:
+                raise SpectroChemPyError(
+                    "UV-visible JCAMP-DX requires a single spectrum"
+                )
+            return _read_uvvis_jcamp(dataset, filename, stream)
         return _read_ir_jcamp(
             dataset, filename, stream, linked, kwargs.get("sortbydate", True)
         )
@@ -406,6 +415,68 @@ def _read_ir_xydata(fid, firstx, lastx, npoints, xfactor):
     if len(values) != npoints:
         raise ValueError("JCAMP-DX XYDATA does not match NPOINTS")
     return np.asarray(values, dtype=float)
+
+
+def _read_uvvis_jcamp(dataset, filename, stream):
+    headers = {}
+    pairs = []
+    reading = False
+    while True:
+        label, value = _readl(stream)
+        label = re.sub(r"[\s\-_]", "", label.upper())
+        value = value.strip()
+        if label == "##END":
+            break
+        if label in {"##XYDATA", "##XYPOINTS"}:
+            if reading or "".join(value.upper().split()) != "(XY..XY)":
+                raise ValueError("UV-visible JCAMP-DX requires one explicit XY table")
+            reading = True
+        elif reading and value and not label:
+            values = re.split(r"\s*[,;]\s*|\s+", value)
+            if len(values) % 2 or not all(
+                re.fullmatch(_AFFN_NUMBER, item) for item in values
+            ):
+                raise ValueError("Invalid UV-visible JCAMP-DX XY pair")
+            pairs.extend(map(float, values))
+        elif label:
+            if reading or (label == "##TITLE" and label in headers):
+                raise ValueError("UV-visible JCAMP-DX requires a single spectrum")
+            headers[label] = value
+    if any(line.partition("$$")[0].strip() for line in stream):
+        raise ValueError("Unexpected content after UV-visible JCAMP-DX END")
+    if not pairs or len(pairs) != 2 * int(headers.get("##NPOINTS", "0")):
+        raise ValueError("UV-visible JCAMP-DX XY count disagrees with NPOINTS")
+    xfactor = float(headers.get("##XFACTOR", "1"))
+    yfactor = float(headers.get("##YFACTOR", "1"))
+    with np.errstate(over="ignore", invalid="ignore"):
+        x, y = np.asarray(pairs).reshape(-1, 2).T * np.array([[xfactor], [yfactor]])
+    if xfactor == 0 or yfactor == 0 or not np.isfinite([x, y]).all():
+        raise ValueError("Invalid UV-visible JCAMP-DX values or factors")
+    for label, actual in (("##FIRSTX", x[0]), ("##LASTX", x[-1])):
+        if label in headers and not np.isclose(
+            float(headers[label]), actual, rtol=1e-7, atol=1e-12
+        ):
+            raise ValueError(f"UV-visible JCAMP-DX {label} disagrees with XY table")
+    xunits = headers.get("##XUNITS", "")
+    yunits = headers.get("##YUNITS", "")
+    if xunits.casefold() not in {"nm", "nanometers", "wavelength (nm)"}:
+        raise ValueError(f"Unsupported UV-visible JCAMP-DX XUNITS: {xunits!r}")
+    coord = Coord(title="wavelength", units="nm", rounding=False)
+    coord._set_data(x)
+    dataset.data = y
+    dataset.set_coordset(x=coord)
+    dataset.x._rounding = False
+    dataset.name = headers.get("##TITLE", Path(filename).stem)
+    dataset.filename = filename
+    dataset.origin = headers.get("##ORIGIN") or "jcamp-uvvis"
+    dataset.title = yunits or "intensity"
+    if yunits.casefold() in {"absorbance", "transmittance"}:
+        dataset.units = yunits.lower()
+    dataset.meta.jcamp_data_type = "UV/VIS SPECTRUM"
+    dataset.meta.jcamp_xunits = xunits
+    dataset.meta.jcamp_yunits = yunits
+    dataset.history = f"Imported UV-visible JCAMP-DX file {Path(filename).name}"
+    return dataset
 
 
 def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
