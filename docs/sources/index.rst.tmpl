@@ -127,6 +127,17 @@
     Examples <gettingstarted/examples/index>
     About <credits/index>
 
+{% elif gallery_preview or (single and pattern.endswith('.py')) -%}
+.. toctree::
+    :maxdepth: 2
+
+    {{ 'gallery/index' if gallery_preview else pattern[:-3] }}
+
+.. toctree::
+    :hidden:
+
+    reference/glossary
+    reference/bibliography
 {% elif single and pattern.endswith('.ipynb') -%}
 .. toctree::
     :maxdepth: 3
