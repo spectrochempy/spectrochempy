@@ -1071,7 +1071,10 @@ def rstjinja(app, docname, source):
     }:
         return
     src = source[0]
-    rendered = app.builder.templates.render_string(src, app.config.html_context)
+    if app.builder.format == "html":
+        rendered = app.builder.templates.render_string(src, app.config.html_context)
+    else:
+        rendered = jinja2.Template(src).render(app.config.html_context)
     source[0] = rendered
 
 
