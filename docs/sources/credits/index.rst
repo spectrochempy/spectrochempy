@@ -10,7 +10,7 @@ Read :doc:`what's new in this version </{{ current_whatsnew_doc }}>`.
     :maxdepth: 1
 
     Why SpectroChemPy? </gettingstarted/whyscpy>
-    Release notes archive </whatsnew/index>
+    What's new </whatsnew/index>
     Papers citing SpectroChemPy </reference/papers>
     Bibliography </reference/bibliography>
     Citing SpectroChemPy <citing>
