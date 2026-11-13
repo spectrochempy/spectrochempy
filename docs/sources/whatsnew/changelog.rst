@@ -21,6 +21,11 @@ New Features
 
 - Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
   segments independently and report segments too short for the chosen filter.
+- Use ``NDDataset.argsort()`` to obtain the original indices of 1D data sorted
+  by value.
+- Plot distributions of finite, unmasked dataset values with
+  ``dataset.plot(method="hist")``, with counts or unit-aware probability density.
+- Pass an opacity per trace to ``plot_multiple()`` with ``alpha``.
 - Add wavelet denoising to ``Filter`` with the optional ``wavelets`` extra. (#1852)
 - Add Butterworth low-pass, FTIR fringe notch and Gaussian methods to
   ``Filter``. Measure their effects with ``rms()`` and
@@ -38,6 +43,7 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Honor ``figsize`` when ``plot_multiple()`` creates an overlay figure.
 - Read DIFDUP infrared JCAMP-DX data, handle inline comments, and preserve
   physical spectral axis bounds when line abscissae use an X factor.
 

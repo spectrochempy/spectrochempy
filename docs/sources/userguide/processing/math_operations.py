@@ -166,7 +166,7 @@ _ = dataset.plot()
 # Numerical negative, element-wise, keep units
 
 # %%
-out = np.negative(dataset)  # the same results is obtained using out=-dataset
+out = -dataset
 _ = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %% [markdown]
@@ -176,7 +176,7 @@ _ = out.plot(figsize=(6, 2.5), show_mask=True)
 # Numerical absolute value element-wise, element-wise, keep units
 
 # %%
-out = np.abs(dataset)
+out = abs(dataset)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -420,7 +420,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Compute tangent element-wise.
 
 # %%
-out = np.tan(dataset / np.max(dataset))
+out = np.tan(dataset / dataset.max())
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -544,7 +544,7 @@ _ = dataset2.plot(figsize=(6, 2.5))
 # Add arguments element-wise.
 
 # %%
-out = np.add(dataset, dataset2)
+out = dataset + dataset2
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -552,7 +552,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Subtract arguments, element-wise.
 
 # %%
-out = np.subtract(dataset, dataset2)
+out = dataset - dataset2
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -560,7 +560,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Multiply arguments element-wise.
 
 # %%
-out = np.multiply(dataset, dataset2)
+out = dataset * dataset2
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -570,7 +570,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Returns a true division of the inputs, element-wise.
 
 # %%
-out = np.divide(dataset, dataset2)
+out = dataset / dataset2
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
@@ -578,7 +578,7 @@ _ = out.plot(figsize=(6, 2.5))
 # Return the largest integer smaller or equal to the division of the inputs.
 
 # %%
-out = np.floor_divide(dataset, dataset2)
+out = dataset // dataset2
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]

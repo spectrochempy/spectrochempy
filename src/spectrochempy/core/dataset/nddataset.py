@@ -1614,6 +1614,47 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         """Set units of the one or more coordinates."""
         self._coordset.set_units(*args, **kwargs)
 
+    def argsort(self, *, descend=False):
+        """
+        Return the original indices of a one-dimensional dataset sorted by value.
+
+        Equal values keep their original order. Masked values and NaNs follow
+        the sorted values in their original order, in either direction.
+        Infinities sort as numeric values.
+
+        Parameters
+        ----------
+        descend : bool, optional
+            Sort in descending order. The default is ascending order.
+
+        Returns
+        -------
+        numpy.ndarray
+            One-dimensional integer permutation suitable for indexing this dataset.
+
+        Raises
+        ------
+        ValueError
+            If the dataset is multidimensional or its values are not real numbers.
+
+        See Also
+        --------
+        sort : Sort a dataset by its coordinates or coordinate labels.
+        """
+        if self.is_empty:
+            return np.empty(0, dtype=np.intp)
+        if self.ndim != 1 or self.data.dtype.kind not in "buif":
+            raise ValueError("argsort requires a one-dimensional real dataset.")
+
+        missing = np.isnan(self.data) | self.mask
+        valid_indices = np.flatnonzero(~missing)
+        if descend:
+            valid_indices = valid_indices[::-1]
+        order = np.argsort(self.data[valid_indices], kind="stable")
+        if descend:
+            order = order[::-1]
+        return np.concatenate((valid_indices[order], np.flatnonzero(missing)))
+
     def sort(self, **kwargs):
         """
         Return the dataset sorted along a given dimension.
@@ -2603,6 +2644,15 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             Here, ``show`` controls whether SpectroChemPy performs its
             explicit display step after plotting. In notebook environments,
             figures may still render inline without that explicit call.
+
+            For ``method="hist"``, the histogram uses all finite, unmasked
+            real data values, regardless of dataset dimensionality. Select
+            ``dataset.real`` or ``dataset.imag`` for complex data.
+            ``bins`` accepts a bin count (default 10), a NumPy binning rule,
+            or explicit edges in the dataset's units. ``density=True``
+            normalizes the integral to one and labels the vertical axis
+            in reciprocal data units. ``histtype="step"`` draws an outline.
+            Use common bin edges when comparing distributions.
 
             For ``method="stack"``, ``palette`` controls categorical or continuous
             color selection. It accepts ``None``, a colormap name, or an explicit
