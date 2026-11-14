@@ -1259,8 +1259,11 @@ def plot_multiple(
 
     kwargs["show"] = False
 
+    secondary_x = kwargs.pop("secondary_x", None)
     sh = 0
     for i, s in enumerate(datasets):
+        if i == len(datasets) - 1 and secondary_x is not None:
+            kwargs["secondary_x"] = secondary_x
         ax = (s + shift[i] + sh).plot(
             method=method,
             pen=pen,

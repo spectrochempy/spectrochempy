@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Set symmetric color limits on filled contour plots with ``symmetric_percentile``.
+- Add a linked upper x-axis to Cartesian plots with the ``secondary_x``
+  plotting option.
+- Remove transient spikes along a selected acquisition axis with
+  ``despike(method="neighbors")``.
+
 - Read 1D Raman JCAMP-DX spectra with explicit Raman shift and intensity pairs.
   (:pr:`1877`)
 

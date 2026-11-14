@@ -1197,6 +1197,10 @@ def plot_image(dataset, **kwargs):
 
     Other Parameters
     ----------------
+    symmetric_percentile : float, optional
+        Set symmetric color limits from this percentile of absolute finite,
+        unmasked intensities. Values outside the limits saturate on the plot.
+        The option supplies the contour levels and normalization.
     ax : Axe, optional
         Axe where to plot. If not specified, create a new one.
     clear : bool, optional, default: True
@@ -1803,6 +1807,34 @@ def plot_2D(dataset, method=None, **kwargs):
             zdata = new.imag.masked_data
 
         levels = requested_levels
+        percentile = kwargs.get("symmetric_percentile")
+        if percentile is not None:
+            if method not in {"image", "contourf"}:
+                raise ValueError("symmetric_percentile requires a filled contour plot.")
+            if not 0 < percentile <= 100:
+                raise ValueError("symmetric_percentile must be in (0, 100].")
+            scale_options = (
+                "levels",
+                "norm",
+                "vmin",
+                "vmax",
+                "positive_color",
+                "negative_color",
+            )
+            if any(kwargs.get(key) is not None for key in scale_options):
+                raise ValueError(
+                    "symmetric_percentile defines levels and normalization."
+                )
+            zdata = np.ma.masked_invalid(zdata)
+            valid = abs(zdata.compressed())
+            if not valid.size:
+                raise ValueError(
+                    "symmetric_percentile requires finite, unmasked values."
+                )
+            bound = np.percentile(valid, percentile) or valid.max() or 1.0
+            zdata = zdata.clip(-bound, bound)
+            levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
+            kwargs["norm"] = Normalize(vmin=-bound, vmax=bound)
 
         zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 

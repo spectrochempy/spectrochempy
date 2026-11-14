@@ -116,6 +116,12 @@ def plot_dataset_impl(
     # NORMALIZE METHOD - Convert legacy names to canonical BEFORE dispatch
     method = normalize_backend_method(method, warned_aliases=_WARNED_ALIASES)
 
+    secondary_x = kwargs.pop("secondary_x", None)
+    if secondary_x is not None:
+        if get_dispatch_method_key(method) in {"surface", "waterfall"}:
+            raise ValueError("secondary_x requires a 2D Cartesian plot.")
+        label, forward, inverse = secondary_x
+
     # Get the standalone plot function
     plot_func_data = _get_plot_function(method) if method else None
     if plot_func_data is None:
@@ -138,6 +144,9 @@ def plot_dataset_impl(
         ax = plot_func(dataset, **kwargs)
     else:
         ax = plot_func(dataset, method=render_method, **kwargs)
+
+    if secondary_x is not None:
+        ax.secondary_xaxis("top", functions=(forward, inverse)).set_xlabel(label)
 
     # Save and/or display the completed figure
     _finalize_plot(ax, show=show, output=output)
