@@ -25,8 +25,8 @@ New Features
 - **Spectral filtering:** Smooth spectra with Butterworth low-pass or Gaussian
   filters, remove periodic FTIR fringes with a notch filter, or denoise with
   the optional ``wavelets`` extra. Use ``mask_policy="split"`` to filter each
-  contiguous unmasked segment independently and report segments that are too
-  short. Compare results with ``rms()`` and ``characterize_peaks_1d()``, which
+  contiguous unmasked segment independently. Filtering raises an error if any
+  segment is too short. Compare results with ``rms()`` and ``characterize_peaks_1d()``, which
   reports sampled peak position, height and apparent full width at half
   maximum. (:pr:`1862`, :pr:`1867`, :pr:`1873`)
 - **Acquisition-axis despiking:** Remove transient spikes along a selected
