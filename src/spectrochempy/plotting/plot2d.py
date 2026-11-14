@@ -1202,7 +1202,7 @@ def plot_image(dataset, **kwargs):
         Set symmetric color limits from this percentile of absolute finite,
         unmasked intensities. Values outside the limits saturate on the plot.
         The option supplies the contour levels and normalization. If the
-        absolute percentile is zero or subnormal, use machine epsilon.
+        absolute percentile is effectively zero, use a small positive bound.
         Rescale intensities near the floating-point limit before plotting.
     ax : Axe, optional
         Axe where to plot. If not specified, create a new one.
@@ -1843,8 +1843,8 @@ def plot_2D(dataset, method=None, **kwargs):
                     "Rescale intensities before plotting symmetric contours."
                 )
             bound = np.percentile(valid, percentile)
-            if bound < np.finfo(float).tiny:
-                bound = np.finfo(float).eps
+            if bound < 1e-12:
+                bound = 1e-12
             levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
             kwargs["norm"] = Normalize(vmin=-bound, vmax=bound)
 
@@ -2383,7 +2383,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 cb_mappable = locals().get("colorbar_mappable", mappable)
                 cb = fig.colorbar(
                     cb_mappable,
-                    extend=getattr(mappable, "extend", "neither"),
+                    extend="both" if percentile is not None else None,
                     ax=ax,
                     location="right",
                     pad=0.02,
