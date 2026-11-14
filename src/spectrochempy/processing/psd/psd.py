@@ -709,12 +709,17 @@ class PSD(BaseConfigurable):
             ),
         }
         spectral = X.coord(spectral_dim)
-        if spectral is not None:
+        if spectral is not None and (not spectral.is_empty or spectral.is_labeled):
             coords["x"] = spectral.copy()
         retained = X[discard * n_times :, :]
-        return retained.reshape(
+        grouped = retained.reshape(
             (len(starts), n_times, X.shape[1]), dims=("z", "y", "x"), coords=coords
         )
+        steps = np.diff(times.ravel())
+        grouped.meta["psd_regular_acquisitions"] = bool(
+            not steps.size or np.allclose(steps, steps[0], rtol=1e-6, atol=0.0)
+        )
+        return grouped
 
     def fourier(self, X, *, period=None, grid="measured"):
         """
@@ -741,7 +746,9 @@ class PSD(BaseConfigurable):
             "cycle_starts", use the mean interval between the start times
             of grouped cycles as the period and treat sample index i as
             time i * period / n_samples. This assumes equal spacing and
-            does not interpolate the intensities. Supply at least two
+            does not interpolate the intensities. Grouped acquisitions with
+            an irregular original grid require this explicit approximation.
+            Supply at least two
             cycle starts with time units, as returned by `group_cycles`.
 
         Returns
@@ -789,6 +796,11 @@ class PSD(BaseConfigurable):
             period = intervals.mean()
         elif grid != "measured":
             raise ValueError("grid must be 'measured' or 'cycle_starts'.")
+        elif X.ndim == 3 and not X.meta.get("psd_regular_acquisitions", True):
+            raise ValueError(
+                "Fourier analysis requires uniformly spaced time. "
+                "Use grid='cycle_starts' to assume a uniform grid."
+            )
 
         cycle_coord = Coord(np.arange(data.shape[0]), title="cycle")
         spectral_coord = Coord(np.arange(data.shape[-1]), title="channel")

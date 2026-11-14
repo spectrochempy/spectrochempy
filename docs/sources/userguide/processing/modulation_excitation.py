@@ -177,9 +177,8 @@ psd_ax = scp.plot_multiple(
 # %% [markdown]
 # ## Explore experimental data
 
-# %% [raw] raw_mimetype="text/restructuredtext"
-# The :ref:`Raman modulation gallery example
-# <sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_raman_plot_raman_modulation.py>`
+#
+# The [Raman modulation gallery example](../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_raman_modulation.rst)
 # shows the same experimental spectra in the time and phase domains.
 
 # %% [raw] raw_mimetype="text/restructuredtext"
@@ -191,9 +190,11 @@ psd_ax = scp.plot_multiple(
 # For an application combining PSD and multivariate curve resolution to
 # separate overlapping IR signals, see :cite:t:`alcaraz:2019`.
 
-# %% [raw] raw_mimetype="text/restructuredtext"
+# %% [markdown]
 # To try CP, pass the aligned cycle × time × spectral coordinate array to
-# ``scp.tensor.CP`` from the :doc:`Tensor plugin </userguide/plugins/tensor>`.
+# `scp.tensor.CP` from the [Tensor plugin](../plugins/tensor.rst).
 # The cycle factor shows how the amplitude of each component varies between
-# cycles, assuming a shared temporal profile for that component. See
-# :cite:t:`bro:2003` for the PARAFAC model and a diagnostic for choosing its rank.
+# cycles, assuming a shared temporal profile for that component.
+
+# %% [raw] raw_mimetype="text/restructuredtext"
+# See :cite:t:`bro:2003` for the PARAFAC model and a diagnostic for choosing its rank.

@@ -597,3 +597,19 @@ def test_fourier_grid_from_cycle_starts():
     np.testing.assert_array_equal(cycles.y.data, original_time)
     with pytest.raises(ValueError, match="at least two measured"):
         processor.fourier(cycles[:1], grid="cycle_starts")
+
+
+def test_group_cycles_without_spectral_coord_preserves_grid_validation():
+    dataset = NDDataset(np.arange(12).reshape(6, 2))
+    dataset.y = Coord([0, 0.5, 2, 4, 5.5, 6], units="s")
+    psd = PSD(n_spectra_per_cycle=3)
+
+    grouped = psd.group_cycles(dataset)
+
+    assert grouped.shape == (2, 3, 2)
+    np.testing.assert_allclose(grouped.y.data, [0, 1, 2])
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        psd.fourier(grouped)
+    np.testing.assert_allclose(
+        psd.fourier(grouped, grid="cycle_starts").y.data, [0, 0.25]
+    )
