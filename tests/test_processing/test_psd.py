@@ -665,3 +665,28 @@ def test_fourier_and_group_cycles_require_numeric_times():
         psd.group_cycles(data)
     with pytest.raises(ValueError, match="numeric values"):
         psd.fourier(data)
+
+
+def test_group_cycles_preserves_multiple_spectral_coordinates():
+    data = NDDataset(np.arange(30).reshape(6, 5))
+    data.y = Coord(np.arange(6), units="s")
+    data.x = [Coord(np.arange(5), units="cm^-1"), Coord(np.arange(5), units="nm")]
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
+    assert grouped.x == data.x
+    np.testing.assert_array_equal(grouped.data.reshape(data.shape), data.data)
+
+
+@pytest.mark.parametrize("reference", ["x", "y"])
+def test_fourier_and_group_cycles_resolve_coordinate_references(reference):
+    data = NDDataset(np.ones((6, 6)))
+    source = "y" if reference == "x" else "x"
+    data.set_coordset(**{source: Coord(np.arange(6), units="s"), reference: source})
+    psd = PSD(n_spectra_per_cycle=3)
+
+    transformed = psd.fourier(data)
+    grouped = psd.group_cycles(data, discard=1)
+    np.testing.assert_allclose(transformed.y.data, [0, 1 / 3])
+    for result in (transformed, grouped):
+        np.testing.assert_array_equal(result.x.data, np.arange(6))
+        assert result.x.units == data.x.units

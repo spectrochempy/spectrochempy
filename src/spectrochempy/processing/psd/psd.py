@@ -661,7 +661,10 @@ class PSD(BaseConfigurable):
     @staticmethod
     def _optional_coord(X, dim):
         coords = X.coordset
-        return coords[dim] if coords is not None and dim in coords.names else None
+        if coords is None:
+            return None
+        target = coords.references.get(dim, dim)
+        return coords[target] if target in coords.names else None
 
     @staticmethod
     def _numeric_times(coord):
@@ -723,15 +726,19 @@ class PSD(BaseConfigurable):
             ),
         }
         spectral = self._optional_coord(X, spectral_dim)
-        if spectral is not None and (not spectral.is_empty or spectral.is_labeled):
-            coords["x"] = spectral.copy()
-        if spectral is None:
+        coords["x"] = spectral.copy() if spectral is not None else Coord()
+        if spectral is None or X.coordset.references:
             X = X.copy()
-            X.set_coordset(**{time_dim: acquisition.copy(), spectral_dim: Coord()})
+            X.set_coordset(
+                **{time_dim: acquisition.copy(), spectral_dim: coords["x"].copy()}
+            )
         retained = X[discard * n_times :, :]
         grouped = retained.reshape(
-            (len(starts), n_times, X.shape[1]), dims=("z", "y", "x"), coords=coords
+            (len(starts), n_times, X.shape[1]),
+            dims=("z", "y", "x"),
+            coord_policy="drop",
         )
+        grouped.set_coordset(**coords)
         steps = np.diff(times.ravel())
         grouped.meta["psd_regular_acquisitions"] = bool(
             not steps.size or np.allclose(steps, steps[0], rtol=1e-6, atol=0.0)
