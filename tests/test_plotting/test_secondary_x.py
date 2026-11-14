@@ -85,3 +85,18 @@ def test_secondary_x_with_axes_dictionary():
         assert upper.get_xlabel() == "Scaled x"
     finally:
         plt.close(result["fig"])
+
+
+def test_secondary_x_above_top_projection():
+    dataset = scp.NDDataset(np.arange(9).reshape(3, 3))
+    result = dataset.plot_contourf(
+        projections="x",
+        return_dict=True,
+        secondary_x=("Scaled x", lambda x: 2 * x, lambda x: x / 2),
+        show=False,
+    )
+    try:
+        (upper,) = result["axes"]["top"].child_axes
+        assert upper.get_xlabel() == "Scaled x"
+    finally:
+        plt.close(result["fig"])
