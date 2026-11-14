@@ -21,12 +21,12 @@ New Features
 
 - **Optical JCAMP-DX:** Read 1D Raman spectra with explicit Raman shift and
   intensity pairs and 1D UV-visible spectra with explicit wavelength and
-  intensity pairs. Multi-file reads keep distinct explicit grids separate.
-  (:pr:`1877`, :pr:`1875`)
+  intensity pairs. Multi-file reads return these spectra separately, even with
+  ``merge=True``. (:pr:`1877`, :pr:`1875`)
 - **NMR JCAMP-DX:** Use ``read_jcamp()`` or ``jcamp.read()`` with the optional
   NMR plugin for supported processed 1D spectra and supported real 2D
   NTUPLES spectra. The 2D path requires nmrglue-ng 1.3 or later.
-  Use ``jcamp_kind`` to select the profile explicitly when the declaration
+  Use ``jcamp_kind`` to select the spectrum type explicitly when the declaration
   is ambiguous. LINK containers with conflicting declarations raise an
   error. (:pr:`1859`, :pr:`1861`)
 - **Spectral filtering:** Use ``Filter`` for Butterworth low-pass or Gaussian
