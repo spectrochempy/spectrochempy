@@ -6,10 +6,10 @@
 
 :orphan:
 
-What's New in Revision 1.2.2.dev
+What's New in Revision 1.3.2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.2.2.dev.
+These are the changes in SpectroChemPy-1.3.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 New Features
@@ -17,48 +17,3 @@ New Features
 
 - Compute per-cycle Fourier coefficients for modulation experiments with
   ``PSD.fourier()`` and group sequential acquisitions with ``PSD.group_cycles()``. (:pr:`1880`)
-
-- Set symmetric color limits on filled contour plots with ``symmetric_percentile``. (:pr:`1879`)
-- Add a linked upper x-axis to Cartesian plots with the ``secondary_x``
-  plotting option. (:pr:`1879`)
-- Remove transient spikes along a selected acquisition axis with
-  ``despike(method="neighbors")``. (:pr:`1879`)
-
-- Read 1D Raman JCAMP-DX spectra with explicit Raman shift and intensity pairs.
-  (:pr:`1877`)
-
-- Read 1D UV-visible JCAMP-DX spectra with explicit wavelength and intensity pairs.
-  (:pr:`1875`)
-
-- Add ``mask_policy="split"`` to ``Filter`` to process contiguous unmasked
-  segments independently and report segments too short for the chosen filter. (:pr:`1873`)
-- Use ``NDDataset.argsort()`` to obtain the original indices of 1D data sorted
-  by value. (:pr:`1871`)
-- Plot distributions of finite, unmasked dataset values with
-  ``dataset.plot(method="hist")``, with counts or unit-aware probability density. (:pr:`1871`)
-- Pass an opacity per trace to ``plot_multiple()`` with ``alpha``. (:pr:`1871`)
-- Add wavelet denoising to ``Filter`` with the optional ``wavelets`` extra. (:pr:`1867`)
-- Add Butterworth low-pass, FTIR fringe notch and Gaussian methods to
-  ``Filter``. Measure their effects with ``rms()`` and
-  ``characterize_peaks_1d()``, which reports sampled peak position, height and
-  apparent full width at half maximum. (:pr:`1862`)
-- Route supported processed 1D NMR JCAMP-DX files through the optional NMR
-  plugin when using ``read_jcamp()`` or ``jcamp.read()``. (:pr:`1859`)
-- Read supported real 2D NMR JCAMP-DX NTUPLES spectra through the same API
-  with the NMR plugin and nmrglue-ng 1.3 or later. (:pr:`1861`)
-
-Bug Fixes
-~~~~~~~~~
-
-- Honor ``figsize`` when ``plot_multiple()`` creates an overlay figure. (:pr:`1871`)
-- Read DIFDUP infrared JCAMP-DX data, handle inline comments, and preserve
-  physical spectral axis bounds when line abscissae use an X factor. (:pr:`1866`)
-
-Developer
-~~~~~~~~~
-
-- Link to the PULSAR powder line shape simulation and fitting examples from
-  the Modeling and simulation gallery. (:pr:`1874`)
-
-- List NMR examples in the gallery sidebar and include their import cards in
-  the main Import / Export grid. (:pr:`1872`)
