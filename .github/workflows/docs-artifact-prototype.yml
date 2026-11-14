@@ -45,7 +45,7 @@ jobs:
           for name in $names; do
             python -m pip install --no-deps -e "plugins/$name"
           done
-          python -m pip install "spectrochempy-nmr>=0.2,<0.4" osqp scipy tensorly
+          python -m pip install "spectrochempy-nmr>=0.2,<0.5" osqp scipy tensorly
           python -c 'from importlib.metadata import version; import spectrochempy as scp; assert callable(scp.nmr.read); print("NMR plugin", version("spectrochempy-nmr"))'
       - name: Generate source artifact
         run: python -m docs.ci_artifacts produce ${{ matrix.kind }} "${{ runner.temp }}/bundle"
