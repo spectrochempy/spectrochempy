@@ -761,3 +761,16 @@ def test_fourier_preserves_frequency_precision_after_grouping():
     period = 3.712346
     frequencies = PSD().fourier(np.ones((8, 2)), period=period).y.data
     np.testing.assert_allclose(frequencies, np.fft.rfftfreq(8, d=period / 8))
+
+
+def test_fourier_preserves_frequency_when_aligned_grouped_cycles_are_omitted():
+    signal = np.tile([1.0, 0.0, -1.0, 0.0], 5)
+    data = NDDataset(np.column_stack([signal, 2 * signal]))
+    data.y = Coord(np.arange(20), units="s")
+    psd = PSD(n_spectra_per_cycle=4)
+    grouped = psd.group_cycles(data)
+
+    all_cycles = psd.fourier(grouped)
+    selected = psd.fourier(grouped[::2])
+    np.testing.assert_allclose(selected.y.data, all_cycles.y.data)
+    np.testing.assert_allclose(selected.data, all_cycles.data[::2])

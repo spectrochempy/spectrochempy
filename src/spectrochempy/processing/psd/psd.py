@@ -775,8 +775,9 @@ class PSD(BaseConfigurable):
         (time, channel) cycle. The samples must be real, finite, unmasked,
         uniformly spaced and aligned across complete cycles. Do not repeat
         the cycle endpoint. For concatenated input with timestamps, the
-        timestamps must form one continuous grid. Time coordinates must
-        contain numeric values.
+        timestamps must form one continuous grid. For grouped input, cycles
+        may be omitted if all retained starts are aligned to the period.
+        Time coordinates must contain numeric values.
 
         Parameters
         ----------
@@ -790,12 +791,12 @@ class PSD(BaseConfigurable):
         grid : {"measured", "cycle_starts"}, optional
             By default, validate the measured sampling grid. With
             "cycle_starts", use the mean interval between the start times
-            of grouped cycles as the period and treat sample index i as
-            time i * period / n_samples. This assumes equal spacing and
-            does not interpolate the intensities. Grouped acquisitions with
-            an irregular original grid require this explicit approximation.
-            Supply at least two
-            cycle starts with time units, as returned by `group_cycles`.
+            of consecutive grouped cycles as the period and treat sample index
+            i as time i * period / n_samples. This assumes equal spacing and
+            does not interpolate the intensities. Skipping cycles increases
+            the estimated period. Grouped acquisitions with an irregular
+            original grid require this explicit approximation. Supply at least
+            two cycle starts with time units, as returned by `group_cycles`.
 
         Returns
         -------
@@ -901,8 +902,15 @@ class PSD(BaseConfigurable):
             and starts.units.is_compatible_with("s")
         ):
             intervals = np.diff(self._numeric_times(starts, seconds=True))
-            if not np.allclose(intervals, period, rtol=1e-6, atol=0.0):
-                raise ValueError("Measured cycle starts must be spaced by the period.")
+            cycle_steps = intervals / period
+            multiples = np.rint(cycle_steps)
+            if not (
+                np.all(np.isfinite(intervals) & (multiples >= 1))
+                and np.allclose(cycle_steps, multiples, rtol=0.0, atol=1e-6)
+            ):
+                raise ValueError(
+                    "Measured cycle starts must be spaced by the period or a multiple."
+                )
 
         coefficients = np.fft.rfft(data, axis=1) / n_times
         result = NDDataset(coefficients, units=X.units, title=X.title)
