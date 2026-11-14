@@ -54,3 +54,9 @@ def test_despike_neighbors_preserves_persistent_bands_and_masks():
     assert result.y == dataset.y
     assert result.units == dataset.units
     assert "dim=y, delta=8" in result.history_entries[-1]["message"]
+
+
+def test_neighbors_removes_spike_in_flat_trace():
+    dataset = scp.NDDataset([100, 100, 100, 100, 1000, 100, 100, 100, 100])
+    result = dataset.despike(method="neighbors")
+    np.testing.assert_array_equal(result.data, np.full(9, 100))

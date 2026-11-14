@@ -100,7 +100,7 @@ def _despike_neighbors(dataset, delta, dim):
         center = np.ma.median(residual, axis=0)
         noise = 1.4826 * np.ma.median(abs(residual - center), axis=0)
         excess = current - np.ma.maximum(previous, following)
-        spikes = ((noise > 0) & (excess > delta * noise)).filled(False)
+        spikes = (excess > delta * noise).filled(False)
         data[1:-1][spikes] = local_mean.data[spikes]
         new.data = np.moveaxis(data, 0, axis)
 
@@ -144,8 +144,8 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
     dimensions. A positive excursion above both neighbors is replaced by
     their mean if it exceeds ``delta`` times the scaled median absolute
     deviation of the residuals from the neighbor mean. Endpoints, triplets
-    with masked or non-finite values, and traces with zero estimated noise
-    are skipped. For a time series of spectra, choose the acquisition axis.
+    with masked or non-finite values are skipped. With zero estimated noise,
+    any strictly positive excess above both neighbors qualifies. For a time series of spectra, choose the acquisition axis.
 
     Parameters
     ----------

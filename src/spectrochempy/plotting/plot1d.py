@@ -31,6 +31,7 @@ from spectrochempy.plotting._kwargs import normalize_style_argument
 from spectrochempy.plotting._methods import validate_method_for_target_dimension
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
+from spectrochempy.utils.mplutils import _add_secondary_x
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -289,7 +290,9 @@ def plot_1D(dataset, method=None, **kwargs):
     with plt.style.context(style), matplotlib.rc_context(merged_overrides):
         if method == "hist":
             kwargs.pop("pen", None)
-            return _plot_histogram(dataset, **kwargs)
+            secondary_x = kwargs.pop("secondary_x", None)
+            ax = _plot_histogram(dataset, **kwargs)
+            return _add_secondary_x(ax, secondary_x)
 
         # Redirections ?
         # ------------------------------------------------------------------------
@@ -575,7 +578,7 @@ def plot_1D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
-            return ax
+            return _add_secondary_x(ax, kwargs.get("secondary_x"))
 
         # ------------------------------------------------------------------------
         # labels
@@ -640,7 +643,7 @@ def plot_1D(dataset, method=None, **kwargs):
                 alpha=0.3,
             )
 
-        return ax
+        return _add_secondary_x(ax, kwargs.get("secondary_x"))
 
 
 def plot_scatter(dataset, **kwargs):

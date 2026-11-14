@@ -373,6 +373,16 @@ def _save_figure(fig, output):
         raise error_type(message) from exc
 
 
+def _add_secondary_x(ax, secondary_x):
+    """Attach an optional upper x-axis to a Cartesian plot."""
+    if secondary_x is not None:
+        if ax.name == "3d" or hasattr(ax, "zaxis"):
+            raise ValueError("secondary_x requires a 2D Cartesian plot.")
+        label, forward, inverse = secondary_x
+        ax.secondary_xaxis("top", functions=(forward, inverse)).set_xlabel(label)
+    return ax
+
+
 def _finalize_plot(target, *, show=True, output=None):
     """
     Shared final step of a plotting call: optional saving, then optional display.

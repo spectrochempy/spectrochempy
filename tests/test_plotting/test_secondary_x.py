@@ -56,3 +56,18 @@ def test_secondary_x_rejects_3d(method):
         dataset.plot(
             method=method, secondary_x=("x", lambda x: x, lambda x: x), show=False
         )
+
+
+@pytest.mark.parametrize("ndim", [1, 2])
+def test_secondary_x_on_direct_renderer(ndim):
+    dataset = scp.NDDataset(np.arange(9).reshape((3, 3) if ndim == 2 else (9,)))
+    axis = ("Scaled x", lambda x: 2 * x, lambda x: x / 2)
+    if ndim == 2:
+        ax = dataset.plot_2D(method="contourf", secondary_x=axis)
+    else:
+        ax = dataset.plot_1D(method="pen", secondary_x=axis)
+    try:
+        (upper,) = ax.child_axes
+        assert upper.get_xlabel() == "Scaled x"
+    finally:
+        plt.close(ax.figure)

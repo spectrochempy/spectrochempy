@@ -42,6 +42,7 @@ from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
+from spectrochempy.utils.mplutils import _add_secondary_x
 from spectrochempy.utils.mplutils import make_label
 
 # ======================================================================================
@@ -1636,6 +1637,8 @@ def plot_2D(dataset, method=None, **kwargs):
         # Waterfall uses its own 3D rendering and must not go through _figure_setup
         if method == "waterfall":
             # Call the 3D waterfall function directly
+            if kwargs.get("secondary_x") is not None:
+                raise ValueError("secondary_x requires a 2D Cartesian plot.")
             return _plot_waterfall_3d(new, prefs=prefs, **kwargs)
 
         # Figure setup
@@ -1831,8 +1834,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 raise ValueError(
                     "symmetric_percentile requires finite, unmasked values."
                 )
-            bound = np.percentile(valid, percentile) or valid.max() or 1.0
-            zdata = zdata.clip(-bound, bound)
+            bound = np.percentile(valid, percentile) or np.finfo(float).eps
             levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
             kwargs["norm"] = Normalize(vmin=-bound, vmax=bound)
 
@@ -2014,7 +2016,14 @@ def plot_2D(dataset, method=None, **kwargs):
                     and min(contour_levels) < 0 < max(contour_levels)
                 ):
                     contour_levels = np.unique([*contour_levels, 0.0])
-                mappable = ax.contourf(xdata, ydata, zdata, contour_levels, alpha=alpha)
+                mappable = ax.contourf(
+                    xdata,
+                    ydata,
+                    zdata,
+                    contour_levels,
+                    alpha=alpha,
+                    extend="both" if percentile is not None else "neither",
+                )
                 mappable.set_cmap(cmap)
                 mappable.set_norm(norm)
 
@@ -2241,7 +2250,7 @@ def plot_2D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
-            return ax
+            return _add_secondary_x(ax, kwargs.get("secondary_x"))
 
         # display a title
         # ------------------------------------------------------------------------
@@ -2443,7 +2452,7 @@ def plot_2D(dataset, method=None, **kwargs):
         )
         if kwargs.get("return_dict", False):
             return {"fig": fig, "axes": _panel_axes(ax)}
-        return ax
+        return _add_secondary_x(ax, kwargs.get("secondary_x"))
 
 
 def _plot_waterfall_3d(new, prefs, **kwargs):
