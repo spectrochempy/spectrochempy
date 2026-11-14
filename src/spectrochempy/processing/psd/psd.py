@@ -726,6 +726,7 @@ class PSD(BaseConfigurable):
                 units=time.units,
                 rounding=False,
                 linearize_below=0,
+                sigdigits=15,
             ),
             "y": Coord(
                 elapsed,
@@ -733,6 +734,7 @@ class PSD(BaseConfigurable):
                 units=time.units,
                 rounding=False,
                 linearize_below=0,
+                sigdigits=15,
             ),
         }
         spectral = self._optional_coord(X, spectral_dim)
@@ -911,6 +913,7 @@ class PSD(BaseConfigurable):
                 title="modulation frequency",
                 units="Hz",
                 rounding=False,
+                sigdigits=15,
             ),
             x=spectral_coord,
         )

@@ -746,3 +746,18 @@ def test_group_cycles_preserves_measured_starts_and_mean_elapsed_times():
     grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
     np.testing.assert_allclose(grouped.z.data, [0, 4, 8.004])
     np.testing.assert_allclose(grouped.y.data, [0, 1.0006, 2])
+
+
+def test_fourier_preserves_frequency_precision_after_grouping():
+    data = NDDataset(np.ones((12, 2)))
+    step = 0.12345678
+    data.set_coordset(
+        y=Coord(step * np.arange(12), units="s", rounding=False, sigdigits=15)
+    )
+    psd = PSD(n_spectra_per_cycle=4)
+
+    expected = np.fft.rfftfreq(4, d=step)
+    np.testing.assert_allclose(psd.fourier(psd.group_cycles(data)).y.data, expected)
+    period = 3.712346
+    frequencies = PSD().fourier(np.ones((8, 2)), period=period).y.data
+    np.testing.assert_allclose(frequencies, np.fft.rfftfreq(8, d=period / 8))
