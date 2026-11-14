@@ -660,6 +660,184 @@ class PSD(BaseConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
+    def group_cycles(self, X, *, discard=0):
+        """
+        Group consecutive spectra into complete modulation cycles.
+
+        Set `n_spectra_per_cycle` on the PSD instance and supply a 2D
+        dataset with a finite, strictly increasing acquisition coordinate.
+        The result uses dimensions (z, y, x) for cycle start, mean elapsed
+        time within each cycle, and spectral channel. Both time coordinates
+        use the original time units.
+
+        Parameters
+        ----------
+        X : NDDataset
+            Concatenated spectra in acquisition order.
+        discard : int, optional
+            Number of complete initial cycles to omit.
+        """
+        n_times = self.n_spectra_per_cycle
+        if X.ndim != 2 or not n_times or not X.size or X.shape[0] % n_times:
+            raise ValueError(
+                "Expected 2D spectra and a whole number of complete cycles."
+            )
+        n_cycles = X.shape[0] // n_times
+        if not isinstance(discard, (int, np.integer)) or not 0 <= discard < n_cycles:
+            raise ValueError("discard must leave at least one complete cycle.")
+
+        time_dim, spectral_dim = X.dims
+        time = X.coord(time_dim)
+        if time is None or time.data is None:
+            raise ValueError("An acquisition time coordinate is required.")
+        timestamps = time.magnitude
+        if not np.isfinite(timestamps).all() or np.any(np.diff(timestamps) <= 0):
+            raise ValueError(
+                "Acquisition times must be finite and strictly increasing."
+            )
+
+        times = timestamps.reshape(n_cycles, n_times)[discard:]
+        starts = times[:, 0]
+        elapsed = (times - starts[:, None]).mean(axis=0)
+        coords = {
+            "z": Coord(starts, title="cycle start", units=time.units, rounding=False),
+            "y": Coord(
+                elapsed,
+                title="elapsed time within cycle",
+                units=time.units,
+                rounding=False,
+            ),
+        }
+        spectral = X.coord(spectral_dim)
+        if spectral is not None:
+            coords["x"] = spectral.copy()
+        retained = X[discard * n_times :, :]
+        return retained.reshape(
+            (len(starts), n_times, X.shape[1]), dims=("z", "y", "x"), coords=coords
+        )
+
+    def fourier(self, X, *, period=None, grid="measured"):
+        """
+        Return normalized complex Fourier coefficients for each cycle.
+
+        Accept a grouped (cycle, time, channel) dataset, a concatenated
+        (time, channel) dataset with `n_spectra_per_cycle` set, or a single
+        (time, channel) cycle. The samples must be real, finite, unmasked,
+        uniformly spaced and aligned across complete cycles. Do not repeat
+        the cycle endpoint. For concatenated input with timestamps, the
+        timestamps must form one continuous grid.
+
+        Parameters
+        ----------
+        X : NDDataset or array-like
+            Time-resolved spectra.
+        period : float, optional
+            Period in seconds. If omitted, infer it as the number of samples
+            per cycle times the spacing of the time coordinate. If provided
+            with a time coordinate, it must agree with the inferred period.
+
+        grid : {"measured", "cycle_starts"}, optional
+            By default, validate the measured sampling grid. With
+            "cycle_starts", use the mean interval between the start times
+            of grouped cycles as the period and treat sample index i as
+            time i * period / n_samples. This assumes equal spacing and
+            does not interpolate the intensities. Supply at least two
+            cycle starts with time units, as returned by `group_cycles`.
+
+        Returns
+        -------
+        NDDataset
+            Complex coefficients with dimensions (cycle, frequency, channel).
+            Frequencies are in Hz, including DC and, for an even number of
+            samples, Nyquist. Coefficients use the negative exponential,
+            with the first sample as the phase origin, and are divided by the
+            number of samples per cycle. To reconstruct a cycle, multiply
+            the coefficients by that number and use `numpy.fft.irfft` with
+            the original cycle length.
+        """
+        if not isinstance(X, NDDataset):
+            X = NDDataset(X)
+        if X.ndim not in (2, 3) or not X.size:
+            raise ValueError("Expected a nonempty 2D or 3D dataset.")
+        if np.iscomplexobj(X.data) or np.any(X.mask) or not np.isfinite(X.data).all():
+            raise ValueError("Fourier analysis requires real, finite, unmasked data.")
+
+        n_times = X.shape[-2]
+        if X.ndim == 2 and self.n_spectra_per_cycle is not None:
+            n_times = self.n_spectra_per_cycle
+        if n_times < 2 or (X.ndim == 2 and X.shape[0] % n_times):
+            raise ValueError("Expected complete cycles of at least two samples.")
+        data = X.data.reshape(-1, n_times, X.shape[-1])
+
+        if period is not None and (not np.isfinite(period) or period <= 0):
+            raise ValueError("period must be positive and finite (seconds).")
+
+        if grid == "cycle_starts":
+            if period is not None:
+                raise ValueError(
+                    "grid='cycle_starts' derives the period from coordinates."
+                )
+            starts = X.coord(X.dims[0]) if X.ndim == 3 else None
+            if starts is None or starts.data is None or starts.size < 2:
+                raise ValueError("Expected at least two measured cycle starts.")
+            if starts.units is None or not starts.units.is_compatible_with("s"):
+                raise ValueError("Cycle starts must have time units.")
+            start_times = starts.to("s").magnitude
+            intervals = np.diff(start_times)
+            if not np.all(np.isfinite(intervals) & (intervals > 0)):
+                raise ValueError("Cycle starts must be finite and strictly increasing.")
+            period = intervals.mean()
+        elif grid != "measured":
+            raise ValueError("grid must be 'measured' or 'cycle_starts'.")
+
+        cycle_coord = Coord(np.arange(data.shape[0]), title="cycle")
+        spectral_coord = Coord(np.arange(data.shape[-1]), title="channel")
+        if X.coordset is not None:
+            time_coord = X.coordset[X.dims[-2]]
+            if grid == "measured" and time_coord.data is not None:
+                times = time_coord.magnitude
+                has_time_units = not time_coord.dimensionless
+                if has_time_units:
+                    times = time_coord.to("s").magnitude
+                elif period is None:
+                    raise ValueError("Provide a period in seconds for unitless time.")
+                steps = np.diff(times)
+                if (
+                    not np.all(np.isfinite(steps))
+                    or np.any(steps <= 0)
+                    or not np.allclose(steps, steps[0], rtol=1e-6, atol=0.0)
+                ):
+                    raise ValueError("Fourier analysis requires uniformly spaced time.")
+                if has_time_units:
+                    inferred = n_times * steps[0]
+                    if period is not None and not np.isclose(
+                        period, inferred, rtol=1e-6, atol=0.0
+                    ):
+                        raise ValueError("period does not match the time coordinate.")
+                    period = inferred
+
+            spectral_coord = X.coordset[X.dims[-1]].copy()
+            if X.ndim == 3:
+                cycle_coord = X.coordset[X.dims[0]].copy()
+
+        if period is None:
+            raise ValueError("Provide a period in seconds or a time coordinate.")
+
+        coefficients = np.fft.rfft(data, axis=1) / n_times
+        result = NDDataset(coefficients, units=X.units, title=X.title)
+        result.set_coordset(
+            z=cycle_coord,
+            y=Coord(
+                np.fft.rfftfreq(n_times, d=period / n_times),
+                title="modulation frequency",
+                units="Hz",
+                rounding=False,
+            ),
+            x=spectral_coord,
+        )
+        result.history = f"Fourier coefficients per cycle (period={period:g} s)"
+        return result
+
     def transform(self, X):
         """
         Apply the PSD transform to data X.

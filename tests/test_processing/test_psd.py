@@ -507,3 +507,93 @@ class TestPSD:
         psd_b = PSD()
         psd_a.phi = [0.0, 90.0]
         np.testing.assert_allclose(psd_b._get_phi(), expected_default)
+
+
+def test_fourier_cycle_coefficients():
+    n_times = 16
+    angle = 2 * np.pi * np.arange(n_times) / n_times
+    phase = np.array([0.2, -0.7])
+    signal = 3 + 2 * np.cos(2 * angle + phase[:, None])
+    data = signal[:, :, None] * np.array([1.0, 2.0])
+    grouped = NDDataset(data, units="absorbance")
+    grouped.set_coordset(
+        z=Coord([4, 5], title="cycle"),
+        y=Coord(500 * np.arange(n_times), units="ms"),
+        x=Coord([1630, 1650], units="cm^-1"),
+    )
+    result = PSD().fourier(grouped)
+    assert result.units == grouped.units
+    np.testing.assert_array_equal(result.z.data, grouped.z.data)
+    np.testing.assert_array_equal(result.x.data, grouped.x.data)
+    np.testing.assert_allclose(result.y.to("Hz").data, np.arange(9) / 8)
+    np.testing.assert_allclose(result.data[:, 2, 0], np.exp(1j * phase))
+    np.testing.assert_allclose(
+        np.fft.irfft(result.data * n_times, n=n_times, axis=1), data
+    )
+
+    flattened = data.reshape(-1, 2)
+    np.testing.assert_allclose(
+        PSD(n_spectra_per_cycle=n_times).fourier(flattened, period=8).data,
+        result.data,
+    )
+    demodulated = PSD(harmonic=2, integration_rule="riemann").transform(grouped)
+    complex_psd = demodulated.quadrature.data - 1j * demodulated.in_phase.data
+    np.testing.assert_allclose(
+        complex_psd, 2 * result.data[:, 2].mean(axis=0) * np.exp(-4j * np.pi / n_times)
+    )
+
+
+def test_fourier_checks_time_grid():
+    data = NDDataset(np.ones((4, 2)))
+    with pytest.raises(ValueError, match="Provide a period"):
+        PSD().fourier(data)
+
+    data.set_coordset(y=Coord([0, 1, 2, 4], units="s"), x=Coord([1, 2]))
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        PSD().fourier(data)
+
+    data.y = Coord([0, 1, 2, 3], units="s")
+    with pytest.raises(ValueError, match="does not match"):
+        PSD().fourier(data, period=3)
+
+
+def test_group_cycles_preserves_mask_and_averages_relative_times():
+    """Group retained spectra and keep measured starts separate from elapsed time."""
+    dataset = NDDataset(np.arange(18).reshape(9, 2))
+    dataset.y = Coord([0, 1, 2, 4, 5, 6, 8, 10, 11], units="s")
+    dataset.x = Coord([450, 460], units="cm^-1")
+    mask = np.zeros(dataset.shape, dtype=bool)
+    mask[6, 1] = True
+    dataset.mask = mask
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(dataset, discard=1)
+
+    np.testing.assert_array_equal(grouped.data, dataset.data[3:].reshape(2, 3, 2))
+    np.testing.assert_array_equal(grouped.mask, mask[3:].reshape(2, 3, 2))
+    np.testing.assert_allclose(grouped.z.data, [4, 8])
+    np.testing.assert_allclose(grouped.y.data, [0, 1.5, 2.5])
+    assert grouped.x == dataset.x
+    assert grouped.y.units == dataset.y.units
+
+
+def test_fourier_grid_from_cycle_starts():
+    """Use the measured cycle period and preserve the samples and coordinates."""
+    data = np.arange(24.0).reshape(12, 2)
+    dataset = NDDataset(data)
+    dataset.y = Coord([0, 1, 2, 4, 7, 8, 10, 12, 16, 18, 20, 22], units="ms")
+    dataset.x = Coord([450, 460], units="cm^-1")
+    processor = PSD(n_spectra_per_cycle=4)
+    cycles = processor.group_cycles(dataset)
+    original_time = cycles.y.data.copy()
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        processor.fourier(cycles)
+
+    result = processor.fourier(cycles, grid="cycle_starts")
+
+    np.testing.assert_allclose(result.y.data, np.arange(3) / 0.008)
+    np.testing.assert_allclose(
+        np.fft.irfft(result.data * 4, n=4, axis=1), cycles.data, atol=1e-12
+    )
+    np.testing.assert_array_equal(cycles.y.data, original_time)
+    with pytest.raises(ValueError, match="at least two measured"):
+        processor.fourier(cycles[:1], grid="cycle_starts")
