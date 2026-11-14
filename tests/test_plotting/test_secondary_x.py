@@ -95,8 +95,17 @@ def test_secondary_x_above_top_projection():
         secondary_x=("Scaled x", lambda x: 2 * x, lambda x: x / 2),
         show=False,
     )
+    main = result["axes"]["main"]
+    dataset.plot_contourf(
+        ax=main,
+        clear=False,
+        data_only=True,
+        secondary_x=("Updated scale", lambda x: 3 * x, lambda x: x / 3),
+        show=False,
+    )
     try:
         (upper,) = result["axes"]["top"].child_axes
-        assert upper.get_xlabel() == "Scaled x"
+        assert not main.child_axes
+        assert upper.get_xlabel() == "Updated scale"
     finally:
         plt.close(result["fig"])

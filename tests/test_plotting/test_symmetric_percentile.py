@@ -44,3 +44,16 @@ def test_zero_percentile_stays_robust_to_an_isolated_extreme():
         assert ax.collections[0].norm.vmax < 1
     finally:
         plt.close(ax.figure)
+
+
+def test_symmetric_percentile_preserves_colormap_selection():
+    dataset = scp.NDDataset(np.tile([-100.0, 0.0, 100.0], (3, 1)))
+    ordinary = dataset.plot_image(cmap_mode="diverging", show=False)
+    robust = dataset.plot_image(
+        cmap_mode="diverging", symmetric_percentile=50, show=False
+    )
+    try:
+        assert robust.collections[0].cmap.name == ordinary.collections[0].cmap.name
+    finally:
+        plt.close(ordinary.figure)
+        plt.close(robust.figure)
