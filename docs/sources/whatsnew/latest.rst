@@ -17,16 +17,19 @@ New Features
 
 - **Optical JCAMP-DX:** Read 1D Raman spectra with explicit Raman shift and
   intensity pairs and 1D UV-visible spectra with explicit wavelength and
-  intensity pairs. (:pr:`1877`, :pr:`1875`)
+  intensity pairs. Multi-file reads keep distinct explicit grids separate.
+  (:pr:`1877`, :pr:`1875`)
 - **NMR JCAMP-DX:** Use ``read_jcamp()`` or ``jcamp.read()`` with the optional
   NMR plugin for supported processed 1D spectra and supported real 2D
   NTUPLES spectra. The 2D path requires nmrglue-ng 1.3 or later.
-  (:pr:`1859`, :pr:`1861`)
-- **Spectral filtering:** Smooth spectra with Butterworth low-pass or Gaussian
-  filters, remove periodic FTIR fringes with a notch filter, or denoise with
-  the optional ``wavelets`` extra. Use ``mask_policy="split"`` to filter each
-  contiguous unmasked segment independently. Filtering raises an error if any
-  segment is too short. Compare results with ``rms()`` and ``characterize_peaks_1d()``, which
+  Use ``jcamp_kind`` to select the profile explicitly when the declaration
+  is ambiguous. LINK containers with conflicting declarations raise an
+  error. (:pr:`1859`, :pr:`1861`)
+- **Spectral filtering:** Use ``Filter`` for Butterworth low-pass or Gaussian
+  smoothing, periodic FTIR fringe removal with a notch filter, or wavelet
+  denoising with the optional ``wavelets`` extra. Set ``mask_policy="split"``
+  to filter contiguous unmasked segments independently. Filtering raises an
+  error if an unmasked segment is too short for the selected filter. Compare results with ``rms()`` and ``characterize_peaks_1d()``, which
   reports sampled peak position, height and apparent full width at half
   maximum. (:pr:`1862`, :pr:`1867`, :pr:`1873`)
 - **Acquisition-axis despiking:** Remove transient spikes along a selected
