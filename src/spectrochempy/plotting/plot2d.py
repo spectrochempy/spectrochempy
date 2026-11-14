@@ -1834,7 +1834,9 @@ def plot_2D(dataset, method=None, **kwargs):
                 raise ValueError(
                     "symmetric_percentile requires finite, unmasked values."
                 )
-            bound = np.percentile(valid, percentile) or np.finfo(float).eps
+            bound = np.percentile(valid, percentile)
+            if bound < np.finfo(float).tiny:
+                bound = np.finfo(float).eps
             levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
             kwargs["norm"] = Normalize(vmin=-bound, vmax=bound)
 
@@ -2373,6 +2375,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 cb_mappable = locals().get("colorbar_mappable", mappable)
                 cb = fig.colorbar(
                     cb_mappable,
+                    extend=getattr(mappable, "extend", "neither"),
                     ax=ax,
                     location="right",
                     pad=0.02,
@@ -2450,9 +2453,10 @@ def plot_2D(dataset, method=None, **kwargs):
             clear=kwargs.get("clear", True),
             preserve_title=not kwargs.get("clear", True) and "title" not in kwargs,
         )
+        _add_secondary_x(ax, kwargs.get("secondary_x"))
         if kwargs.get("return_dict", False):
             return {"fig": fig, "axes": _panel_axes(ax)}
-        return _add_secondary_x(ax, kwargs.get("secondary_x"))
+        return ax
 
 
 def _plot_waterfall_3d(new, prefs, **kwargs):

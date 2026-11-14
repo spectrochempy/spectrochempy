@@ -145,7 +145,9 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
     their mean if it exceeds ``delta`` times the scaled median absolute
     deviation of the residuals from the neighbor mean. Endpoints, triplets
     with masked or non-finite values are skipped. With zero estimated noise,
-    any strictly positive excess above both neighbors qualifies. For a time series of spectra, choose the acquisition axis.
+    any strictly positive excess above both neighbors qualifies. For a time series of spectra, choose
+    the acquisition axis. Short traces may contain too few unaffected samples
+    to estimate the noise reliably.
 
     Parameters
     ----------

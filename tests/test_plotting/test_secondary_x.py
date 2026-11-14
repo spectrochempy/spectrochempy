@@ -71,3 +71,17 @@ def test_secondary_x_on_direct_renderer(ndim):
         assert upper.get_xlabel() == "Scaled x"
     finally:
         plt.close(ax.figure)
+
+
+def test_secondary_x_with_axes_dictionary():
+    dataset = scp.NDDataset(np.arange(9).reshape(3, 3))
+    result = dataset.plot_contourf(
+        return_dict=True,
+        secondary_x=("Scaled x", lambda x: 2 * x, lambda x: x / 2),
+        show=False,
+    )
+    try:
+        (upper,) = result["axes"]["main"].child_axes
+        assert upper.get_xlabel() == "Scaled x"
+    finally:
+        plt.close(result["fig"])
