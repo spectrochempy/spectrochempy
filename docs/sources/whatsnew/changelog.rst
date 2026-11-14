@@ -26,9 +26,6 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- Allow the NMR extra to install spectrochempy-nmr 0.4 while retaining
-  compatibility with previously supported plugin versions.
-
 
 .. section
 
