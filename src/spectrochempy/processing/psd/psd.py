@@ -688,6 +688,8 @@ class PSD(BaseConfigurable):
 
         time_dim, spectral_dim = X.dims
         time = X.coord(time_dim)
+        if time is not None:
+            time = time.default
         if time is None or time.data is None:
             raise ValueError("An acquisition time coordinate is required.")
         timestamps = time.magnitude
@@ -785,6 +787,8 @@ class PSD(BaseConfigurable):
                     "grid='cycle_starts' derives the period from coordinates."
                 )
             starts = X.coord(X.dims[0]) if X.ndim == 3 else None
+            if starts is not None:
+                starts = starts.default
             if starts is None or starts.data is None or starts.size < 2:
                 raise ValueError("Expected at least two measured cycle starts.")
             if starts.units is None or not starts.units.is_compatible_with("s"):
@@ -805,8 +809,12 @@ class PSD(BaseConfigurable):
         cycle_coord = Coord(np.arange(data.shape[0]), title="cycle")
         spectral_coord = Coord(np.arange(data.shape[-1]), title="channel")
         if X.coordset is not None:
-            time_coord = X.coordset[X.dims[-2]]
-            if grid == "measured" and time_coord.data is not None:
+            time_coord = X.coordset[X.dims[-2]].default
+            if (
+                grid == "measured"
+                and time_coord is not None
+                and time_coord.data is not None
+            ):
                 times = time_coord.magnitude
                 has_time_units = not time_coord.dimensionless
                 if has_time_units:
@@ -834,6 +842,19 @@ class PSD(BaseConfigurable):
 
         if period is None:
             raise ValueError("Provide a period in seconds or a time coordinate.")
+
+        starts = cycle_coord.default
+        if (
+            grid == "measured"
+            and X.ndim == 3
+            and starts is not None
+            and starts.size > 1
+            and starts.units is not None
+            and starts.units.is_compatible_with("s")
+        ):
+            intervals = np.diff(starts.to("s").magnitude)
+            if not np.allclose(intervals, period, rtol=1e-6, atol=0.0):
+                raise ValueError("Measured cycle starts must be spaced by the period.")
 
         coefficients = np.fft.rfft(data, axis=1) / n_times
         result = NDDataset(coefficients, units=X.units, title=X.title)

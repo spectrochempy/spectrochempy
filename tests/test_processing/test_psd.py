@@ -613,3 +613,30 @@ def test_group_cycles_without_spectral_coord_preserves_grid_validation():
     np.testing.assert_allclose(
         psd.fourier(grouped, grid="cycle_starts").y.data, [0, 0.25]
     )
+
+
+def test_fourier_validates_measured_cycle_start_intervals():
+    data = NDDataset(np.ones((3, 3, 2)))
+    data.y = Coord([0, 1, 2], units="s")
+    data.z = Coord([0, 3, 10], units="s")
+
+    with pytest.raises(ValueError, match="spaced by the period"):
+        PSD().fourier(data)
+    np.testing.assert_allclose(
+        PSD().fourier(data, grid="cycle_starts").y.data, [0, 0.2]
+    )
+
+
+def test_fourier_uses_default_time_coordinates():
+    data = NDDataset(np.ones((6, 2)))
+    data.y = [Coord(np.arange(6), units="s"), Coord(np.arange(6), units="ms")]
+    psd = PSD(n_spectra_per_cycle=3)
+
+    np.testing.assert_allclose(psd.fourier(data).y.data, [0, 1 / 3])
+    grouped = psd.group_cycles(data)
+    grouped.y = [grouped.y.copy(), Coord([0, 1, 2], units="ms")]
+    grouped.z = [grouped.z.copy(), Coord([1, 2])]
+    np.testing.assert_allclose(psd.fourier(grouped).y.data, [0, 1 / 3])
+    np.testing.assert_allclose(
+        psd.fourier(grouped, grid="cycle_starts").y.data, [0, 1 / 3]
+    )
