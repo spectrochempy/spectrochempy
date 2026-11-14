@@ -16,7 +16,7 @@ New Features
 ~~~~~~~~~~~~
 
 - Compute per-cycle Fourier coefficients for modulation experiments with
-  ``PSD.fourier()`` and group sequential acquisitions with ``PSD.group_cycles()``.
+  ``PSD.fourier()`` and group sequential acquisitions with ``PSD.group_cycles()``. (:pr:`1880`)
 
 - Set symmetric color limits on filled contour plots with ``symmetric_percentile``. (:pr:`1879`)
 - Add a linked upper x-axis to Cartesian plots with the ``secondary_x``
