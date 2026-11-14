@@ -379,7 +379,13 @@ def _add_secondary_x(ax, secondary_x):
         if ax.name == "3d" or hasattr(ax, "zaxis"):
             raise ValueError("secondary_x requires a 2D Cartesian plot.")
         label, forward, inverse = secondary_x
-        ax.secondary_xaxis("top", functions=(forward, inverse)).set_xlabel(label)
+        upper = getattr(ax, "_scp_secondary_x", None)
+        if upper not in ax.child_axes:
+            upper = ax.secondary_xaxis("top", functions=(forward, inverse))
+            ax._scp_secondary_x = upper
+        else:
+            upper.set_functions((forward, inverse))
+        upper.set_xlabel(label)
     return ax
 
 

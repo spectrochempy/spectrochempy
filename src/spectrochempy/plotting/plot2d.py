@@ -1836,7 +1836,9 @@ def plot_2D(dataset, method=None, **kwargs):
                 raise ValueError(
                     "symmetric_percentile requires finite, unmasked values."
                 )
-            if valid.max() >= np.finfo(float).max / 2:
+            if discrete_data:
+                raise ValueError("symmetric_percentile requires numeric coordinates.")
+            if valid.max() >= 1e250:
                 raise ValueError(
                     "Rescale intensities before plotting symmetric contours."
                 )
