@@ -721,3 +721,28 @@ def test_fourier_unit_conversion_preserves_measured_sampling_jitter():
 
     with pytest.raises(ValueError, match="uniformly spaced time"):
         PSD().fourier(data)
+
+
+def test_fourier_unitless_time_requires_explicit_period():
+    data = NDDataset(np.arange(8.0).reshape(4, 2))
+    data.y = Coord([0, 1, 2, 3])
+
+    with pytest.raises(ValueError, match="Provide a period"):
+        PSD().fourier(data)
+    np.testing.assert_allclose(PSD().fourier(data, period=4).y.data, [0, 0.25, 0.5])
+
+
+def test_group_cycles_preserves_measured_starts_and_mean_elapsed_times():
+    data = NDDataset(np.ones((9, 2)))
+    data.set_coordset(
+        y=Coord(
+            [0, 1, 2, 4, 5.0006, 6, 8.004, 9.0052, 10.004],
+            units="s",
+            rounding=False,
+            linearize_below=0,
+        )
+    )
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
+    np.testing.assert_allclose(grouped.z.data, [0, 4, 8.004])
+    np.testing.assert_allclose(grouped.y.data, [0, 1.0006, 2])

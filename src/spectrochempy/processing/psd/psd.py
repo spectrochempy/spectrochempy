@@ -720,12 +720,19 @@ class PSD(BaseConfigurable):
         starts = times[:, 0]
         elapsed = (times - starts[:, None]).mean(axis=0)
         coords = {
-            "z": Coord(starts, title="cycle start", units=time.units, rounding=False),
+            "z": Coord(
+                starts,
+                title="cycle start",
+                units=time.units,
+                rounding=False,
+                linearize_below=0,
+            ),
             "y": Coord(
                 elapsed,
                 title="elapsed time within cycle",
                 units=time.units,
                 rounding=False,
+                linearize_below=0,
             ),
         }
         spectral = self._optional_coord(X, spectral_dim)
@@ -852,7 +859,7 @@ class PSD(BaseConfigurable):
                 and time_coord is not None
                 and time_coord.data is not None
             ):
-                has_time_units = not time_coord.dimensionless
+                has_time_units = not (time_coord.unitless or time_coord.dimensionless)
                 times = self._numeric_times(time_coord, seconds=has_time_units)
                 if not has_time_units and period is None:
                     raise ValueError("Provide a period in seconds for unitless time.")
