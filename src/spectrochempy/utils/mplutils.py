@@ -373,19 +373,33 @@ def _save_figure(fig, output):
         raise error_type(message) from exc
 
 
-def _add_secondary_x(ax, secondary_x):
-    """Attach an optional upper x-axis to a Cartesian plot."""
+def _add_secondary_x(ax, secondary_x, *, parent=None):
+    """Attach or move the managed upper axis to the topmost panel."""
+    parent = ax if parent is None else parent
+    upper = getattr(ax, "_scp_secondary_x", None)
+    if (
+        secondary_x is None
+        and upper is not None
+        and upper.axes is not None
+        and upper in upper.axes.child_axes
+    ):
+        secondary_x = ax._scp_secondary_x_spec
+
     if secondary_x is not None:
         if ax.name == "3d" or hasattr(ax, "zaxis"):
             raise ValueError("secondary_x requires a 2D Cartesian plot.")
         label, forward, inverse = secondary_x
-        upper = getattr(ax, "_scp_secondary_x", None)
-        if upper not in ax.child_axes:
-            upper = ax.secondary_xaxis("top", functions=(forward, inverse))
+        if upper is not None and upper not in parent.child_axes:
+            if upper.axes is not None and upper in upper.axes.child_axes:
+                upper.remove()
+            upper = None
+        if upper is None:
+            upper = parent.secondary_xaxis("top", functions=(forward, inverse))
             ax._scp_secondary_x = upper
         else:
             upper.set_functions((forward, inverse))
         upper.set_xlabel(label)
+        ax._scp_secondary_x_spec = secondary_x
     return ax
 
 

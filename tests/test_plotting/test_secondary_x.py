@@ -109,3 +109,19 @@ def test_secondary_x_above_top_projection():
         assert upper.get_xlabel() == "Updated scale"
     finally:
         plt.close(result["fig"])
+
+
+def test_secondary_x_moves_when_projection_is_added():
+    dataset = scp.NDDataset(np.arange(9).reshape(3, 3))
+    main = dataset.plot_contourf(
+        secondary_x=("Scaled x", lambda x: 2 * x, lambda x: x / 2), show=False
+    )
+    try:
+        result = dataset.plot_contourf(
+            ax=main, clear=False, projections="x", return_dict=True, show=False
+        )
+        assert not main.child_axes
+        (upper,) = result["axes"]["top"].child_axes
+        assert upper.get_xlabel() == "Scaled x"
+    finally:
+        plt.close(main.figure)

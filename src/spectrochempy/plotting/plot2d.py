@@ -2264,7 +2264,7 @@ def plot_2D(dataset, method=None, **kwargs):
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
             upper_parent = _panel_axes(ax).get("top", ax)
-            _add_secondary_x(upper_parent, kwargs.get("secondary_x"))
+            _add_secondary_x(ax, kwargs.get("secondary_x"), parent=upper_parent)
             return ax
 
         # display a title
@@ -2467,7 +2467,7 @@ def plot_2D(dataset, method=None, **kwargs):
             preserve_title=not kwargs.get("clear", True) and "title" not in kwargs,
         )
         upper_parent = _panel_axes(ax).get("top", ax)
-        _add_secondary_x(upper_parent, kwargs.get("secondary_x"))
+        _add_secondary_x(ax, kwargs.get("secondary_x"), parent=upper_parent)
         if kwargs.get("return_dict", False):
             return {"fig": fig, "axes": _panel_axes(ax)}
         return ax
