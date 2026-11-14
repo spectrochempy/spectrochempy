@@ -690,3 +690,34 @@ def test_fourier_and_group_cycles_resolve_coordinate_references(reference):
     for result in (transformed, grouped):
         np.testing.assert_array_equal(result.x.data, np.arange(6))
         assert result.x.units == data.x.units
+
+
+def test_group_cycles_without_spectral_coordinates_can_be_demodulated():
+    data = NDDataset(np.arange(24.0).reshape(8, 3))
+    data.y = Coord(np.arange(8), units="s")
+    psd = PSD(n_spectra_per_cycle=4, integration_rule="riemann")
+
+    result = psd.transform(psd.group_cycles(data))
+    np.testing.assert_array_equal(result.amplitude.x.data, np.arange(3))
+
+
+def test_group_cycles_preserves_readonly_metadata():
+    data = NDDataset(np.ones((6, 2)))
+    data.y = Coord(np.arange(6), units="s")
+    data.meta.readonly = True
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
+    assert grouped.meta.readonly
+    assert grouped.meta["psd_regular_acquisitions"]
+    assert data.meta.readonly
+    assert "psd_regular_acquisitions" not in data.meta
+
+
+def test_fourier_unit_conversion_preserves_measured_sampling_jitter():
+    data = NDDataset(np.ones((4, 2)))
+    data.set_coordset(
+        y=Coord([0, 1, 2.0006, 3], units="ms", rounding=False, linearize_below=0)
+    )
+
+    with pytest.raises(ValueError, match="uniformly spaced time"):
+        PSD().fourier(data)

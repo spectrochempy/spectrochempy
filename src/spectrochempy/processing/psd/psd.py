@@ -667,11 +667,14 @@ class PSD(BaseConfigurable):
         return coords[target] if target in coords.names else None
 
     @staticmethod
-    def _numeric_times(coord):
+    def _numeric_times(coord, *, seconds=False):
         values = coord.magnitude
         if values.dtype.kind not in "fiu":
             raise ValueError("Time coordinates must contain numeric values.")
-        return values.astype(float, copy=False)
+        values = values.astype(float, copy=False)
+        if seconds:
+            values = (values * coord.units).to("s").magnitude
+        return values
 
     # ----------------------------------------------------------------------------------
     # Public methods
@@ -726,7 +729,10 @@ class PSD(BaseConfigurable):
             ),
         }
         spectral = self._optional_coord(X, spectral_dim)
-        coords["x"] = spectral.copy() if spectral is not None else Coord()
+        if spectral is None or (spectral.is_empty and not spectral.is_labeled):
+            coords["x"] = Coord(np.arange(X.shape[1]), title="channel")
+        else:
+            coords["x"] = spectral.copy()
         if spectral is None or X.coordset.references:
             X = X.copy()
             X.set_coordset(
@@ -740,9 +746,15 @@ class PSD(BaseConfigurable):
         )
         grouped.set_coordset(**coords)
         steps = np.diff(times.ravel())
-        grouped.meta["psd_regular_acquisitions"] = bool(
+        regular = bool(
             not steps.size or np.allclose(steps, steps[0], rtol=1e-6, atol=0.0)
         )
+        readonly = grouped.meta.readonly
+        grouped.meta.readonly = False
+        try:
+            grouped.meta["psd_regular_acquisitions"] = regular
+        finally:
+            grouped.meta.readonly = readonly
         return grouped
 
     def fourier(self, X, *, period=None, grid="measured"):
@@ -816,8 +828,7 @@ class PSD(BaseConfigurable):
                 raise ValueError("Expected at least two measured cycle starts.")
             if starts.units is None or not starts.units.is_compatible_with("s"):
                 raise ValueError("Cycle starts must have time units.")
-            self._numeric_times(starts)
-            start_times = self._numeric_times(starts.to("s"))
+            start_times = self._numeric_times(starts, seconds=True)
             intervals = np.diff(start_times)
             if not np.all(np.isfinite(intervals) & (intervals > 0)):
                 raise ValueError("Cycle starts must be finite and strictly increasing.")
@@ -841,11 +852,9 @@ class PSD(BaseConfigurable):
                 and time_coord is not None
                 and time_coord.data is not None
             ):
-                times = self._numeric_times(time_coord)
                 has_time_units = not time_coord.dimensionless
-                if has_time_units:
-                    times = self._numeric_times(time_coord.to("s"))
-                elif period is None:
+                times = self._numeric_times(time_coord, seconds=has_time_units)
+                if not has_time_units and period is None:
                     raise ValueError("Provide a period in seconds for unitless time.")
                 steps = np.diff(times)
                 if (
@@ -882,8 +891,7 @@ class PSD(BaseConfigurable):
             and starts.units is not None
             and starts.units.is_compatible_with("s")
         ):
-            self._numeric_times(starts)
-            intervals = np.diff(self._numeric_times(starts.to("s")))
+            intervals = np.diff(self._numeric_times(starts, seconds=True))
             if not np.allclose(intervals, period, rtol=1e-6, atol=0.0):
                 raise ValueError("Measured cycle starts must be spaced by the period.")
 
