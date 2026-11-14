@@ -91,8 +91,9 @@ jobs:
               pip install 'nmrglue-ng>=1.2.4,<2' && \
               pip install --no-deps 'spectrochempy-nmr>=0.2,<0.4' && \
               for dir in /workspace/plugins/spectrochempy-*/; do
-                if grep -q 'Official Plugin' \"\${dir}pyproject.toml\" 2>/dev/null; then
-                  pip install --no-build-isolation --no-deps \"\$dir\"
+                official=\$(python3 -c 'import sys, tomllib; data = tomllib.loads(open(sys.argv[1], encoding=\"utf-8\").read()); print(data.get(\"tool\", {}).get(\"spectrochempy\", {}).get(\"official-plugin\") is True)' \"\${dir}pyproject.toml\") || exit 1
+                if [ \"\$official\" = True ]; then
+                  pip install --no-build-isolation --no-deps \"\$dir\" || exit 1
                 fi
               done && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode with-plugins
