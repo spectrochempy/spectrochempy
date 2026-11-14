@@ -31,7 +31,7 @@ build:
           python -m pip install --no-deps -e "plugins/$name"
         done
       # Use the released NMR plugin for examples that require it.
-      - python -m pip install "spectrochempy-nmr>=0.2,<0.4"
+      - python -m pip install "spectrochempy-nmr>=0.2,<0.5"
       # Runtime dependencies that --no-deps skips.
       - python -m pip install osqp scipy tensorly
     build:

@@ -79,7 +79,7 @@ jobs:
           wheel_with_nmr_extra="${wheel}[nmr]"
           python -m pip install \
             "$wheel_with_nmr_extra" \
-            "spectrochempy-nmr>=0.3,<0.4" \
+            "spectrochempy-nmr>=0.3,<0.5" \
             pytest pytest-doctestplus
           python -m pip check
 
@@ -104,7 +104,7 @@ jobs:
           print(f"SpectroChemPy: {core}")
           print(f"spectrochempy-nmr: {nmr}")
           assert core == os.environ["RELEASE_VERSION"]
-          assert nmr.startswith("0.3."), nmr
+          assert nmr.startswith(("0.3.", "0.4.")), nmr
           PY
 
       - name: Run core-side plugin consumption contracts

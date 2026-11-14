@@ -89,7 +89,7 @@ jobs:
                 pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint tensorly && \
               pip install 'nmrglue-ng>=1.2.4,<2' && \
-              pip install --no-deps 'spectrochempy-nmr>=0.2,<0.4' && \
+              pip install --no-deps 'spectrochempy-nmr>=0.2,<0.5' && \
               for dir in /workspace/plugins/spectrochempy-*/; do
                 official=\$(python3 -c 'import sys, tomllib; data = tomllib.loads(open(sys.argv[1], encoding=\"utf-8\").read()); print(data.get(\"tool\", {}).get(\"spectrochempy\", {}).get(\"official-plugin\") is True)' \"\${dir}pyproject.toml\") || exit 1
                 if [ \"\$official\" = True ]; then
