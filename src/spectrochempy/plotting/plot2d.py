@@ -1846,7 +1846,6 @@ def plot_2D(dataset, method=None, **kwargs):
             if bound < 1e-12:
                 bound = 1e-12
             levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
-            kwargs["norm"] = Normalize(vmin=-bound, vmax=bound)
 
         zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
@@ -1901,6 +1900,8 @@ def plot_2D(dataset, method=None, **kwargs):
         norm = kwargs.get("norm")
         vmin = kwargs.get("vmin")
         vmax = kwargs.get("vmax")
+        if percentile is not None:
+            vmin, vmax = -bound, bound
         contrast_safe = kwargs.get("contrast_safe", True)
         min_contrast = kwargs.get("min_contrast", 1.5)
         diverging_margin = kwargs.get("diverging_margin", 0.05)
@@ -1937,6 +1938,8 @@ def plot_2D(dataset, method=None, **kwargs):
                 diverging_margin=diverging_margin,
                 prefs=prefs,
             )
+            if percentile is not None:
+                norm = Normalize(vmin=vmin, vmax=vmax)
         else:
             # For non-image methods, use simple normalization
             if norm is None:
@@ -2260,7 +2263,9 @@ def plot_2D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
-            return _add_secondary_x(ax, kwargs.get("secondary_x"))
+            upper_parent = _panel_axes(ax).get("top", ax)
+            _add_secondary_x(upper_parent, kwargs.get("secondary_x"))
+            return ax
 
         # display a title
         # ------------------------------------------------------------------------
