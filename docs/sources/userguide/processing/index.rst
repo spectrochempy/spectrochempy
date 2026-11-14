@@ -20,6 +20,7 @@ Processing
    baseline
    denoising
    wavelet_denoising
+   modulation_excitation
    apodization
    td_baseline
    fourier

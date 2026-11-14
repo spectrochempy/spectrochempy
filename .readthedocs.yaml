@@ -140,6 +140,9 @@ build:
           python -u -m docs.preexecute_notebooks execute userguide/processing/math_operations.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/processing/modulation_excitation.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
           python -u -m docs.preexecute_notebooks execute userguide/processing/slicing.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then

@@ -6,14 +6,14 @@
 
 :orphan:
 
-What's New in Revision 1.3.1
+What's New in Revision 1.3.2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.3.1.
+These are the changes in SpectroChemPy-1.3.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
-Bug Fixes
-~~~~~~~~~
+New Features
+~~~~~~~~~~~~
 
-- Allow the NMR extra to install spectrochempy-nmr 0.4 while retaining
-  compatibility with previously supported plugin versions.
+- Compute per-cycle Fourier coefficients for modulation experiments with
+  ``PSD.fourier()`` and group sequential acquisitions with ``PSD.group_cycles()``. (:pr:`1880`)

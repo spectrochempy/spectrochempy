@@ -507,3 +507,270 @@ class TestPSD:
         psd_b = PSD()
         psd_a.phi = [0.0, 90.0]
         np.testing.assert_allclose(psd_b._get_phi(), expected_default)
+
+
+def test_fourier_cycle_coefficients():
+    n_times = 16
+    angle = 2 * np.pi * np.arange(n_times) / n_times
+    phase = np.array([0.2, -0.7])
+    signal = 3 + 2 * np.cos(2 * angle + phase[:, None])
+    data = signal[:, :, None] * np.array([1.0, 2.0])
+    grouped = NDDataset(data, units="absorbance")
+    grouped.set_coordset(
+        z=Coord([4, 5], title="cycle"),
+        y=Coord(500 * np.arange(n_times), units="ms"),
+        x=Coord([1630, 1650], units="cm^-1"),
+    )
+    result = PSD().fourier(grouped)
+    assert result.units == grouped.units
+    np.testing.assert_array_equal(result.z.data, grouped.z.data)
+    np.testing.assert_array_equal(result.x.data, grouped.x.data)
+    np.testing.assert_allclose(result.y.to("Hz").data, np.arange(9) / 8)
+    np.testing.assert_allclose(result.data[:, 2, 0], np.exp(1j * phase))
+    np.testing.assert_allclose(
+        np.fft.irfft(result.data * n_times, n=n_times, axis=1), data
+    )
+
+    flattened = data.reshape(-1, 2)
+    np.testing.assert_allclose(
+        PSD(n_spectra_per_cycle=n_times).fourier(flattened, period=8).data,
+        result.data,
+    )
+    demodulated = PSD(harmonic=2, integration_rule="riemann").transform(grouped)
+    complex_psd = demodulated.quadrature.data - 1j * demodulated.in_phase.data
+    np.testing.assert_allclose(
+        complex_psd, 2 * result.data[:, 2].mean(axis=0) * np.exp(-4j * np.pi / n_times)
+    )
+
+
+def test_fourier_checks_time_grid():
+    data = NDDataset(np.ones((4, 2)))
+    with pytest.raises(ValueError, match="Provide a period"):
+        PSD().fourier(data)
+
+    data.set_coordset(y=Coord([0, 1, 2, 4], units="s"), x=Coord([1, 2]))
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        PSD().fourier(data)
+
+    data.y = Coord([0, 1, 2, 3], units="s")
+    with pytest.raises(ValueError, match="does not match"):
+        PSD().fourier(data, period=3)
+
+
+def test_group_cycles_preserves_mask_and_averages_relative_times():
+    """Group retained spectra and keep measured starts separate from elapsed time."""
+    dataset = NDDataset(np.arange(18).reshape(9, 2))
+    dataset.y = Coord([0, 1, 2, 4, 5, 6, 8, 10, 11], units="s")
+    dataset.x = Coord([450, 460], units="cm^-1")
+    mask = np.zeros(dataset.shape, dtype=bool)
+    mask[6, 1] = True
+    dataset.mask = mask
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(dataset, discard=1)
+
+    np.testing.assert_array_equal(grouped.data, dataset.data[3:].reshape(2, 3, 2))
+    np.testing.assert_array_equal(grouped.mask, mask[3:].reshape(2, 3, 2))
+    np.testing.assert_allclose(grouped.z.data, [4, 8])
+    np.testing.assert_allclose(grouped.y.data, [0, 1.5, 2.5])
+    assert grouped.x == dataset.x
+    assert grouped.y.units == dataset.y.units
+
+
+def test_fourier_grid_from_cycle_starts():
+    """Use the measured cycle period and preserve the samples and coordinates."""
+    data = np.arange(24.0).reshape(12, 2)
+    dataset = NDDataset(data)
+    dataset.y = Coord([0, 1, 2, 4, 7, 8, 10, 12, 16, 18, 20, 22], units="ms")
+    dataset.x = Coord([450, 460], units="cm^-1")
+    processor = PSD(n_spectra_per_cycle=4)
+    cycles = processor.group_cycles(dataset)
+    original_time = cycles.y.data.copy()
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        processor.fourier(cycles)
+
+    result = processor.fourier(cycles, grid="cycle_starts")
+
+    np.testing.assert_allclose(result.y.data, np.arange(3) / 0.008)
+    np.testing.assert_allclose(
+        np.fft.irfft(result.data * 4, n=4, axis=1), cycles.data, atol=1e-12
+    )
+    np.testing.assert_array_equal(cycles.y.data, original_time)
+    with pytest.raises(ValueError, match="at least two measured"):
+        processor.fourier(cycles[:1], grid="cycle_starts")
+
+
+def test_group_cycles_without_spectral_coord_preserves_grid_validation():
+    dataset = NDDataset(np.arange(12).reshape(6, 2))
+    dataset.y = Coord([0, 0.5, 2, 4, 5.5, 6], units="s")
+    psd = PSD(n_spectra_per_cycle=3)
+
+    grouped = psd.group_cycles(dataset)
+
+    assert grouped.shape == (2, 3, 2)
+    np.testing.assert_allclose(grouped.y.data, [0, 1, 2])
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        psd.fourier(grouped)
+    np.testing.assert_allclose(
+        psd.fourier(grouped, grid="cycle_starts").y.data, [0, 0.25]
+    )
+
+
+def test_fourier_validates_measured_cycle_start_intervals():
+    data = NDDataset(np.ones((3, 3, 2)))
+    data.y = Coord([0, 1, 2], units="s")
+    data.z = Coord([0, 3, 10], units="s")
+
+    with pytest.raises(ValueError, match="spaced by the period"):
+        PSD().fourier(data)
+    np.testing.assert_allclose(
+        PSD().fourier(data, grid="cycle_starts").y.data, [0, 0.2]
+    )
+
+
+def test_fourier_uses_default_time_coordinates():
+    data = NDDataset(np.ones((6, 2)))
+    data.y = [Coord(np.arange(6), units="s"), Coord(np.arange(6), units="ms")]
+    psd = PSD(n_spectra_per_cycle=3)
+
+    np.testing.assert_allclose(psd.fourier(data).y.data, [0, 1 / 3])
+    grouped = psd.group_cycles(data)
+    grouped.y = [grouped.y.copy(), Coord([0, 1, 2], units="ms")]
+    grouped.z = [grouped.z.copy(), Coord([1, 2])]
+    np.testing.assert_allclose(psd.fourier(grouped).y.data, [0, 1 / 3])
+    np.testing.assert_allclose(
+        psd.fourier(grouped, grid="cycle_starts").y.data, [0, 1 / 3]
+    )
+
+
+def test_fourier_and_group_cycles_with_sparse_coordinates():
+    data = NDDataset(np.ones((6, 2)))
+    data.set_coordset(y=Coord(np.arange(6), units="s"))
+    psd = PSD(n_spectra_per_cycle=3)
+
+    np.testing.assert_allclose(psd.fourier(data).y.data, [0, 1 / 3])
+    grouped = psd.group_cycles(data, discard=1)
+    np.testing.assert_allclose(psd.fourier(grouped).y.data, [0, 1 / 3])
+    assert data.coordset.names == ["y"]
+
+
+def test_fourier_and_group_cycles_require_numeric_times():
+    data = NDDataset(np.ones((6, 2)))
+    data.y = Coord(
+        np.datetime64("2025-01-01") + np.arange(6) * np.timedelta64(1, "s"),
+        rounding=False,
+    )
+    psd = PSD(n_spectra_per_cycle=3)
+
+    with pytest.raises(ValueError, match="numeric values"):
+        psd.group_cycles(data)
+    with pytest.raises(ValueError, match="numeric values"):
+        psd.fourier(data)
+
+
+def test_group_cycles_preserves_multiple_spectral_coordinates():
+    data = NDDataset(np.arange(30).reshape(6, 5))
+    data.y = Coord(np.arange(6), units="s")
+    data.x = [Coord(np.arange(5), units="cm^-1"), Coord(np.arange(5), units="nm")]
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
+    assert grouped.x == data.x
+    np.testing.assert_array_equal(grouped.data.reshape(data.shape), data.data)
+
+
+@pytest.mark.parametrize("reference", ["x", "y"])
+def test_fourier_and_group_cycles_resolve_coordinate_references(reference):
+    data = NDDataset(np.ones((6, 6)))
+    source = "y" if reference == "x" else "x"
+    data.set_coordset(**{source: Coord(np.arange(6), units="s"), reference: source})
+    psd = PSD(n_spectra_per_cycle=3)
+
+    transformed = psd.fourier(data)
+    grouped = psd.group_cycles(data, discard=1)
+    np.testing.assert_allclose(transformed.y.data, [0, 1 / 3])
+    for result in (transformed, grouped):
+        np.testing.assert_array_equal(result.x.data, np.arange(6))
+        assert result.x.units == data.x.units
+
+
+def test_group_cycles_without_spectral_coordinates_can_be_demodulated():
+    data = NDDataset(np.arange(24.0).reshape(8, 3))
+    data.y = Coord(np.arange(8), units="s")
+    psd = PSD(n_spectra_per_cycle=4, integration_rule="riemann")
+
+    result = psd.transform(psd.group_cycles(data))
+    np.testing.assert_array_equal(result.amplitude.x.data, np.arange(3))
+
+
+def test_group_cycles_preserves_readonly_metadata():
+    data = NDDataset(np.ones((6, 2)))
+    data.y = Coord(np.arange(6), units="s")
+    data.meta.readonly = True
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
+    assert grouped.meta.readonly
+    assert grouped.meta["psd_regular_acquisitions"]
+    assert data.meta.readonly
+    assert "psd_regular_acquisitions" not in data.meta
+
+
+def test_fourier_unit_conversion_preserves_measured_sampling_jitter():
+    data = NDDataset(np.ones((4, 2)))
+    data.set_coordset(
+        y=Coord([0, 1, 2.0006, 3], units="ms", rounding=False, linearize_below=0)
+    )
+
+    with pytest.raises(ValueError, match="uniformly spaced time"):
+        PSD().fourier(data)
+
+
+def test_fourier_unitless_time_requires_explicit_period():
+    data = NDDataset(np.arange(8.0).reshape(4, 2))
+    data.y = Coord([0, 1, 2, 3])
+
+    with pytest.raises(ValueError, match="Provide a period"):
+        PSD().fourier(data)
+    np.testing.assert_allclose(PSD().fourier(data, period=4).y.data, [0, 0.25, 0.5])
+
+
+def test_group_cycles_preserves_measured_starts_and_mean_elapsed_times():
+    data = NDDataset(np.ones((9, 2)))
+    data.set_coordset(
+        y=Coord(
+            [0, 1, 2, 4, 5.0006, 6, 8.004, 9.0052, 10.004],
+            units="s",
+            rounding=False,
+            linearize_below=0,
+        )
+    )
+
+    grouped = PSD(n_spectra_per_cycle=3).group_cycles(data)
+    np.testing.assert_allclose(grouped.z.data, [0, 4, 8.004])
+    np.testing.assert_allclose(grouped.y.data, [0, 1.0006, 2])
+
+
+def test_fourier_preserves_frequency_precision_after_grouping():
+    data = NDDataset(np.ones((12, 2)))
+    step = 0.12345678
+    data.set_coordset(
+        y=Coord(step * np.arange(12), units="s", rounding=False, sigdigits=15)
+    )
+    psd = PSD(n_spectra_per_cycle=4)
+
+    expected = np.fft.rfftfreq(4, d=step)
+    np.testing.assert_allclose(psd.fourier(psd.group_cycles(data)).y.data, expected)
+    period = 3.712346
+    frequencies = PSD().fourier(np.ones((8, 2)), period=period).y.data
+    np.testing.assert_allclose(frequencies, np.fft.rfftfreq(8, d=period / 8))
+
+
+def test_fourier_preserves_frequency_when_aligned_grouped_cycles_are_omitted():
+    signal = np.tile([1.0, 0.0, -1.0, 0.0], 5)
+    data = NDDataset(np.column_stack([signal, 2 * signal]))
+    data.y = Coord(np.arange(20), units="s")
+    psd = PSD(n_spectra_per_cycle=4)
+    grouped = psd.group_cycles(data)
+
+    all_cycles = psd.fourier(grouped)
+    selected = psd.fourier(grouped[::2])
+    np.testing.assert_allclose(selected.y.data, all_cycles.y.data)
+    np.testing.assert_allclose(selected.data, all_cycles.data[::2])

@@ -19,6 +19,8 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Compute per-cycle Fourier coefficients for modulation experiments with
+  ``PSD.fourier()`` and group sequential acquisitions with ``PSD.group_cycles()``. (:pr:`1880`)
 
 .. section
 
