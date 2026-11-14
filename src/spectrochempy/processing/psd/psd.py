@@ -658,6 +658,19 @@ class PSD(BaseConfigurable):
         return in_phase, quadrature, amplitude, phase_lag
 
     # ----------------------------------------------------------------------------------
+    @staticmethod
+    def _optional_coord(X, dim):
+        coords = X.coordset
+        return coords[dim] if coords is not None and dim in coords.names else None
+
+    @staticmethod
+    def _numeric_times(coord):
+        values = coord.magnitude
+        if values.dtype.kind not in "fiu":
+            raise ValueError("Time coordinates must contain numeric values.")
+        return values.astype(float, copy=False)
+
+    # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
     def group_cycles(self, X, *, discard=0):
@@ -665,7 +678,7 @@ class PSD(BaseConfigurable):
         Group consecutive spectra into complete modulation cycles.
 
         Set `n_spectra_per_cycle` on the PSD instance and supply a 2D
-        dataset with a finite, strictly increasing acquisition coordinate.
+        dataset with a finite, strictly increasing numeric acquisition coordinate.
         The result uses dimensions (z, y, x) for cycle start, mean elapsed
         time within each cycle, and spectral channel. Both time coordinates
         use the original time units.
@@ -687,12 +700,11 @@ class PSD(BaseConfigurable):
             raise ValueError("discard must leave at least one complete cycle.")
 
         time_dim, spectral_dim = X.dims
-        time = X.coord(time_dim)
-        if time is not None:
-            time = time.default
+        acquisition = self._optional_coord(X, time_dim)
+        time = acquisition.default if acquisition is not None else None
         if time is None or time.data is None:
             raise ValueError("An acquisition time coordinate is required.")
-        timestamps = time.magnitude
+        timestamps = self._numeric_times(time)
         if not np.isfinite(timestamps).all() or np.any(np.diff(timestamps) <= 0):
             raise ValueError(
                 "Acquisition times must be finite and strictly increasing."
@@ -710,9 +722,12 @@ class PSD(BaseConfigurable):
                 rounding=False,
             ),
         }
-        spectral = X.coord(spectral_dim)
+        spectral = self._optional_coord(X, spectral_dim)
         if spectral is not None and (not spectral.is_empty or spectral.is_labeled):
             coords["x"] = spectral.copy()
+        if spectral is None:
+            X = X.copy()
+            X.set_coordset(**{time_dim: acquisition.copy(), spectral_dim: Coord()})
         retained = X[discard * n_times :, :]
         grouped = retained.reshape(
             (len(starts), n_times, X.shape[1]), dims=("z", "y", "x"), coords=coords
@@ -732,7 +747,8 @@ class PSD(BaseConfigurable):
         (time, channel) cycle. The samples must be real, finite, unmasked,
         uniformly spaced and aligned across complete cycles. Do not repeat
         the cycle endpoint. For concatenated input with timestamps, the
-        timestamps must form one continuous grid.
+        timestamps must form one continuous grid. Time coordinates must
+        contain numeric values.
 
         Parameters
         ----------
@@ -786,14 +802,15 @@ class PSD(BaseConfigurable):
                 raise ValueError(
                     "grid='cycle_starts' derives the period from coordinates."
                 )
-            starts = X.coord(X.dims[0]) if X.ndim == 3 else None
+            starts = self._optional_coord(X, X.dims[0]) if X.ndim == 3 else None
             if starts is not None:
                 starts = starts.default
             if starts is None or starts.data is None or starts.size < 2:
                 raise ValueError("Expected at least two measured cycle starts.")
             if starts.units is None or not starts.units.is_compatible_with("s"):
                 raise ValueError("Cycle starts must have time units.")
-            start_times = starts.to("s").magnitude
+            self._numeric_times(starts)
+            start_times = self._numeric_times(starts.to("s"))
             intervals = np.diff(start_times)
             if not np.all(np.isfinite(intervals) & (intervals > 0)):
                 raise ValueError("Cycle starts must be finite and strictly increasing.")
@@ -809,16 +826,18 @@ class PSD(BaseConfigurable):
         cycle_coord = Coord(np.arange(data.shape[0]), title="cycle")
         spectral_coord = Coord(np.arange(data.shape[-1]), title="channel")
         if X.coordset is not None:
-            time_coord = X.coordset[X.dims[-2]].default
+            time_coord = self._optional_coord(X, X.dims[-2])
+            if time_coord is not None:
+                time_coord = time_coord.default
             if (
                 grid == "measured"
                 and time_coord is not None
                 and time_coord.data is not None
             ):
-                times = time_coord.magnitude
+                times = self._numeric_times(time_coord)
                 has_time_units = not time_coord.dimensionless
                 if has_time_units:
-                    times = time_coord.to("s").magnitude
+                    times = self._numeric_times(time_coord.to("s"))
                 elif period is None:
                     raise ValueError("Provide a period in seconds for unitless time.")
                 steps = np.diff(times)
@@ -836,9 +855,13 @@ class PSD(BaseConfigurable):
                         raise ValueError("period does not match the time coordinate.")
                     period = inferred
 
-            spectral_coord = X.coordset[X.dims[-1]].copy()
+            spectral = self._optional_coord(X, X.dims[-1])
+            if spectral is not None:
+                spectral_coord = spectral.copy()
             if X.ndim == 3:
-                cycle_coord = X.coordset[X.dims[0]].copy()
+                cycles = self._optional_coord(X, X.dims[0])
+                if cycles is not None:
+                    cycle_coord = cycles.copy()
 
         if period is None:
             raise ValueError("Provide a period in seconds or a time coordinate.")
@@ -852,7 +875,8 @@ class PSD(BaseConfigurable):
             and starts.units is not None
             and starts.units.is_compatible_with("s")
         ):
-            intervals = np.diff(starts.to("s").magnitude)
+            self._numeric_times(starts)
+            intervals = np.diff(self._numeric_times(starts.to("s")))
             if not np.allclose(intervals, period, rtol=1e-6, atol=0.0):
                 raise ValueError("Measured cycle starts must be spaced by the period.")
 

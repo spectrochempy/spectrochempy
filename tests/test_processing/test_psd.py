@@ -640,3 +640,28 @@ def test_fourier_uses_default_time_coordinates():
     np.testing.assert_allclose(
         psd.fourier(grouped, grid="cycle_starts").y.data, [0, 1 / 3]
     )
+
+
+def test_fourier_and_group_cycles_with_sparse_coordinates():
+    data = NDDataset(np.ones((6, 2)))
+    data.set_coordset(y=Coord(np.arange(6), units="s"))
+    psd = PSD(n_spectra_per_cycle=3)
+
+    np.testing.assert_allclose(psd.fourier(data).y.data, [0, 1 / 3])
+    grouped = psd.group_cycles(data, discard=1)
+    np.testing.assert_allclose(psd.fourier(grouped).y.data, [0, 1 / 3])
+    assert data.coordset.names == ["y"]
+
+
+def test_fourier_and_group_cycles_require_numeric_times():
+    data = NDDataset(np.ones((6, 2)))
+    data.y = Coord(
+        np.datetime64("2025-01-01") + np.arange(6) * np.timedelta64(1, "s"),
+        rounding=False,
+    )
+    psd = PSD(n_spectra_per_cycle=3)
+
+    with pytest.raises(ValueError, match="numeric values"):
+        psd.group_cycles(data)
+    with pytest.raises(ValueError, match="numeric values"):
+        psd.fourier(data)
