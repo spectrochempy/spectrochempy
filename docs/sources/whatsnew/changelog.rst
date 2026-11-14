@@ -19,6 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Set symmetric color limits on filled contour plots with ``symmetric_percentile``. (:pr:`1879`)
+- Add a linked upper x-axis to Cartesian plots with the ``secondary_x``
+  plotting option. (:pr:`1879`)
+- Remove transient spikes along a selected acquisition axis with
+  ``despike(method="neighbors")``. (:pr:`1879`)
+
 - Read 1D Raman JCAMP-DX spectra with explicit Raman shift and intensity pairs.
   (:pr:`1877`)
 

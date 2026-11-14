@@ -116,6 +116,12 @@ def plot_dataset_impl(
     # NORMALIZE METHOD - Convert legacy names to canonical BEFORE dispatch
     method = normalize_backend_method(method, warned_aliases=_WARNED_ALIASES)
 
+    if kwargs.get("secondary_x") is not None and get_dispatch_method_key(method) in {
+        "surface",
+        "waterfall",
+    }:
+        raise ValueError("secondary_x requires a 2D Cartesian plot.")
+
     # Get the standalone plot function
     plot_func_data = _get_plot_function(method) if method else None
     if plot_func_data is None:

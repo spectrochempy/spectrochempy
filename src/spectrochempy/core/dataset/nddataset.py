@@ -2645,6 +2645,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             explicit display step after plotting. In notebook environments,
             figures may still render inline without that explicit call.
 
+            For 2D Cartesian plots, ``secondary_x=(label, forward, inverse)``
+            adds an upper x-axis linked to the primary axis. Both conversion
+            functions must accept arrays. ``forward`` converts displayed x values
+            to the upper-axis scale, and ``inverse`` converts back.
+
             For ``method="hist"``, the histogram uses all finite, unmasked
             real data values, regardless of dataset dimensionality. Select
             ``dataset.real`` or ``dataset.imag`` for complex data.

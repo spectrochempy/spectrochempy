@@ -80,7 +80,35 @@ def denoise(dataset, ratio=99.8, **kwargs):
     return data
 
 
-def despike(dataset, size=9, delta=2, method="katsumoto"):
+def _despike_neighbors(dataset, delta, dim):
+    if not np.isfinite(delta) or delta <= 0:
+        raise ValueError("delta must be positive and finite.")
+    if np.iscomplexobj(dataset.data):
+        raise ValueError("Neighbor despiking requires real data.")
+
+    new = dataset.copy()
+    axis, name = new.get_axis(dim)
+    data = np.moveaxis(new.data, axis, 0)
+    mask = np.moveaxis(np.broadcast_to(new.mask, new.shape), axis, 0)
+    if len(data) >= 3:
+        # Floating-point arithmetic also allows fractional replacements in integer data.
+        data = data.astype(np.result_type(data.dtype, np.float64), copy=True)
+        samples = np.ma.array(data, mask=mask | ~np.isfinite(data))
+        previous, current, following = samples[:-2], samples[1:-1], samples[2:]
+        local_mean = (previous + following) / 2
+        residual = current - local_mean
+        center = np.ma.median(residual, axis=0)
+        noise = 1.4826 * np.ma.median(abs(residual - center), axis=0)
+        excess = current - np.ma.maximum(previous, following)
+        spikes = (excess > delta * noise).filled(False)
+        data[1:-1][spikes] = local_mean.data[spikes]
+        new.data = np.moveaxis(data, 0, axis)
+
+    new.history = f"Removed spikes using neighbors (dim={name}, delta={delta})"
+    return new
+
+
+def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
     """
     Remove spikes from the data.
 
@@ -111,6 +139,16 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
       points that are spikes.
 
 
+    The 'neighbors' method compares each sample with its two immediate
+    neighbors along ``dim``, independently at every position on the other
+    dimensions. A positive excursion above both neighbors is replaced by
+    their mean if it exceeds ``delta`` times the scaled median absolute
+    deviation of the residuals from the neighbor mean. Endpoints, triplets
+    with masked or non-finite values are skipped. With zero estimated noise,
+    any strictly positive excess above both neighbors qualifies. For a time series of spectra, choose
+    the acquisition axis. Short traces may contain too few unaffected samples
+    to estimate the noise reliably.
+
     Parameters
     ----------
     dataset : `NDDataset` or a ndarray-like object
@@ -121,7 +159,10 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
     delta : float, optional, default: 2
         Set the threshold for the detection of spikes.
     method : str, optional, default: 'katsumoto'
-        The method to use. Can be 'katsumoto' or 'whitaker'
+        The method to use. Can be 'katsumoto', 'whitaker', or 'neighbors'.
+    dim : str or int, optional, default: -1
+        Dimension used by 'neighbors'. Each replacement uses exactly two
+        immediate neighbors, independently of ``size``.
 
     Returns
     -------
@@ -129,6 +170,9 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
         The despike dataset
 
     """
+    if method == "neighbors":
+        return _despike_neighbors(dataset, delta, dim)
+
     new = dataset.copy()
 
     # machine epsilon

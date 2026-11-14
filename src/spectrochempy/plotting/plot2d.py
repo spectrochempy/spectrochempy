@@ -42,6 +42,7 @@ from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
+from spectrochempy.utils.mplutils import _add_secondary_x
 from spectrochempy.utils.mplutils import make_label
 
 # ======================================================================================
@@ -1197,6 +1198,12 @@ def plot_image(dataset, **kwargs):
 
     Other Parameters
     ----------------
+    symmetric_percentile : float, optional
+        Set symmetric color limits from this percentile of absolute finite,
+        unmasked intensities. Values outside the limits saturate on the plot.
+        The option supplies the contour levels and normalization. If the
+        absolute percentile is effectively zero, use a small positive bound.
+        Rescale intensities near the floating-point limit before plotting.
     ax : Axe, optional
         Axe where to plot. If not specified, create a new one.
     clear : bool, optional, default: True
@@ -1632,6 +1639,8 @@ def plot_2D(dataset, method=None, **kwargs):
         # Waterfall uses its own 3D rendering and must not go through _figure_setup
         if method == "waterfall":
             # Call the 3D waterfall function directly
+            if kwargs.get("secondary_x") is not None:
+                raise ValueError("secondary_x requires a 2D Cartesian plot.")
             return _plot_waterfall_3d(new, prefs=prefs, **kwargs)
 
         # Figure setup
@@ -1803,6 +1812,40 @@ def plot_2D(dataset, method=None, **kwargs):
             zdata = new.imag.masked_data
 
         levels = requested_levels
+        percentile = kwargs.get("symmetric_percentile")
+        if percentile is not None:
+            if method not in {"image", "contourf"}:
+                raise ValueError("symmetric_percentile requires a filled contour plot.")
+            if not 0 < percentile <= 100:
+                raise ValueError("symmetric_percentile must be in (0, 100].")
+            scale_options = (
+                "levels",
+                "norm",
+                "vmin",
+                "vmax",
+                "positive_color",
+                "negative_color",
+            )
+            if any(kwargs.get(key) is not None for key in scale_options):
+                raise ValueError(
+                    "symmetric_percentile defines levels and normalization."
+                )
+            zdata = np.ma.masked_invalid(zdata)
+            valid = abs(zdata.compressed())
+            if not valid.size:
+                raise ValueError(
+                    "symmetric_percentile requires finite, unmasked values."
+                )
+            if discrete_data:
+                raise ValueError("symmetric_percentile requires numeric coordinates.")
+            if valid.max() >= 1e250:
+                raise ValueError(
+                    "Rescale intensities before plotting symmetric contours."
+                )
+            bound = np.percentile(valid, percentile)
+            if bound < 1e-12:
+                bound = 1e-12
+            levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
 
         zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
@@ -1857,6 +1900,8 @@ def plot_2D(dataset, method=None, **kwargs):
         norm = kwargs.get("norm")
         vmin = kwargs.get("vmin")
         vmax = kwargs.get("vmax")
+        if percentile is not None:
+            vmin, vmax = -bound, bound
         contrast_safe = kwargs.get("contrast_safe", True)
         min_contrast = kwargs.get("min_contrast", 1.5)
         diverging_margin = kwargs.get("diverging_margin", 0.05)
@@ -1893,6 +1938,8 @@ def plot_2D(dataset, method=None, **kwargs):
                 diverging_margin=diverging_margin,
                 prefs=prefs,
             )
+            if percentile is not None:
+                norm = Normalize(vmin=vmin, vmax=vmax)
         else:
             # For non-image methods, use simple normalization
             if norm is None:
@@ -1982,7 +2029,14 @@ def plot_2D(dataset, method=None, **kwargs):
                     and min(contour_levels) < 0 < max(contour_levels)
                 ):
                     contour_levels = np.unique([*contour_levels, 0.0])
-                mappable = ax.contourf(xdata, ydata, zdata, contour_levels, alpha=alpha)
+                mappable = ax.contourf(
+                    xdata,
+                    ydata,
+                    zdata,
+                    contour_levels,
+                    alpha=alpha,
+                    extend="both" if percentile is not None else "neither",
+                )
                 mappable.set_cmap(cmap)
                 mappable.set_norm(norm)
 
@@ -2209,6 +2263,8 @@ def plot_2D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
+            upper_parent = _panel_axes(ax).get("top", ax)
+            _add_secondary_x(ax, kwargs.get("secondary_x"), parent=upper_parent)
             return ax
 
         # display a title
@@ -2332,6 +2388,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 cb_mappable = locals().get("colorbar_mappable", mappable)
                 cb = fig.colorbar(
                     cb_mappable,
+                    extend="both" if percentile is not None else None,
                     ax=ax,
                     location="right",
                     pad=0.02,
@@ -2409,6 +2466,8 @@ def plot_2D(dataset, method=None, **kwargs):
             clear=kwargs.get("clear", True),
             preserve_title=not kwargs.get("clear", True) and "title" not in kwargs,
         )
+        upper_parent = _panel_axes(ax).get("top", ax)
+        _add_secondary_x(ax, kwargs.get("secondary_x"), parent=upper_parent)
         if kwargs.get("return_dict", False):
             return {"fig": fig, "axes": _panel_axes(ax)}
         return ax
