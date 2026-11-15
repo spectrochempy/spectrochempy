@@ -16,4 +16,4 @@ Bug Fixes
 ~~~~~~~~~
 
 - Preserve metadata lists whose length differs from the number of dataset
-  dimensions when transposing or swapping axes after loading an SCP file.
+  dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
