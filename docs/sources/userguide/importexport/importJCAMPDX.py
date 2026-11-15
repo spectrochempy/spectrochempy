@@ -57,13 +57,13 @@ S0 = X[0]
 S0
 
 # %%
-S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
+_ = S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
 
 # %% [markdown]
 # The namespace API is also available for writing:
 
 # %%
-scp.jcamp.write(S0, "CO@Mo_Al2O3_0.jdx", confirm=False, overwrite=True)
+_ = scp.jcamp.write(S0, "CO@Mo_Al2O3_0.jdx", confirm=False, overwrite=True)
 
 # %% [markdown]
 # Then used (and maybe changed) by a 3rd party software, and re-imported in

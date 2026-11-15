@@ -87,20 +87,21 @@ All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`.
 Creating NDDataset
 ******************
 
-A `NDDataset` can be created using the `NDDataset` class constructor, for instance here we create a dataset from a
-`~numpy.random.random` two-dimensional array:
+Use ``NDDataset.random()`` to create a dataset of uniformly distributed
+random samples:
+
+.. ipython:: python
+
+    X = NDDataset.random((4, 4), seed=42)
+
+If the values already come from NumPy, pass the array to the
+``NDDataset`` constructor:
 
 .. ipython:: python
 
     import numpy as np
-    X = np.random.random((4,4))
-    nd = NDDataset(X)
-
-The above code in `SpectroChemPy` can be simplified using the `random` creation method:
-
-.. ipython:: python
-
-    X = NDDataset.random((4,4))
+    values = np.arange(16).reshape(4, 4)
+    nd = NDDataset(values)
 
 
 (see the :ref:`user_guide` for a large set of examples on how to use this constructor.)
