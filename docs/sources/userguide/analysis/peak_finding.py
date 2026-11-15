@@ -513,7 +513,7 @@ for w in (wl, wr):
     _ = ax.plot(w, s[w].data, "v", color="red")
     # and a red mark  #TODO: add function to plot this easily
 
-ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
+_ = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
 
 # %% [markdown]
 # It leads to base marks at their expected locations. We can further check that the

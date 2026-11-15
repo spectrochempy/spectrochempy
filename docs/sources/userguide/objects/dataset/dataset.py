@@ -444,7 +444,7 @@ corrected = region - reference
 corrected.name = "referenced-OH-region"
 
 # %%
-corrected.plot()
+_ = corrected.plot()
 
 # %%
 reference.history

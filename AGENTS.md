@@ -129,6 +129,18 @@ The skills are shared by OpenCode, Codex, and Claude Code. They live only in
 
 ## Gallery and Tutorial Handoff
 
+In user guides, notebooks, and gallery examples, use the public SpectroChemPy
+API whenever it expresses the operation clearly. Prefer `dataset.plot()`,
+`scp.plot_multiple()`, and `scp.multiplot()` for plots, and dataset
+arithmetic and public helpers such as `scp.Coord.linspace()` or
+`scp.gaussian()` for calculations and profiles. Use direct Matplotlib or
+NumPy for interoperability, low-level implementation comparisons, or
+features without a suitable public equivalent. See `spectrochempy-dev`
+for examples.
+
+In notebooks, assign unused return values to `_` when IPython would
+otherwise display them. Keep figures and outputs that help the reader.
+
 After each coherent set of edits to a gallery example or tutorial, rebuild
 the HTML preview for each changed page. Reuse the local HTTP server for the
 current worktree's preview directory or start one if needed. Verify that

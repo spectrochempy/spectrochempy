@@ -232,15 +232,23 @@ internal (refactoring, tests, docs), apply the `no-changelog` label to the PR.
 * Prefer existing helpers over new ones.
 * Never add new dependencies without explicit approval.
 * Never create new public API without asking.
-* In gallery examples and user-facing documentation, prefer the public
-  SpectroChemPy API over direct NumPy imports. Use helpers such as
-  `scp.Coord.linspace`, `scp.linspace`, and `scp.normal` rather than importing
-  NumPy solely to create arrays. Keep NumPy when the example specifically
-  demonstrates interoperability or when no suitable public equivalent exists.
+* In gallery examples, notebooks, and user guides, keep calculations on
+  `NDDataset` and `Coord` when their operators and methods express the
+  calculation clearly. Use `scp.Coord.linspace()` for coordinates,
+  `scp.linspace()` for sampled values, `scp.gaussian()` for a Gaussian
+  profile, and `scp.normal()` for normal random samples. Keep NumPy for
+  interoperability, low-level comparisons, and operations without a
+  suitable public equivalent.
 * Likewise, prefer `dataset.plot()`, `scp.multiplot()`, `scp.plot_multiple()`,
   and their `output=` lifecycle over direct Matplotlib calls. Keep Matplotlib
   when the example demonstrates integration or needs a feature the public
   plotting API does not expose.
+  Check this on edited examples even when the imports were already present.
+* In notebooks, keep figures, useful diagnostics, and intentional examples
+  of object display. Assign incidental return values to `_`, for example
+  `_ = dataset.plot()` or `_ = ax.set_xlim(...)` when the return value is
+  unused. This suppresses the object representation while preserving the
+  plot.
 
 ---
 
