@@ -8,6 +8,9 @@
 
 __all__ = ["IrisKernel", "IRIS"]
 
+from contextlib import suppress
+from functools import partial
+
 import numpy as np
 import osqp
 import traitlets as tr
@@ -519,6 +522,27 @@ class IRIS(DecompositionAnalysis):
         S = _Smat(q)
         info_("... done")
 
+        factor_transpose = None
+        if (
+            N > M
+            and np.geterr()["under"] == "ignore"
+            and S.dtype in (np.float32, np.float64)
+            and S[0, 0] >= 6 * np.finfo(S.dtype).tiny
+            and np.isfinite(S).all()
+        ):
+            with suppress(np.linalg.LinAlgError):
+                factor_transpose = np.linalg.cholesky(S).T
+
+        def sharpness(distribution):
+            if factor_transpose is not None:
+                with np.errstate(over="ignore", invalid="ignore"):
+                    weighted = factor_transpose @ distribution
+                    value = np.linalg.norm(weighted @ weighted.T)
+                limits = np.finfo(value.dtype)
+                if np.sqrt(limits.tiny) <= value <= np.sqrt(limits.max / 2):
+                    return value
+            return np.linalg.norm(np.dot(np.dot(distribution.T, S), distribution))
+
         # Solve non-regularized problem
         if not self._regularization:
             msg = f"Solving for {N} channels and {W} observations, no regularization"
@@ -529,7 +553,7 @@ class IRIS(DecompositionAnalysis):
                 f[0, :, j] = optimize.nnls(K, X[:, j].squeeze())[0]
             res = X - np.dot(K, f[0])
             RSS[0] = np.sum(res**2)
-            SM[0] = np.linalg.norm(np.dot(np.dot(np.transpose(f[0]), S), f[0]))
+            SM[0] = sharpness(f[0])
 
             msg = f"-->  residuals = {RSS[0]:.2e}    curvature = {SM[0]:.2e}"
             info_(msg)
@@ -539,6 +563,10 @@ class IRIS(DecompositionAnalysis):
             # and are computed here.
 
             if self.qpsolver == "osqp":
+                make_solver = osqp.OSQP
+                default_algebra = getattr(osqp, "default_algebra", None)
+                if default_algebra is not None:
+                    make_solver = partial(make_solver, algebra=default_algebra())
                 # The standard form used by osqp() is
                 # minimize (1/2) xT P x + qT x ; subject to: lo <= A x <= u
                 # The first part of the P matrix is independent of lambda:
@@ -583,9 +611,11 @@ class IRIS(DecompositionAnalysis):
                 channels = self._channels
 
                 if self.qpsolver == "osqp":
+                    P = sparse.triu(
+                        sparse.csc_matrix(P0 + 2 * lambda_ * S), format="csc"
+                    )
                     for j in range(len(channels.data)):
-                        P = sparse.csc_matrix(P0 + 2 * lambda_ * S)
-                        qprob = osqp.OSQP()
+                        qprob = make_solver()
                         if osqp.__version__ < "1.0.0":
                             qprob.setup(
                                 P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False
@@ -634,7 +664,7 @@ class IRIS(DecompositionAnalysis):
 
                 resi = X.data - np.dot(K.data, fi)
                 RSSi = np.sum(resi**2)
-                SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
+                SMi = sharpness(fi)
 
                 msg = (
                     f"log10(lambda)={np.log10(lambda_):.3f} -->  "

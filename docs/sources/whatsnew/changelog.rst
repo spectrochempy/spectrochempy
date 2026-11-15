@@ -64,3 +64,7 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- PERF: Speed up IRIS fits by preparing the OSQP matrix once per regularization
+  parameter, resolving the backend once per fit, and reducing the size of the
+  sharpness calculation for wide datasets.

@@ -8,6 +8,7 @@
 """Core IRIS tests — moved from core to plugin."""
 
 from os import environ
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -17,6 +18,52 @@ from spectrochempy.utils import docutils as chd
 
 from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
+from spectrochempy_iris._core import _Smat
+
+
+@pytest.mark.parametrize(
+    ("points", "expected_sm"),
+    [
+        (np.arange(4, dtype=np.longdouble), 24.0),
+        (np.arange(4) * (1 + 0.1j), 24.0 / abs(1 + 0.1j) ** 3),
+        (np.array([0.0, 1.0, 2.0, 0.0]), np.nan),
+        (np.arange(3.0, -1.0, -1.0), 24.0),
+    ],
+    ids=["longdouble", "complex", "coincident-endpoints", "descending"],
+)
+def test_iris_wide_dataset_sharpness_for_unusual_grids(points, expected_sm):
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(points, dtype=points.dtype)
+    spectra = scp.NDDataset(np.ones((5, 6)), coordset=[observations, channels])
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        model = IRIS(reg_par=None).fit(spectra, kernel)
+
+    np.testing.assert_array_equal(model.f.data, np.ones((1, 4, 6)))
+    np.testing.assert_allclose(model.SM.data, [expected_sm])
+
+
+@pytest.mark.parametrize(
+    ("grid_step", "amplitude"),
+    [(5.8e107, 1e160), (5e-103, 10.0), (1.0, 1e-81)],
+    ids=["subnormal-penalty", "overflowing-sharpness", "underflowing-sharpness"],
+)
+def test_iris_wide_dataset_sharpness_at_extreme_scales(grid_step, amplitude):
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(np.arange(4) * grid_step, rounding=False)
+    data = np.zeros((5, 6))
+    data[:4] = amplitude
+    spectra = scp.NDDataset(data, coordset=[observations, channels])
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+
+    with np.errstate(over="ignore", invalid="ignore"):
+        model = IRIS(reg_par=None).fit(spectra, kernel)
+        distribution = model.f.data[0]
+        expected_sm = np.linalg.norm(distribution.T @ _Smat(grid.data) @ distribution)
+    np.testing.assert_allclose(model.SM.data, [expected_sm], rtol=1e-12, atol=0)
 
 
 def test_IRIS_docstrings():
@@ -158,6 +205,12 @@ def test_IRIS():
     iris2.fit(X, K1)
     f2 = iris2.f
     assert f2.shape == (reg_par[2], q[2], X.shape[1])
+    sharpness_matrix = _Smat(iris2.q.data)
+    np.testing.assert_allclose(
+        iris2.SM.data,
+        [np.linalg.norm(fi.T @ sharpness_matrix @ fi) for fi in f2.data],
+        rtol=1e-11,
+    )
 
     iris2.plotlcurve()
     _ = iris2.f[-2].plot(method="contour")
@@ -169,6 +222,12 @@ def test_IRIS():
     iris3.fit(X, K1)
     f3 = iris3.f
     assert (f3.shape[1], f3.shape[2]) == (q[2], X.shape[1])
+    with patch.object(np.linalg, "cholesky", side_effect=np.linalg.LinAlgError):
+        legacy_metric = IRIS(reg_par=reg_par).fit(X, K1)
+    np.testing.assert_array_equal(f3.data, legacy_metric.f.data)
+    np.testing.assert_array_equal(iris3.RSS.data, legacy_metric.RSS.data)
+    np.testing.assert_array_equal(iris3.lambdas.data, legacy_metric.lambdas.data)
+    np.testing.assert_allclose(iris3.SM.data, legacy_metric.SM.data, rtol=1e-11)
 
     # test other kernels (beware: it is chemical non-sense !)
     q = [5, 1, 10]

@@ -29,3 +29,10 @@ Bug Fixes
 
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
+
+Developer
+~~~~~~~~~
+
+- PERF: Speed up IRIS fits by preparing the OSQP matrix once per regularization
+  parameter, resolving the backend once per fit, and reducing the size of the
+  sharpness calculation for wide datasets.
