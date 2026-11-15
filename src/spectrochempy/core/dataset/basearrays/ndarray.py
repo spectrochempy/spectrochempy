@@ -1953,7 +1953,7 @@ class NDArray(tr.HasTraits):
         if self.is_masked:
             new._mask = np.swapaxes(new._mask, *axis)
 
-        new._meta = new._meta.swap(*axis, inplace=False)
+        new._meta = new._meta._swap(*axis, axis_count=self.ndim)
         return new
 
     swapaxes = swapdims
@@ -2252,7 +2252,7 @@ class NDArray(tr.HasTraits):
         new._data = np.transpose(new._data, axis)
         if new.is_masked:
             new._mask = np.transpose(new._mask, axis)
-        new._meta = new._meta.permute(*axis, inplace=False)
+        new._meta = new._meta._permute(axis, match_rank=True)
 
         new._dims = list(np.take(self._dims, axis))
 

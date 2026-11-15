@@ -6,14 +6,14 @@
 
 :orphan:
 
-What's New in Revision 1.3.1
+What's New in Revision 1.3.2.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-1.3.1.
+These are the changes in SpectroChemPy-1.3.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
 Bug Fixes
 ~~~~~~~~~
 
-- Allow the NMR extra to install spectrochempy-nmr 0.4 while retaining
-  compatibility with previously supported plugin versions.
+- Preserve metadata lists whose length differs from the number of dataset
+  dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)

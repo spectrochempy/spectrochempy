@@ -102,6 +102,38 @@ def test_nddataset_transpose_swapdims(ds1):
     assert nd1 == nd2.T
 
 
+@pytest.mark.parametrize("operation", ["transpose", "swapdims"])
+def test_reloaded_dataset_reorders_only_axis_length_metadata(tmp_path, operation):
+    source = scp.NDDataset(np.arange(24).reshape(2, 3, 4))
+    source.meta.axis_sizes = [2, 3, 4]
+    source.meta.acquisition_encoding = ("ECHO-ANTIECHO", "DQD")
+    source.meta.global_values = [1, 2, 3, 4]
+    path = tmp_path / "metadata.scp"
+    source.dump(path)
+    dataset = scp.NDDataset.load(path)
+
+    result = dataset.T if operation == "transpose" else dataset.swapdims(0, -1)
+
+    assert result.shape == (4, 3, 2)
+    assert result.meta.axis_sizes == [4, 3, 2]
+    assert result.meta.acquisition_encoding == dataset.meta.acquisition_encoding
+    assert result.meta.global_values == [1, 2, 3, 4]
+    assert dataset.meta.axis_sizes == [2, 3, 4]
+    result.meta.global_values.append(5)
+    assert dataset.meta.global_values == [1, 2, 3, 4]
+
+
+def test_inplace_swap_preserves_axis_metadata_copy():
+    dataset = scp.NDDataset(np.arange(24).reshape(2, 3, 4))
+    dataset.meta.axis_values = [{"size": 2}, {"size": 3}, {"size": 4}]
+    original = dataset.meta
+
+    dataset.swapdims(0, -1, inplace=True)
+    original.axis_values[-1]["size"] = 99
+
+    assert dataset.meta.axis_values == [{"size": 4}, {"size": 3}, {"size": 2}]
+
+
 def test_nddataset_apply_funcs(dsm):
     nd = dsm.copy()
     # convert to masked array preserves shape
