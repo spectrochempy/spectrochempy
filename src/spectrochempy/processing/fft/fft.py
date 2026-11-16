@@ -199,9 +199,11 @@ def rfft(dataset, *, dim=None, norm="backward"):
         raise ValueError("rfft requires nonempty real input.")
     axis, dim, source, step = _real_fft_axis(dataset, dim)
     size = dataset.shape[axis]
-    data = np.fft.rfft(dataset.data, axis=axis, norm=norm)
-    with np.errstate(over="ignore"):
+    with np.errstate(over="ignore", invalid="ignore"):
+        data = np.fft.rfft(dataset.data, axis=axis, norm=norm)
         frequencies = np.fft.rfftfreq(size) / step
+    if not np.isfinite(data).all():
+        raise ValueError("The Fourier coefficients cannot be represented.")
     if not np.isfinite(frequencies).all() or not np.all(np.diff(frequencies) > 0):
         raise ValueError(
             "The frequency grid cannot be represented in the coordinate units."
@@ -263,7 +265,10 @@ def irfft(dataset, *, dim=None, n=None, norm=None):
         )
     if norm is None:
         norm = source.get("norm", "backward")
-    data = np.fft.irfft(dataset.data, n=n, axis=axis, norm=norm)
+    with np.errstate(over="ignore", invalid="ignore"):
+        data = np.fft.irfft(dataset.data, n=n, axis=axis, norm=norm)
+    if not np.isfinite(data).all():
+        raise ValueError("The reconstructed samples cannot be represented.")
     units = None if frequency.units is None else frequency.units**-1
     origin = source.get("origin", 0.0)
     if source.get("units") is not None and units is not None:

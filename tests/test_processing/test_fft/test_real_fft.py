@@ -115,3 +115,11 @@ def test_real_fft_preserves_coordinate_referenced_through_an_auxiliary_name():
     result = data.rfft(dim="y")
     assert result.x.units == data.coordset["z"].units
     np.testing.assert_array_equal(result.x.data, data.coordset["z"].data)
+
+
+def test_real_fft_rejects_unrepresentable_results():
+    data = scp.NDDataset([1e308, 1e308])
+    with pytest.raises(ValueError, match="Fourier coefficients cannot be represented"):
+        data.rfft()
+    with pytest.raises(ValueError, match="reconstructed samples cannot be represented"):
+        data.irfft(norm="forward")
