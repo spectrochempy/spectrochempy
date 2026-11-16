@@ -141,9 +141,11 @@
 # NNLS fit at $\lambda \approx 2.11 \times 10^{-5}$. The contours near
 # 2115 cm$^{-1}$ show where the strongest recovered contribution lies in $q$.*
 #
-# - Inspect `analysis.result.f` as a contour map. A feature extending over
-#   several neighboring wavenumbers at similar $q$ can help associate
-#   spectral bands with a common pressure response.
+# - Select a regularization strength and plot the corresponding slice of
+#   `analysis.result.f`. Use `analysis.result.f[4].plot_contour()` for the
+#   gallery fit shown above. Features that extend across neighboring
+#   wavenumbers at similar $q$ can help associate spectral bands with a
+#   common pressure response.
 # - Compare the reconstructed and measured spectra at representative pressures.
 #   Residual structure that persists across the pressure series can indicate
 #   that the kernel or preprocessing does not describe some of the signal.
