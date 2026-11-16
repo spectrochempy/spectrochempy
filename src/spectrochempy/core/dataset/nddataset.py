@@ -2600,6 +2600,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         old_shape = source_shape
         old_dims = source_dims
         new_ndim = len(shape)
+        split_index = (
+            CoordSet._reshape_split_index(old_shape, shape)
+            if coord_policy == "split"
+            else None
+        )
 
         if dims is not None:
             if len(dims) != new_ndim:
@@ -2609,6 +2614,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             if len(set(dims)) != len(dims):
                 raise ValueError("dims must be unique.")
             new_dims = list(dims)
+        elif split_index is not None:
+            block_dim = next(
+                (dim for dim in reversed(DEFAULT_DIM_NAME) if dim not in old_dims),
+                None,
+            )
+            if block_dim is None:
+                raise ValueError(
+                    "Provide explicit dimension names for the split reshape."
+                )
+            new_dims = old_dims.copy()
+            new_dims.insert(split_index, block_dim)
         else:
             # Try to preserve dim names for unambiguously unchanged dimensions
             new_dims = []
@@ -2656,11 +2672,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                         f"expected {shape[new_dims.index(dim_name)]}."
                     )
 
-        if coord_policy == "split":
+        if split_index is not None:
             if old_coordset is None:
                 raise ValueError("Split reshape requires a numeric coordinate.")
             new_coordset = old_coordset._split_reshape(
-                old_dims, old_shape, new_dims, shape, coords
+                old_dims, new_dims, shape, split_index, coords
             )
         elif old_coordset is None:
             new_coordset = None

@@ -160,3 +160,15 @@ def test_split_reshape_requires_an_unambiguous_axis_and_numeric_coordinate():
     data.y = scp.Coord(np.arange(6))
     with pytest.raises(ValueError, match="exactly one axis"):
         data.reshape((2, 2, 6), coord_policy="split")
+
+
+def test_split_reshape_default_names_preserve_the_unaffected_axis():
+    data = scp.NDDataset(np.arange(8.0).reshape(4, 2))
+    data.y = scp.Coord(np.arange(4), title="time")
+    data.x = scp.Coord([10, 20], title="energy")
+
+    grouped = data.reshape((2, 2, 2), coord_policy="split")
+    assert grouped.dims == ["z", "y", "x"]
+    assert grouped.x == data.x
+    assert_array_equal(grouped.z.data, [0, 2])
+    assert_array_equal(grouped.y.data, [0, 1])

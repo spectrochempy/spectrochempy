@@ -127,8 +127,13 @@ def _real_fft_axis(dataset, dim):
         raise ValueError(
             "Within-block samples are not uniformly spaced. Supply an explicit regular coordinate to use a uniform approximation."
         )
-    steps = np.diff(values.astype(float))
-    if steps[0] <= 0 or not np.allclose(steps, steps[0], rtol=1e-6, atol=0.0):
+    with np.errstate(over="ignore"):
+        steps = np.diff(values.astype(float))
+    if (
+        not np.isfinite(steps).all()
+        or steps[0] <= 0
+        or not np.allclose(steps, steps[0], rtol=1e-6, atol=0.0)
+    ):
         raise ValueError("Real FFT requires a uniformly spaced increasing coordinate.")
     return axis, dim, coordinate, float(steps[0])
 
@@ -195,8 +200,14 @@ def rfft(dataset, *, dim=None, norm="backward"):
     axis, dim, source, step = _real_fft_axis(dataset, dim)
     size = dataset.shape[axis]
     data = np.fft.rfft(dataset.data, axis=axis, norm=norm)
+    with np.errstate(over="ignore"):
+        frequencies = np.fft.rfftfreq(size) / step
+    if not np.isfinite(frequencies).all() or not np.all(np.diff(frequencies) > 0):
+        raise ValueError(
+            "The frequency grid cannot be represented in the coordinate units."
+        )
     frequency = Coord(
-        np.fft.rfftfreq(size, step),
+        frequencies,
         title=f"frequency of {source.title}",
         units=None if source.units is None else source.units**-1,
         rounding=False,
@@ -257,8 +268,14 @@ def irfft(dataset, *, dim=None, n=None, norm=None):
     origin = source.get("origin", 0.0)
     if source.get("units") is not None and units is not None:
         origin = ur.Quantity(origin, source["units"]).to(units).magnitude
+    with np.errstate(over="ignore"):
+        values = origin + (np.arange(n) / n) / step
+    if not np.isfinite(values).all() or not np.all(np.diff(values) > 0):
+        raise ValueError(
+            "The sample grid cannot be represented in the coordinate units."
+        )
     coordinate = Coord(
-        origin + np.arange(n) / (n * step),
+        values,
         title=source.get("title", "sample"),
         units=units,
         rounding=False,

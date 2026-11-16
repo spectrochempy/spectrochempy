@@ -90,3 +90,15 @@ def test_resplitting_retains_irregular_sampling_provenance():
     for dim in ("y", "x"):
         with pytest.raises(ValueError, match="Within-block"):
             split_again.rfft(dim=dim)
+
+
+def test_real_fft_handles_extreme_spacing_without_invalid_coordinates():
+    data = scp.NDDataset([1.0, 2.0])
+    data.set_coordset(x=scp.Coord([0.0, 1e308], rounding=False))
+    spectrum = data.rfft()
+    assert spectrum.x.data[1] == pytest.approx(5e-309, abs=0.0)
+    np.testing.assert_allclose(spectrum.irfft().x.data, data.x.data)
+
+    data.set_coordset(x=scp.Coord([0.0, 1e-310], rounding=False))
+    with pytest.raises(ValueError, match="frequency grid cannot be represented"):
+        data.rfft()

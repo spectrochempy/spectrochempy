@@ -870,8 +870,9 @@ class CoordSet(HasTraits):
         """Reconstruct the current legacy CoordSet shape from lifecycle groups."""
         return _groups_to_coordset(groups, name=self.name)
 
-    def _split_reshape(self, old_dims, old_shape, new_dims, new_shape, overrides):
-        """Split one positional axis, retaining coordinates on the other axes."""
+    @staticmethod
+    def _reshape_split_index(old_shape, new_shape):
+        """Identify the axis split into adjacent dimensions."""
         splits = [
             i
             for i in range(len(old_shape))
@@ -884,7 +885,10 @@ class CoordSet(HasTraits):
         if len(splits) != 1:
             raise ValueError("Split reshape must unambiguously split exactly one axis.")
 
-        index = splits[0]
+        return splits[0]
+
+    def _split_reshape(self, old_dims, new_dims, new_shape, index, overrides):
+        """Split one positional axis, retaining coordinates on the other axes."""
         source_dim = old_dims[index]
         source = self._resolved_axis_coord(source_dim)
         if source is None or source.default is None:
