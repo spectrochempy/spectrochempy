@@ -12,6 +12,7 @@ from scipy.optimize import least_squares
 import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
+from spectrochempy.analysis.curvefitting import _optimize_nd
 
 
 def _reference():
@@ -517,3 +518,116 @@ def test_fit_nd_scales_grid_before_subtraction_can_overflow():
     assert opt.result.diagnostics["success"]
     assert_allclose(opt.predict().data[2, 0], 1 / 17, atol=0)
     assert_allclose(opt.jacobian[8, 0] * 1e308, 16 / 289, rtol=1e-6)
+
+
+def test_fit_3d_analytic_jacobian_matches_three_point_with_fewer_calls(monkeypatch):
+    coordinates = [
+        scp.Coord(np.linspace(3.0, -3.0, 14)),
+        scp.Coord(np.linspace(-3.5, 3.5, 16)),
+        scp.Coord(np.linspace(-4.0, 4.0, 18)),
+    ]
+    grid = scp.NDDataset(np.zeros((14, 16, 18)), coordset=coordinates)
+    truth = [
+        {
+            "height": height,
+            "axes": {
+                dim: {
+                    "model": ("lorentzian", "gaussian")[(peak + i) % 2],
+                    "center": center + 0.1 * i,
+                    "width": 1.1 + 0.15 * i,
+                }
+                for i, dim in enumerate(grid.dims)
+            },
+        }
+        for peak, (height, center) in enumerate(((2.0, -0.55), (-1.5, 0.65)))
+    ]
+    specs = deepcopy(truth)
+    specs[0]["height"] = 0.0
+    for spec in specs:
+        for i, axis in enumerate(spec["axes"].values()):
+            axis["center"] += 0.08
+            axis["width"] = {
+                "value": axis["width"] * 1.1 if i else axis["width"],
+                "bounds": (0.5, 2.5),
+                "fixed": i == 0,
+            }
+    dataset = scp.simulate_peaks(grid, truth)
+    rng = np.random.default_rng(1849)
+    dataset.data += rng.normal(0.0, 0.003, grid.shape)
+    dataset.mask = rng.random(grid.shape) < 0.03
+    dataset.data[0, 0, 0] = np.nan
+
+    def solve(backend):
+        peak_evaluations = 0
+        evaluate_peak = _optimize_nd._evaluate_separable_peak
+
+        def counted_peak(*args):
+            nonlocal peak_evaluations
+            peak_evaluations += 1
+            return evaluate_peak(*args)
+
+        def instrument(fun, start, **options):
+            assert callable(options["jac"])
+            if backend == "3-point":
+                options["jac"] = backend
+            return least_squares(fun, start, **options)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(_optimize_nd, "_evaluate_separable_peak", counted_peak)
+            patch.setattr(_optimize_nd, "least_squares", instrument)
+            fit, solution = _optimize_nd.fit_separable_peaks(
+                dataset, specs, max_calls=70
+            )
+        assert solution.success
+        model_evaluations, remainder = divmod(peak_evaluations, len(specs))
+        assert remainder == 0
+        return fit, solution, model_evaluations - 1  # Exclude final reconstruction.
+
+    analytic, solution, calls = solve("analytic")
+    numeric, reference, numeric_calls = solve("3-point")
+    assert calls == solution.nfev
+    assert numeric_calls == reference.nfev + 2 * reference.njev * reference.x.size
+    assert numeric_calls > calls
+    assert_array_equal(analytic["fitted"].mask, numeric["fitted"].mask)
+    assert_allclose(analytic["values"], numeric["values"], atol=1e-6, rtol=0)
+    assert_allclose(analytic["fitted"].data, numeric["fitted"].data, atol=1e-6, rtol=0)
+    assert_allclose(analytic["diagnostics"]["rss"], numeric["diagnostics"]["rss"])
+    assert_allclose(solution.jac, reference.jac, atol=1e-6, rtol=1e-5)
+    assert_allclose(
+        analytic["covariance"], numeric["covariance"], atol=1e-11, rtol=1e-4
+    )
+
+    evaluate_jacobian = _optimize_nd._separable_jacobian
+    force_fallback = True
+
+    def nonfinite_first_jacobian(*args):
+        nonlocal force_fallback
+        jacobian = evaluate_jacobian(*args)
+        if force_fallback:
+            jacobian[0, 0] = np.nan
+            force_fallback = False
+        return jacobian
+
+    monkeypatch.setattr(_optimize_nd, "_separable_jacobian", nonfinite_first_jacobian)
+    _, fallback, fallback_calls = solve("analytic")
+    assert fallback_calls == fallback.nfev + 1 + fallback.x.size
+
+
+def test_fit_nd_preserves_physical_jacobian_when_scaled_tail_underflows():
+    x = scp.Coord([-1e170, 0.0, 1e170], linearize_below=-1)
+    y = scp.Coord([-1.0, 0.0, 1.0])
+    grid = scp.NDDataset(np.zeros((3, 3)), coordset=[y, x])
+    peak = _fixed_peak(grid.dims)
+    height = 10**300
+    peak["height"]["value"] = height
+    peak["axes"]["x"]["model"] = "lorentzian"
+    peak["axes"]["x"]["width"] = {"value": 1.0, "bounds": (0.5, 2.0)}
+    tail = 0.25 * (height / 1e170) / 1e170
+    grid.data = np.array([0.0625, 1.0, 0.0625])[:, None] * [tail, float(height), tail]
+
+    fit, solution = _optimize_nd.fit_separable_peaks(grid, [peak], max_calls=1)
+
+    assert_array_equal(solution.jac[[3, 5], 0], 0.0)
+    assert_allclose(
+        fit["jacobian"][[3, 5], 0], -0.5 * (height / 1e170) / 1e170, rtol=1e-12
+    )
