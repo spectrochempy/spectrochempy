@@ -1,4 +1,5 @@
 from datetime import UTC
+from datetime import date
 from datetime import datetime
 from pathlib import Path
 
@@ -457,6 +458,18 @@ def test_coordinate_extent_ignores_non_finite_values():
             "first [alpha, one]; last [gamma, three]",
         ),
         (
+            scp.Coord(labels=[date(2025, 1, 1), date(2025, 2, 1), date(2025, 3, 1)]),
+            "first 2025-01-01; last 2025-03-01",
+        ),
+        (
+            scp.Coord(labels=np.array([True, False, False])),
+            "first True; last False",
+        ),
+        (
+            scp.Coord([1 + 2j, 2 + 3j, 3 + 4j], rounding=False),
+            "first (1+2j); last (3+4j)",
+        ),
+        (
             scp.Coord(
                 np.array(
                     ["2025-01-01", "2025-02-01", "2025-03-01"], dtype="datetime64[D]"
@@ -475,6 +488,19 @@ def test_to_markdown_report_reports_first_and_last_for_non_numeric_coordinates(
     report = dataset.to_markdown_report(title="Report")
 
     assert extent in report
+
+
+def test_to_markdown_report_reports_endpoints_of_appended_coordinate_labels():
+    coord = scp.Coord(labels=["alpha", "beta", "gamma"], title="Samples")
+    coord.labels = ["one", "two", "three"]
+    dataset = scp.NDDataset([1.0, 2.0, 3.0], coordset=[coord])
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert (
+        "- `x` — Samples; size: 3; unit: —; first [alpha, one]; last [gamma, three]"
+        in report
+    )
 
 
 def test_to_markdown_report_renders_multiple_coordinates():

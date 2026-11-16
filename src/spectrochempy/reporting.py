@@ -8,7 +8,7 @@ from collections import Counter
 from collections.abc import Mapping
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date
 from itertools import groupby
 from numbers import Integral
 from pathlib import Path
@@ -48,7 +48,7 @@ _SCALAR_KEY_TYPES = (
     float,
     complex,
     Path,
-    datetime,
+    date,
     Unit,
     np.bool_,
     np.floating,
@@ -219,7 +219,7 @@ def _coordinates(dataset: NDDataset) -> list[str]:
         return [*lines, "- No coordinates provided."]
 
     names = coordset.names
-    for dim in dataset.dims:
+    for dim, axis_size in zip(dataset.dims, dataset.shape, strict=True):
         name = coordset.references.get(dim, dim)
         coord = dataset.coord(name) if name in names else None
         if coord is None:
@@ -231,19 +231,27 @@ def _coordinates(dataset: NDDataset) -> list[str]:
             lines.append(f"- `{_escape(dim)}`: —")
             continue
         label = coord.title if coord.title != "<untitled>" else coord.name
+        size = coord.size
+        if (
+            size != axis_size
+            and coord.labels is not None
+            and coord.labels.shape[0] == axis_size
+            and coord.data is None
+        ):
+            size = axis_size
         summary = [
             f"{_code(dim)} — {_text(label)}",
-            f"size: {coord.size}",
+            f"size: {size}",
             f"unit: {_unit(coord.units)}",
         ]
-        extent = _coordinate_extent(coord)
+        extent = _coordinate_extent(coord, axis_size=axis_size)
         if extent is not None:
             summary.append(extent)
         lines.append("- " + "; ".join(summary))
     return lines
 
 
-def _coordinate_extent(coord) -> str | None:
+def _coordinate_extent(coord, *, axis_size: int | None = None) -> str | None:
     data = coord.data
     if data is None:
         labels = coord.labels
@@ -252,6 +260,8 @@ def _coordinate_extent(coord) -> str | None:
         if labels.ndim == 1:
             first, last = labels[0], labels[-1]
         else:
+            if labels.shape[-1] != axis_size and labels.shape[0] == axis_size:
+                labels = np.moveaxis(labels, 0, -1)
             first, last = labels[..., 0].tolist(), labels[..., -1].tolist()
         return f"first {_value(first)}; last {_value(last)}"
     if len(data) == 0:
@@ -410,7 +420,7 @@ def _figure_target(target: str) -> str:
     return quote(target, safe="/%+@,~!$*-")
 
 
-def _datetime(value: datetime) -> str:
+def _datetime(value: date) -> str:
     return value.isoformat()
 
 
@@ -423,7 +433,7 @@ def _value(value, *, depth: int = 0) -> str:
         return "—"
     if isinstance(value, str | Path):
         return _text(str(value))
-    if isinstance(value, bool):
+    if isinstance(value, bool | np.bool_ | complex | np.complexfloating):
         return str(value)
     if isinstance(value, Integral | np.integer):
         return _integer_text(value)
@@ -431,7 +441,7 @@ def _value(value, *, depth: int = 0) -> str:
         return _float(value)
     if isinstance(value, np.floating):
         return _numpy_float(value)
-    if isinstance(value, datetime):
+    if isinstance(value, date):
         return _datetime(value)
     if isinstance(value, np.datetime64):
         return str(value)
