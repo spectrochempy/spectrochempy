@@ -526,7 +526,7 @@ class IRIS(DecompositionAnalysis):
         if (
             N > M
             and np.geterr()["under"] == "ignore"
-            and S.dtype in (np.float32, np.float64)
+            and S.dtype.type in (np.float32, np.float64)
             and S[0, 0] >= 6 * np.finfo(S.dtype).tiny
             and np.isfinite(S).all()
         ):
