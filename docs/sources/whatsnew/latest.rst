@@ -43,7 +43,7 @@ Bug Fixes
   ``align(method="inner")``, including datasets containing a single spectrum. (:pr:`1893`)
 
 - Preserve IRIS quadrature weights and regularization when the kernel grid
-  is supplied in descending order.
+  is supplied in descending order. (:pr:`1892`)
 
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
