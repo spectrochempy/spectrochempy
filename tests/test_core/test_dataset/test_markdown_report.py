@@ -665,6 +665,18 @@ def test_to_markdown_report_handles_numpy_duration_metadata():
     assert "Imported sample" in report
 
 
+def test_to_markdown_report_omits_unstable_metadata_key_representations():
+    dataset = _dataset()
+    dataset.meta.mapping = {object(): "plain", (object(),): "nested"}
+    report = dataset.to_markdown_report(title="Report", metadata=("mapping",))
+
+    dataset.meta.mapping = {object(): "plain", (object(),): "nested"}
+
+    assert report == dataset.to_markdown_report(title="Report", metadata=("mapping",))
+    assert r"\[omitted: object key\]: plain" in report
+    assert r"(\[omitted: object key\],): nested" in report
+
+
 def test_to_markdown_report_preserves_history_labels_and_code_spacing():
     dataset = _dataset()
     dataset.replace_history(

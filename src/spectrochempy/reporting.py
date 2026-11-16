@@ -41,6 +41,20 @@ _ENTITY_START = re.compile(
 _BLOCK_MARKER = re.compile(
     r"^(?:(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)|-(?=(?:[ \t]*-){2,}[ \t]*$))"
 )
+_SCALAR_KEY_TYPES = (
+    str,
+    bytes,
+    bool,
+    float,
+    complex,
+    Path,
+    datetime,
+    Unit,
+    np.bool_,
+    np.floating,
+    np.complexfloating,
+    np.datetime64,
+)
 
 
 @dataclass(frozen=True)
@@ -132,6 +146,7 @@ def render_dataset_markdown(
     include. Select metadata keys and sanitize sensitive content before sharing.
     Every recorded history entry is rendered in its original order. Individual
     values may be explicitly truncated for length, collection size or depth.
+    Unsupported metadata keys are identified by type.
 
     Examples
     --------
@@ -448,7 +463,7 @@ def _mapping_items(mapping: Mapping, *, item_depth: int) -> list[tuple[str, obje
                 label = (
                     _composite_key_repr(key)
                     if isinstance(key, tuple | frozenset)
-                    else str(key)
+                    else _scalar_key_label(key, nested=False)
                 )
             except (ValueError, RecursionError):
                 label = f"[omitted: {type(key).__name__} key]"
@@ -471,12 +486,7 @@ def _composite_key_repr(key, depth: int = 0) -> str:
     if depth >= _MAX_NESTING_DEPTH:
         return "[truncated: maximum depth]"
     if not isinstance(key, tuple | frozenset):
-        if (
-            isinstance(key, Integral | np.integer)
-            and _integer_text(key) == _INTEGER_TRUNCATED
-        ):
-            raise ValueError("integer in composite key is too large")
-        return repr(key)
+        return _scalar_key_label(key, nested=True)
     if isinstance(key, tuple):
         items = [
             _composite_key_repr(item, depth + 1) for item in key[:_MAX_COLLECTION_ITEMS]
@@ -491,6 +501,15 @@ def _composite_key_repr(key, depth: int = 0) -> str:
     if isinstance(key, tuple):
         return f"({contents}{',' if len(key) == 1 else ''})"
     return f"frozenset({{{contents}}})" if items else "frozenset()"
+
+
+def _scalar_key_label(key, *, nested: bool) -> str:
+    if isinstance(key, Integral | np.integer):
+        if _integer_text(key) == _INTEGER_TRUNCATED:
+            raise ValueError("integer in composite key is too large")
+    elif key is not None and not isinstance(key, _SCALAR_KEY_TYPES):
+        return f"[omitted: {type(key).__name__} key]"
+    return repr(key) if nested else str(key)
 
 
 def _integer_text(value: Integral | np.integer) -> str:
