@@ -9,6 +9,7 @@
 
 import warnings
 from os import environ
+from unittest.mock import Mock
 from unittest.mock import patch
 
 import numpy as np
@@ -21,6 +22,7 @@ from spectrochempy.utils import docutils as chd
 from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
 from spectrochempy_iris._core import _Smat
+from spectrochempy_iris._osqp_grid import solve_osqp_lambda
 
 
 @pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
@@ -126,6 +128,29 @@ def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers):
         str(item.message) == "underflow encountered in multiply" for item in emitted
     )
     assert underflow_warnings == 12
+
+
+def test_osqp_lambda_reports_penalty_overflow_for_each_channel():
+    grid = np.arange(4) * (1.55e306 ** (-1 / 3))
+    problem = (
+        np.eye(4),
+        np.ones((6, 4)),
+        np.eye(4),
+        np.zeros(4),
+        np.full(4, np.inf),
+        _Smat(grid),
+    )
+    solver = Mock()
+    solver.solve.return_value.x = np.ones(4)
+    with (
+        np.errstate(over="warn"),
+        pytest.warns(
+            RuntimeWarning, match="overflow encountered in multiply"
+        ) as emitted,
+    ):
+        solve_osqp_lambda(10.0, problem, lambda: solver)
+
+    assert solver.solve.call_count == len(emitted) == 6
 
 
 @pytest.mark.parametrize(
