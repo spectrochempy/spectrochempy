@@ -253,6 +253,21 @@ def test_regularized_nnls_satisfies_optimality_on_both_grid_orders():
         np.testing.assert_allclose(gradient[coefficients > 0], 0, atol=1e-12)
 
 
+def test_adaptive_nnls_preserves_search_bounds_on_refit():
+    pressure = np.linspace(0.1, 1, 5)
+    spectra = scp.NDDataset(
+        np.column_stack((pressure, -pressure)),
+        coordset=[scp.Coord(pressure), scp.Coord(np.arange(2))],
+    )
+    kernel = IrisKernel(spectra, "langmuir", q=[-4, 0, 5])
+    iris = IRIS(qpsolver="nnls", reg_par=[-4, -2]).fit(spectra, kernel)
+    strengths = iris.lambdas.data.copy()
+    np.testing.assert_allclose(strengths[[0, -1]], [1e-4, 1e-2], atol=0)
+
+    iris.fit(spectra, kernel)
+    np.testing.assert_array_equal(iris.lambdas.data, strengths)
+
+
 def test_adaptive_nnls_rejects_zero_sharpness():
     pressure = np.linspace(0.1, 1, 5)
     spectra = scp.NDDataset(

@@ -794,7 +794,7 @@ class IRIS(DecompositionAnalysis):
                 msg = (
                     f"Solving for {X.shape[1]} channel(s) and {X.shape[0]} "
                     f"observations, search optimum regularization parameter "
-                    f"in the range: [10**{min(lambdas)}, 10**{max(lambdas)}]"
+                    f"in the range: [10**{min(self.reg_par)}, 10**{max(self.reg_par)}]"
                 )
                 info_(msg)
 
@@ -802,8 +802,8 @@ class IRIS(DecompositionAnalysis):
                 epsilon = 0.1
                 phi = (1 + np.sqrt(5)) / 2
 
-                x[0] = min(lambdas)
-                x[3] = max(lambdas)
+                x[0] = min(self.reg_par)
+                x[3] = max(self.reg_par)
                 x[1] = (x[3] + phi * x[0]) / (1 + phi)
                 x[2] = x[0] + x[3] - x[1]
                 lambdas = 10**x
@@ -850,7 +850,6 @@ class IRIS(DecompositionAnalysis):
 
                         if C2 > 0:
                             break
-
                     if C1 > C2:
                         x_ = x[1]
                         C_ = C1
