@@ -257,6 +257,16 @@ def _coordinate_extent(coord, *, axis_size: int | None = None) -> str | None:
         labels = coord.labels
         if labels is None or labels.size == 0:
             return None
+        if (
+            axis_size is not None
+            and axis_size > 1
+            and labels.shape == (axis_size, axis_size)
+        ):
+            limit = _MAX_COLLECTION_ITEMS
+            stored = _value(labels[:limit, :limit].tolist())
+            if axis_size > limit:
+                stored += f" [truncated: {axis_size - limit} more rows and columns]"
+            return f"stored labels (endpoint orientation ambiguous): {stored}"
         if labels.ndim == 1:
             first, last = labels[0], labels[-1]
         else:

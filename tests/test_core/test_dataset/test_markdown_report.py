@@ -503,6 +503,23 @@ def test_to_markdown_report_reports_endpoints_of_appended_coordinate_labels():
     )
 
 
+@pytest.mark.parametrize("append_labels", [False, True])
+def test_to_markdown_report_preserves_ambiguous_square_coordinate_labels(append_labels):
+    if append_labels:
+        coord = scp.Coord(labels=["alpha", "beta"], title="Samples")
+        coord.labels = ["one", "two"]
+    else:
+        coord = scp.Coord(labels=[["alpha", "one"], ["beta", "two"]], title="Samples")
+    dataset = scp.NDDataset([1.0, 2.0], coordset=[coord])
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert (
+        "stored labels (endpoint orientation ambiguous): [[alpha, one], [beta, two]]"
+        in report
+    )
+
+
 def test_to_markdown_report_renders_multiple_coordinates():
     row = scp.Coord([1.0, 2.0], title="Row")
     column = scp.Coord([1.0, 2.0, 3.0], title="Column")
