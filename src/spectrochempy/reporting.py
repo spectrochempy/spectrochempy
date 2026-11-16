@@ -245,7 +245,16 @@ def _coordinates(dataset: NDDataset) -> list[str]:
 
 def _coordinate_extent(coord) -> str | None:
     data = coord.data
-    if data is None or len(data) == 0:
+    if data is None:
+        labels = coord.labels
+        if labels is None or labels.size == 0:
+            return None
+        if labels.ndim == 1:
+            first, last = labels[0], labels[-1]
+        else:
+            first, last = labels[..., 0].tolist(), labels[..., -1].tolist()
+        return f"first {_value(first)}; last {_value(last)}"
+    if len(data) == 0:
         return None
     array = np.ma.asarray(data)
     if array.dtype.kind in "iuf":
@@ -424,6 +433,8 @@ def _value(value, *, depth: int = 0) -> str:
         return _numpy_float(value)
     if isinstance(value, datetime):
         return _datetime(value)
+    if isinstance(value, np.datetime64):
+        return str(value)
     if isinstance(value, Unit):
         return _unit(value)
     if isinstance(value, Quantity):

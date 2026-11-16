@@ -448,13 +448,33 @@ def test_coordinate_extent_ignores_non_finite_values():
     assert _coordinate_extent(coord) == "min 3.0; max 5.0"
 
 
-def test_coordinate_extent_reports_first_and_last_for_non_numeric_data():
-    # Coord only accepts numeric data, so exercise the non-numeric fallback
-    # with the minimal interface used by the helper.
-    class CategoricalCoord:
-        data = np.array(["alpha", "beta", "gamma"])
+@pytest.mark.parametrize(
+    ("coordinate", "extent"),
+    [
+        (scp.Coord(labels=["alpha", "beta", "gamma"]), "first alpha; last gamma"),
+        (
+            scp.Coord(labels=[["alpha", "beta", "gamma"], ["one", "two", "three"]]),
+            "first [alpha, one]; last [gamma, three]",
+        ),
+        (
+            scp.Coord(
+                np.array(
+                    ["2025-01-01", "2025-02-01", "2025-03-01"], dtype="datetime64[D]"
+                ),
+                rounding=False,
+            ),
+            "first 2025-01-01; last 2025-03-01",
+        ),
+    ],
+)
+def test_to_markdown_report_reports_first_and_last_for_non_numeric_coordinates(
+    coordinate, extent
+):
+    dataset = scp.NDDataset([1.0, 2.0, 3.0], coordset=[coordinate])
 
-    assert _coordinate_extent(CategoricalCoord()) == "first alpha; last gamma"
+    report = dataset.to_markdown_report(title="Report")
+
+    assert extent in report
 
 
 def test_to_markdown_report_renders_multiple_coordinates():
