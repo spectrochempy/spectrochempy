@@ -11,7 +11,7 @@ from datetime import datetime
 from numbers import Integral
 from pathlib import Path
 from urllib.parse import quote
-from urllib.parse import urlparse
+from urllib.parse import urlsplit
 
 import numpy as np
 
@@ -31,9 +31,12 @@ _MAX_NESTING_DEPTH = 4
 _MAX_TEXT_LENGTH = 4096
 _MISSING = "[absent]"
 _TEXT_TRUNCATED = " [truncated: text too long]"
+_INTEGER_TRUNCATED = "[truncated: integer too large]"
+_INTEGER_LIMIT = 10**_MAX_TEXT_LENGTH
 _ENTITY_START = re.compile(
     r"&(?=(?:[A-Za-z][A-Za-z0-9]+|#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6});)"
 )
+_LIST_MARKER = re.compile(r"^[ \t]*(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)")
 
 
 @dataclass(frozen=True)
@@ -296,7 +299,7 @@ def _history_value(value, *, depth: int = 0, indent: str = "  ") -> list[str]:
     if not value:
         return [f"{indent}- {'{}' if isinstance(value, Mapping) else '[]'}"]
     items = (
-        [(key, value[key]) for key in sorted(value, key=str)[:_MAX_COLLECTION_ITEMS]]
+        _mapping_items(value)
         if isinstance(value, Mapping)
         else [
             (f"Item {i}", item)
@@ -318,9 +321,10 @@ def _history_value(value, *, depth: int = 0, indent: str = "  ") -> list[str]:
     return lines
 
 
-def _history_label(value) -> str:
-    label = str(value).replace("_", " ")
-    return _text(label[:1].upper() + label[1:])
+def _history_label(value: str) -> str:
+    label = value.replace("_", " ")
+    text = _text(label[:1].upper() + label[1:])
+    return _LIST_MARKER.sub(lambda match: match[0][:-1] + "\\" + match[0][-1], text)
 
 
 def _figures(figures: Sequence[FigureReference]) -> list[str]:
@@ -355,7 +359,7 @@ def _figure_target(target: str) -> str:
     if any(ord(character) < 32 or ord(character) == 127 for character in target):
         raise ValueError("figure target must not contain control characters")
     try:
-        parsed = urlparse(target)
+        parsed = urlsplit(target)
     except ValueError as exc:
         raise ValueError("figure target must be a valid URL or relative path") from exc
     if parsed.scheme:
@@ -364,13 +368,14 @@ def _figure_target(target: str) -> str:
     elif target.startswith(("/", "\\")):
         raise ValueError("figure target must be an HTTP(S) URL or relative path")
     if parsed.scheme:
-        url = parsed._replace(
-            netloc=quote(parsed.netloc, safe="[]:@%"),
-            path=quote(parsed.path, safe="/:%+@,;~!$&*-"),
-            params=quote(parsed.params, safe="=:%+@,;~!$&*-"),
-            query=quote(parsed.query, safe="/?:=+@,;~!$&*-%"),
-            fragment=quote(parsed.fragment, safe="/?:=+@,;~!$&*-%"),
-        ).geturl()
+        netloc = quote(parsed.netloc, safe="[]:@%")
+        path = quote(parsed.path, safe="/:%+@,;~!$&*-")
+        url = f"{parsed.scheme}://{netloc}{path}"
+        before_fragment, fragment_separator, _ = target.partition("#")
+        if "?" in before_fragment:
+            url += "?" + quote(parsed.query, safe="/?:=+@,;~!$&*-%")
+        if fragment_separator:
+            url += "#" + quote(parsed.fragment, safe="/?:=+@,;~!$&*-%")
         return _ENTITY_START.sub(r"\\&", url)
     return quote(target, safe="/%+@,~!$*-")
 
@@ -391,10 +396,7 @@ def _value(value, *, depth: int = 0) -> str:
     if isinstance(value, bool):
         return str(value)
     if isinstance(value, Integral | np.integer):
-        try:
-            return _text(str(value))
-        except ValueError:
-            return "[truncated: integer too large]"
+        return _integer_text(value)
     if isinstance(value, float):
         return _float(value)
     if isinstance(value, np.floating):
@@ -410,8 +412,8 @@ def _value(value, *, depth: int = 0) -> str:
             return "[truncated: maximum depth]"
         if isinstance(value, Mapping):
             items = [
-                f"{_text(str(key))}: {_value(value[key], depth=depth + 1)}"
-                for key in sorted(value, key=str)[:_MAX_COLLECTION_ITEMS]
+                f"{_text(key)}: {_value(item, depth=depth + 1)}"
+                for key, item in _mapping_items(value)
             ]
             opening, closing = "{", "}"
         else:
@@ -425,6 +427,27 @@ def _value(value, *, depth: int = 0) -> str:
             )
         return opening + ", ".join(items) + closing
     return f"[omitted: {type(value).__name__}]"
+
+
+def _mapping_items(mapping: Mapping) -> list[tuple[str, object]]:
+    def sort_key(key):
+        if isinstance(key, Integral | np.integer) and not isinstance(key, bool):
+            label = _integer_text(key)
+            return label, int(key) if label == _INTEGER_TRUNCATED else 0
+        return str(key), 0
+
+    keys = sorted(mapping, key=sort_key)[:_MAX_COLLECTION_ITEMS]
+    return [(sort_key(key)[0], mapping[key]) for key in keys]
+
+
+def _integer_text(value: Integral | np.integer) -> str:
+    if abs(int(value)) >= _INTEGER_LIMIT:
+        return _INTEGER_TRUNCATED
+    try:
+        text = str(value)
+    except ValueError:
+        return _INTEGER_TRUNCATED
+    return text if len(text) <= _MAX_TEXT_LENGTH else _INTEGER_TRUNCATED
 
 
 def _float(value: float) -> str:
@@ -466,6 +489,11 @@ def _code(value: str) -> str:
     delimiter = "`"
     while delimiter in value:
         delimiter += "`"
-    if not value or value.startswith("`") or value.endswith("`"):
+    if (
+        not value
+        or value.startswith("`")
+        or value.endswith("`")
+        or (value.startswith(" ") and value.endswith(" ") and value.strip(" "))
+    ):
         value = f" {value} "
     return f"{delimiter}{value}{delimiter}{suffix}"

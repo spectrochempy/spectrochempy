@@ -104,6 +104,9 @@ def test_to_markdown_report_rejects_invalid_figure_targets(target):
             r"https://example.org/a\&amp;b.png?x=1&y=2",
         ),
         ("http://example.org/spectrum.png", "http://example.org/spectrum.png"),
+        ("https://example.org/a?", "https://example.org/a?"),
+        ("https://example.org/a#", "https://example.org/a#"),
+        ("https://example.org/a;?#", "https://example.org/a;?#"),
         ('figures/a[1]"<>.png', "figures/a%5B1%5D%22%3C%3E.png"),
     ],
 )
@@ -604,6 +607,38 @@ def test_to_markdown_report_bounds_history_identifiers_and_large_integer():
     assert report.count("[truncated: text too long]") == 3
     assert "Number: [truncated: integer too large]" in report
     assert "##### 2. Next" in report
+
+
+def test_to_markdown_report_bounds_large_integer_keys():
+    dataset = _dataset()
+    large_keys = {10**5000: "first", 10**5001: "second"}
+    dataset.meta.mapping = large_keys
+
+    report = dataset.to_markdown_report(title="Report", metadata=("mapping",))
+    dataset.meta.mapping = dict(reversed(tuple(large_keys.items())))
+
+    assert report == dataset.to_markdown_report(title="Report", metadata=("mapping",))
+    assert r"\[truncated: integer too large\]: first" in report
+    assert r"\[truncated: integer too large\]: second" in report
+    assert "Imported sample" in report
+
+
+def test_to_markdown_report_preserves_history_labels_and_code_spacing():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "operation": "fit",
+                "parameters": {"1. literal": 1, "- literal": 2, "model": " a "},
+            }
+        ]
+    )
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert r"  - 1\. literal: 1" in report
+    assert r"  - \- literal: 2" in report
+    assert "- Method: `  a  `" in report
 
 
 def test_to_markdown_report_escapes_windows_path_text():
