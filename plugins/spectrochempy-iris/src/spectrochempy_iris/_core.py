@@ -13,7 +13,6 @@ from contextlib import suppress
 from functools import partial
 
 import numpy as np
-import osqp
 import traitlets as tr
 from scipy import linalg
 from scipy import optimize
@@ -29,12 +28,11 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
 
 from ._osqp_grid import solve_osqp_grid
-
-_quadprog = None  # loaded lazily on first use
 
 
 @tr.signature_has_traits
@@ -415,11 +413,11 @@ class IRIS(DecompositionAnalysis):
             "quadprog",
             "nnls",
         ],
-        default_value="osqp",
+        default_value="nnls",
         allow_none=True,
-        help="Solver for regularized fits: `osqp` (default), `quadprog`, or `nnls`. "
+        help="Solver for regularized fits: `nnls` (default), `osqp`, or `quadprog`. "
         "NNLS uses SciPy on an augmented least-squares system and requires real "
-        "data and a positive-definite penalty. Install quadprog separately to use it.",
+        "data and a positive-definite penalty. OSQP and quadprog are optional.",
     ).tag(config=True)
 
     reg_par = tr.List(
@@ -459,24 +457,6 @@ class IRIS(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
     # ----------------------------------------------------------------------------------
-    @tr.validate("qpsolver")
-    def _qpsolver_validate(self, proposal):
-        qpsolver = proposal.value
-        if qpsolver == "quadprog":
-            global _quadprog
-            if _quadprog is None:
-                from spectrochempy.utils.optional import (
-                    import_optional_dependency,  # noqa: PLC0415
-                )
-
-                _quadprog = import_optional_dependency("quadprog", errors="ignore")
-            if _quadprog is False:
-                raise ValueError(
-                    "quadprog module is not installed. Please install it or run IRIS Solver "
-                    "with qpsolver='osqp'",
-                )
-        return qpsolver
-
     @tr.validate("reg_par")
     def _reg_par_validate(self, proposal):
         reg_par = proposal.value
@@ -592,8 +572,12 @@ class IRIS(DecompositionAnalysis):
             # some matrices used for QP optimization do not depend on lambdaR
             # and are computed here.
 
+            solver = self.qpsolver or "nnls"
             parallel_grid = False
-            if self.qpsolver == "osqp":
+            if solver == "osqp":
+                osqp = import_optional_dependency(
+                    "osqp", extra="IRIS requires it for qpsolver='osqp'."
+                )
                 make_solver = osqp.OSQP
                 backend = None
                 default_algebra = getattr(osqp, "default_algebra", None)
@@ -636,7 +620,7 @@ class IRIS(DecompositionAnalysis):
                     with np.errstate(over="ignore", invalid="ignore", under="ignore"):
                         max_penalty = P0 + 2 * lambdas.max() * S
                     parallel_grid = np.isfinite(max_penalty).all()
-            elif self.qpsolver == "nnls":
+            elif solver == "nnls":
                 if any(np.iscomplexobj(array) for array in (X, K, S)):
                     raise ValueError("Regularized NNLS requires real data and penalty.")
                 # S = U.T @ U, so stacking sqrt(lambda) * U below K adds
@@ -651,6 +635,9 @@ class IRIS(DecompositionAnalysis):
                 augmented_data = np.vstack((X, np.zeros((M, N))))
                 P0 = None
             else:
+                quadprog = import_optional_dependency(
+                    "quadprog", extra="IRIS requires it for qpsolver='quadprog'."
+                )
                 # The standard form used by quadprog() was
                 # minimize (1/2) xT P x - qT x ; subject to: A.T x >= b
                 # The first part of the G matrix is independent of lambda:
@@ -680,11 +667,11 @@ class IRIS(DecompositionAnalysis):
                 f, RSS and SM for a given regularization parameter
 
                 """
-                if self.qpsolver == "osqp":
+                if solver == "osqp":
                     fi = _solve_osqp_lambda(
                         lambda_, problem, make_solver, legacy_warning
                     )
-                elif self.qpsolver == "nnls":
+                elif solver == "nnls":
                     fi = np.empty((K.shape[1], X.shape[1]))
                     if lambda_ == 0:
                         design, observations = K, X
@@ -702,7 +689,7 @@ class IRIS(DecompositionAnalysis):
                     for j, channel in enumerate(channels.data):
                         try:
                             P = P0 + 2 * lambda_ * S
-                            fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+                            fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                         except ValueError:  # pragma: no cover
                             msg = (
@@ -713,9 +700,7 @@ class IRIS(DecompositionAnalysis):
                             warning_(msg)
                             try:
                                 P = _nearestPD(P0 + 2 * lambda_ * S, 0)
-                                fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[
-                                    0
-                                ]
+                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                             except ValueError:
                                 msg = (
@@ -724,9 +709,7 @@ class IRIS(DecompositionAnalysis):
                                 )
                                 warning_(msg)
                                 P = _nearestPD(P0 + 2 * lambda_ * S, 1e-3)
-                                fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[
-                                    0
-                                ]
+                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                 return summarize_lambda(X, K, lambda_, fi)
 
@@ -736,7 +719,7 @@ class IRIS(DecompositionAnalysis):
                 SMi = sharpness(fi)
 
                 if (
-                    self.qpsolver == "nnls"
+                    solver == "nnls"
                     and self._search_reg
                     and not (0 < RSSi < np.inf and 0 < SMi < np.inf)
                 ):
@@ -824,7 +807,7 @@ class IRIS(DecompositionAnalysis):
                     info_(msg)
 
                     while "convergence not reached":
-                        if self.qpsolver == "nnls" and not x[0] < x[1] < x[2] < x[3]:
+                        if solver == "nnls" and not x[0] < x[1] < x[2] < x[3]:
                             raise ValueError(
                                 "Adaptive NNLS regularization could not find positive "
                                 "curvature. Use a fixed regularization grid."
@@ -970,7 +953,7 @@ class IRIS(DecompositionAnalysis):
         return AnalysisResult(
             estimator="IRIS",
             parameters={
-                "qpsolver": self.qpsolver,
+                "qpsolver": self.qpsolver or "nnls",
                 "reg_par": self.reg_par,
                 "warm_start": self._warm_start,
                 "regularization": self._regularization,

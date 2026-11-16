@@ -15,9 +15,6 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
-- Select SciPy's non-negative least-squares solver for regularized IRIS fits
-  with ``qpsolver='nnls'``.
-
 - Split one dataset axis into blocks with ``reshape(coord_policy='split')``.
 - Compute and invert one-sided Fourier transforms along a dataset dimension with ``rfft`` and ``irfft``.
 - ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
@@ -50,6 +47,13 @@ Bug Fixes
 
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- IRIS uses SciPy NNLS by default for regularized fits. Install OSQP
+  separately and pass ``qpsolver="osqp"`` to keep using the previous solver.
+  Quadprog also requires a separate installation. (:pr:`1892`)
 
 Developer
 ~~~~~~~~~

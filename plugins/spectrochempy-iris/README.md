@@ -16,6 +16,19 @@ SpectroChemPy 1.0.0 should keep an earlier compatible version of this plugin.
 pip install spectrochempy[iris]
 ```
 
+IRIS uses SciPy NNLS by default for regularized fits. To use the OSQP
+or quadprog solver, install the corresponding extra and set
+`qpsolver="osqp"` or `qpsolver="quadprog"` on `IRIS`.
+
+```bash
+pip install "spectrochempy-iris[osqp]"
+pip install "spectrochempy-iris[quadprog]"
+```
+
+For conda installations, install `osqp` or `quadprog` separately.
+Select `qpsolver="osqp"` to retain the previous solver or to use the
+`workers` option on fixed regularization grids.
+
 ## Usage
 
 ```python
@@ -36,7 +49,7 @@ compatibility.
 
 ```bash
 pip install -e .
-pip install -e plugins/spectrochempy-iris
+pip install -e "plugins/spectrochempy-iris[osqp]"
 cd plugins/spectrochempy-iris
 python -m pytest tests/
 ```

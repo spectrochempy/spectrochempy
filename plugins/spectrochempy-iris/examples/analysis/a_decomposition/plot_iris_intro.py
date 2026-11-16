@@ -127,10 +127,11 @@ _ = iris3.fit(X_, K)
 _ = iris3.plotlcurve(title="L curve, automated search")
 
 # %%
-# The largest curvature of the L-curve is at index 5 for this automated search.
+# On this dataset, the NNLS search selects a regularization strength near
+# 2.1e-5 (index 4 on the evaluated grid).
 
-_ = iris3.result.f[5].plot_contour()
-_ = iris3.plotmerit(5)
+_ = iris3.result.f[4].plot_contour()
+_ = iris3.plotmerit(4)
 
 # %%
 # The historical root example also demonstrated the legacy direct classes

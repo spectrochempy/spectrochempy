@@ -7,13 +7,13 @@
 
 """Core IRIS tests — moved from core to plugin."""
 
+import sys
 import warnings
 from os import environ
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import numpy as np
-import osqp
 import pytest
 
 import spectrochempy as scp
@@ -25,8 +25,34 @@ from spectrochempy_iris._core import _Smat
 from spectrochempy_iris._core import _solve_osqp_lambda
 
 
-@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
-def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
+@pytest.fixture
+def osqp():
+    module = pytest.importorskip("osqp")
+    if not hasattr(module, "default_algebra"):
+        pytest.skip("requires modern OSQP")
+    return module
+
+
+def test_regularized_iris_runs_without_optional_qp_solvers(monkeypatch):
+    for solver in ("osqp", "quadprog"):
+        monkeypatch.setitem(sys.modules, solver, None)
+
+    observations = scp.Coord(np.arange(5))
+    grid = scp.Coord(np.arange(4))
+    channels = scp.Coord(np.arange(2))
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+    spectra = scp.NDDataset(np.ones((5, 2)), coordset=[observations, channels])
+    regularization = [-4, -2, 3]
+
+    iris = IRIS(reg_par=regularization).fit(spectra, kernel)
+    assert iris.qpsolver == "nnls"
+    assert iris.f.shape == (3, 4, 2)
+    for solver in ("osqp", "quadprog"):
+        with pytest.raises(ImportError, match=f"qpsolver='{solver}'"):
+            IRIS(qpsolver=solver, reg_par=regularization).fit(spectra, kernel)
+
+
+def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch, osqp):
     monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
     observations = scp.Coord(np.arange(5))
     channels = scp.Coord(np.arange(6))
@@ -37,12 +63,14 @@ def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
     kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
     with warnings.catch_warnings(record=True) as serial_warnings:
         warnings.simplefilter("always", PendingDeprecationWarning)
-        serial = IRIS(reg_par=[-4, -2, 3], workers=1).fit(spectra, kernel)
-    with warnings.catch_warnings(record=True) as parallel_warnings:
-        warnings.simplefilter("always", PendingDeprecationWarning)
-        parallel = IRIS(reg_par=[-4, -2, 3], workers=2, log_level="INFO").fit(
+        serial = IRIS(qpsolver="osqp", reg_par=[-4, -2, 3], workers=1).fit(
             spectra, kernel
         )
+    with warnings.catch_warnings(record=True) as parallel_warnings:
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        parallel = IRIS(
+            qpsolver="osqp", reg_par=[-4, -2, 3], workers=2, log_level="INFO"
+        ).fit(spectra, kernel)
     assert "Starting OSQP workers for a 4-point kernel grid" in parallel.log
     serial_messages = [
         str(item.message)
@@ -60,7 +88,7 @@ def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
             pytest.raises(PendingDeprecationWarning),
         ):
             warnings.simplefilter("error", PendingDeprecationWarning)
-            IRIS(reg_par=[-4, -2, 3], workers=2).fit(spectra, kernel)
+            IRIS(qpsolver="osqp", reg_par=[-4, -2, 3], workers=2).fit(spectra, kernel)
 
     for actual, reference in (
         (parallel.f, serial.f),
@@ -75,7 +103,6 @@ def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
         assert actual.tobytes() == reference.tobytes()
 
 
-@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
 @pytest.mark.parametrize(
     ("points", "reg_par", "warning_is_error"),
     [
@@ -85,7 +112,7 @@ def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
     ids=["negative-penalty", "overflowing-penalty"],
 )
 def test_iris_workers_keep_invalid_grid_failures_sequential(
-    monkeypatch, capfd, points, reg_par, warning_is_error
+    monkeypatch, capfd, points, reg_par, warning_is_error, osqp
 ):
     monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
     if not warning_is_error:
@@ -107,15 +134,16 @@ def test_iris_workers_keep_invalid_grid_failures_sequential(
                 )
             error = RuntimeWarning if warning_is_error else osqp.OSQPException
             with pytest.raises(error):
-                IRIS(reg_par=reg_par, workers=workers).fit(spectra, kernel)
+                IRIS(qpsolver="osqp", reg_par=reg_par, workers=workers).fit(
+                    spectra, kernel
+                )
         native_output.append(capfd.readouterr())
 
     assert native_output[0] == native_output[1]
 
 
-@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
 @pytest.mark.parametrize("workers", [1, 2])
-def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers):
+def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers, osqp):
     monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
     observations = scp.Coord(np.arange(5))
     channels = scp.Coord(np.arange(6))
@@ -127,7 +155,9 @@ def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers):
 
     with np.errstate(under="warn"), warnings.catch_warnings(record=True) as emitted:
         warnings.simplefilter("always", RuntimeWarning)
-        IRIS(reg_par=[-25, -24, 2], workers=workers).fit(spectra, kernel)
+        IRIS(qpsolver="osqp", reg_par=[-25, -24, 2], workers=workers).fit(
+            spectra, kernel
+        )
 
     underflow_warnings = sum(
         str(item.message) == "underflow encountered in multiply" for item in emitted
@@ -142,7 +172,9 @@ def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers):
             module=r"^spectrochempy_iris\._core$",
         )
         with pytest.raises(RuntimeWarning, match="underflow encountered in multiply"):
-            IRIS(reg_par=[-25, -24, 2], workers=workers).fit(spectra, kernel)
+            IRIS(qpsolver="osqp", reg_par=[-25, -24, 2], workers=workers).fit(
+                spectra, kernel
+            )
 
 
 def test_osqp_lambda_reports_penalty_overflow_for_each_channel():

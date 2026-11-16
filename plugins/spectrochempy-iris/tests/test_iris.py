@@ -340,7 +340,7 @@ class TestIRISResult:
     def test_parameters_describe_solver_and_regularization(self, fitted_iris):
         parameters = fitted_iris.result.parameters
         assert parameters == {
-            "qpsolver": "osqp",
+            "qpsolver": "nnls",
             "reg_par": None,
             "warm_start": False,
             "regularization": False,
