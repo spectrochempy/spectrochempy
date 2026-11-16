@@ -11,11 +11,20 @@ import numpy as np
 from scipy import sparse
 
 
+def _penalized_matrix(lambda_, P0, S):
+    return sparse.triu(sparse.csc_matrix(P0 + 2 * lambda_ * S), format="csc")
+
+
 def solve_osqp_lambda(lambda_, problem, make_solver, legacy_warning=None):
     P0, q, A, lo, up, S = problem
-    P = sparse.triu(sparse.csc_matrix(P0 + 2 * lambda_ * S), format="csc")
-    distribution = np.empty((P.shape[0], len(q)))
+    cached_matrix = None
+    if np.geterr()["under"] == "ignore":
+        cached_matrix = _penalized_matrix(lambda_, P0, S)
+    distribution = np.empty((P0.shape[0], len(q)))
     for j, linear in enumerate(q):
+        P = cached_matrix
+        if P is None:
+            P = _penalized_matrix(lambda_, P0, S)
         solver = make_solver()
         if legacy_warning is None:
             solver.setup(P, linear.squeeze(), A, lo, up, alpha=1.0, verbose=False)

@@ -106,6 +106,28 @@ def test_iris_workers_keep_invalid_grid_failures_sequential(
     assert native_output[0] == native_output[1]
 
 
+@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
+@pytest.mark.parametrize("workers", [1, 2])
+def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers):
+    monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(np.arange(4) * 1e100, rounding=False)
+    spectra = scp.NDDataset(
+        np.arange(30.0).reshape(5, 6), coordset=[observations, channels]
+    )
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+
+    with np.errstate(under="warn"), warnings.catch_warnings(record=True) as emitted:
+        warnings.simplefilter("always", RuntimeWarning)
+        IRIS(reg_par=[-25, -24, 2], workers=workers).fit(spectra, kernel)
+
+    underflow_warnings = sum(
+        str(item.message) == "underflow encountered in multiply" for item in emitted
+    )
+    assert underflow_warnings == 12
+
+
 @pytest.mark.parametrize(
     ("points", "expected_sm"),
     [

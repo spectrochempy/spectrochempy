@@ -611,7 +611,7 @@ class IRIS(DecompositionAnalysis):
                     and len(lambdas) > 1
                     and backend == "builtin"
                     and legacy_warning is None
-                    and np.isrealobj(S)
+                    and np.result_type(P0, q, S).type in (np.float32, np.float64)
                     and S[0, 0] > 0
                     and np.isfinite(S).all()
                     and np.isfinite(lambdas).all()
