@@ -32,3 +32,4 @@ in the :doc:`analysis gallery </gettingstarted/examples/gallery/auto_examples_an
    pca
    pls
    mcr_als
+   iris

@@ -15,6 +15,9 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add an IRIS tutorial covering the Langmuir kernel, regularization and
+  interpretation of the CO adsorption example. (:pr:`1892`)
+
 - Split one dataset axis into blocks with ``reshape(coord_policy='split')``.
 - Compute and invert one-sided Fourier transforms along a dataset dimension with ``rfft`` and ``irfft``.
 - ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
