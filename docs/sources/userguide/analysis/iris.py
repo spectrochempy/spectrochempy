@@ -142,7 +142,7 @@
 # 2115 cm$^{-1}$ show where the strongest recovered contribution lies in $q$.*
 #
 # - Select a regularization strength and plot the corresponding slice of
-#   `analysis.result.f`. Use `analysis.result.f[4].plot_contour()` for the
+#   `analysis.result.f`. Use `iris3.result.f[4].plot_contour()` for the
 #   gallery fit shown above. Features that extend across neighboring
 #   wavenumbers at similar $q$ can help associate spectral bands with a
 #   common pressure response.
