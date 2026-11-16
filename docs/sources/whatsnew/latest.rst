@@ -15,6 +15,8 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Split one dataset axis into blocks with ``reshape(coord_policy='split')``.
+- Compute and invert one-sided Fourier transforms along a dataset dimension with ``rfft`` and ``irfft``.
 - ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
   summary of one explicitly supplied dataset, selected metadata, structured
   history and explicit figure references. It does not capture Matplotlib state

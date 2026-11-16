@@ -127,3 +127,36 @@ def test_reshape_preserves_current_reference_removal_behavior():
     assert reshaped.shape == (3,)
     assert reshaped.coordset.references == {}
     assert_array_equal(reshaped.x.data, coord_x.data)
+
+
+def test_split_reshape_keeps_block_geometry_coordinates_and_mask():
+    data = scp.NDDataset(np.arange(30.0).reshape(10, 3))
+    data.y = [
+        scp.Coord(np.arange(10) * 2 + 3, title="time", units="ms"),
+        scp.Coord(np.arange(10) * 3, title="elapsed", units="s"),
+    ]
+    data.y.select(2)
+    data.x = scp.Coord([10, 20, 30], units="eV")
+    data[8, 2] = scp.MASKED
+
+    grouped = data.reshape((-1, 5, 3), dims=("cycle", "y", "x"), coord_policy="split")
+
+    assert grouped.shape == (2, 5, 3)
+    assert grouped.mask[1, 3, 2]
+    assert grouped.x == data.x
+    old_default = data.y.default
+    assert grouped.y.default.units == old_default.units
+    assert_array_equal(grouped.coordset["cycle"].default.data, old_default.data[::5])
+    assert_array_equal(
+        grouped.y.default.data, old_default.data[:5] - old_default.data[0]
+    )
+
+
+def test_split_reshape_requires_an_unambiguous_axis_and_numeric_coordinate():
+    data = scp.NDDataset(np.ones((6, 4)))
+    with pytest.raises(ValueError, match="numeric coordinate"):
+        data.reshape((2, 3, 4), coord_policy="split")
+
+    data.y = scp.Coord(np.arange(6))
+    with pytest.raises(ValueError, match="exactly one axis"):
+        data.reshape((2, 2, 6), coord_policy="split")
