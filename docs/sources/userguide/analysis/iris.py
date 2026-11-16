@@ -127,42 +127,104 @@
 # spectra and residuals before interpreting the map.
 
 # %% [markdown]
-# ## Read the map alongside the original spectra
+# ## Work through the CO adsorption series
 #
-# The gallery follows CO adsorption on molybdenum supported on alumina. It
-# starts with infrared spectra recorded at 19 pressures, selects the CO
-# stretching region, builds a Langmuir kernel and estimates an affinity
-# distribution.
+# [Install the IRIS plugin](../plugins/iris.rst#installation) to run this tutorial.
+# The dataset contains 19 infrared spectra measured during CO adsorption.
+# Use the recorded pressures as the active observation coordinate and keep
+# the acquisition times as a secondary coordinate. Select the CO stretching
+# region using its wavenumber limits.
+
+# %%
+import spectrochempy as scp
+
+spectra = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
+pressures = [
+    0.003,
+    0.004,
+    0.009,
+    0.014,
+    0.021,
+    0.026,
+    0.036,
+    0.051,
+    0.093,
+    0.150,
+    0.203,
+    0.300,
+    0.404,
+    0.503,
+    0.602,
+    0.702,
+    0.801,
+    0.905,
+    1.004,
+]
+pressure = scp.Coord(pressures, title="pressure", units="torr")
+spectra.y = [spectra.y.copy(), pressure]
+spectra.y.select(2)
+spectra = spectra[:, 2250.0:1950.0]
+_ = spectra.plot_contourf(colorbar=True)
+
+# %% [markdown]
+# ### Build the kernel and fit without regularization
 #
-# ![CO adsorption contour map with wavenumber on the horizontal axis and
-# adsorption affinity on the vertical axis.](images/iris-co-affinity.png)
+# The Langmuir kernel uses 50 grid points between $q=-8$ and $q=-1$.
+# The fit without a penalty gives a baseline for judging what the penalty
+# changes in the recovered distribution.
+
+# %%
+kernel = spectra.iris.kernel_matrix(kernel_type="langmuir", q=[-8, -1, 50])
+unregularized = scp.iris.IRIS(reg_par=None)
+_ = unregularized.fit(spectra, kernel)
+_ = unregularized.result.f[0].plot_contour()
+
+# %% [markdown]
+# ### Scan regularization strengths
 #
-# Affinity distribution from the CO gallery example, using the adaptive
-# NNLS fit at $\lambda \approx 2.11 \times 10^{-5}$. The contours near
-# 2115 cm$^{-1}$ show where the strongest recovered contribution lies in $q$.
+# Scan a broad range and read the L-curve. For this dataset the bend is
+# near $10^{-4}$ on this grid. Use the corresponding slice of the distribution
+# to see how the roughness penalty changes the map.
+
+# %%
+scan = scp.iris.IRIS(reg_par=[-10, 1, 12])
+_ = scan.fit(spectra, kernel)
+_ = scan.plotlcurve(title="Fixed scan of regularization strengths")
+_ = scan.result.f[6].plot_contour()
+
+# %% [markdown]
+# ### Refine the search and inspect the reconstruction
 #
-# - Select a regularization strength and plot the corresponding slice of
-#   `analysis.result.f`. Use `iris3.result.f[4].plot_contour()` for the
-#   gallery fit shown above. Features that extend across neighboring
-#   wavenumbers at similar $q$ can help associate spectral bands with a
-#   common pressure response.
-# - Compare the reconstructed and measured spectra at representative pressures.
-#   Residual structure that persists across the pressure series can indicate
-#   that the kernel or preprocessing does not describe some of the signal.
-# - Check how the map changes with the grid and $\lambda$. Features that
-#   persist across reasonable choices are easier to interpret. The recovered
-#   amplitude describes spectral contribution. Conversion to an absolute
-#   population requires a calibration or an independent quantitative measure.
+# Search within a narrower range around the bend. The default NNLS solver
+# reports the selected strength and its index when logging is set to INFO.
+# For this fit the search selects about $2.11 \times 10^{-5}$ at index 4.
+# Use the index reported by your fit to select the matching distribution
+# and reconstruction.
+
+# %%
+adaptive = scp.iris.IRIS(reg_par=[-6, -2], log_level="INFO")
+_ = adaptive.fit(spectra, kernel)
+_ = adaptive.plotlcurve(title="Adaptive search")
+selected_index = 4
+_ = adaptive.result.f[selected_index].plot_contour()
+_ = adaptive.plot_merit(index=selected_index)
+
+# %% [markdown]
+# The contours near 2115 cm$^{-1}$ show where the strongest recovered
+# contribution lies in $q$. Bands extending across neighboring wavenumbers
+# at similar $q$ may share a pressure response. Check the reconstructed
+# spectra and residuals against the measurements. Residual structure that
+# persists across pressures can indicate a mismatch in the kernel or
+# preprocessing. Check that the map features persist across reasonable
+# choices of grid and $\lambda$. The recovered amplitude describes a
+# spectral contribution. Converting it to an absolute population requires
+# calibration or an independent quantitative measure.
 #
-# ## Try the CO adsorption example
+# The [short CO gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.rst)
+# shows one fit at a fixed strength. See the
+# [IRIS API reference](../../reference/generated/spectrochempy.iris.IRIS.rst)
+# for estimator parameters, methods and outputs.
 #
-# 1. [Install the IRIS plugin](../plugins/iris.rst#installation).
-# 2. [Follow the CO adsorption example in the gallery](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.rst).
-#    It shows how to attach the pressure coordinate, construct the kernel,
-#    compare regularization strengths, and plot the distribution and the
-#    reconstructed spectra.
-# 3. [Consult the IRIS API reference](../../reference/generated/spectrochempy.iris.IRIS.rst)
-#    for estimator parameters, methods and outputs.
-#
-# [Stelmachowski et al. (2013), *Phys. Chem. Chem. Phys.*](https://doi.org/10.1039/C3CP51146D)
-# describe the original 2D IRIS method.
+# ```{=rst}
+# :cite:t:`stelmachowski:2013` describe the original 2D IRIS method.
+# ```
