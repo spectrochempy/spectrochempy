@@ -959,10 +959,18 @@ class CoordSet(HasTraits):
             with np.errstate(over="ignore"):
                 offsets = blocks - blocks[:, :1]
                 mean_offsets = offsets.mean(axis=0)
+            spread_scale = 1
             if not np.isfinite(mean_offsets).all():
-                # Scale before summation if the sum exceeds the float range.
-                with np.errstate(over="ignore"):
-                    mean_offsets = (offsets / shape[0]).sum(axis=0)
+                # Scale before summation. Scale before subtraction too if
+                # even one block offset exceeds the float range.
+                spread_scale = shape[0]
+                with np.errstate(over="ignore", invalid="ignore"):
+                    if np.isfinite(offsets).all():
+                        offsets = offsets / spread_scale
+                    else:
+                        scaled = blocks / spread_scale
+                        offsets = scaled - scaled[:, :1]
+                    mean_offsets = offsets.sum(axis=0)
                 if not np.isfinite(mean_offsets).all():
                     raise ValueError("Split coordinate offsets cannot be represented.")
             options = {
@@ -981,9 +989,14 @@ class CoordSet(HasTraits):
 
             # Keep the original within-block sampling check even if the mean
             # offsets happen to make a regular grid.
-            steps = np.diff(offsets, axis=1)
+            with np.errstate(over="ignore"):
+                steps = np.diff(blocks, axis=1)
             irregular = bool(
-                steps.size and not np.allclose(steps, steps.flat[0], rtol=1e-6, atol=0)
+                steps.size
+                and (
+                    not np.isfinite(steps).all()
+                    or not np.allclose(steps, steps.flat[0], rtol=1e-6, atol=0)
+                )
             )
             inner_coord = Coord(
                 mean_offsets,
@@ -993,7 +1006,7 @@ class CoordSet(HasTraits):
             inner_coord.meta["split_irregular_sampling"] = source_irregular or irregular
             inner.append(inner_coord)
             if steps.size and np.any(
-                np.ptp(offsets, axis=0) > np.median(0.5 * abs(steps))
+                np.ptp(offsets, axis=0) > np.median((0.5 / spread_scale) * abs(steps))
             ):
                 warnings.warn(
                     f"Offsets differ between blocks on coordinate {coordinate.title!r}.",

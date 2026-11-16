@@ -182,3 +182,18 @@ def test_split_reshape_keeps_representable_mean_of_large_offsets():
 
     result = data.reshape((2, 2), coord_policy="split")
     np.testing.assert_allclose(result.x.data, [0, 1.075e308])
+
+
+def test_split_reshape_keeps_mean_even_when_a_single_offset_overflows():
+    data = scp.NDDataset(np.arange(6.0))
+    data.set_coordset(
+        x=scp.Coord(
+            [-1.7e308, -0.9e308, 0.15e308, 0.2e308, 0.25e308, 0.3e308],
+            rounding=False,
+            linearize_below=0,
+        )
+    )
+
+    with pytest.warns(UserWarning, match="Offsets differ"):
+        result = data.reshape((2, 3), coord_policy="split")
+    np.testing.assert_allclose(result.x.data, [0, 4.25e307, 9.75e307])
