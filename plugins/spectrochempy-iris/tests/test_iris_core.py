@@ -79,7 +79,7 @@ def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
 @pytest.mark.parametrize(
     ("points", "reg_par", "warning_is_error"),
     [
-        (np.arange(3.0, -1.0, -1.0), [-4, 3, 3], False),
+        (np.arange(4.0), [-4, 3, 3], False),
         (np.arange(4) * 1e-100, [9, 10, 3], True),
     ],
     ids=["negative-penalty", "overflowing-penalty"],
@@ -88,6 +88,8 @@ def test_iris_workers_keep_invalid_grid_failures_sequential(
     monkeypatch, capfd, points, reg_par, warning_is_error
 ):
     monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    if not warning_is_error:
+        monkeypatch.setitem(IRIS._fit.__globals__, "_Smat", lambda q: -_Smat(q))
     observations = scp.Coord(np.arange(5))
     channels = scp.Coord(np.arange(6))
     grid = scp.Coord(points, rounding=False)
@@ -209,6 +211,21 @@ def test_iris_wide_dataset_sharpness_at_extreme_scales(grid_step, amplitude):
         distribution = model.f.data[0]
         expected_sm = np.linalg.norm(distribution.T @ _Smat(grid.data) @ distribution)
     np.testing.assert_allclose(model.SM.data, [expected_sm], rtol=1e-12, atol=0)
+
+
+def test_iris_kernel_and_penalty_are_invariant_to_grid_reversal():
+    spectra = scp.NDDataset(
+        np.ones((5, 2)),
+        coordset=[scp.Coord(np.linspace(0.1, 1, 5)), scp.Coord(np.arange(2))],
+    )
+    ascending = IrisKernel(spectra, "langmuir", q=[-4, 0, 5]).kernel
+    descending = IrisKernel(spectra, "langmuir", q=[0, -4, 5]).kernel
+
+    np.testing.assert_array_equal(descending.x.data[::-1], ascending.x.data)
+    np.testing.assert_array_equal(descending.data[:, ::-1], ascending.data)
+    penalty = _Smat(descending.x.data)
+    np.testing.assert_array_equal(penalty[::-1, ::-1], _Smat(ascending.x.data))
+    assert np.all(np.linalg.eigvalsh(penalty) > 0)
 
 
 def test_IRIS_docstrings():

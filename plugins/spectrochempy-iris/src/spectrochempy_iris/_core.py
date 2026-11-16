@@ -295,7 +295,10 @@ class IrisKernel(tr.HasTraits):
 
         # weighting coefficients for the numerical quadrature of the Fredholm integral
         w = np.zeros(q.size)
-        w[0] = 0.5 * (q.data[-1] - q.data[0]) / (q.size - 1)
+        span = q.data[-1] - q.data[0]
+        if np.isrealobj(span):
+            span = abs(span)
+        w[0] = 0.5 * span / (q.size - 1)
         w[1:-1] = 2 * w[0]
         w[-1] = w[0]
 
@@ -1109,7 +1112,10 @@ def _Smat(q):
     S[m - 1, m - 2] = -4
     S[m - 1, m - 1] = 6
 
-    return ((q[m - 1] - q[0]) / (m - 1)) ** (-3) * S
+    step = (q[m - 1] - q[0]) / (m - 1)
+    if np.isrealobj(step):
+        step = abs(step)
+    return step ** (-3) * S
 
 
 def _nearestPD(A, shift):  # pragma: no cover
