@@ -1,0 +1,611 @@
+"""Deterministic Markdown reporting for explicit scientific inputs."""
+
+from __future__ import annotations
+
+import math
+import re
+from collections import Counter
+from collections.abc import Mapping
+from collections.abc import Sequence
+from dataclasses import dataclass
+from datetime import date
+from itertools import groupby
+from numbers import Integral
+from pathlib import Path
+from urllib.parse import quote
+from urllib.parse import urlsplit
+
+import numpy as np
+
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import Unit
+
+__all__ = ["FigureReference", "render_dataset_markdown"]
+
+
+_SCOPE_MESSAGE = (
+    "This report summarizes recorded dataset information and processing history. "
+    "It is not an executable workflow or a complete provenance record."
+)
+_MAX_COLLECTION_ITEMS = 32
+_MAX_NESTING_DEPTH = 4
+_MAX_TEXT_LENGTH = 4096
+_MISSING = "[absent]"
+_TEXT_TRUNCATED = " [truncated: text too long]"
+_INTEGER_TRUNCATED = "[truncated: integer too large]"
+_INTEGER_LIMIT = 10**_MAX_TEXT_LENGTH
+_ENTITY_START = re.compile(
+    r"&(?=(?:[A-Za-z][A-Za-z0-9]+|#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6});)"
+)
+_BLOCK_MARKER = re.compile(
+    r"^(?:(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)|-(?=(?:[ \t]*-){2,}[ \t]*$))"
+)
+_SCALAR_KEY_TYPES = (
+    str,
+    bytes,
+    bool,
+    float,
+    complex,
+    Path,
+    date,
+    Unit,
+    np.bool_,
+    np.floating,
+    np.complexfloating,
+    np.datetime64,
+)
+
+
+@dataclass(frozen=True)
+class FigureReference:
+    """
+    An explicit, report-relative or HTTP(S) figure reference.
+
+    The caller supplies every reference; the renderer never captures Matplotlib
+    state.
+
+    Parameters
+    ----------
+    label : str
+        Figure label, used for the section heading and the image alternative
+        text.
+    target : str
+        HTTP(S) URL or relative POSIX path, resolved relative to the exported
+        Markdown file. Spaces and Markdown delimiters are URL-encoded.
+        Other URL schemes and absolute paths are rejected. The target is not
+        checked for existence and is never copied.
+    caption : str, optional
+        Optional caption rendered after the image.
+
+    See Also
+    --------
+    reporting.render_dataset_markdown : Render a dataset report.
+    NDDataset.to_markdown_report : Shortcut on a dataset instance.
+
+    Examples
+    --------
+    .. code-block:: python
+
+       from spectrochempy.reporting import FigureReference
+
+       figure = FigureReference(
+           "Spectrum",
+           "figures/spectrum.png",
+           "Measured signal.",
+       )
+    """
+
+    label: str
+    target: str
+    caption: str | None = None
+
+
+def render_dataset_markdown(
+    dataset: NDDataset,
+    *,
+    title: str,
+    metadata: Sequence[str] = (),
+    figures: Sequence[FigureReference] = (),
+) -> str:
+    """
+    Render one :class:`NDDataset` as a deterministic Markdown report.
+
+    Rendering is deterministic, does not modify the dataset, and never captures
+    Matplotlib state.
+
+    Parameters
+    ----------
+    dataset : NDDataset
+        Dataset to describe. The renderer does not modify it.
+    title : str
+        Required document title.
+    metadata : sequence of str, optional
+        Explicit metadata keys to include, in report order. This allowlist is
+        the only metadata selection mechanism; no key is discovered
+        automatically.
+    figures : sequence of FigureReference, optional
+        Explicit figure references. Matplotlib figures and implicit capture are
+        not supported.
+
+    Returns
+    -------
+    str
+        Deterministic Markdown document ending with a single newline.
+
+    See Also
+    --------
+    NDDataset.to_markdown_report : Shortcut on a dataset instance.
+    reporting.FigureReference : Explicit figure reference.
+
+    Notes
+    -----
+    Free text is rendered as supplied and escaped for Markdown. The renderer
+    does not detect confidential information or redact paths. Callers are
+    responsible for the metadata, origin, history and figure references they
+    include. Select metadata keys and sanitize sensitive content before sharing.
+    Every recorded history entry is rendered in its original order. Individual
+    values may be explicitly truncated for length, collection size or depth.
+    Unsupported metadata keys are identified by type.
+
+    Examples
+    --------
+    .. code-block:: python
+
+       import spectrochempy as scp
+       from spectrochempy.reporting import FigureReference
+
+       dataset = scp.NDDataset([1.0, 2.0, 3.0], title="Absorbance")
+       dataset.meta.operator = "Ada"
+       report = dataset.to_markdown_report(
+           title="IR experiment",
+           metadata=("operator",),
+           figures=(FigureReference("Spectrum", "figures/spectrum.png"),),
+       )
+       print(report)
+    """
+    if not isinstance(dataset, NDDataset):
+        raise TypeError("dataset must be an NDDataset")
+    if not isinstance(title, str) or not title.strip():
+        raise ValueError("title must be a non-empty string")
+    if isinstance(metadata, str):
+        raise TypeError("metadata must be a sequence of strings")
+    metadata = tuple(metadata)
+    if any(not isinstance(key, str) for key in metadata):
+        raise TypeError("metadata keys must be strings")
+    figures = tuple(figures)
+    _validate_figures(figures)
+
+    lines = [
+        f"# {_text(title)}",
+        "",
+        "## Datasets",
+        "",
+        f"### {_dataset_heading(dataset)}",
+        "",
+    ]
+    lines.extend(_dataset_summary(dataset))
+    lines.extend(_coordinates(dataset))
+    lines.extend(_metadata(dataset, metadata))
+    lines.extend(_history(dataset))
+    lines.extend(_figures(figures))
+    lines.extend(["", _SCOPE_MESSAGE])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _dataset_heading(dataset: NDDataset) -> str:
+    if dataset.has_defined_name:
+        return _text(dataset.name)
+    return "Dataset"
+
+
+def _dataset_summary(dataset: NDDataset) -> list[str]:
+    lines = ["- Shape: " + _code(repr(dataset.shape))]
+    lines.append("- Dimensions: " + _code(", ".join(dataset.dims)))
+    lines.append("- Data unit: " + _unit(dataset.units))
+    if dataset.title != "<untitled>":
+        lines.append("- Title: " + _text(dataset.title))
+    origin = dataset.origin
+    if isinstance(origin, str) and not origin.strip():
+        origin = None
+    lines.append("- Origin: " + _value(origin))
+    return lines
+
+
+def _coordinates(dataset: NDDataset) -> list[str]:
+    lines = ["", "#### Coordinates", ""]
+    coordset = dataset.coordset
+    if coordset is None:
+        return [*lines, "- No coordinates provided."]
+
+    names = coordset.names
+    for dim, axis_size in zip(dataset.dims, dataset.shape, strict=True):
+        name = coordset.references.get(dim, dim)
+        coord = dataset.coord(name) if name in names else None
+        if coord is None:
+            lines.append(f"- `{_escape(dim)}`: —")
+            continue
+        if hasattr(coord, "default"):
+            coord = coord.default
+        if coord is None:
+            lines.append(f"- `{_escape(dim)}`: —")
+            continue
+        label = coord.title if coord.title != "<untitled>" else coord.name
+        size = coord.size
+        if (
+            size != axis_size
+            and coord.labels is not None
+            and coord.labels.shape[0] == axis_size
+            and coord.data is None
+        ):
+            size = axis_size
+        summary = [
+            f"{_code(dim)} — {_text(label)}",
+            f"size: {size}",
+            f"unit: {_unit(coord.units)}",
+        ]
+        extent = _coordinate_extent(coord, axis_size=axis_size)
+        if extent is not None:
+            summary.append(extent)
+        lines.append("- " + "; ".join(summary))
+    return lines
+
+
+def _coordinate_extent(coord, *, axis_size: int | None = None) -> str | None:
+    data = coord.data
+    if data is None:
+        labels = coord.labels
+        if labels is None or labels.size == 0:
+            return None
+        if (
+            axis_size is not None
+            and axis_size > 1
+            and labels.shape == (axis_size, axis_size)
+        ):
+            limit = _MAX_COLLECTION_ITEMS
+            stored = _value(labels[:limit, :limit].tolist())
+            if axis_size > limit:
+                stored += f" [truncated: {axis_size - limit} more rows and columns]"
+            return f"stored labels (endpoint orientation ambiguous): {stored}"
+        if labels.ndim == 1:
+            first, last = labels[0], labels[-1]
+        else:
+            if labels.shape[-1] != axis_size and labels.shape[0] == axis_size:
+                labels = np.moveaxis(labels, 0, -1)
+            first, last = labels[..., 0].tolist(), labels[..., -1].tolist()
+        return f"first {_value(first)}; last {_value(last)}"
+    if len(data) == 0:
+        return None
+    array = np.ma.asarray(data)
+    if array.dtype.kind in "iuf":
+        valid = np.ma.masked_invalid(array).compressed()
+        if valid.size == 0:
+            return None
+        return f"min {_value(valid.min())}; max {_value(valid.max())}"
+    return f"first {_value(data[0])}; last {_value(data[-1])}"
+
+
+def _metadata(dataset: NDDataset, keys: Sequence[str]) -> list[str]:
+    if not keys:
+        return []
+    lines = ["", "#### Selected metadata", ""]
+    for key in keys:
+        if key not in dataset.meta:
+            lines.append(f"- {_code(key)}: {_MISSING}")
+            continue
+        lines.append(f"- {_code(key)}: {_value(dataset.meta[key])}")
+    return lines
+
+
+def _history(dataset: NDDataset) -> list[str]:
+    lines = ["", "#### Processing history", ""]
+    entries = dataset.history_entries
+    if not entries:
+        return [*lines, "- No history entry provided."]
+
+    for index, entry in enumerate(entries, start=1):
+        operation = entry["operation"] if entry["operation"] is not None else "text"
+        lines.extend([f"##### {index}. {_history_label(operation)}", ""])
+        parameters = entry["parameters"]
+        if isinstance(parameters, Mapping):
+            if "model" in parameters:
+                model = parameters["model"]
+                method = _code(model) if isinstance(model, str) else _value(model)
+                lines.append(f"- Method: {method}")
+            remaining = {
+                key: value
+                for key, value in parameters.items()
+                if key not in {"model", "sources"}
+            }
+            if remaining:
+                lines.append("- Parameters:")
+                lines.extend(_history_value(remaining))
+            else:
+                lines.append("- Parameters: —")
+            if "sources" in parameters:
+                lines.append("- Sources:")
+                lines.extend(_history_value(parameters["sources"]))
+        else:
+            lines.append(f"- Parameters: {_value(parameters)}")
+        lines.extend(
+            [
+                "- Details:",
+                f"  - Timestamp: {_code(_datetime(entry['date']))}",
+                f"  - Operation: {_code(operation)}",
+                f"  - Message: {_value(entry['message'])}",
+                "",
+            ]
+        )
+    return lines[:-1]
+
+
+def _history_value(value, *, depth: int = 0, indent: str = "  ") -> list[str]:
+    if not isinstance(value, Mapping | list | tuple):
+        return [f"{indent}- {_value(value)}"]
+    if depth >= _MAX_NESTING_DEPTH:
+        return [f"{indent}- [truncated: maximum depth]"]
+    if not value:
+        return [f"{indent}- {'{}' if isinstance(value, Mapping) else '[]'}"]
+    items = (
+        [(key, value[key]) for key in sorted(value)[:_MAX_COLLECTION_ITEMS]]
+        if isinstance(value, Mapping)
+        else [
+            (f"Item {i}", item)
+            for i, item in enumerate(value[:_MAX_COLLECTION_ITEMS], start=1)
+        ]
+    )
+    labels = [_history_label(key) for key, _ in items]
+    label_counts = Counter(labels)
+    lines = []
+    for (key, child), label in zip(items, labels, strict=True):
+        if label_counts[label] > 1:
+            label = _code(key)
+        if isinstance(child, Mapping | list | tuple):
+            lines.append(f"{indent}- {label}:")
+            lines.extend(_history_value(child, depth=depth + 1, indent=indent + "  "))
+        else:
+            lines.append(f"{indent}- {label}: {_value(child)}")
+    if len(value) > _MAX_COLLECTION_ITEMS:
+        lines.append(
+            f"{indent}- [truncated: {len(value) - _MAX_COLLECTION_ITEMS} more items]"
+        )
+    return lines
+
+
+def _history_label(value: str) -> str:
+    label = value.replace("_", " ")
+    return _text(label[:1].upper() + label[1:])
+
+
+def _figures(figures: Sequence[FigureReference]) -> list[str]:
+    if not figures:
+        return []
+    lines = ["", "## Figures", ""]
+    for figure in figures:
+        target = _figure_target(figure.target)
+        label = _text(figure.label)
+        lines.append(f"### {label}")
+        lines.extend(["", f"![{label}]({target})"])
+        if figure.caption is not None:
+            lines.extend(["", f"Caption: {_text(figure.caption)}"])
+        lines.append("")
+    return lines[:-1]
+
+
+def _validate_figures(figures: Sequence[FigureReference]) -> None:
+    for figure in figures:
+        if not isinstance(figure, FigureReference):
+            raise TypeError("figures must contain FigureReference instances")
+        if not isinstance(figure.label, str) or not figure.label:
+            raise ValueError("figure label must be a non-empty string")
+        if figure.caption is not None and not isinstance(figure.caption, str):
+            raise TypeError("figure caption must be a string or None")
+        _figure_target(figure.target)
+
+
+def _figure_target(target: str) -> str:
+    if not isinstance(target, str) or not target:
+        raise ValueError("figure target must be a non-empty string")
+    if any(ord(character) < 32 or ord(character) == 127 for character in target):
+        raise ValueError("figure target must not contain control characters")
+    try:
+        parsed = urlsplit(target)
+    except ValueError as exc:
+        raise ValueError("figure target must be a valid URL or relative path") from exc
+    if parsed.scheme:
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
+            raise ValueError("figure target must be an HTTP(S) URL or relative path")
+    elif target.startswith(("/", "\\")):
+        raise ValueError("figure target must be an HTTP(S) URL or relative path")
+    if parsed.scheme:
+        netloc = quote(parsed.netloc, safe="[]:@%")
+        path = quote(parsed.path, safe="/:%+@,;=~!$&'*-")
+        url = f"{parsed.scheme}://{netloc}{path}"
+        before_fragment, fragment_separator, _ = target.partition("#")
+        if "?" in before_fragment:
+            url += "?" + quote(parsed.query, safe="/?:=+@,;~!$&'*-%")
+        if fragment_separator:
+            url += "#" + quote(parsed.fragment, safe="/?:=+@,;~!$&'*-%")
+        return _ENTITY_START.sub(r"\\&", url)
+    return quote(target, safe="/%+@,~!$*-")
+
+
+def _datetime(value: date) -> str:
+    return value.isoformat()
+
+
+def _unit(value) -> str:
+    return "—" if value is None else _code(str(value))
+
+
+def _value(value, *, depth: int = 0) -> str:
+    if value is None:
+        return "—"
+    if isinstance(value, str | Path):
+        return _text(str(value))
+    if isinstance(value, bool | np.bool_ | complex | np.complexfloating):
+        return str(value)
+    if isinstance(value, Integral | np.integer):
+        return _integer_text(value)
+    if isinstance(value, float):
+        return _float(value)
+    if isinstance(value, np.floating):
+        return _numpy_float(value)
+    if isinstance(value, date):
+        return _datetime(value)
+    if isinstance(value, np.datetime64):
+        return str(value)
+    if isinstance(value, Unit):
+        return _unit(value)
+    if isinstance(value, Quantity):
+        return f"{_value(value.magnitude, depth=depth + 1)} {_unit(value.units)}"
+    if isinstance(value, Mapping | list | tuple):
+        if depth >= _MAX_NESTING_DEPTH:
+            return "[truncated: maximum depth]"
+        if isinstance(value, Mapping):
+            items = [
+                f"{_text(key)}: {_value(item, depth=depth + 1)}"
+                for key, item in _mapping_items(value, item_depth=depth + 1)
+            ]
+            opening, closing = "{", "}"
+        else:
+            items = [
+                _value(item, depth=depth + 1) for item in value[:_MAX_COLLECTION_ITEMS]
+            ]
+            opening, closing = "[", "]"
+        if len(value) > _MAX_COLLECTION_ITEMS:
+            items.append(
+                f"[truncated: {len(value) - _MAX_COLLECTION_ITEMS} more items]"
+            )
+        return opening + ", ".join(items) + closing
+    return f"[omitted: {type(value).__name__}]"
+
+
+def _mapping_items(mapping: Mapping, *, item_depth: int) -> list[tuple[str, object]]:
+    def sort_key(item):
+        key, _ = item
+        ordinal = 0
+        if isinstance(key, Integral | np.integer) and not isinstance(key, bool):
+            label = _integer_text(key)
+            if label == _INTEGER_TRUNCATED:
+                ordinal = int(key)
+        else:
+            try:
+                label = (
+                    _composite_key_repr(key)
+                    if isinstance(key, tuple | frozenset)
+                    else _scalar_key_label(key, nested=False)
+                )
+            except (ValueError, RecursionError):
+                label = f"[omitted: {type(key).__name__} key]"
+        return label, type(key).__module__, type(key).__qualname__, ordinal
+
+    items = []
+    ordered = sorted(mapping.items(), key=sort_key)
+    for key, group in groupby(ordered, key=sort_key):
+        values = [value for _, value in group]
+        if len(values) > 1:
+            values.sort(key=lambda value: _value(value, depth=item_depth))
+        remaining = _MAX_COLLECTION_ITEMS - len(items)
+        items.extend((key[0], value) for value in values[:remaining])
+        if len(items) == _MAX_COLLECTION_ITEMS:
+            break
+    return items
+
+
+def _composite_key_repr(key, depth: int = 0) -> str:
+    if depth >= _MAX_NESTING_DEPTH:
+        return "[truncated: maximum depth]"
+    if not isinstance(key, tuple | frozenset):
+        return _scalar_key_label(key, nested=True)
+    if isinstance(key, tuple):
+        items = [
+            _composite_key_repr(item, depth + 1) for item in key[:_MAX_COLLECTION_ITEMS]
+        ]
+    else:
+        items = sorted(_composite_key_repr(item, depth + 1) for item in key)[
+            :_MAX_COLLECTION_ITEMS
+        ]
+    if len(key) > _MAX_COLLECTION_ITEMS:
+        items.append(f"[truncated: {len(key) - _MAX_COLLECTION_ITEMS} more items]")
+    contents = ", ".join(items)
+    if isinstance(key, tuple):
+        return f"({contents}{',' if len(key) == 1 else ''})"
+    return f"frozenset({{{contents}}})" if items else "frozenset()"
+
+
+def _scalar_key_label(key, *, nested: bool) -> str:
+    if isinstance(key, Integral | np.integer):
+        if _integer_text(key) == _INTEGER_TRUNCATED:
+            raise ValueError("integer in composite key is too large")
+    elif key is not None and not isinstance(key, _SCALAR_KEY_TYPES):
+        return f"[omitted: {type(key).__name__} key]"
+    return repr(key) if nested else str(key)
+
+
+def _integer_text(value: Integral | np.integer) -> str:
+    if isinstance(value, np.timedelta64):
+        return str(value)
+    if abs(int(value)) >= _INTEGER_LIMIT:
+        return _INTEGER_TRUNCATED
+    try:
+        text = str(value)
+    except ValueError:
+        return _INTEGER_TRUNCATED
+    return text if len(text) <= _MAX_TEXT_LENGTH else _INTEGER_TRUNCATED
+
+
+def _float(value: float) -> str:
+    if math.isnan(value):
+        return "NaN"
+    if math.isinf(value):
+        return "+∞" if value > 0 else "-∞"
+    return repr(float(value))
+
+
+def _numpy_float(value: np.floating) -> str:
+    if np.isnan(value):
+        return "NaN"
+    if np.isinf(value):
+        return "+∞" if value > 0 else "-∞"
+    return str(value)
+
+
+def _text(value: str) -> str:
+    if len(value) > _MAX_TEXT_LENGTH:
+        return _escape(value[:_MAX_TEXT_LENGTH]) + _TEXT_TRUNCATED
+    return _escape(value)
+
+
+def _escape(value: str) -> str:
+    trimmed = value.lstrip(" \t")
+    leading = value[: len(value) - len(trimmed)]
+    value = trimmed
+    value = value.replace("\\", "\\\\")
+    value = _ENTITY_START.sub(r"\\&", value)
+    value = value.replace("\r\n", "\n").replace("\r", "\n")
+    value = value.replace("\n", "\\n")
+    for character in "`*[]<>#~":
+        value = value.replace(character, f"\\{character}")
+    value = re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", value)
+    escaped = _BLOCK_MARKER.sub(
+        lambda match: match[0][:-1] + "\\" + match[0][-1], value
+    )
+    return "".join(f"&#{ord(character)};" for character in leading) + escaped
+
+
+def _code(value: str) -> str:
+    suffix = _TEXT_TRUNCATED if len(value) > _MAX_TEXT_LENGTH else ""
+    value = value[:_MAX_TEXT_LENGTH]
+    value = value.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\\n")
+    delimiter = "`"
+    while delimiter in value:
+        delimiter += "`"
+    if (
+        not value
+        or value.startswith("`")
+        or value.endswith("`")
+        or (value.startswith(" ") and value.endswith(" ") and value.strip(" "))
+    ):
+        value = f" {value} "
+    return f"{delimiter}{value}{delimiter}{suffix}"

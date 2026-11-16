@@ -19,6 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
+  summary of one explicitly supplied dataset, selected metadata, structured
+  history and explicit figure references. It does not capture Matplotlib state
+  or claim exhaustive provenance. Every recorded history operation is included
+  in order; only individual values are explicitly truncated. Paths are rendered
+  as supplied, and figure references accept relative paths and HTTP(S) URLs. (:pr:`1775`)
 
 .. section
 
