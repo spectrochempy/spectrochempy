@@ -75,6 +75,16 @@ explicitly directs a push to `upstream`.
 When a task is authorized, proceed to a validated solution and a first review
 of the diff without requesting confirmation for ordinary technical choices.
 
+## Independent review before merge
+
+Every PR requires an independent review from a fresh temporary subagent
+session without the implementation history. Record the verdict and exact
+PR head. Resolve actionable findings, validate the corrections, and repeat
+in a fresh session. Merge only when the current head has an explicit
+`APPROVE` verdict and all required checks pass. Any change to the head
+requires a new review. Follow the `spectrochempy-dev` and
+`spectrochempy-review` skills for the handoff and review loop.
+
 ## PR Base
 
 Always base PRs on `upstream/master` unless explicitly instructed otherwise.

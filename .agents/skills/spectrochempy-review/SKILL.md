@@ -12,14 +12,14 @@ metadata:
 
 ## Trigger
 
-Use this skill when asked to perform a **separate review** of an
-implementation. This review runs in a **temporary subagent session** attached
-to the current task, with the review prompt and repository access but without
-the implementation history. Return the report to the parent agent.
+Use this skill for a requested **separate review** and for the mandatory
+independent review before every PR merge. This review runs in a **temporary
+subagent session** attached to the current task, with the review prompt and
+repository access but without the implementation history. Return the report
+to the parent agent.
 
-Do **not** use this for trivial changes (typos, formatting, mechanical
-refactoring with no behavior change). Those are covered by the implementer's
-self-review.
+For a PR intended for merge, use this skill even for documentation,
+formatting, or test-only changes.
 
 ---
 
@@ -32,7 +32,7 @@ The reviewer works from:
 2. **Applicable instructions** — `AGENTS.md`, `CONTRIBUTING.md`, and only the
    relevant conventions from the `spectrochempy-dev` skill (read the specific
    sections needed, not the skill in full).
-3. **The diff** — exact commit or branch range to examine.
+3. **The diff** — exact base and head commits or the local diff snapshot.
 4. **Relevant sources** — the implementation code and tests.
 
 The implementer's self-report is **information to verify**, not authority.
@@ -46,7 +46,7 @@ A handoff prompt from the implementer containing:
 
 * Need / requirement.
 * Branch name or PR number.
-* Base commit and commit to examine.
+* Exact base and head commits, or exact base commit and local diff snapshot.
 * Sensitive points flagged by the implementer.
 
 **Do not ask the maintainer for missing elements.** First, try to find them:
@@ -62,6 +62,10 @@ Only ask the maintainer if a genuine ambiguity remains after investigation.
 ## Procedure
 
 ### 1. Establish the diff
+
+For uncommitted work, verify the supplied base commit and review the exact
+diff snapshot from the handoff. Report which snapshot the verdict covers.
+For committed work, use the base and head commits as follows.
 
 ```bash
 git diff <base>..<commit>
@@ -163,10 +167,14 @@ Classify findings as:
 
 ### Verdict
 
-* **Approve** — no established defects; change is safe to merge.
-* **Request changes** — established defects must be fixed before merge.
-* **Needs discussion** — uncertainties or design choices that warrant
-  maintainer judgment.
+State one explicit verdict and record the exact reviewed head commit or local diff snapshot.
+
+* `APPROVE` — no unresolved actionable findings for this head.
+* `REQUEST_CHANGES` — established defects require correction.
+* `NEEDS_DISCUSSION` — an uncertainty or design decision requires resolution.
+
+Only `APPROVE` for the current PR head satisfies the independent review
+requirement. Any new head requires a fresh independent session.
 
 ### Validation
 

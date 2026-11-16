@@ -34,12 +34,19 @@ git checkout -b <new-branch> upstream/master
 
 Do NOT create branches, commit, push, or open PRs unless explicitly delegated.
 
-## GitHub Content
+## PR Publication
 
-Before creating or editing a GitHub issue, pull-request description, comment,
-review, or reply, show the exact proposed text to the maintainer and obtain
-explicit validation. Treat a request to write GitHub content as a request for a
-draft unless the maintainer separately authorizes its publication after review.
+Keep PR preparation local. Push a branch only when the maintainer explicitly
+asks to push it or to open a PR that needs it. Open a GitHub PR, including a
+draft PR, only when the maintainer explicitly asks to open it.
+When opening an authorized PR, write its description as part of opening it.
+
+## Other GitHub Content
+
+Before creating or editing a GitHub issue, comment, review, or reply, show
+the exact proposed text to the maintainer and obtain explicit validation.
+Treat a request to write that content as a request for a local draft unless
+the maintainer separately authorizes its publication after review.
 
 ### Branch Names
 
@@ -235,20 +242,22 @@ internal (refactoring, tests, docs), apply the `no-changelog` label to the PR.
 * In gallery examples, notebooks, and user guides, keep calculations on
   `NDDataset` and `Coord` when their operators and methods express the
   calculation clearly. Use `scp.Coord.linspace()` for coordinates,
-  `scp.linspace()` for sampled values, `scp.gaussian()` for a Gaussian
-  profile, and `scp.normal()` for normal random samples. Keep NumPy for
-  interoperability, low-level comparisons, and operations without a
-  suitable public equivalent.
+  `scp.linspace()` for sampled values, and `scp.normal()` for normal random
+  samples. For line shapes, use the public helper for the intended model:
+  `scp.gaussian()`, `scp.lorentzian()`, `scp.voigt()`, or
+  `scp.pseudovoigt()`. Match the model's width and normalization to the
+  example before replacing a formula. Keep NumPy for interoperability,
+  low-level comparisons, and operations without a suitable public equivalent.
 * Likewise, prefer `dataset.plot()`, `scp.multiplot()`, `scp.plot_multiple()`,
   and their `output=` lifecycle over direct Matplotlib calls. Keep Matplotlib
   when the example demonstrates integration or needs a feature the public
   plotting API does not expose.
   Check this on edited examples even when the imports were already present.
-* In notebooks, keep figures, useful diagnostics, and intentional examples
-  of object display. Assign incidental return values to `_`, for example
-  `_ = dataset.plot()` or `_ = ax.set_xlim(...)` when the return value is
-  unused. This suppresses the object representation while preserving the
-  plot.
+* In notebook-based tutorials and gallery examples, use `_ = expression`
+  when an unused return value would appear as cell output. For example,
+  `_ = dataset.plot()` hides the returned axes representation while keeping
+  the figure visible. Keep useful diagnostics and intentionally displayed
+  objects.
 
 ---
 
@@ -358,37 +367,19 @@ Fix any problem found before considering the task complete.
 
 ## When a Separate Review Is Required
 
-An independent review in a temporary subagent session, without the
-implementation history, is required for changes that affect:
-
-* **Behavior** — any user-visible behavior change, bug fix with semantic
-  impact, or algorithm modification.
-* **API** — new, modified, or removed public API symbols.
-* **Scientific computation** — numerical methods, transforms, fitting,
-  preprocessing, or any calculation that affects results.
-* **Readers / I/O** — file format handling, serialization, or data import.
-* **CI / Publication** — workflows, release process, packaging.
-
-A separate review is **not** required for:
-
-* Pure documentation edits (typos, formatting, clarifications).
-* Mechanical refactoring with no behavior change (renames, reformatting).
-* Test-only additions that verify existing behavior.
-
-Justify briefly when skipping the separate review based on actual risk.
-
----
+Every PR requires independent review before merge, including documentation,
+test-only and mechanical changes. Use a fresh temporary subagent session
+without the implementation history. For work that is not going to merge,
+separate review is still appropriate for changes to behavior, public APIs,
+scientific calculations, I/O, CI or packaging.
 
 ## Handoff to Separate Review
 
-When a separate review is required, prepare a short prompt and offer to start
-a temporary subagent session attached to the current task. Launch the initial
-review only at the maintainer's explicit request. Give the reviewer only the
-review prompt and access to the relevant repository, without inheriting the
-implementation conversation. Do not create a standalone chat or task. Close
-the subagent session when it returns its report. If the application cannot
-start an isolated temporary subagent, report the limitation and provide the
-review prompt.
+When the maintainer requests a review or delegates a merge, start an
+independent review in a fresh temporary subagent session. Give the reviewer
+the prompt, applicable repository instructions, and repository access.
+If an isolated reviewer is unavailable, report the limitation and provide
+the review prompt. Leave any pending PR open until approved.
 
 Include:
 
@@ -403,15 +394,24 @@ The reviewer works from this prompt, the applicable instructions, the diff,
 and the relevant sources. The implementer's report is information to verify,
 not authority.
 
-When the independent review returns, verify its findings against the code,
-apply the justified corrections, and run targeted validation. After making
-corrections, launch another temporary subagent session to review the updated
-diff without asking for approval again. Give the reviewer the updated scope
-and revision. Keep the implementation conversation and earlier reviews out
-of the subagent session. Repeat until an independent review finds no actionable
-issues. If a finding requires a maintainer decision or the application
-cannot launch another isolated temporary subagent, report what remains and provide
-the updated review prompt.
+For uncommitted work, provide the exact base commit and a snapshot of the
+diff under review. Record which snapshot the verdict covers. The review
+request itself authorizes the review loop locally.
+
+After each review, verify the findings, fix actionable issues, and run
+targeted validation. Start a fresh independent subagent session for each
+updated diff without asking again. Give each reviewer the exact revision
+and keep the implementation conversation and earlier reviews out of their
+context. Repeat until the current revision receives an explicit `APPROVE`.
+If a finding needs a maintainer decision, surface it and resume the review
+loop once it is resolved.
+
+Record the verdict and reviewed commit. Immediately before merging,
+verify that GitHub still reports that head and that the required checks
+passed. Make the merge request conditional on the approved head commit.
+If GitHub reports a different head or rejects the merge for a head mismatch,
+review the new head. If a guarded merge or independent review is unavailable,
+or the verdict requires changes or discussion, keep the PR open.
 
 Example handoff prompt:
 
@@ -434,7 +434,9 @@ Before reporting completion:
 2. No broken imports or circular dependencies.
 3. Audit note updated if applicable (see Audit Notes section).
 4. Self-review performed and issues fixed.
-5. If required, handoff prompt for separate review produced.
+5. If review was requested or merge delegated, complete the independent review
+   loop and record the verdict for the exact revision. If blocked, report the
+   blocker and provide the handoff prompt when a reviewer is unavailable.
 6. Files staged (`git add <files>`) for VSCode Source Control handoff. Do not
    commit or push unless explicitly delegated.
 
