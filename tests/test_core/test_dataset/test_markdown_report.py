@@ -76,6 +76,8 @@ def test_to_markdown_report_matches_golden_file_without_mutation():
         "/spectrum.png",
         "//example.org/a.png",
         "https://",
+        "https://:80/spectrum.png",
+        "https://user@/spectrum.png",
         "figures/a\n## forged.png",
     ],
 )
@@ -611,7 +613,13 @@ def test_to_markdown_report_bounds_history_identifiers_and_large_integer():
 
 def test_to_markdown_report_bounds_large_integer_keys():
     dataset = _dataset()
-    large_keys = {10**5000: "first", 10**5001: "second"}
+    large_keys = {
+        10**5000: "first",
+        10**5001: "second",
+        (10**5000, "sample"): "reference",
+        1: "numeric",
+        "1": "string",
+    }
     dataset.meta.mapping = large_keys
 
     report = dataset.to_markdown_report(title="Report", metadata=("mapping",))
@@ -620,6 +628,8 @@ def test_to_markdown_report_bounds_large_integer_keys():
     assert report == dataset.to_markdown_report(title="Report", metadata=("mapping",))
     assert r"\[truncated: integer too large\]: first" in report
     assert r"\[truncated: integer too large\]: second" in report
+    assert r"\[omitted: tuple key\]: reference" in report
+    assert "1: numeric, 1: string" in report
     assert "Imported sample" in report
 
 
@@ -639,6 +649,23 @@ def test_to_markdown_report_preserves_history_labels_and_code_spacing():
     assert r"  - 1\. literal: 1" in report
     assert r"  - \- literal: 2" in report
     assert "- Method: `  a  `" in report
+
+
+@pytest.mark.parametrize(
+    ("source", "escaped"),
+    [
+        ("- literal path", r"\- literal path"),
+        ("1. literal path", r"1\. literal path"),
+        ("---", r"\---"),
+    ],
+)
+def test_to_markdown_report_preserves_scalar_history_sources(source, escaped):
+    dataset = _dataset()
+    dataset.replace_history([{"operation": "load", "parameters": {"sources": source}}])
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert f"- Sources:\n  - {escaped}\n" in report
 
 
 def test_to_markdown_report_escapes_windows_path_text():

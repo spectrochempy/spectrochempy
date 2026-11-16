@@ -36,7 +36,9 @@ _INTEGER_LIMIT = 10**_MAX_TEXT_LENGTH
 _ENTITY_START = re.compile(
     r"&(?=(?:[A-Za-z][A-Za-z0-9]+|#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6});)"
 )
-_LIST_MARKER = re.compile(r"^[ \t]*(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)")
+_BLOCK_MARKER = re.compile(
+    r"^[ \t]*(?:(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)|-(?=--+[ \t]*$))"
+)
 
 
 @dataclass(frozen=True)
@@ -323,8 +325,7 @@ def _history_value(value, *, depth: int = 0, indent: str = "  ") -> list[str]:
 
 def _history_label(value: str) -> str:
     label = value.replace("_", " ")
-    text = _text(label[:1].upper() + label[1:])
-    return _LIST_MARKER.sub(lambda match: match[0][:-1] + "\\" + match[0][-1], text)
+    return _text(label[:1].upper() + label[1:])
 
 
 def _figures(figures: Sequence[FigureReference]) -> list[str]:
@@ -363,7 +364,7 @@ def _figure_target(target: str) -> str:
     except ValueError as exc:
         raise ValueError("figure target must be a valid URL or relative path") from exc
     if parsed.scheme:
-        if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+        if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
             raise ValueError("figure target must be an HTTP(S) URL or relative path")
     elif target.startswith(("/", "\\")):
         raise ValueError("figure target must be an HTTP(S) URL or relative path")
@@ -431,10 +432,17 @@ def _value(value, *, depth: int = 0) -> str:
 
 def _mapping_items(mapping: Mapping) -> list[tuple[str, object]]:
     def sort_key(key):
+        ordinal = 0
         if isinstance(key, Integral | np.integer) and not isinstance(key, bool):
             label = _integer_text(key)
-            return label, int(key) if label == _INTEGER_TRUNCATED else 0
-        return str(key), 0
+            if label == _INTEGER_TRUNCATED:
+                ordinal = int(key)
+        else:
+            try:
+                label = str(key)
+            except (ValueError, RecursionError):
+                label = f"[omitted: {type(key).__name__} key]"
+        return label, type(key).__module__, type(key).__qualname__, ordinal
 
     keys = sorted(mapping, key=sort_key)[:_MAX_COLLECTION_ITEMS]
     return [(sort_key(key)[0], mapping[key]) for key in keys]
@@ -479,7 +487,8 @@ def _escape(value: str) -> str:
     value = value.replace("\n", "\\n")
     for character in "`*[]<>#~":
         value = value.replace(character, f"\\{character}")
-    return re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", value)
+    value = re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", value)
+    return _BLOCK_MARKER.sub(lambda match: match[0][:-1] + "\\" + match[0][-1], value)
 
 
 def _code(value: str) -> str:
