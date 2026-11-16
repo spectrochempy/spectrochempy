@@ -18,6 +18,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 _BOUND_NEIGHBORHOOD = 1e-5
+_GAUSSIAN_EXPONENT = 4 * np.log(2)
 
 
 def snapshot_peaks(spec):
@@ -188,6 +189,71 @@ class _NonfiniteResidualError(ValueError):
     """A trial model cannot produce finite residuals."""
 
 
+def _axis_log_derivatives(values, axis):
+    """Return the negative log profile and the log magnitude of its slopes."""
+    offsets, displacement, overflow = _scaled_offsets(
+        values, axis["center"], axis["width"]
+    )
+    log_distance = np.asarray(np.log(np.abs(offsets)), dtype=float)
+    recover = ~np.isfinite(offsets) | (
+        (np.abs(offsets) < np.finfo(offsets.dtype).tiny) & (displacement != 0)
+    )
+    if np.any(recover):
+        log_distance[recover] = (
+            np.log(np.abs(displacement[recover]))
+            - np.log(np.longdouble(axis["width"]))
+            + np.log(2) * overflow[recover]
+        )
+    if axis["model"] == "gaussian":
+        power = np.asarray((_GAUSSIAN_EXPONENT * offsets) * offsets, dtype=float)
+        power[recover] = np.exp(np.log(_GAUSSIAN_EXPONENT) + 2 * log_distance[recover])
+        log_center = np.log(2 * _GAUSSIAN_EXPONENT) + log_distance
+    else:
+        power = np.logaddexp(0.0, np.log(4) + 2 * log_distance)
+        log_center = np.log(8) + log_distance - power
+    return power, log_center, log_center + log_distance, np.signbit(displacement)
+
+
+def _separable_jacobian(peak_grids, columns, support, log_scales):
+    """Differentiate residuals on the fixed support in the requested units."""
+    count = support[0].size
+    jacobian = np.empty((count, len(columns)), order="F")
+    with np.errstate(over="ignore", under="ignore", invalid="ignore", divide="ignore"):
+        for peak, grid in peak_grids:
+            log_profile = np.zeros(count)
+            axis_columns = []
+            for (dim, values), indices in zip(grid.items(), support, strict=True):
+                axis = peak["axes"][dim]
+                power, center, width, negative = _axis_log_derivatives(values, axis)
+                log_profile -= power[indices]
+                axis_columns.append((axis, indices, center, width, negative))
+
+            height_column = columns.get((id(peak), "height"))
+            if height_column is not None:
+                index, _ = height_column
+                jacobian[:, index] = -np.exp(log_profile + log_scales[index])
+
+            height = peak["height"]
+            log_height = np.log(np.longdouble(abs(height)))
+            for axis, indices, center, width, negative in axis_columns:
+                log_weight = log_height - np.log(np.longdouble(axis["width"]))
+                for key, slope in (("center", center), ("width", width)):
+                    column = columns.get((id(axis), key))
+                    if column is None:
+                        continue
+                    index, log_factor = column
+                    if height == 0:
+                        jacobian[:, index] = 0.0
+                        continue
+                    weight = float(log_weight + log_scales[index] - log_factor)
+                    magnitude = np.exp(log_profile + weight + slope[indices])
+                    sign = 1.0 if height < 0 else -1.0
+                    if key == "center":
+                        sign = np.where(negative[indices], -sign, sign)
+                    jacobian[:, index] = sign * magnitude
+    return jacobian
+
+
 def _bounded_jacobian(vector, residuals, bounds):
     """Differentiate a reconstructed model using evaluable in-bounds steps."""
     try:
@@ -315,11 +381,14 @@ def fit_separable_peaks(dataset, specs, max_calls):
         )
         solver_free = [(targets[id(target)], key) for target, key in free]
 
-        def scaled_residuals(vector):
+        def update_solver_parameters(vector):
             for ((target, factor), key), value in zip(
                 solver_free, scales * vector, strict=True
             ):
                 target[key] = float(value) if key == "height" else value / factor
+
+        def scaled_residuals(vector):
+            update_solver_parameters(vector)
             fitted, _ = model(solver_peaks, solver_grids)
             with np.errstate(over="ignore", invalid="ignore"):
                 scaled = residuals(fitted) / intensity_scale
@@ -329,12 +398,51 @@ def fit_separable_peaks(dataset, specs, max_calls):
                 )
             return scaled
 
+        use_analytic_jacobian = dataset.ndim in (2, 3)
+        if use_analytic_jacobian:
+            support = np.nonzero(valid)
+            log_scales = np.log(scales) - np.log(np.longdouble(intensity_scale))
+            columns = {
+                (id(target), key): (index, np.log(factor))
+                for index, ((target, factor), key) in enumerate(solver_free)
+            }
+            active_targets = {target for target, _ in columns}
+            active_peaks = [
+                index
+                for index, peak in enumerate(solver_peaks)
+                if id(peak) in active_targets
+                or any(id(axis) in active_targets for axis in peak["axes"].values())
+            ]
+            peak_grids = [(solver_peaks[i], solver_grids[i]) for i in active_peaks]
+
+            def jacobian_at(vector):
+                update_solver_parameters(vector)
+                result = _separable_jacobian(peak_grids, columns, support, log_scales)
+                if np.isfinite(result).all():
+                    return result
+                return _bounded_jacobian(vector, scaled_residuals, bounds)
+
+            def solver_jacobian(vector):
+                result = jacobian_at(vector)
+                if result is None:
+                    raise ValueError(
+                        "ND fitting could not evaluate a finite Jacobian on the support"
+                    )
+                return result
+
+            jac = solver_jacobian
+        else:
+            jac = "3-point"
+
+            def jacobian_at(vector):
+                return _bounded_jacobian(vector, scaled_residuals, bounds)
+
         solution = least_squares(
             scaled_residuals,
             start,
             bounds=bounds,
             method="trf",
-            jac="3-point",
+            jac=jac,
             x_scale="jac",
             gtol=None,
             max_nfev=max_calls,
@@ -356,15 +464,27 @@ def fit_separable_peaks(dataset, specs, max_calls):
         if not np.allclose(
             public_vector, solution.x, rtol=8 * epsilon, atol=8 * epsilon
         ):
-            solution.jac = _bounded_jacobian(public_vector, scaled_residuals, bounds)
+            solution.jac = jacobian_at(public_vector)
         solution.x = public_vector
         if solution.jac is not None:
-            with np.errstate(over="ignore", under="ignore", invalid="ignore"):
-                jacobian = np.asarray(
-                    solution.jac.astype(np.longdouble)
-                    * (np.longdouble(intensity_scale) / scales),
-                    dtype=float,
+            if use_analytic_jacobian:
+                physical_columns = {
+                    (id(target), key): (index, 0.0)
+                    for index, (target, key) in enumerate(free)
+                }
+                jacobian = _separable_jacobian(
+                    [(peaks[i], coordinates) for i in active_peaks],
+                    physical_columns,
+                    support,
+                    np.zeros_like(scales),
                 )
+            if jacobian is None or np.isnan(jacobian).any():
+                with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+                    jacobian = np.asarray(
+                        solution.jac.astype(np.longdouble)
+                        * (np.longdouble(intensity_scale) / scales),
+                        dtype=float,
+                    )
 
     fitted, components = model(peaks, [coordinates] * len(peaks), keep_components=True)
     residual = np.zeros(dataset.shape)
