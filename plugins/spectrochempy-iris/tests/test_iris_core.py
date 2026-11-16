@@ -7,9 +7,13 @@
 
 """Core IRIS tests — moved from core to plugin."""
 
+import warnings
 from os import environ
+from unittest.mock import Mock
+from unittest.mock import patch
 
 import numpy as np
+import osqp
 import pytest
 
 import spectrochempy as scp
@@ -17,6 +21,194 @@ from spectrochempy.utils import docutils as chd
 
 from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
+from spectrochempy_iris._core import _Smat
+from spectrochempy_iris._core import _solve_osqp_lambda
+
+
+@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
+def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
+    monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(np.arange(4))
+    spectra = scp.NDDataset(
+        np.arange(30.0).reshape(5, 6), coordset=[observations, channels]
+    )
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+    with warnings.catch_warnings(record=True) as serial_warnings:
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        serial = IRIS(reg_par=[-4, -2, 3], workers=1).fit(spectra, kernel)
+    with warnings.catch_warnings(record=True) as parallel_warnings:
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        parallel = IRIS(reg_par=[-4, -2, 3], workers=2, log_level="INFO").fit(
+            spectra, kernel
+        )
+    assert "Starting OSQP workers for a 4-point kernel grid" in parallel.log
+    serial_messages = [
+        str(item.message)
+        for item in serial_warnings
+        if item.category is PendingDeprecationWarning
+    ]
+    assert [
+        str(item.message)
+        for item in parallel_warnings
+        if item.category is PendingDeprecationWarning
+    ] == serial_messages
+    if serial_messages:
+        with (
+            warnings.catch_warnings(),
+            pytest.raises(PendingDeprecationWarning),
+        ):
+            warnings.simplefilter("error", PendingDeprecationWarning)
+            IRIS(reg_par=[-4, -2, 3], workers=2).fit(spectra, kernel)
+
+    for actual, reference in (
+        (parallel.f, serial.f),
+        (parallel.lambdas, serial.lambdas),
+        (parallel.RSS, serial.RSS),
+        (parallel.SM, serial.SM),
+    ):
+        actual = np.asarray(actual.data)
+        reference = np.asarray(reference.data)
+        assert actual.shape == reference.shape
+        assert actual.dtype == reference.dtype
+        assert actual.tobytes() == reference.tobytes()
+
+
+@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
+@pytest.mark.parametrize(
+    ("points", "reg_par", "warning_is_error"),
+    [
+        (np.arange(3.0, -1.0, -1.0), [-4, 3, 3], False),
+        (np.arange(4) * 1e-100, [9, 10, 3], True),
+    ],
+    ids=["negative-penalty", "overflowing-penalty"],
+)
+def test_iris_workers_keep_invalid_grid_failures_sequential(
+    monkeypatch, capfd, points, reg_par, warning_is_error
+):
+    monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(points, rounding=False)
+    spectra = scp.NDDataset(
+        np.arange(30.0).reshape(5, 6), coordset=[observations, channels]
+    )
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+    native_output = []
+
+    for workers in (1, 2):
+        with np.errstate(over="warn", invalid="warn"), warnings.catch_warnings():
+            if warning_is_error:
+                warnings.filterwarnings(
+                    "error", "overflow encountered in multiply", RuntimeWarning
+                )
+            error = RuntimeWarning if warning_is_error else osqp.OSQPException
+            with pytest.raises(error):
+                IRIS(reg_par=reg_par, workers=workers).fit(spectra, kernel)
+        native_output.append(capfd.readouterr())
+
+    assert native_output[0] == native_output[1]
+
+
+@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
+@pytest.mark.parametrize("workers", [1, 2])
+def test_iris_reports_penalty_underflow_for_each_channel(monkeypatch, workers):
+    monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(np.arange(4) * 1e100, rounding=False)
+    spectra = scp.NDDataset(
+        np.arange(30.0).reshape(5, 6), coordset=[observations, channels]
+    )
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+
+    with np.errstate(under="warn"), warnings.catch_warnings(record=True) as emitted:
+        warnings.simplefilter("always", RuntimeWarning)
+        IRIS(reg_par=[-25, -24, 2], workers=workers).fit(spectra, kernel)
+
+    underflow_warnings = sum(
+        str(item.message) == "underflow encountered in multiply" for item in emitted
+    )
+    assert underflow_warnings == 12
+
+    with np.errstate(under="warn"), warnings.catch_warnings():
+        warnings.filterwarnings(
+            "error",
+            "underflow encountered in multiply",
+            RuntimeWarning,
+            module=r"^spectrochempy_iris\._core$",
+        )
+        with pytest.raises(RuntimeWarning, match="underflow encountered in multiply"):
+            IRIS(reg_par=[-25, -24, 2], workers=workers).fit(spectra, kernel)
+
+
+def test_osqp_lambda_reports_penalty_overflow_for_each_channel():
+    grid = np.arange(4) * (1.55e306 ** (-1 / 3))
+    problem = (
+        np.eye(4),
+        np.ones((6, 4)),
+        np.eye(4),
+        np.zeros(4),
+        np.full(4, np.inf),
+        _Smat(grid),
+    )
+    solver = Mock()
+    solver.solve.return_value.x = np.ones(4)
+    with (
+        np.errstate(over="warn"),
+        pytest.warns(
+            RuntimeWarning, match="overflow encountered in multiply"
+        ) as emitted,
+    ):
+        _solve_osqp_lambda(10.0, problem, lambda: solver)
+
+    assert solver.solve.call_count == len(emitted) == 6
+
+
+@pytest.mark.parametrize(
+    ("points", "expected_sm"),
+    [
+        (np.arange(4, dtype=np.longdouble), 24.0),
+        (np.arange(4) * (1 + 0.1j), 24.0 / abs(1 + 0.1j) ** 3),
+        (np.array([0.0, 1.0, 2.0, 0.0]), np.nan),
+        (np.arange(3.0, -1.0, -1.0), 24.0),
+    ],
+    ids=["longdouble", "complex", "coincident-endpoints", "descending"],
+)
+def test_iris_wide_dataset_sharpness_for_unusual_grids(points, expected_sm):
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(points, dtype=points.dtype)
+    spectra = scp.NDDataset(np.ones((5, 6)), coordset=[observations, channels])
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        model = IRIS(reg_par=None).fit(spectra, kernel)
+
+    np.testing.assert_array_equal(model.f.data, np.ones((1, 4, 6)))
+    np.testing.assert_allclose(model.SM.data, [expected_sm])
+
+
+@pytest.mark.parametrize(
+    ("grid_step", "amplitude"),
+    [(5.8e107, 1e160), (5e-103, 10.0), (1.0, 1e-81)],
+    ids=["subnormal-penalty", "overflowing-sharpness", "underflowing-sharpness"],
+)
+def test_iris_wide_dataset_sharpness_at_extreme_scales(grid_step, amplitude):
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(np.arange(4) * grid_step, rounding=False)
+    data = np.zeros((5, 6))
+    data[:4] = amplitude
+    spectra = scp.NDDataset(data, coordset=[observations, channels])
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+
+    with np.errstate(over="ignore", invalid="ignore"):
+        model = IRIS(reg_par=None).fit(spectra, kernel)
+        distribution = model.f.data[0]
+        expected_sm = np.linalg.norm(distribution.T @ _Smat(grid.data) @ distribution)
+    np.testing.assert_allclose(model.SM.data, [expected_sm], rtol=1e-12, atol=0)
 
 
 def test_IRIS_docstrings():
@@ -158,6 +350,12 @@ def test_IRIS():
     iris2.fit(X, K1)
     f2 = iris2.f
     assert f2.shape == (reg_par[2], q[2], X.shape[1])
+    sharpness_matrix = _Smat(iris2.q.data)
+    np.testing.assert_allclose(
+        iris2.SM.data,
+        [np.linalg.norm(fi.T @ sharpness_matrix @ fi) for fi in f2.data],
+        rtol=1e-11,
+    )
 
     iris2.plotlcurve()
     _ = iris2.f[-2].plot(method="contour")
@@ -169,6 +367,12 @@ def test_IRIS():
     iris3.fit(X, K1)
     f3 = iris3.f
     assert (f3.shape[1], f3.shape[2]) == (q[2], X.shape[1])
+    with patch.object(np.linalg, "cholesky", side_effect=np.linalg.LinAlgError):
+        legacy_metric = IRIS(reg_par=reg_par).fit(X, K1)
+    np.testing.assert_array_equal(f3.data, legacy_metric.f.data)
+    np.testing.assert_array_equal(iris3.RSS.data, legacy_metric.RSS.data)
+    np.testing.assert_array_equal(iris3.lambdas.data, legacy_metric.lambdas.data)
+    np.testing.assert_allclose(iris3.SM.data, legacy_metric.SM.data, rtol=1e-11)
 
     # test other kernels (beware: it is chemical non-sense !)
     q = [5, 1, 10]
