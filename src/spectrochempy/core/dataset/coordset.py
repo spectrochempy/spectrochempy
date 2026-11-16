@@ -928,7 +928,7 @@ class CoordSet(HasTraits):
         inner = []
         default_index = 0
         for coordinate in coordinates:
-            values = coordinate.data
+            values = coordinate._data
             if values is not None and values.dtype.kind in "fiu":
                 values = values.astype(float, copy=False)
                 steps = np.diff(values)
@@ -960,9 +960,13 @@ class CoordSet(HasTraits):
                 "sigdigits": 15,
                 "linearize_below": 0,
             }
-            outer.append(
-                Coord(blocks[:, 0], title=f"{coordinate.title} block start", **options)
+            source_irregular = coordinate.meta.get("split_irregular_sampling", False)
+            outer_coord = Coord(
+                blocks[:, 0], title=f"{coordinate.title} block start", **options
             )
+            if source_irregular:
+                outer_coord.meta["split_irregular_sampling"] = True
+            outer.append(outer_coord)
 
             # Keep the original within-block sampling check even if the mean
             # offsets happen to make a regular grid.
@@ -975,7 +979,7 @@ class CoordSet(HasTraits):
                 title=f"offset within {coordinate.title} block",
                 **options,
             )
-            inner_coord.meta["split_irregular_sampling"] = irregular
+            inner_coord.meta["split_irregular_sampling"] = source_irregular or irregular
             inner.append(inner_coord)
             if steps.size and np.any(
                 np.ptp(offsets, axis=0) > 0.5 * np.median(abs(steps))

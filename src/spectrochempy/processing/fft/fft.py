@@ -116,7 +116,7 @@ def _real_fft_axis(dataset, dim):
     else:
         coordinate = coordinate.default
 
-    values = coordinate.data
+    values = coordinate._data
     if (
         values is None
         or values.dtype.kind not in "fiu"
@@ -190,8 +190,8 @@ def rfft(dataset, *, dim=None, norm="backward"):
     NDDataset
         Complex coefficients from DC up to the highest nonnegative frequency.
     """
-    if dataset.data.dtype.kind not in "fiub":
-        raise ValueError("rfft requires real input.")
+    if dataset.is_empty or dataset.data.dtype.kind not in "fiub":
+        raise ValueError("rfft requires nonempty real input.")
     axis, dim, source, step = _real_fft_axis(dataset, dim)
     size = dataset.shape[axis]
     data = np.fft.rfft(dataset.data, axis=axis, norm=norm)
@@ -204,7 +204,8 @@ def rfft(dataset, *, dim=None, norm="backward"):
     )
     frequency.meta["rfft_source"] = {
         "size": int(size),
-        "origin": float(source.data[0]),
+        "origin": float(source._data[0]),
+        "units": None if source.units is None else str(source.units),
         "title": source.title,
         "norm": norm,
     }
@@ -234,10 +235,12 @@ def irfft(dataset, *, dim=None, n=None, norm=None):
         Reconstructed real samples with coordinates derived from the frequency
         spacing and the original origin, if recorded.
     """
-    if dataset.data.dtype.kind not in "cfiub":
-        raise ValueError("irfft requires real or complex Fourier coefficients.")
+    if dataset.is_empty or dataset.data.dtype.kind not in "cfiub":
+        raise ValueError(
+            "irfft requires nonempty real or complex Fourier coefficients."
+        )
     axis, dim, frequency, step = _real_fft_axis(dataset, dim)
-    if frequency.data[0] != 0:
+    if frequency._data[0] != 0:
         raise ValueError("irfft requires a frequency coordinate starting at zero.")
     source = frequency.meta.get("rfft_source", {})
     bins = dataset.shape[axis]
@@ -250,10 +253,14 @@ def irfft(dataset, *, dim=None, n=None, norm=None):
     if norm is None:
         norm = source.get("norm", "backward")
     data = np.fft.irfft(dataset.data, n=n, axis=axis, norm=norm)
+    units = None if frequency.units is None else frequency.units**-1
+    origin = source.get("origin", 0.0)
+    if source.get("units") is not None and units is not None:
+        origin = ur.Quantity(origin, source["units"]).to(units).magnitude
     coordinate = Coord(
-        source.get("origin", 0.0) + np.arange(n) / (n * step),
+        origin + np.arange(n) / (n * step),
         title=source.get("title", "sample"),
-        units=None if frequency.units is None else frequency.units**-1,
+        units=units,
         rounding=False,
         sigdigits=15,
     )
