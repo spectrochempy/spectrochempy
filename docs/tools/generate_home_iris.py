@@ -1,12 +1,13 @@
 """
 Generate the homepage's scientific illustrations from the IRIS gallery data.
 
-Run manually with the optional spectrochempy-iris plugin installed:
+Run manually with the spectrochempy-iris plugin and its OSQP extra installed:
     python docs/tools/generate_home_iris.py
 
 Scientific source:
 plugins/spectrochempy-iris/examples/analysis/a_decomposition/plot_iris_intro.py
-The contours use its automatic regularization search and selected result (5).
+The contours use the gallery data and the OSQP adaptive result at index 5
+to reproduce the checked-in homepage illustrations.
 Only the saved SVGs are needed to build the documentation.
 """
 
@@ -54,7 +55,7 @@ def main():
     data.y.select(2)
     data = data[:, 2250.0:1950.0]
     kernel = data.iris.kernel_matrix(kernel_type="langmuir", q=[-8, -1, 50])
-    model = scp.iris.IRIS(log_level="INFO", reg_par=[-6, -2])
+    model = scp.iris.IRIS(qpsolver="osqp", log_level="INFO", reg_par=[-6, -2])
     model.fit(data, kernel)
     distribution = model.result.f[5].squeeze()
 
