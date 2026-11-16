@@ -640,6 +640,16 @@ def test_to_markdown_report_bounds_large_integer_keys():
     assert "Imported sample" in report
 
 
+def test_to_markdown_report_sorts_members_of_composite_metadata_keys():
+    dataset = _dataset()
+    key = ("reference", frozenset({"alpha", "beta", "gamma"}))
+    dataset.meta.mapping = {key: 1}
+
+    report = dataset.to_markdown_report(title="Report", metadata=("mapping",))
+
+    assert "('reference', frozenset({'alpha', 'beta', 'gamma'})): 1" in report
+
+
 def test_to_markdown_report_preserves_history_labels_and_code_spacing():
     dataset = _dataset()
     dataset.replace_history(
@@ -686,6 +696,9 @@ def test_to_markdown_report_preserves_distinct_history_parameter_names():
         ("- literal path", r"\- literal path"),
         ("1. literal path", r"1\. literal path"),
         ("---", r"\---"),
+        ("-- -", r"\-- -"),
+        ("    spectrum.png", "&#32;&#32;&#32;&#32;spectrum.png"),
+        ("\tspectrum.png", "&#9;spectrum.png"),
     ],
 )
 def test_to_markdown_report_preserves_scalar_history_sources(source, escaped):

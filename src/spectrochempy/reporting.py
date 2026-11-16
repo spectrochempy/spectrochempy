@@ -39,7 +39,7 @@ _ENTITY_START = re.compile(
     r"&(?=(?:[A-Za-z][A-Za-z0-9]+|#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6});)"
 )
 _BLOCK_MARKER = re.compile(
-    r"^[ \t]*(?:(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)|-(?=--+[ \t]*$))"
+    r"^(?:(?:[-+]|[0-9]{1,9}[.)])(?=[ \t]|$)|-(?=(?:[ \t]*-){2,}[ \t]*$))"
 )
 
 
@@ -445,7 +445,11 @@ def _mapping_items(mapping: Mapping, *, item_depth: int) -> list[tuple[str, obje
                 ordinal = int(key)
         else:
             try:
-                label = str(key)
+                label = (
+                    _composite_key_repr(key)
+                    if isinstance(key, tuple | frozenset)
+                    else str(key)
+                )
             except (ValueError, RecursionError):
                 label = f"[omitted: {type(key).__name__} key]"
         return label, type(key).__module__, type(key).__qualname__, ordinal
@@ -461,6 +465,32 @@ def _mapping_items(mapping: Mapping, *, item_depth: int) -> list[tuple[str, obje
         if len(items) == _MAX_COLLECTION_ITEMS:
             break
     return items
+
+
+def _composite_key_repr(key, depth: int = 0) -> str:
+    if depth >= _MAX_NESTING_DEPTH:
+        return "[truncated: maximum depth]"
+    if not isinstance(key, tuple | frozenset):
+        if (
+            isinstance(key, Integral | np.integer)
+            and _integer_text(key) == _INTEGER_TRUNCATED
+        ):
+            raise ValueError("integer in composite key is too large")
+        return repr(key)
+    if isinstance(key, tuple):
+        items = [
+            _composite_key_repr(item, depth + 1) for item in key[:_MAX_COLLECTION_ITEMS]
+        ]
+    else:
+        items = sorted(_composite_key_repr(item, depth + 1) for item in key)[
+            :_MAX_COLLECTION_ITEMS
+        ]
+    if len(key) > _MAX_COLLECTION_ITEMS:
+        items.append(f"[truncated: {len(key) - _MAX_COLLECTION_ITEMS} more items]")
+    contents = ", ".join(items)
+    if isinstance(key, tuple):
+        return f"({contents}{',' if len(key) == 1 else ''})"
+    return f"frozenset({{{contents}}})" if items else "frozenset()"
 
 
 def _integer_text(value: Integral | np.integer) -> str:
@@ -496,6 +526,9 @@ def _text(value: str) -> str:
 
 
 def _escape(value: str) -> str:
+    trimmed = value.lstrip(" \t")
+    leading = value[: len(value) - len(trimmed)]
+    value = trimmed
     value = value.replace("\\", "\\\\")
     value = _ENTITY_START.sub(r"\\&", value)
     value = value.replace("\r\n", "\n").replace("\r", "\n")
@@ -503,7 +536,10 @@ def _escape(value: str) -> str:
     for character in "`*[]<>#~":
         value = value.replace(character, f"\\{character}")
     value = re.sub(r"(?<!\w)_|_(?!\w)", r"\\_", value)
-    return _BLOCK_MARKER.sub(lambda match: match[0][:-1] + "\\" + match[0][-1], value)
+    escaped = _BLOCK_MARKER.sub(
+        lambda match: match[0][:-1] + "\\" + match[0][-1], value
+    )
+    return "".join(f"&#{ord(character)};" for character in leading) + escaped
 
 
 def _code(value: str) -> str:
