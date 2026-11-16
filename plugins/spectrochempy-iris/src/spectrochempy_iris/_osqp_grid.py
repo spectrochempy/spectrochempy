@@ -3,45 +3,18 @@
 import sys
 import warnings
 from concurrent.futures import ProcessPoolExecutor
-from functools import partial
 from inspect import getmodule
 from multiprocessing import get_context
 
 import numpy as np
-from scipy import sparse
-
-
-def _penalized_matrix(lambda_, P0, S):
-    return sparse.triu(sparse.csc_matrix(P0 + 2 * lambda_ * S), format="csc")
-
-
-def solve_osqp_lambda(lambda_, problem, make_solver, legacy_warning=None):
-    P0, q, A, lo, up, S = problem
-    P = _penalized_matrix(lambda_, P0, S)
-    reuse_matrix = np.geterr()["under"] == "ignore" and np.isfinite(P.data).all()
-    distribution = np.empty((P0.shape[0], len(q)))
-    for j, linear in enumerate(q):
-        if j and not reuse_matrix:
-            P = _penalized_matrix(lambda_, P0, S)
-        solver = make_solver()
-        if legacy_warning is None:
-            solver.setup(P, linear.squeeze(), A, lo, up, alpha=1.0, verbose=False)
-        else:
-            solver.setup(P, linear.squeeze(), A, lo, alpha=1.0, verbose=False)
-            legacy_warning()
-        distribution[:, j] = solver.solve().x
-    return distribution
-
 
 _solve_in_worker = None
 
 
-def _initialize_worker(problem, make_solver, error_policy):
+def _initialize_worker(solve_lambda, error_policy):
     global _solve_in_worker
     np.seterr(**error_policy)
-    _solve_in_worker = partial(
-        solve_osqp_lambda, problem=problem, make_solver=make_solver
-    )
+    _solve_in_worker = solve_lambda
 
 
 def _solve_worker_lambda(lambda_):
@@ -59,7 +32,7 @@ def _solve_worker_lambda(lambda_):
     )
 
 
-def solve_osqp_grid(lambdas, problem, make_solver, workers):
+def solve_osqp_grid(lambdas, solve_lambda, workers):
     workers = min(workers, len(lambdas))
     if sys.platform == "win32":
         workers = min(workers, 61)
@@ -67,7 +40,7 @@ def solve_osqp_grid(lambdas, problem, make_solver, workers):
         max_workers=workers,
         mp_context=get_context("spawn"),
         initializer=_initialize_worker,
-        initargs=(problem, make_solver, np.geterr()),
+        initargs=(solve_lambda, np.geterr()),
     ) as pool:
         warning_modules = {}
         for distribution, error, emitted in pool.map(_solve_worker_lambda, lambdas):

@@ -32,7 +32,6 @@ from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
 
 from ._osqp_grid import solve_osqp_grid
-from ._osqp_grid import solve_osqp_lambda
 
 _quadprog = None  # loaded lazily on first use
 
@@ -656,7 +655,7 @@ class IRIS(DecompositionAnalysis):
 
                 """
                 if self.qpsolver == "osqp":
-                    fi = solve_osqp_lambda(
+                    fi = _solve_osqp_lambda(
                         lambda_, problem, make_solver, legacy_warning
                     )
                 else:  # quadprog solver
@@ -717,9 +716,10 @@ class IRIS(DecompositionAnalysis):
                 info_(msg)
 
                 if parallel_grid:
-                    batches = solve_osqp_grid(
-                        lambdas, problem, make_solver, self.workers
+                    solve_lambda = partial(
+                        _solve_osqp_lambda, problem=problem, make_solver=make_solver
                     )
+                    batches = solve_osqp_grid(lambdas, solve_lambda, self.workers)
                     with closing(batches) as distributions:
                         for i, (lambda_value, fi) in enumerate(
                             zip(lambdas, distributions, strict=True)
@@ -1048,6 +1048,28 @@ def _menger(x, y):
 
     denominator = np.sqrt(r01 * r12 * r02)
     return numerator / denominator
+
+
+def _penalized_matrix(lambda_, P0, S):
+    return sparse.triu(sparse.csc_matrix(P0 + 2 * lambda_ * S), format="csc")
+
+
+def _solve_osqp_lambda(lambda_, problem, make_solver, legacy_warning=None):
+    P0, q, A, lo, up, S = problem
+    P = _penalized_matrix(lambda_, P0, S)
+    reuse_matrix = np.geterr()["under"] == "ignore" and np.isfinite(P.data).all()
+    distribution = np.empty((P0.shape[0], len(q)))
+    for j, linear in enumerate(q):
+        if j and not reuse_matrix:
+            P = _penalized_matrix(lambda_, P0, S)
+        solver = make_solver()
+        if legacy_warning is None:
+            solver.setup(P, linear.squeeze(), A, lo, up, alpha=1.0, verbose=False)
+        else:
+            solver.setup(P, linear.squeeze(), A, lo, alpha=1.0, verbose=False)
+            legacy_warning()
+        distribution[:, j] = solver.solve().x
+    return distribution
 
 
 def _Smat(q):
