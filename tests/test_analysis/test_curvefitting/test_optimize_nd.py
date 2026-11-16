@@ -558,23 +558,30 @@ def test_fit_3d_analytic_jacobian_matches_three_point_with_fewer_calls(monkeypat
     dataset.data[0, 0, 0] = np.nan
 
     def solve(backend):
-        calls = 0
+        peak_evaluations = 0
+        evaluate_peak = _optimize_nd._evaluate_separable_peak
+
+        def counted_peak(*args):
+            nonlocal peak_evaluations
+            peak_evaluations += 1
+            return evaluate_peak(*args)
 
         def instrument(fun, start, **options):
-            def counted(vector):
-                nonlocal calls
-                calls += 1
-                return fun(vector)
-
             assert callable(options["jac"])
             if backend == "3-point":
                 options["jac"] = backend
-            return least_squares(counted, start, **options)
+            return least_squares(fun, start, **options)
 
-        monkeypatch.setattr(_optimize_nd, "least_squares", instrument)
-        fit, solution = _optimize_nd.fit_separable_peaks(dataset, specs, max_calls=70)
+        with monkeypatch.context() as patch:
+            patch.setattr(_optimize_nd, "_evaluate_separable_peak", counted_peak)
+            patch.setattr(_optimize_nd, "least_squares", instrument)
+            fit, solution = _optimize_nd.fit_separable_peaks(
+                dataset, specs, max_calls=70
+            )
         assert solution.success
-        return fit, solution, calls
+        model_evaluations, remainder = divmod(peak_evaluations, len(specs))
+        assert remainder == 0
+        return fit, solution, model_evaluations - 1  # Exclude final reconstruction.
 
     analytic, solution, calls = solve("analytic")
     numeric, reference, numeric_calls = solve("3-point")
@@ -589,6 +596,21 @@ def test_fit_3d_analytic_jacobian_matches_three_point_with_fewer_calls(monkeypat
     assert_allclose(
         analytic["covariance"], numeric["covariance"], atol=1e-11, rtol=1e-4
     )
+
+    evaluate_jacobian = _optimize_nd._separable_jacobian
+    force_fallback = True
+
+    def nonfinite_first_jacobian(*args):
+        nonlocal force_fallback
+        jacobian = evaluate_jacobian(*args)
+        if force_fallback:
+            jacobian[0, 0] = np.nan
+            force_fallback = False
+        return jacobian
+
+    monkeypatch.setattr(_optimize_nd, "_separable_jacobian", nonfinite_first_jacobian)
+    _, fallback, fallback_calls = solve("analytic")
+    assert fallback_calls == fallback.nfev + 1 + fallback.x.size
 
 
 def test_fit_nd_preserves_physical_jacobian_when_scaled_tail_underflows():
