@@ -147,7 +147,7 @@ def _real_fft_result(dataset, dim, data, coordinate, operation, **parameters):
         if other == dim:
             continue
         target = coords.references.get(other) if coords is not None else None
-        if target is not None and target != dim:
+        if target in dataset.dims and target != dim:
             result_coords[other] = target
         else:
             original = (

@@ -102,3 +102,16 @@ def test_real_fft_handles_extreme_spacing_without_invalid_coordinates():
     data.set_coordset(x=scp.Coord([0.0, 1e-310], rounding=False))
     with pytest.raises(ValueError, match="frequency grid cannot be represented"):
         data.rfft()
+
+
+def test_real_fft_preserves_coordinate_referenced_through_an_auxiliary_name():
+    data = scp.NDDataset(np.arange(24.0).reshape(4, 6))
+    data.set_coordset(
+        y=scp.Coord(np.arange(4)),
+        z=scp.Coord(np.arange(6) + 10, units="eV"),
+        x="z",
+    )
+
+    result = data.rfft(dim="y")
+    assert result.x.units == data.coordset["z"].units
+    np.testing.assert_array_equal(result.x.data, data.coordset["z"].data)

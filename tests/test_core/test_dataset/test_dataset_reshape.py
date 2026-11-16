@@ -172,3 +172,13 @@ def test_split_reshape_default_names_preserve_the_unaffected_axis():
     assert grouped.x == data.x
     assert_array_equal(grouped.z.data, [0, 2])
     assert_array_equal(grouped.y.data, [0, 1])
+
+
+def test_split_reshape_keeps_representable_mean_of_large_offsets():
+    data = scp.NDDataset(np.arange(4.0))
+    data.set_coordset(
+        x=scp.Coord([-1.7e308, -0.6e308, 0.6e308, 1.65e308], rounding=False)
+    )
+
+    result = data.reshape((2, 2), coord_policy="split")
+    np.testing.assert_allclose(result.x.data, [0, 1.075e308])

@@ -935,9 +935,8 @@ class CoordSet(HasTraits):
             values = coordinate._data
             if values is not None and values.dtype.kind in "fiu":
                 values = values.astype(float, copy=False)
-                steps = np.diff(values)
                 if not np.isfinite(values).all() or not (
-                    np.all(steps > 0) or np.all(steps < 0)
+                    np.all(values[1:] > values[:-1]) or np.all(values[1:] < values[:-1])
                 ):
                     values = None
             else:
@@ -957,7 +956,15 @@ class CoordSet(HasTraits):
             if coordinate is source.default:
                 default_index = len(outer)
             blocks = values.reshape(shape)
-            offsets = blocks - blocks[:, :1]
+            with np.errstate(over="ignore"):
+                offsets = blocks - blocks[:, :1]
+                mean_offsets = offsets.mean(axis=0)
+            if not np.isfinite(mean_offsets).all():
+                # Scale before summation if the sum exceeds the float range.
+                with np.errstate(over="ignore"):
+                    mean_offsets = (offsets / shape[0]).sum(axis=0)
+                if not np.isfinite(mean_offsets).all():
+                    raise ValueError("Split coordinate offsets cannot be represented.")
             options = {
                 "units": coordinate.units,
                 "rounding": False,
@@ -979,14 +986,14 @@ class CoordSet(HasTraits):
                 steps.size and not np.allclose(steps, steps.flat[0], rtol=1e-6, atol=0)
             )
             inner_coord = Coord(
-                offsets.mean(axis=0),
+                mean_offsets,
                 title=f"offset within {coordinate.title} block",
                 **options,
             )
             inner_coord.meta["split_irregular_sampling"] = source_irregular or irregular
             inner.append(inner_coord)
             if steps.size and np.any(
-                np.ptp(offsets, axis=0) > 0.5 * np.median(abs(steps))
+                np.ptp(offsets, axis=0) > np.median(0.5 * abs(steps))
             ):
                 warnings.warn(
                     f"Offsets differ between blocks on coordinate {coordinate.title!r}.",
