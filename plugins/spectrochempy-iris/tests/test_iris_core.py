@@ -40,7 +40,10 @@ def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
         serial = IRIS(reg_par=[-4, -2, 3], workers=1).fit(spectra, kernel)
     with warnings.catch_warnings(record=True) as parallel_warnings:
         warnings.simplefilter("always", PendingDeprecationWarning)
-        parallel = IRIS(reg_par=[-4, -2, 3], workers=2).fit(spectra, kernel)
+        parallel = IRIS(reg_par=[-4, -2, 3], workers=2, log_level="INFO").fit(
+            spectra, kernel
+        )
+    assert "Starting OSQP workers for a 4-point kernel grid" in parallel.log
     serial_messages = [
         str(item.message)
         for item in serial_warnings

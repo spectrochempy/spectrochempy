@@ -360,8 +360,13 @@ class IRIS(DecompositionAnalysis):
     workers : int, optional, default: 1
         Maximum number of processes for evaluating a fixed regularization
         grid with the OSQP builtin backend and finite convex problems.
-        Other fit modes run in a single process. In a Python script,
-        call parallel fits from an ``if __name__ == "__main__":`` block.
+        Other fit modes run in a single process. Each parallel fit starts
+        new processes that import SpectroChemPy. This overhead can make
+        parallel fits slower on small kernel grids. The grid size needed
+        for a speedup depends on the machine and the fit. Parallel fits
+        with fewer than 100 points on the kernel grid log an INFO message.
+        In a Python script, call parallel fits from an
+        ``if __name__ == "__main__":`` block.
         If a parallel fit fails, OSQP may print native diagnostics from
         several regularization values that were already being evaluated.
 
@@ -716,6 +721,11 @@ class IRIS(DecompositionAnalysis):
                 info_(msg)
 
                 if parallel_grid:
+                    if M < 100:
+                        info_(
+                            f"Starting OSQP workers for a {M}-point kernel grid. "
+                            "Process startup can make this slower than workers=1."
+                        )
                     solve_lambda = partial(
                         _solve_osqp_lambda, problem=problem, make_solver=make_solver
                     )
