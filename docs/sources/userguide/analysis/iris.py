@@ -137,9 +137,9 @@
 # ![CO adsorption contour map with wavenumber on the horizontal axis and
 # adsorption affinity on the vertical axis.](images/iris-co-affinity.png)
 #
-# *Affinity distribution from the CO gallery example, using the adaptive
+# Affinity distribution from the CO gallery example, using the adaptive
 # NNLS fit at $\lambda \approx 2.11 \times 10^{-5}$. The contours near
-# 2115 cm$^{-1}$ show where the strongest recovered contribution lies in $q$.*
+# 2115 cm$^{-1}$ show where the strongest recovered contribution lies in $q$.
 #
 # - Select a regularization strength and plot the corresponding slice of
 #   `analysis.result.f`. Use `iris3.result.f[4].plot_contour()` for the
