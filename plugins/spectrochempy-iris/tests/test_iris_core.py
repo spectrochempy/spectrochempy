@@ -7,10 +7,12 @@
 
 """Core IRIS tests — moved from core to plugin."""
 
+import warnings
 from os import environ
 from unittest.mock import patch
 
 import numpy as np
+import osqp
 import pytest
 
 import spectrochempy as scp
@@ -19,6 +21,89 @@ from spectrochempy.utils import docutils as chd
 from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
 from spectrochempy_iris._core import _Smat
+
+
+@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
+def test_iris_parallel_fixed_grid_matches_sequential_fit(monkeypatch):
+    monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(np.arange(4))
+    spectra = scp.NDDataset(
+        np.arange(30.0).reshape(5, 6), coordset=[observations, channels]
+    )
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+    with warnings.catch_warnings(record=True) as serial_warnings:
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        serial = IRIS(reg_par=[-4, -2, 3], workers=1).fit(spectra, kernel)
+    with warnings.catch_warnings(record=True) as parallel_warnings:
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        parallel = IRIS(reg_par=[-4, -2, 3], workers=2).fit(spectra, kernel)
+    serial_messages = [
+        str(item.message)
+        for item in serial_warnings
+        if item.category is PendingDeprecationWarning
+    ]
+    assert [
+        str(item.message)
+        for item in parallel_warnings
+        if item.category is PendingDeprecationWarning
+    ] == serial_messages
+    if serial_messages:
+        with (
+            warnings.catch_warnings(),
+            pytest.raises(PendingDeprecationWarning),
+        ):
+            warnings.simplefilter("error", PendingDeprecationWarning)
+            IRIS(reg_par=[-4, -2, 3], workers=2).fit(spectra, kernel)
+
+    for actual, reference in (
+        (parallel.f, serial.f),
+        (parallel.lambdas, serial.lambdas),
+        (parallel.RSS, serial.RSS),
+        (parallel.SM, serial.SM),
+    ):
+        actual = np.asarray(actual.data)
+        reference = np.asarray(reference.data)
+        assert actual.shape == reference.shape
+        assert actual.dtype == reference.dtype
+        assert actual.tobytes() == reference.tobytes()
+
+
+@pytest.mark.skipif(not hasattr(osqp, "default_algebra"), reason="requires modern OSQP")
+@pytest.mark.parametrize(
+    ("points", "reg_par", "warning_is_error"),
+    [
+        (np.arange(3.0, -1.0, -1.0), [-4, 3, 3], False),
+        (np.arange(4) * 1e-100, [9, 10, 3], True),
+    ],
+    ids=["negative-penalty", "overflowing-penalty"],
+)
+def test_iris_workers_keep_invalid_grid_failures_sequential(
+    monkeypatch, capfd, points, reg_par, warning_is_error
+):
+    monkeypatch.setattr(osqp, "default_algebra", lambda: "builtin")
+    observations = scp.Coord(np.arange(5))
+    channels = scp.Coord(np.arange(6))
+    grid = scp.Coord(points, rounding=False)
+    spectra = scp.NDDataset(
+        np.arange(30.0).reshape(5, 6), coordset=[observations, channels]
+    )
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+    native_output = []
+
+    for workers in (1, 2):
+        with np.errstate(over="warn", invalid="warn"), warnings.catch_warnings():
+            if warning_is_error:
+                warnings.filterwarnings(
+                    "error", "overflow encountered in multiply", RuntimeWarning
+                )
+            error = RuntimeWarning if warning_is_error else osqp.OSQPException
+            with pytest.raises(error):
+                IRIS(reg_par=reg_par, workers=workers).fit(spectra, kernel)
+        native_output.append(capfd.readouterr())
+
+    assert native_output[0] == native_output[1]
 
 
 @pytest.mark.parametrize(

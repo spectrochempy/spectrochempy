@@ -24,6 +24,9 @@ New Features
   in order; only individual values are explicitly truncated. Paths are rendered
   as supplied, and figure references accept relative paths and HTTP(S) URLs. (:pr:`1775`)
 
+- IRIS can evaluate a fixed regularization grid in parallel with the OSQP
+  builtin backend. Set ``workers`` to opt in. (:pr:`1887`)
+
 Bug Fixes
 ~~~~~~~~~
 
