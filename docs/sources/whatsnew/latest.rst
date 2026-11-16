@@ -24,8 +24,18 @@ New Features
   in order; only individual values are explicitly truncated. Paths are rendered
   as supplied, and figure references accept relative paths and HTTP(S) URLs. (:pr:`1775`)
 
+- IRIS can evaluate a fixed regularization grid in parallel with the OSQP
+  builtin backend. Set ``workers`` to opt in. (:pr:`1887`)
+
 Bug Fixes
 ~~~~~~~~~
 
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
+
+Developer
+~~~~~~~~~
+
+- PERF: Speed up IRIS fits by preparing the OSQP matrix once per regularization
+  parameter, resolving the backend once per fit, and reducing the size of the
+  sharpness calculation for wide datasets. (:pr:`1887`)

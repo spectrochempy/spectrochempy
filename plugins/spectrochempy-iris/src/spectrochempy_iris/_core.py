@@ -8,6 +8,10 @@
 
 __all__ = ["IrisKernel", "IRIS"]
 
+from contextlib import closing
+from contextlib import suppress
+from functools import partial
+
 import numpy as np
 import osqp
 import traitlets as tr
@@ -26,6 +30,8 @@ from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
+
+from ._osqp_grid import solve_osqp_grid
 
 _quadprog = None  # loaded lazily on first use
 
@@ -351,6 +357,18 @@ class IRIS(DecompositionAnalysis):
 
         When `warm_start` is `True`, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`.
+    workers : int, optional, default: 1
+        Maximum number of processes for evaluating a fixed regularization
+        grid with the OSQP builtin backend and finite convex problems.
+        Other fit modes run in a single process. Each parallel fit starts
+        new processes that import SpectroChemPy. This overhead can make
+        parallel fits slower on small kernel grids. The grid size needed
+        for a speedup depends on the machine and the fit. Parallel fits
+        with fewer than 100 points on the kernel grid log an INFO message.
+        In a Python script, call parallel fits from an
+        ``if __name__ == "__main__":`` block.
+        If a parallel fit fails, OSQP may print native diagnostics from
+        several regularization values that were already being evaluated.
 
     See Also
     --------
@@ -378,6 +396,11 @@ class IRIS(DecompositionAnalysis):
     _lambdas = CoordType().tag(rounding=False)
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
+    workers = tr.Int(
+        1,
+        min=1,
+        help="Maximum process count for a fixed OSQP regularization grid.",
+    )
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -410,6 +433,8 @@ class IRIS(DecompositionAnalysis):
         self,
         log_level="WARNING",
         warm_start=False,
+        *,
+        workers=1,
         **kwargs,
     ):
         # call the super class for initialisation of the configuration parameters
@@ -419,6 +444,7 @@ class IRIS(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
+        self.workers = workers
         # no validation of reg_par triggred when it is None
         # so we need to init self._lambdas manually else itt will not be inited
         if self.reg_par is None:
@@ -519,6 +545,27 @@ class IRIS(DecompositionAnalysis):
         S = _Smat(q)
         info_("... done")
 
+        factor_transpose = None
+        if (
+            N > M
+            and np.geterr()["under"] == "ignore"
+            and S.dtype.type in (np.float32, np.float64)
+            and S[0, 0] >= 6 * np.finfo(S.dtype).tiny
+            and np.isfinite(S).all()
+        ):
+            with suppress(np.linalg.LinAlgError):
+                factor_transpose = np.linalg.cholesky(S).T
+
+        def sharpness(distribution):
+            if factor_transpose is not None:
+                with np.errstate(over="ignore", invalid="ignore"):
+                    weighted = factor_transpose @ distribution
+                    value = np.linalg.norm(weighted @ weighted.T)
+                limits = np.finfo(value.dtype)
+                if np.sqrt(limits.tiny) <= value <= np.sqrt(limits.max / 2):
+                    return value
+            return np.linalg.norm(np.dot(np.dot(distribution.T, S), distribution))
+
         # Solve non-regularized problem
         if not self._regularization:
             msg = f"Solving for {N} channels and {W} observations, no regularization"
@@ -529,7 +576,7 @@ class IRIS(DecompositionAnalysis):
                 f[0, :, j] = optimize.nnls(K, X[:, j].squeeze())[0]
             res = X - np.dot(K, f[0])
             RSS[0] = np.sum(res**2)
-            SM[0] = np.linalg.norm(np.dot(np.dot(np.transpose(f[0]), S), f[0]))
+            SM[0] = sharpness(f[0])
 
             msg = f"-->  residuals = {RSS[0]:.2e}    curvature = {SM[0]:.2e}"
             info_(msg)
@@ -538,7 +585,14 @@ class IRIS(DecompositionAnalysis):
             # some matrices used for QP optimization do not depend on lambdaR
             # and are computed here.
 
+            parallel_grid = False
             if self.qpsolver == "osqp":
+                make_solver = osqp.OSQP
+                backend = None
+                default_algebra = getattr(osqp, "default_algebra", None)
+                if default_algebra is not None:
+                    backend = default_algebra()
+                    make_solver = partial(make_solver, algebra=backend)
                 # The standard form used by osqp() is
                 # minimize (1/2) xT P x + qT x ; subject to: lo <= A x <= u
                 # The first part of the P matrix is independent of lambda:
@@ -548,6 +602,33 @@ class IRIS(DecompositionAnalysis):
                 A = sparse.csc_matrix(np.eye(M))
                 lo = np.zeros(M)
                 up = np.ones(M) * np.inf
+                problem = (P0, q, A, lo, up, S)
+                legacy_warning = None
+                if osqp.__version__ < "1.0.0":
+                    legacy_warning = partial(
+                        warning_,
+                        f"The version of 'osqp' is outdated ({osqp.__version__}). "
+                        f"Please update osqp to version '1.0.1' or later. SpectroChemPy "
+                        f"will not support this version in the future (scpy > 0.9)",
+                    )
+                parallel_grid = (
+                    self.workers > 1
+                    and not self._search_reg
+                    and len(lambdas) > 1
+                    and backend == "builtin"
+                    and legacy_warning is None
+                    and np.result_type(P0, q, S).type in (np.float32, np.float64)
+                    and S[0, 0] > 0
+                    and np.isfinite(S).all()
+                    and np.isfinite(lambdas).all()
+                    and np.isfinite(P0).all()
+                    and np.isfinite(q).all()
+                    and not {"call", "log"}.intersection(np.geterr().values())
+                )
+                if parallel_grid:
+                    with np.errstate(over="ignore", invalid="ignore", under="ignore"):
+                        max_penalty = P0 + 2 * lambdas.max() * S
+                    parallel_grid = np.isfinite(max_penalty).all()
             else:
                 # The standard form used by quadprog() was
                 # minimize (1/2) xT P x - qT x ; subject to: A.T x >= b
@@ -578,31 +659,13 @@ class IRIS(DecompositionAnalysis):
                 f, RSS and SM for a given regularization parameter
 
                 """
-                M, N, _ = K.shape[-1], X.shape[-1], X.shape[0]
-                fi = np.zeros((M, N))
-                channels = self._channels
-
                 if self.qpsolver == "osqp":
-                    for j in range(len(channels.data)):
-                        P = sparse.csc_matrix(P0 + 2 * lambda_ * S)
-                        qprob = osqp.OSQP()
-                        if osqp.__version__ < "1.0.0":
-                            qprob.setup(
-                                P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False
-                            )
-                            warning_(
-                                f"The version of 'osqp' is outdated ({osqp.__version__}). "
-                                f"Please update osqp to version '1.0.1' or later. Spectrochempy "
-                                f"will not support this version in the future (scpy > 0.9)"
-                            )
-                        else:
-                            qprob.setup(
-                                P, q[j].squeeze(), A, lo, up, alpha=1.0, verbose=False
-                            )
-
-                        fi[:, j] = qprob.solve().x
-
+                    fi = _solve_osqp_lambda(
+                        lambda_, problem, make_solver, legacy_warning
+                    )
                 else:  # quadprog solver
+                    fi = np.zeros((K.shape[-1], X.shape[-1]))
+                    channels = self._channels
                     for j, channel in enumerate(channels.data):
                         try:
                             P = P0 + 2 * lambda_ * S
@@ -632,9 +695,12 @@ class IRIS(DecompositionAnalysis):
                                     0
                                 ]
 
+                return summarize_lambda(X, K, lambda_, fi)
+
+            def summarize_lambda(X, K, lambda_, fi):
                 resi = X.data - np.dot(K.data, fi)
                 RSSi = np.sum(resi**2)
-                SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
+                SMi = sharpness(fi)
 
                 msg = (
                     f"log10(lambda)={np.log10(lambda_):.3f} -->  "
@@ -654,14 +720,32 @@ class IRIS(DecompositionAnalysis):
                 )
                 info_(msg)
 
-                for i, lambda_value in enumerate(lambdas):
-                    f[i], RSS[i], SM[i] = solve_for_lambda(
-                        X,
-                        K,
-                        P0,
-                        lambda_value,
-                        S,
+                if parallel_grid:
+                    if M < 100:
+                        info_(
+                            f"Starting OSQP workers for a {M}-point kernel grid. "
+                            "Process startup can make this slower than workers=1."
+                        )
+                    solve_lambda = partial(
+                        _solve_osqp_lambda, problem=problem, make_solver=make_solver
                     )
+                    batches = solve_osqp_grid(lambdas, solve_lambda, self.workers)
+                    with closing(batches) as distributions:
+                        for i, (lambda_value, fi) in enumerate(
+                            zip(lambdas, distributions, strict=True)
+                        ):
+                            f[i], RSS[i], SM[i] = summarize_lambda(
+                                X, K, lambda_value, fi
+                            )
+                else:
+                    for i, lambda_value in enumerate(lambdas):
+                        f[i], RSS[i], SM[i] = solve_for_lambda(
+                            X,
+                            K,
+                            P0,
+                            lambda_value,
+                            S,
+                        )
 
             else:
                 msg = (
@@ -974,6 +1058,28 @@ def _menger(x, y):
 
     denominator = np.sqrt(r01 * r12 * r02)
     return numerator / denominator
+
+
+def _penalized_matrix(lambda_, P0, S):
+    return sparse.triu(sparse.csc_matrix(P0 + 2 * lambda_ * S), format="csc")
+
+
+def _solve_osqp_lambda(lambda_, problem, make_solver, legacy_warning=None):
+    P0, q, A, lo, up, S = problem
+    P = _penalized_matrix(lambda_, P0, S)
+    reuse_matrix = np.geterr()["under"] == "ignore" and np.isfinite(P.data).all()
+    distribution = np.empty((P0.shape[0], len(q)))
+    for j, linear in enumerate(q):
+        if j and not reuse_matrix:
+            P = _penalized_matrix(lambda_, P0, S)
+        solver = make_solver()
+        if legacy_warning is None:
+            solver.setup(P, linear.squeeze(), A, lo, up, alpha=1.0, verbose=False)
+        else:
+            solver.setup(P, linear.squeeze(), A, lo, alpha=1.0, verbose=False)
+            legacy_warning()
+        distribution[:, j] = solver.solve().x
+    return distribution
 
 
 def _Smat(q):
