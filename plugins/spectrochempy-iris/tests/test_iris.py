@@ -415,6 +415,24 @@ def test_compare_kernel_models():
         assert r["iris"]._fitted
 
 
+@pytest.mark.parametrize("solver", ["nnls", "osqp"])
+def test_regularized_iris_workflows_select_solver(solver):
+    ds = _make_test_dataset(n_spectra=8, n_channels=15)
+    options = {"q": [-6, 1, 6], "reg_par": [-4, -2, 3]}
+    if solver == "osqp":
+        pytest.importorskip("osqp")
+        options["qpsolver"] = solver
+
+    batch_fit = batch_iris_analysis([ds], **options)[0]["result"]
+    comparison_fit = compare_kernel_models(ds, kernels=["langmuir"], **options)[0][
+        "result"
+    ]
+
+    assert batch_fit.parameters["qpsolver"] == solver
+    assert comparison_fit.parameters["qpsolver"] == solver
+    np.testing.assert_array_equal(batch_fit.f.data, comparison_fit.f.data)
+
+
 def test_compare_kernel_defaults():
     """compare_kernel_models uses default kernels when none specified."""
     ds = _make_test_dataset(n_spectra=8, n_channels=15)

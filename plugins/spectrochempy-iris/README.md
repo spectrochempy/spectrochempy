@@ -27,7 +27,8 @@ pip install "spectrochempy-iris[quadprog]"
 
 For conda installations, install `osqp` or `quadprog` separately.
 Select `qpsolver="osqp"` to retain the previous solver or to use the
-`workers` option on fixed regularization grids.
+`workers` option on fixed regularization grids. The `batch_iris` and
+`compare_kernels` helpers also accept `qpsolver`.
 
 ## Usage
 

@@ -214,6 +214,8 @@ def batch_iris_analysis(
     kernel_type: str = "langmuir",
     q: list | None = None,
     reg_par: list | None = None,
+    *,
+    qpsolver: str = "nnls",
 ) -> list[dict]:
     """
     Run IRIS analysis on multiple datasets or conditions.
@@ -228,6 +230,10 @@ def batch_iris_analysis(
         Internal variable parameter vector or ``[start, stop, num]``.
     reg_par : list, optional
         Regularisation parameters (``[min, max]`` or ``[start, stop, num]``).
+
+    qpsolver : str, optional
+        Solver for regularized fits. Use ``"nnls"`` (default), ``"osqp"``, or
+        ``"quadprog"``. Install OSQP or quadprog separately to use it.
 
     Returns
     -------
@@ -253,7 +259,7 @@ def batch_iris_analysis(
     for label, ds in items:
         kernel_fn = extra_kernels.get(kernel_type, kernel_type)
         kernel = _IrisKernel(ds, kernel_fn, q=q)
-        iris = _IRIS(reg_par=reg_par)
+        iris = _IRIS(reg_par=reg_par, qpsolver=qpsolver)
         iris.fit(ds, kernel)
         result = iris.result
 
@@ -276,6 +282,8 @@ def compare_kernel_models(
     kernels: list[str] | None = None,
     q: list | None = None,
     reg_par: list | None = None,
+    *,
+    qpsolver: str = "nnls",
 ) -> list[dict]:
     """
     Compare multiple IRIS kernel models on the same dataset.
@@ -290,6 +298,10 @@ def compare_kernel_models(
         Internal variable parameter vector or ``[start, stop, num]``.
     reg_par : list, optional
         Regularisation parameters (``[min, max]`` or ``[start, stop, num]``).
+
+    qpsolver : str, optional
+        Solver for regularized fits. Use ``"nnls"`` (default), ``"osqp"``, or
+        ``"quadprog"``. Install OSQP or quadprog separately to use it.
 
     Returns
     -------
@@ -313,7 +325,7 @@ def compare_kernel_models(
     for name in kernels:
         kernel_fn = extra_kernels.get(name, name)
         kernel = _IrisKernel(dataset, kernel_fn, q=q)
-        iris = _IRIS(reg_par=reg_par)
+        iris = _IRIS(reg_par=reg_par, qpsolver=qpsolver)
         iris.fit(dataset, kernel)
         result = iris.result
 
