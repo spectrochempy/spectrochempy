@@ -363,6 +363,8 @@ class IRIS(DecompositionAnalysis):
         grid with the OSQP builtin backend and finite convex problems.
         Other fit modes run in a single process. In a Python script,
         call parallel fits from an ``if __name__ == "__main__":`` block.
+        If a parallel fit fails, OSQP may print native diagnostics from
+        several regularization values that were already being evaluated.
 
     See Also
     --------
