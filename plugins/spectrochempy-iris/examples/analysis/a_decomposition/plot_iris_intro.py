@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 11
 
 """
 IRIS: 2D-IRIS analysis (plugin)
@@ -16,6 +15,8 @@ with the optional ``spectrochempy-iris`` plugin.
 Requires the official ``spectrochempy-iris`` plugin.
 Install with: ``pip install spectrochempy[iris]``.
 """
+
+# sphinx_gallery_thumbnail_number = 11
 
 # %%
 import spectrochempy as scp

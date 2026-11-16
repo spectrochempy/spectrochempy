@@ -19,23 +19,21 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Added the generic ``fft.validate_input`` plugin hook for read-only FFT/IFFT
-  checks before in-place axis changes, resizing or numerical preparation.
-  Validators can reject a request without leaving the caller partly modified.
-
 - ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
   summary of one explicitly supplied dataset, selected metadata, structured
   history and explicit figure references. It does not capture Matplotlib state
   or claim exhaustive provenance. Every recorded history operation is included
   in order; only individual values are explicitly truncated. Paths are rendered
-  as supplied, and figure references accept relative paths and HTTP(S) URLs.
-
+  as supplied, and figure references accept relative paths and HTTP(S) URLs. (:pr:`1775`)
 
 .. section
 
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
+- Preserve metadata lists whose length differs from the number of dataset
+  dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
 
 
 .. section
@@ -50,11 +48,6 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
-
-- Remove built-in quaternion handling and the Hypercomplex plugin from the
-  official plugin catalog, bundled extras, development environments and CI.
-  Specialized NMR representations belong to the standalone NMR plugin; use
-  ordinary complex arrays for core numerical operations.
 
 
 .. section

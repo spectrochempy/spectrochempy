@@ -14,4 +14,5 @@ Import & Export
    :maxdepth: 3
 
    import
+   readers
    importIR

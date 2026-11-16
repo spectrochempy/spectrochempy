@@ -34,11 +34,15 @@ from spectrochempy.plotting._colorbar_utils import _apply_colorbar_tick_policy
 from spectrochempy.plotting._kwargs import normalize_plot_kwargs
 from spectrochempy.plotting._kwargs import normalize_style_argument
 from spectrochempy.plotting._methods import validate_method_for_target_dimension
+from spectrochempy.plotting._projections import _draw_projections
+from spectrochempy.plotting._projections import _panel_axes
+from spectrochempy.plotting._projections import _prepare_projections
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
+from spectrochempy.utils.mplutils import _add_secondary_x
 from spectrochempy.utils.mplutils import make_label
 
 # ======================================================================================
@@ -367,8 +371,45 @@ def plot_lines(dataset, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -417,8 +458,8 @@ def plot_lines(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -503,8 +544,45 @@ def plot_contour(dataset, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -552,8 +630,8 @@ def plot_contour(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -639,8 +717,45 @@ def plot_contourf(dataset, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -688,8 +803,8 @@ def plot_contourf(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -785,8 +900,45 @@ def plot_stack(dataset, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -831,8 +983,8 @@ def plot_stack(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -918,8 +1070,45 @@ def plot_map(dataset, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -964,8 +1153,8 @@ def plot_map(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -1009,6 +1198,12 @@ def plot_image(dataset, **kwargs):
 
     Other Parameters
     ----------------
+    symmetric_percentile : float, optional
+        Set symmetric color limits from this percentile of absolute finite,
+        unmasked intensities. Values outside the limits saturate on the plot.
+        The option supplies the contour levels and normalization. If the
+        absolute percentile is effectively zero, use a small positive bound.
+        Rescale intensities near the floating-point limit before plotting.
     ax : Axe, optional
         Axe where to plot. If not specified, create a new one.
     clear : bool, optional, default: True
@@ -1052,8 +1247,45 @@ def plot_image(dataset, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -1098,8 +1330,8 @@ def plot_image(dataset, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -1189,8 +1421,45 @@ def plot_2D(dataset, method=None, **kwargs):
         plot model data if available.
     plottitle: bool, optional, default: False
         Use the name of the dataset as title. Works only if title is not defined
-    projections : bool, optional, default: False
-        Show projections on the axes (2D plots only).
+    projections : bool, str or sequence of str, optional
+        For contour/contourf plots, add marginal panels retaining the named
+        dataset dimensions. True selects both dimensions, False disables them.
+        A dimension on the horizontal axis produces a top panel; a dimension
+        on the vertical axis produces a right panel. Dimension names retain
+        their meaning after transposition. When omitted, use the
+        show_projections and show_projection_x/y preferences.
+    projection_reducer : {'sum', 'mean', 'max'}, default: 'sum'
+        Reduce over the other dimension, excluding masked and non-finite data.
+        This is a pointwise reduction, not a coordinate-weighted integral.
+    projection_data : mapping, optional
+        Map a retained dimension to a reference NDDataset or list of them.
+        A 2D reference contributes one curve per row. References replace the
+        calculated projection for that dimension. Their coordinates may have
+        different sampling, but must have compatible units and overlap the
+        map. Coordinates are converted without interpolation or input mutation.
+        Without an explicit selection, supplied reference dimensions are enabled.
+    projection_kwargs : mapping, optional
+        Per-dimension dictionaries accepting color, linestyle, linewidth,
+        labels, legend (bool or location), intensity_label and title. Styles
+        may be scalar or one per reference curve; labels must be one per curve.
+    projection_size : float, default: 0.25
+        Marginal size as a fraction of the corresponding main axes size.
+    projection_pad : float, default: 0.12
+        Gap between the map and each marginal, in inches.
+    positive_color, negative_color : color, optional
+        Use a two-color, zero-centered palette for signed contours. An omitted
+        counterpart defaults to red (positive) or blue (negative). The colorbar,
+        if requested, uses the same sign palette and symmetric amplitude range.
+        These colors take precedence over cmap/norm. Filled contours include
+        a zero boundary when the specified levels span both signs.
+    positive_linestyle, negative_linestyle : str, optional
+        Contour line style for each sign; otherwise use linestyle.
+    diagonal : bool, default: False
+        Add a dotted diagonal within the shared coordinate range. Axis units
+        must match.
+    return_dict : bool, default: False
+        Return a dictionary with fig and axes instead of the main axes. The
+        axes mapping contains main and any top/right marginal axes.
     reverse : bool or None [optional, default=None/False
         In principle, coordinates run from left to right,
         except for wavenumbers
@@ -1235,8 +1504,8 @@ def plot_2D(dataset, method=None, **kwargs):
 
     Returns
     -------
-    Matplolib Axes or None
-        The matplotlib axes containing the plot if successful, None otherwise.
+    Matplotlib Axes, dict or None
+        The main axes, or a fig/axes dictionary when return_dict=True.
 
     See Also
     --------
@@ -1257,7 +1526,9 @@ def plot_2D(dataset, method=None, **kwargs):
     import matplotlib.backend_bases  # noqa: F401
     import matplotlib.pyplot as plt
     from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import ListedColormap
     from matplotlib.colors import Normalize
+    from matplotlib.colors import TwoSlopeNorm
     from matplotlib.ticker import ScalarFormatter
 
     # Get preferences
@@ -1362,11 +1633,14 @@ def plot_2D(dataset, method=None, **kwargs):
 
         if kwargs.get("y_reverse", False):
             new = new[::-1]
+        projection_panels = _prepare_projections(new, method, kwargs, prefs)
 
         # EARLY RETURN FOR WATERFALL - before any figure creation
         # Waterfall uses its own 3D rendering and must not go through _figure_setup
         if method == "waterfall":
             # Call the 3D waterfall function directly
+            if kwargs.get("secondary_x") is not None:
+                raise ValueError("secondary_x requires a 2D Cartesian plot.")
             return _plot_waterfall_3d(new, prefs=prefs, **kwargs)
 
         # Figure setup
@@ -1538,6 +1812,40 @@ def plot_2D(dataset, method=None, **kwargs):
             zdata = new.imag.masked_data
 
         levels = requested_levels
+        percentile = kwargs.get("symmetric_percentile")
+        if percentile is not None:
+            if method not in {"image", "contourf"}:
+                raise ValueError("symmetric_percentile requires a filled contour plot.")
+            if not 0 < percentile <= 100:
+                raise ValueError("symmetric_percentile must be in (0, 100].")
+            scale_options = (
+                "levels",
+                "norm",
+                "vmin",
+                "vmax",
+                "positive_color",
+                "negative_color",
+            )
+            if any(kwargs.get(key) is not None for key in scale_options):
+                raise ValueError(
+                    "symmetric_percentile defines levels and normalization."
+                )
+            zdata = np.ma.masked_invalid(zdata)
+            valid = abs(zdata.compressed())
+            if not valid.size:
+                raise ValueError(
+                    "symmetric_percentile requires finite, unmasked values."
+                )
+            if discrete_data:
+                raise ValueError("symmetric_percentile requires numeric coordinates.")
+            if valid.max() >= 1e250:
+                raise ValueError(
+                    "Rescale intensities before plotting symmetric contours."
+                )
+            bound = np.percentile(valid, percentile)
+            if bound < 1e-12:
+                bound = 1e-12
+            levels = np.linspace(-bound, bound, kwargs.get("nlevels", 61))
 
         zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
@@ -1592,6 +1900,8 @@ def plot_2D(dataset, method=None, **kwargs):
         norm = kwargs.get("norm")
         vmin = kwargs.get("vmin")
         vmax = kwargs.get("vmax")
+        if percentile is not None:
+            vmin, vmax = -bound, bound
         contrast_safe = kwargs.get("contrast_safe", True)
         min_contrast = kwargs.get("min_contrast", 1.5)
         diverging_margin = kwargs.get("diverging_margin", 0.05)
@@ -1628,6 +1938,8 @@ def plot_2D(dataset, method=None, **kwargs):
                 diverging_margin=diverging_margin,
                 prefs=prefs,
             )
+            if percentile is not None:
+                norm = Normalize(vmin=vmin, vmax=vmax)
         else:
             # For non-image methods, use simple normalization
             if norm is None:
@@ -1637,6 +1949,25 @@ def plot_2D(dataset, method=None, **kwargs):
                 cmap = prefs.colormap
             elif isinstance(cmap, str):
                 cmap = plt.get_cmap(cmap)
+
+        if method in ("contour", "contourf", "map", "image") and (
+            kwargs.get("positive_color") is not None
+            or kwargs.get("negative_color") is not None
+        ):
+            cmap = ListedColormap(
+                [
+                    kwargs["negative_color"]
+                    if kwargs.get("negative_color") is not None
+                    else "#2166ac",
+                    kwargs["positive_color"]
+                    if kwargs.get("positive_color") is not None
+                    else "#b2182b",
+                ]
+            )
+            zdata = np.ma.masked_invalid(zdata)
+            bound = float(np.ma.max(np.ma.abs(zdata))) if zdata.count() else 0.0
+            bound = bound or 1.0
+            norm = TwoSlopeNorm(vmin=-bound, vcenter=0.0, vmax=bound)
 
         # Initialize mappable tracker for colorbar
         mappable = None
@@ -1689,7 +2020,23 @@ def plot_2D(dataset, method=None, **kwargs):
                     if not hasattr(new, "clevels") or new.clevels is None:
                         new.clevels = _get_clevels(zdata, prefs, **kwargs)
                     contour_levels = new.clevels
-                mappable = ax.contourf(xdata, ydata, zdata, contour_levels, alpha=alpha)
+                if (
+                    (
+                        kwargs.get("positive_color") is not None
+                        or kwargs.get("negative_color") is not None
+                    )
+                    and not np.isscalar(contour_levels)
+                    and min(contour_levels) < 0 < max(contour_levels)
+                ):
+                    contour_levels = np.unique([*contour_levels, 0.0])
+                mappable = ax.contourf(
+                    xdata,
+                    ydata,
+                    zdata,
+                    contour_levels,
+                    alpha=alpha,
+                    extend="both" if percentile is not None else "neither",
+                )
                 mappable.set_cmap(cmap)
                 mappable.set_norm(norm)
 
@@ -1722,10 +2069,28 @@ def plot_2D(dataset, method=None, **kwargs):
                     contour_levels = new.clevels
 
                 mappable = ax.contour(
-                    xdata, ydata, zdata, contour_levels, linewidths=lw, alpha=alpha
+                    xdata,
+                    ydata,
+                    zdata,
+                    contour_levels,
+                    linewidths=lw,
+                    alpha=alpha,
+                    linestyles=ls,
                 )
                 mappable.set_cmap(cmap)
                 mappable.set_norm(norm)
+                if "positive_linestyle" in kwargs or "negative_linestyle" in kwargs:
+                    mappable.set_linestyles(
+                        [
+                            kwargs.get(
+                                "negative_linestyle"
+                                if level < 0
+                                else "positive_linestyle",
+                                ls,
+                            )
+                            for level in mappable.levels
+                        ]
+                    )
 
                 # For continuous colorbar, create a ScalarMappable with the resolved norm
                 colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
@@ -1898,6 +2263,8 @@ def plot_2D(dataset, method=None, **kwargs):
         if data_only:
             # if data only (we will not set axes and labels
             # it was probably done already in a previous plot
+            upper_parent = _panel_axes(ax).get("top", ax)
+            _add_secondary_x(ax, kwargs.get("secondary_x"), parent=upper_parent)
             return ax
 
         # display a title
@@ -2021,6 +2388,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 cb_mappable = locals().get("colorbar_mappable", mappable)
                 cb = fig.colorbar(
                     cb_mappable,
+                    extend="both" if percentile is not None else None,
                     ax=ax,
                     location="right",
                     pad=0.02,
@@ -2083,6 +2451,25 @@ def plot_2D(dataset, method=None, **kwargs):
             else:
                 _ = ax.legend(labels=list(legend))
 
+        if kwargs.get("diagonal", False):
+            if method not in ("contour", "contourf", "map", "image"):
+                raise ValueError("A diagonal requires a contour or contourf plot")
+            if not _can_enforce_equal_aspect(new):
+                raise ValueError("A diagonal requires matching coordinate units")
+            lo = max(min(ax.get_xlim()), min(ax.get_ylim()))
+            hi = min(max(ax.get_xlim()), max(ax.get_ylim()))
+            if lo < hi:
+                ax.plot([lo, hi], [lo, hi], color="0.6", linestyle=":", linewidth=0.7)
+        _draw_projections(
+            ax,
+            projection_panels,
+            clear=kwargs.get("clear", True),
+            preserve_title=not kwargs.get("clear", True) and "title" not in kwargs,
+        )
+        upper_parent = _panel_axes(ax).get("top", ax)
+        _add_secondary_x(ax, kwargs.get("secondary_x"), parent=upper_parent)
+        if kwargs.get("return_dict", False):
+            return {"fig": fig, "axes": _panel_axes(ax)}
         return ax
 
 

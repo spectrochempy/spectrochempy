@@ -1,5 +1,7 @@
 .. _examples-analysis-index:
 
-##################
-Analysis NDDataset
-##################
+.. gallery-overview-start
+
+########
+Analysis
+########

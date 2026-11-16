@@ -3,16 +3,20 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+import warnings
 from numbers import Integral
 
 import numpy as np
+import scipy.ndimage
 import scipy.signal
 import traitlets as tr
 
 import spectrochempy.utils.traits as mtr
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.optional import import_optional_dependency
 
 __dataset_methods__ = [
     "differentiate",
@@ -56,6 +60,10 @@ def _detect_uniform_spacing(dataset, dim, *, coordset=None):
     except AttributeError:
         return None, "no coordinate available"
 
+    return _uniform_spacing(coord)
+
+
+def _uniform_spacing(coord):
     if coord is None:
         return None, "coordinate is None"
 
@@ -94,6 +102,9 @@ def _detect_uniform_spacing(dataset, dim, *, coordset=None):
     return float(mean_diff), None
 
 
+_SPECTRAL_METHODS = {"butterworth", "notch", "gaussian", "wavelet"}
+
+
 _common_see_also = """
 See Also
 --------
@@ -116,7 +127,9 @@ class Filter(ProcessingConfigurable):
 
     The filters can be applied to 1D datasets consisting in a single row
     with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`,
-    :term:`n_features`).
+    :term:`n_features`). Butterworth, notch, Gaussian and wavelet filters also support
+    higher-dimensional datasets. Physical settings use the active coordinate
+    on axes with multiple coordinates.
 
     Various filters/smoothers can be applied to the data. The currently available
     filters are:
@@ -125,24 +138,94 @@ class Filter(ProcessingConfigurable):
     - Convolution filters (`han`, `hamming`, `bartlett`, `blackman`)
     - Savitzky-Golay filter (`savgol`)
     - Whittaker-Eilers filter (`whittaker`)
+    - Zero-phase Butterworth low-pass filter (`butterworth`)
+    - Zero-phase narrow band-stop filter (`notch`)
+    - Gaussian convolution (`gaussian`)
+    - Discrete wavelet denoising (`wavelet`)
 
     Parameters
     ----------
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
-    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``], optional, default: ``"savgol"``
+    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``, ``"butterworth"``, ``"notch"``, ``"gaussian"``, ``"wavelet"``], optional, default: ``"savgol"``
         The filter method to be applied. By default, the Savitzky-Golay (savgol) filter is applied.
     size : `int`, optional, default: 5
         The size of the filter window. size must be a positive odd integer.
     order : `int`, optional, default: 2
-        The order of the polynomial used to fit the data.
+        For Savitzky-Golay, the order of the polynomial used to fit the data.
+        For Butterworth, the positive filter order per pass.
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
     lamb : `float`, optional, default: 10.0
         The smoothing parameter for the Whittaker-Eilers filter.
     cval : `float`, optional, default: 0.0
         The value to fill past the edges of the input if `mode` is ``'constant'``.
+
+    mask_policy : {"default", "split"}, optional, default: "default"
+        With "split", filter each contiguous unmasked segment independently
+        along the selected dimension, even when spectra have different masks.
+        Preserve the mask and apply the filter's boundary handling at each
+        segment's ends. Masked values are converted to the output dtype and
+        may be rounded if that dtype cannot represent them exactly.
+        If any unmasked segment is too short for the configured filter,
+        raise ValueError for the whole operation. Entirely masked spectra
+        are skipped. The default uses the method's
+        original mask handling.
+
+    cutoff : `float`, optional
+        Required for Butterworth. Frequency in cycles per unit of the selected
+        coordinate. The combined forward-backward response is −3 dB at cutoff.
+    period : `float`, optional
+        Required for the notch filter. Period of the fringe in units of the
+        selected coordinate.
+    quality_factor : `float`, optional, default: 30.0
+        Notch center frequency divided by the single-pass −3 dB bandwidth.
+        Must exceed 0.5 and give a bandwidth below the Nyquist frequency.
+    sigma : `float`, optional
+        Required for Gaussian convolution. Standard deviation of the Gaussian.
+    sigma_units : {"points", "coordinate"}, optional, default: "points"
+        Interpret Gaussian sigma in sample points or in units of the selected
+        coordinate. FWHM equals sqrt(8 log(2)) times sigma.
+
+    wavelet : str, optional, default: "sym4"
+        Discrete wavelet family and order, using PyWavelets names.
+    wavelet_level : int or None, optional
+        Positive decomposition level. The default is the smaller of three and
+        the maximum level for the selected wavelet and axis length.
+    wavelet_threshold : float or None, optional
+        Nonnegative soft threshold in signal units. By default it is estimated
+        separately for each spectrum from the median absolute deviation of
+        the finest detail coefficients (MAD divided by 0.67449), multiplied
+        by sqrt(2 log(n)), where n is the selected axis length.
+
+    Notes
+    -----
+    Split filtering requires finite values at unmasked samples and uses the
+    original coordinate for spacing checks and derivative scaling. Minimum
+    segment lengths are the window size for Savitzky–Golay in interp mode,
+    one more than the difference order for Whittaker, and the usual padding
+    or decomposition minimum for IIR and wavelet filters, respectively.
+    Split filtering requires real data for window filters, Savitzky–Golay,
+    Whittaker and wavelets.
+
+    By default, Butterworth, notch, Gaussian and wavelet filters require
+    finite, unmasked data. Butterworth, notch and
+    coordinate-based Gaussian filtering require a uniformly spaced coordinate.
+    Descending coordinates are supported. Butterworth and notch use odd
+    extension with SciPy's default padding and require more than the padding
+    length in samples along the selected axis. The padding is three times
+    the Butterworth order plus three, or nine points for the notch.
+    IIR settings whose response cannot be resolved in floating point are rejected.
+    Gaussian convolution uses the configured `mode` and `cval`.
+    Inputs outside SciPy's supported floating-point dtypes are converted
+    to double precision. Overflow during conversion is rejected.
+    The default `interp` selects SciPy's `reflect` mode for this method.
+
+    Wavelet denoising uses symmetric extension and sample indices along the
+    selected axis. It soft-thresholds detail coefficients and preserves the
+    approximation coefficients. It accepts real data and computes in double
+    precision. It requires the optional dependency installed with ``pip install "spectrochempy[wavelets]"``.
 
     See Also
     --------
@@ -162,6 +245,10 @@ class Filter(ProcessingConfigurable):
             "median",
             "savgol",
             "whittaker",
+            "butterworth",
+            "notch",
+            "gaussian",
+            "wavelet",
         ],
         default_value="savgol",
         help="The filter method to be applied. By default, "
@@ -179,8 +266,47 @@ class Filter(ProcessingConfigurable):
         "in the case of the Savitzky-Golay (savgol) filter. "
         "`order` must be less than size.\n"
         "In the case of the Whittaker-Eilers filter, order is the "
-        "difference order of the penalized least squares.",
+        "difference order of the penalized least squares. "
+        "For Butterworth it is the positive filter order per pass.",
     ).tag(config=True, min=0)
+
+    mask_policy = tr.Enum(
+        ["default", "split"],
+        default_value="default",
+        help="Filter contiguous unmasked segments independently when set to split.",
+    ).tag(config=True)
+
+    cutoff = tr.Float(
+        None, allow_none=True, help="Butterworth cutoff in cycles per coordinate unit."
+    ).tag(config=True)
+
+    period = tr.Float(
+        None, allow_none=True, help="Notch period in coordinate units."
+    ).tag(config=True)
+
+    quality_factor = tr.Float(
+        30.0, help="Notch center frequency divided by single-pass bandwidth."
+    ).tag(config=True)
+
+    sigma = tr.Float(None, allow_none=True, help="Gaussian standard deviation.").tag(
+        config=True
+    )
+
+    sigma_units = tr.Enum(
+        ["points", "coordinate"],
+        default_value="points",
+        help="Interpret Gaussian sigma in points or in coordinate units.",
+    ).tag(config=True)
+
+    wavelet = tr.Unicode("sym4", help="Discrete wavelet name.").tag(config=True)
+
+    wavelet_level = tr.Integer(
+        None, allow_none=True, help="Discrete wavelet decomposition level."
+    ).tag(config=True)
+
+    wavelet_threshold = tr.Float(
+        None, allow_none=True, help="Soft threshold in signal units."
+    ).tag(config=True)
 
     deriv = tr.Integer(
         default_value=0,
@@ -257,10 +383,381 @@ and ‘nearest’.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
-    def _transform(self, X):
+    def transform(self, dataset, dim=-1):
+        """
+        Apply the configured filter along a dimension of the dataset.
+
+        Parameters
+        ----------
+        dataset : `NDDataset`
+            The dataset to filter.
+        dim : int or str, optional, default: -1
+            A dimension name or an axis index.
+
+        Returns
+        -------
+        `NDDataset`
+            The filtered dataset.
+
+        """
+        if self.mask_policy == "split":
+            return self._transform_segments(dataset, dim)
+        if self.method not in _SPECTRAL_METHODS:
+            return super().transform(dataset, dim=dim)
+
+        self._transformed = False
+        if dataset.ndim == 0:
+            raise ValueError(f"{self.method} filtering requires a dimension")
+        if np.any(dataset.mask):
+            raise ValueError(f"{self.method} filtering requires unmasked data")
+        if not np.all(np.isfinite(dataset.data)):
+            raise ValueError(f"{self.method} filtering requires finite data")
+
+        axis, dimension = dataset.get_axis(dim, negative_axis=True)
+        data, parameters = self._spectral_transform(
+            dataset.data, axis, dimension, getattr(dataset, dimension, None)
+        )
+        with np.errstate(over="ignore", under="ignore"):
+            result = dataset.copy(keepname=True)
+        result._dtype = data.dtype
+        result._data = data
+        result._append_history_entry(
+            operation=self.method,
+            parameters={"dimension": dimension, "axis": axis, **parameters},
+            message=f"Applied {self.method} filter on dimension {dimension}",
+        )
+        self._transformed = True
+        return result
+
+    def _transform_segments(self, dataset, dim):
+        self._transformed = False
+        if dataset.ndim == 0:
+            raise ValueError(f"{self.method} filtering requires a dimension")
+        axis, dimension = dataset.get_axis(dim, negative_axis=True)
+        data = np.moveaxis(dataset.data, axis, -1)
+        mask = np.moveaxis(np.broadcast_to(dataset.mask, dataset.shape), axis, -1)
+        spectral = self.method in _SPECTRAL_METHODS
+        if not spectral and np.iscomplexobj(data) and not mask.all():
+            raise ValueError(f"{self.method} split filtering requires real data")
+        coord = getattr(dataset, dimension, None)
+        output = None
+        parameters = {}
+        wavelet_segments = []
+        minimum = 1
+        if self.method == "savgol" and self.mode == "interp":
+            minimum = self.size
+        elif self.method == "whittaker":
+            minimum = self.order + 1
+
+        spacing_info = None
+        physical_spectral = self.method in {"butterworth", "notch"} or (
+            self.method == "gaussian" and self.sigma_units == "coordinate"
+        )
+        for index in np.ndindex(data.shape[:-1]):
+            boundaries = np.flatnonzero(
+                np.diff(~mask[index], prepend=False, append=False)
+            )
+            for start, stop in boundaries.reshape(-1, 2):
+                region = slice(start, stop)
+                segment = data[index][region]
+                try:
+                    if segment.size < minimum:
+                        raise ValueError(f"requires at least {minimum} samples")
+                    if not np.isfinite(segment).all():
+                        raise ValueError("requires finite data")
+                    if spectral:
+                        if physical_spectral and spacing_info is None:
+                            spacing_info = self._spectral_spacing(coord)
+                        values, parameters = self._spectral_transform(
+                            segment, -1, dimension, coord, spacing_info=spacing_info
+                        )
+                    else:
+                        if (
+                            spacing_info is None
+                            and self.method == "savgol"
+                            and self.deriv
+                            and self.delta is None
+                        ):
+                            active_coord = (
+                                coord.default if isinstance(coord, CoordSet) else coord
+                            )
+                            spacing_info = _uniform_spacing(active_coord)
+                            if spacing_info[0] is None:
+                                self._warn_index_spacing(spacing_info[1])
+                        values = self._transform(
+                            segment,
+                            dataset=dataset,
+                            axis=axis,
+                            spacing_info=spacing_info,
+                        )
+                except ValueError as exc:
+                    raise ValueError(
+                        f"{self.method} filter on dimension {dimension!r}, "
+                        f"spectrum {index}, segment [{start}:{stop}): {exc}"
+                    ) from exc
+                if output is None:
+                    output = data.astype(np.result_type(data.dtype, values.dtype))
+                output[index][region] = values
+                if self.method == "wavelet":
+                    wavelet_segments.append(
+                        {
+                            "spectrum": list(index),
+                            "start": int(start),
+                            "stop": int(stop),
+                            **parameters,
+                        }
+                    )
+
+        with np.errstate(over="ignore", under="ignore"):
+            result = dataset.copy(keepname=True)
+        result._dtype = data.dtype if output is None else output.dtype
+        result._data = (
+            dataset.data.copy() if output is None else np.moveaxis(output, -1, axis)
+        )
+        entry = {
+            "operation": self.method,
+            "parameters": {"dimension": dimension, "axis": axis, **parameters},
+            "message": f"Applied {self.method} filter on dimension {dimension}",
+        }
+        if output is not None and not spectral:
+            entry = self._processing_history_entry(dataset=dataset, axis=axis)
+            if self._output_units is not None:
+                result._units = self._output_units
+            if self._output_title_suffix and result.title:
+                result.title = f"{result.title} {self._output_title_suffix}"
+        if wavelet_segments:
+            entry["parameters"] = {
+                "dimension": dimension,
+                "axis": axis,
+                "segments": wavelet_segments,
+            }
+        entry["parameters"]["mask_policy"] = "split"
+        result._append_history_entry(**entry)
+        self._transformed = True
+        return result
+
+    @staticmethod
+    def _spectral_spacing(coord):
+        if isinstance(coord, CoordSet):
+            coord = coord.default
+        return _uniform_spacing(coord), (
+            str(coord.units) if coord is not None and coord.units is not None else None
+        )
+
+    def _spectral_transform(self, data, axis, dimension, coord, *, spacing_info=None):
+        if self.method == "wavelet":
+            return self._wavelet_transform(data, axis)
+
+        parameter = {"butterworth": "cutoff", "notch": "period", "gaussian": "sigma"}[
+            self.method
+        ]
+        value = getattr(self, parameter)
+        if value is None or not np.isfinite(value) or value <= 0:
+            raise ValueError(f"{parameter} must be finite and positive")
+
+        gaussian = self.method == "gaussian"
+        physical_units = not gaussian or self.sigma_units == "coordinate"
+        spacing = 1.0
+        parameters = {parameter: value}
+        if physical_units:
+            if spacing_info is None:
+                spacing_info = self._spectral_spacing(coord)
+            (delta, message), coordinate_units = spacing_info
+            if delta is None or not np.isfinite(delta) or delta == 0:
+                raise ValueError(
+                    f"{self.method} filtering requires a uniformly spaced coordinate"
+                    f" ({message or 'invalid spacing'})"
+                )
+            spacing = abs(delta)
+            parameters.update(
+                spacing=spacing,
+                coordinate_units=coordinate_units,
+            )
+
+        if gaussian:
+            sigma_points = value / spacing
+            if not np.isfinite(sigma_points) or sigma_points <= 0:
+                raise ValueError("Gaussian sigma in points must be finite and positive")
+            mode = "reflect" if self.mode == "interp" else self.mode
+            parameters.update(
+                sigma_units=self.sigma_units, sigma_points=sigma_points, mode=mode
+            )
+            if mode == "constant":
+                if not np.isfinite(self.cval):
+                    raise ValueError("Gaussian cval must be finite in constant mode")
+                parameters["cval"] = self.cval
+
+            truncate = 4.0
+            if sigma_points < 0.5 / truncate:
+                return data.copy(), parameters
+            if data.dtype.type not in (
+                np.float32,
+                np.float64,
+                np.complex64,
+                np.complex128,
+            ):
+                dtype = np.complex128 if np.iscomplexobj(data) else np.float64
+                with np.errstate(over="ignore", under="ignore"):
+                    data = data.astype(dtype)
+                if not np.isfinite(data).all():
+                    raise ValueError(
+                        "Gaussian input exceeds the double-precision range"
+                    )
+            return (
+                scipy.ndimage.gaussian_filter1d(
+                    data,
+                    sigma_points,
+                    axis=axis,
+                    mode=mode,
+                    cval=self.cval,
+                    truncate=truncate,
+                ),
+                parameters,
+            )
+
+        nyquist_fraction = (
+            2.0 * spacing * value
+            if self.method == "butterworth"
+            else 2.0 * spacing / value
+        )
+        if not 0 < nyquist_fraction < 1:
+            raise ValueError(f"{parameter} must give a frequency below Nyquist")
+
+        if self.method == "butterworth":
+            if self.order < 1:
+                raise ValueError("Butterworth order must be positive")
+            padlen = 3 * (self.order + 1)
+            factor = (np.sqrt(2.0) - 1.0) ** (-0.5 / self.order)
+            critical = (2.0 / np.pi) * np.arctan(
+                factor * np.tan(np.pi * nyquist_fraction / 2.0)
+            )
+            parameters.update(order=self.order, critical_nyquist_fraction=critical)
+        else:
+            if not np.isfinite(self.quality_factor) or self.quality_factor <= 0.5:
+                raise ValueError("quality_factor must be finite and greater than 0.5")
+            if nyquist_fraction / self.quality_factor >= 1:
+                raise ValueError("quality_factor must give a bandwidth below Nyquist")
+            padlen = 9
+            parameters["quality_factor"] = self.quality_factor
+
+        if data.shape[axis] <= padlen:
+            raise ValueError(
+                f"{self.method} filtering requires at least {padlen + 1} "
+                f"samples along dimension {dimension!r}"
+            )
+        if self.method == "butterworth":
+            sos = scipy.signal.butter(self.order, critical, output="sos")
+            target_gain = 2.0**-0.25
+        else:
+            numerator, denominator = scipy.signal.iirnotch(
+                nyquist_fraction, self.quality_factor
+            )
+            sos = np.array([np.concatenate((numerator, denominator))])
+            target_gain = 0.0
+
+        with np.errstate(divide="ignore", invalid="ignore"):
+            _, response = scipy.signal.sosfreqz(
+                sos, worN=[0.0, np.pi * nyquist_fraction]
+            )
+        if not np.allclose(np.abs(response), [1.0, target_gain], rtol=1e-4, atol=1e-4):
+            raise ValueError(
+                f"{self.method} settings are outside the numerically reliable range"
+            )
+
+        parameters.update(padtype="odd", padlen=padlen)
+        return (
+            scipy.signal.sosfiltfilt(sos, data, axis=axis, padlen=padlen),
+            parameters,
+        )
+
+    def _wavelet_transform(self, data, axis):
+        pywt = import_optional_dependency(
+            "pywt", extra='Install it with pip install "spectrochempy[wavelets]".'
+        )
+        if np.iscomplexobj(data):
+            raise ValueError("wavelet filtering requires real data")
+        with np.errstate(over="ignore", under="ignore"):
+            data = data.astype(np.float64, copy=False)
+        if not np.isfinite(data).all():
+            raise ValueError("wavelet input exceeds the double-precision range")
+        wavelet = pywt.Wavelet(self.wavelet)
+        size = data.shape[axis]
+        maximum_level = pywt.dwt_max_level(size, wavelet.dec_len)
+        if maximum_level == 0:
+            raise ValueError(
+                f"wavelet {wavelet.name!r} requires at least "
+                f"{2 * (wavelet.dec_len - 1)} samples along the selected dimension"
+            )
+        level = self.wavelet_level
+        if level is None:
+            level = min(3, maximum_level)
+        if not 1 <= level <= maximum_level:
+            raise ValueError(f"wavelet_level must be between 1 and {maximum_level}")
+
+        threshold = self.wavelet_threshold
+        if threshold is not None and (not np.isfinite(threshold) or threshold < 0):
+            raise ValueError("wavelet_threshold must be finite and nonnegative")
+
+        mode = "symmetric"
+        coefficients = pywt.wavedec(data, wavelet, mode=mode, level=level, axis=axis)
+        rule = "fixed"
+        if threshold is None:
+            finest = coefficients[-1]
+            center = np.median(finest, axis=axis, keepdims=True)
+            mad = np.median(np.abs(finest - center), axis=axis, keepdims=True)
+            threshold = mad * (np.sqrt(2 * np.log(size)) / 0.6744897501960817)
+            if not np.isfinite(threshold).all():
+                raise ValueError(
+                    "wavelet threshold exceeds the supported numeric range"
+                )
+            rule = "universal_mad"
+
+        details = [
+            np.sign(detail) * np.maximum(np.abs(detail) - threshold, 0)
+            for detail in coefficients[1:]
+        ]
+        result = pywt.waverec(
+            [coefficients[0], *details], wavelet, mode=mode, axis=axis
+        )
+        extent = [slice(None)] * data.ndim
+        extent[axis] = slice(size)
+        result = result[tuple(extent)]
+        if not np.isfinite(result).all():
+            raise ValueError(
+                "wavelet reconstruction exceeds the supported numeric range"
+            )
+        effective_threshold = (
+            threshold.squeeze(axis=axis).tolist()
+            if rule == "universal_mad"
+            else threshold
+        )
+        return result, {
+            "wavelet": wavelet.name,
+            "level": level,
+            "mode": mode,
+            "threshold_mode": "soft",
+            "threshold_rule": rule,
+            "threshold": effective_threshold,
+        }
+
+    @staticmethod
+    def _warn_index_spacing(message):
+        warnings.warn(
+            f"Savitzky-Golay derivative requested but {message}. "
+            "Falling back to index-based delta=1.0. "
+            "To obtain physically scaled derivatives, provide "
+            "a uniformly spaced coordinate or set delta explicitly.",
+            stacklevel=3,
+        )
+
+    def _transform(self, X, *, dataset=None, axis=None, spacing_info=None):
+        split = dataset is not None
+        if not split:
+            dataset, axis = self._X, self._dim
+        data_axis = -1 if split else axis
         self._history_delta = None
         kwargs = {  # param for avg and convolution filters
-            "axis": self._dim,
+            "axis": data_axis,
             "mode": "reflect" if self.mode == "interp" else self.mode,
             "cval": self.cval,
         }
@@ -290,7 +787,9 @@ and ‘nearest’.
         elif self.method == "median":
             if "axis" in kwargs:
                 axis = kwargs.pop("axis")
-            if axis in (-2, 0):
+            if split:
+                size = self.size
+            elif axis in (-2, 0):
                 size = (self.size, 1)
             elif axis in (-1, 1):
                 size = (1, self.size)
@@ -309,11 +808,12 @@ and ‘nearest’.
 
             if self.delta is None:
                 if self.deriv:
-                    delta_signed, msg = _detect_uniform_spacing(
-                        self._X,
-                        self._dim,
+                    delta_signed, msg = (
+                        spacing_info
+                        if split
+                        else _detect_uniform_spacing(dataset, axis)
                     )
-                    if delta_signed is None and np.any(self._X_mask):
+                    if delta_signed is None and not split and np.any(self._X_mask):
                         delta_signed, msg = _detect_uniform_spacing(
                             self._X,
                             self._dim,
@@ -325,15 +825,8 @@ and ‘nearest’.
                     else:
                         delta_used = 1.0
                         delta_source = "fallback"
-                        import warnings as _warnings
-
-                        _warnings.warn(
-                            f"Savitzky-Golay derivative requested but {msg}. "
-                            "Falling back to index-based delta=1.0. "
-                            "To obtain physically scaled derivatives, provide "
-                            "a uniformly spaced coordinate or set delta explicitly.",
-                            stacklevel=2,
-                        )
+                        if not split:
+                            self._warn_index_spacing(msg)
                 else:
                     # deriv=0: delta is irrelevant; scipy needs a float
                     delta_used = 1.0
@@ -341,7 +834,7 @@ and ‘nearest’.
                 delta_source = "explicit"
 
             kwargs = {
-                "axis": self._dim,
+                "axis": data_axis,
                 "deriv": self.deriv,
                 "delta": delta_used,
                 "mode": self.mode,
@@ -353,9 +846,15 @@ and ‘nearest’.
             # Propagate units for derivative paths that claim physical scaling.
             # Smoothing (deriv=0) and index fallbacks keep source units.
             if self.deriv > 0 and delta_source in ("coordinate", "explicit"):
-                coord = self._X.coord(self._dim)
+                coord = (
+                    getattr(dataset, dataset.dims[axis], None)
+                    if split
+                    else dataset.coord(axis)
+                )
+                if split and isinstance(coord, CoordSet):
+                    coord = coord.default
                 coord_units = coord.units if coord is not None else None
-                source_units = self._X.units
+                source_units = dataset.units
                 if source_units is not None and coord_units is not None:
                     self._output_units = source_units / coord_units**self.deriv
                 elif source_units is not None:
@@ -376,15 +875,17 @@ and ‘nearest’.
         # Whittaker-Eilers filter
         # -----------------------
         elif self.method == "whittaker":
-            data = np.apply_along_axis(ws, self._dim, X, self.lamb, self.order)
+            data = np.apply_along_axis(ws, data_axis, X, self.lamb, self.order)
 
         return data
 
-    def _processing_history_entry(self):
-        dimension = self._X.dims[self._dim]
+    def _processing_history_entry(self, *, dataset=None, axis=None):
+        if dataset is None:
+            dataset, axis = self._X, self._dim
+        dimension = dataset.dims[axis]
         parameters = {
             "dimension": dimension,
-            "axis": self._dim,
+            "axis": axis,
         }
         labels = {
             "avg": "moving-average",
@@ -676,7 +1177,12 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     fundamentally index-based; the detected delta scales the derivative
     coefficients during the convolution.
 
-    **Masked data.** Masked rows and columns are removed before filtering,
+    **Masked data.** Pass ``mask_policy="split"`` to filter contiguous
+    unmasked segments separately and use the original coordinate for
+    automatic spacing. In ``mode="interp"``, every unmasked segment must
+    contain at least ``size`` points.
+
+    By default, masked rows and columns are removed before filtering,
     and the input mask is restored afterwards. Automatic spacing detection
     first uses the retained samples if they are uniformly spaced (including
     regular subsampling). Otherwise it uses the original coordinate if that
@@ -691,7 +1197,8 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     gaps (for example, twice the original step when every other sample is
     removed). This corrects the scaling but not the effects of crossing gaps.
 
-    Removing a masked block joins its two sides in the filtered series.
+    With the default mask policy, removing a masked block joins its two
+    sides in the filtered series.
     Windows spanning this gap can therefore give unreliable values at
     unmasked points near the gap, even with physical units and spacing.
     Interior convolution windows can affect up to ``size // 2`` retained

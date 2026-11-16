@@ -30,6 +30,10 @@ _MAX_COLLECTION_ITEMS = 32
 _MAX_NESTING_DEPTH = 4
 _MAX_TEXT_LENGTH = 4096
 _MISSING = "[absent]"
+_TEXT_TRUNCATED = " [truncated: text too long]"
+_ENTITY_START = re.compile(
+    r"&(?=(?:[A-Za-z][A-Za-z0-9]+|#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6});)"
+)
 
 
 @dataclass(frozen=True)
@@ -194,7 +198,8 @@ def _coordinates(dataset: NDDataset) -> list[str]:
 
     names = coordset.names
     for dim in dataset.dims:
-        coord = dataset.coord(dim) if dim in names else None
+        name = coordset.references.get(dim, dim)
+        coord = dataset.coord(name) if name in names else None
         if coord is None:
             lines.append(f"- `{_escape(dim)}`: —")
             continue
@@ -359,13 +364,14 @@ def _figure_target(target: str) -> str:
     elif target.startswith(("/", "\\")):
         raise ValueError("figure target must be an HTTP(S) URL or relative path")
     if parsed.scheme:
-        return parsed._replace(
+        url = parsed._replace(
             netloc=quote(parsed.netloc, safe="[]:@%"),
             path=quote(parsed.path, safe="/:%+@,;~!$&*-"),
             params=quote(parsed.params, safe="=:%+@,;~!$&*-"),
             query=quote(parsed.query, safe="/?:=+@,;~!$&*-%"),
             fragment=quote(parsed.fragment, safe="/?:=+@,;~!$&*-%"),
         ).geturl()
+        return _ENTITY_START.sub(r"\\&", url)
     return quote(target, safe="/%+@,~!$*-")
 
 
@@ -382,8 +388,13 @@ def _value(value, *, depth: int = 0) -> str:
         return "—"
     if isinstance(value, str | Path):
         return _text(str(value))
-    if isinstance(value, bool | Integral | np.integer):
+    if isinstance(value, bool):
         return str(value)
+    if isinstance(value, Integral | np.integer):
+        try:
+            return _text(str(value))
+        except ValueError:
+            return "[truncated: integer too large]"
     if isinstance(value, float):
         return _float(value)
     if isinstance(value, np.floating):
@@ -434,12 +445,13 @@ def _numpy_float(value: np.floating) -> str:
 
 def _text(value: str) -> str:
     if len(value) > _MAX_TEXT_LENGTH:
-        return _escape(value[:_MAX_TEXT_LENGTH]) + " [truncated: text too long]"
+        return _escape(value[:_MAX_TEXT_LENGTH]) + _TEXT_TRUNCATED
     return _escape(value)
 
 
 def _escape(value: str) -> str:
     value = value.replace("\\", "\\\\")
+    value = _ENTITY_START.sub(r"\\&", value)
     value = value.replace("\r\n", "\n").replace("\r", "\n")
     value = value.replace("\n", "\\n")
     for character in "`*[]<>#~":
@@ -448,10 +460,12 @@ def _escape(value: str) -> str:
 
 
 def _code(value: str) -> str:
+    suffix = _TEXT_TRUNCATED if len(value) > _MAX_TEXT_LENGTH else ""
+    value = value[:_MAX_TEXT_LENGTH]
     value = value.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\\n")
     delimiter = "`"
     while delimiter in value:
         delimiter += "`"
     if not value or value.startswith("`") or value.endswith("`"):
         value = f" {value} "
-    return f"{delimiter}{value}{delimiter}"
+    return f"{delimiter}{value}{delimiter}{suffix}"

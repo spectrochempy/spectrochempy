@@ -120,9 +120,9 @@ Users can install official plugins through SpectroChemPy extras:
     pip install "spectrochempy[tensor]"
     pip install "spectrochempy[plugins]"
 
-The ``nmr`` extra installs the NMR plugin, currently including the TopSpin
-reader and its NMR-specific dependencies.  The ``plugins`` extra installs the
-current official plugin set.
+The ``nmr`` extra installs the NMR plugin and its dependencies. See the
+:doc:`reader catalog </userguide/importexport/readers>` for its registered
+formats. The ``plugins`` extra installs the current official plugin set.
 
 Experimental plugins such as ``spectrochempy-cantera`` are **not** included
 in aggregate extras and must be installed directly::

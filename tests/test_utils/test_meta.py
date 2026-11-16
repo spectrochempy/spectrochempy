@@ -442,6 +442,10 @@ def test_permute():
     assert result.td == [200, 400, 500]
     assert meta.td == [500, 200, 400]  # Original unchanged
 
+    result = meta.permute(2, 0, inplace=False)
+    assert result.td == [400, 500]
+    assert meta.td == [500, 200, 400]
+
 
 # ======================================================================================================================
 # Serialization tests

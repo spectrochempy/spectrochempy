@@ -20,7 +20,7 @@ Completed decoupling
   ``importer.infer_filetype_key``.
 * Remote parent-directory download rules are delegated through
   ``importer.remote_download_target``.
-* Five NMR readers are registered: TopSpin, Agilent, JEOL, TecMag, SIMPSON.
+* The NMR plugin registers TopSpin, Agilent, JEOL and SIMPSON readers.
 * The ``Experiment`` class provides the high-level NMR scientific API
   (classification, validation, state-aware processing).
 

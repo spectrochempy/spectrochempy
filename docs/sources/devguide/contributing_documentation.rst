@@ -38,8 +38,8 @@ API Documentation
 
 Guides & Tutorials
 ~~~~~~~~~~~~~~~~~~
-- Written in reST or Jupyter notebooks
-- Located in ``docs/userguide/``
+- Written in reST or Jupytext Python files with ``# %%`` cells
+- Located in ``docs/sources/userguide/``
 - Provide high-level overviews and examples
 - All code examples are tested
 
@@ -88,6 +88,78 @@ Build Options
 
     python docs/make.py --single-doc spectrochempy.<class-or-method-name>
     # where ``<class-or-method-name>`` is the name of an importable method in the API.
+
+Preview a Gallery Example or Tutorial
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From the repository root, use the documentation environment to render the
+page you are editing. For a gallery example, pass the script path relative to
+the repository root. This also works with scripts under a plugin's
+``examples/`` directory.
+
+.. code-block:: bash
+
+    python -m docs.make html --gallery-example src/spectrochempy/examples/core/a_nddataset/plot_a_create_dataset.py
+
+For a tutorial, pass its Jupytext source path relative to ``docs/sources/``.
+The preview reads the Python file directly.
+
+.. code-block:: bash
+
+    python -m docs.make html --single-doc userguide/plotting/plot_types.py
+
+Each command prints the absolute path to the generated HTML page under
+``build/preview/``. Open that page in a browser and keep the surrounding
+files so its styles and figures load. The preview uses the data and plugins
+available in the local documentation environment. Tutorials also need a
+working Jupyter ``python3`` kernel. For prose or layout edits, add
+``--no-exec`` to render the page without running its code or regenerating its
+figures.
+
+If your browser or editor preview needs an HTTP URL, reuse a local server
+already serving this worktree's ``build/preview/`` directory. To start one,
+run this command from the repository root.
+
+.. code-block:: bash
+
+    python -m http.server 8765 --bind 127.0.0.1 --directory build/preview
+
+If port 8765 is busy, choose a free port and use it in the preview URL.
+Append the printed HTML path relative to ``build/preview/`` to
+``http://127.0.0.1:8765/``. After editing, rerun the preview command and
+refresh the page in your browser. The URL works while the server is running.
+
+Documentation CI Artifacts
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The documentation artifact workflow runs on pushes to master and release
+tags. It can also be triggered manually. The tutorial and gallery jobs
+check out the workflow commit.
+The tutorial job saves executed notebooks. The gallery job saves generated
+reStructuredText, figures, thumbnails, downloads, and API backreferences.
+The final job checks the commit and file hashes of both artifacts before
+rendering one Sphinx site with the usual configuration and document paths.
+Download the HTML artifact from the workflow run to inspect the result.
+
+Before enabling artifact mode in production, validate it on a separate Read
+the Docs test project with the same build time limit. Configure
+``SCPY_RTD_DOCS_ARTIFACTS=1`` and set ``SCPY_RTD_GITHUB_TOKEN`` as a private
+environment variable with read access to Actions in the SpectroChemPy
+repository. Verify that the hosted build uses artifacts from its exact
+checkout SHA and installed SpectroChemPy version, keeps the expected URLs and navigation, and completes within
+the time limit, including dependency installation, the CI wait, and rendering.
+If the concurrent workflow and RTD build exceed that limit, arrange for CI to
+finish before triggering RTD. External pull request previews execute their
+sources inside RTD.
+
+RTD waits up to 15 minutes for a successful workflow with both artifacts for
+its checkout. If artifacts expire, start a new workflow run with
+``workflow_dispatch`` in the upstream SpectroChemPy repository. Verify that
+the run uses the exact checkout SHA and retry RTD once CI succeeds. If the
+ref has moved and you need the old SHA, dispatch CI on a temporary branch at that SHA and build
+the corresponding RTD version of the temporary branch. To retry the original
+RTD version instead, generate artifacts for its current SHA. To restore
+execution inside RTD, unset ``SCPY_RTD_DOCS_ARTIFACTS``.
 
 Writing Tips
 ------------

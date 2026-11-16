@@ -103,13 +103,14 @@ _ = ds.plot(figsize=(10, 4))
 # %% [markdown]
 # ## Titles and Labels
 #
-# `ds.plot()` returns a Matplotlib Axes object. Use it to set titles and labels:
+# Set the title and labels in the plotting call:
 
 # %%
-ax = ds.plot()
-_ = ax.set_title("NH4Y Activation Spectrum")
-_ = ax.set_xlabel("Wavenumber (cm⁻¹)")
-_ = ax.set_ylabel("Absorbance (a.u.)")
+_ = ds.plot(
+    title="NH4Y Activation Spectrum",
+    xlabel="Wavenumber (cm⁻¹)",
+    ylabel="Absorbance (a.u.)",
+)
 
 # %% [markdown]
 # ## Grid

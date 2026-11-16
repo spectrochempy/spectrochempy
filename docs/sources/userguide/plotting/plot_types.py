@@ -103,6 +103,37 @@ _ = ds.plot_contour()
 _ = ds.plot_contour(colorbar=True)
 
 # %% [markdown]
+# ### Calculated Projections
+#
+# Add marginal curves by naming the dimensions to retain. In this time-series
+# dataset, `x` is wavenumber and `y` is time. The top panel retains `x` and
+# reduces over time; the right panel retains `y` and reduces over wavenumber.
+#
+# The reducers `sum`, `mean` and `max` exclude masked and non-finite samples.
+# These are pointwise reductions, not coordinate-weighted integrals: on an
+# irregular grid, a sum is not the area under a spectrum.
+
+# %%
+_ = ds.plot_contour(
+    projections=("x", "y"),
+    projection_reducer="mean",
+    projection_size=0.25,
+    colorbar=True,
+    figsize=(8, 5),
+)
+
+# %% [markdown]
+# `projections=True` selects both dimensions and `False` disables them for
+# that call. If omitted, the `show_projections` and `show_projection_x/y`
+# preferences apply. Names keep their numerical meaning after transposition:
+# `ds.T.plot_contour(projections="x")` puts the retained wavenumber dimension
+# on the right because it is now the vertical axis.
+#
+# To show measured spectra instead of reductions of the map, supply
+# `projection_data`. The [advanced plotting tutorial](advanced.ipynb) shows
+# external references, signed contours and complete multi-panel figures.
+
+# %% [markdown]
 # ## Filled Contour / Image-like Plot
 #
 # For image-like filled rendering, use `plot_contourf()` or `plot_image()`:

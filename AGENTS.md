@@ -108,7 +108,7 @@ Load the relevant skill before starting work:
 | Skill | When to load |
 |---|---|
 | `spectrochempy-dev` | Any development, refactoring, or bug fix |
-| `spectrochempy-review` | Separate review in a new session (see skill) |
+| `spectrochempy-review` | Independent review in a temporary subagent session (see skill) |
 | `spectrochempy-release` | Preparing a release (without publishing) |
 
 The skills are shared by OpenCode, Codex, and Claude Code. They live only in
@@ -126,6 +126,31 @@ The skills are shared by OpenCode, Codex, and Claude Code. They live only in
 * `../spectrochempy_data/` — Reference datasets
 
 ---
+
+## Gallery and Tutorial Handoff
+
+In user guides, notebooks, and gallery examples, use the public SpectroChemPy
+API whenever it expresses the operation clearly. Prefer `dataset.plot()`,
+`scp.plot_multiple()`, and `scp.multiplot()` for plots, and dataset
+arithmetic and public helpers such as `scp.Coord.linspace()` or
+`scp.gaussian()` for calculations and profiles. Use direct Matplotlib or
+NumPy for interoperability, low-level implementation comparisons, or
+features without a suitable public equivalent. See `spectrochempy-dev`
+for examples.
+
+In notebooks, assign unused return values to `_` when IPython would
+otherwise display them. Keep figures and outputs that help the reader.
+
+After each coherent set of edits to a gallery example or tutorial, rebuild
+the HTML preview for each changed page. Reuse the local HTTP server for the
+current worktree's preview directory or start one if needed. Verify that
+each updated page is served and include its direct HTTP URL in the final
+response. If your app can open a browser preview, open or refresh the page
+there and leave it available for review. Follow the preview instructions in
+`docs/sources/devguide/contributing_documentation.rst`.
+
+If execution is blocked, build with `--no-exec` when possible and report that
+the code and figures could not be verified.
 
 ## References
 

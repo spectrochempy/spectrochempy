@@ -253,7 +253,9 @@ _ = blc.corrected.plot()
 #
 # Some advanced workflows are provided by optional official plugins. For
 # example, 2D-IRIS analysis is available through the ``spectrochempy-iris``
-# plugin and NMR TopSpin reading is available through ``spectrochempy-nmr``.
+# plugin and NMR data reading through `spectrochempy-nmr`.
+# The [reader catalog](../userguide/importexport/readers.rst) lists formats
+# and identifies which ones require a plugin.
 # These workflows are documented in the central examples gallery and in the
 # [plugin guide](../userguide/plugins/index.rst), while this quickstart keeps to the
 # standard SpectroChemPy experience.

@@ -316,6 +316,8 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
         objnames = byte_obj._attributes_()
 
         dic = {}
+        if byte_obj._implements("Coord") and not byte_obj._rounding:
+            dic["rounding"] = False
         for name in objnames:
             if name == "history" and hasattr(byte_obj, "_history"):
                 # ``history`` is a rendered compatibility view.  Persist the
@@ -346,7 +348,9 @@ def json_encoder(byte_obj, encoding=None, *, _root=True):
                 ):
                     dic[name] = json_encoder(val.tolist(), encoding=None, _root=False)
                     continue
-                if name == "acquisition_date" and isinstance(val, datetime.datetime):
+                if name in {"acquisition_date", "modified"} and isinstance(
+                    val, datetime.datetime
+                ):
                     dic[name] = {
                         "isoformat": val.isoformat(),
                         "__class__": "DATETIME",

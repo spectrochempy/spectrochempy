@@ -71,8 +71,6 @@ def read_quadera(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     description : `str`, optional
         A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
@@ -92,19 +90,10 @@ def read_quadera(*paths, **kwargs):
 
         It is used, for instance, when reading a directory with different types of
         files and merging compatible datasets into separate groups by origin.
-
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
     pattern : `str`, optional
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by

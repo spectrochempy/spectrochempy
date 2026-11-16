@@ -7,7 +7,9 @@
 # ruff: noqa
 
 __all__ = [
+    "characterization",
     "peakfinding",
 ]
 
+from . import characterization
 from . import peakfinding

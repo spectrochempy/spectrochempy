@@ -12,6 +12,9 @@ examples, tests, and documentation are coordinated with the main project.
 Official plugins should feel like part of SpectroChemPy once installed. They are
 not loaded manually: import SpectroChemPy, then use the documented namespace.
 
+See the :doc:`reader catalog </userguide/importexport/readers>` for file
+formats, reader functions, and their required plugins.
+
 Current official plugins
 ========================
 
@@ -30,7 +33,7 @@ Current official plugins
    * - NMR
      - ``spectrochempy-nmr``
      - ``scp.nmr``
-     - TopSpin/Bruker NMR reading and NMR-specific processing utilities.
+     - NMR file readers and processing tools.
    * - Tensor
      - ``spectrochempy-tensor``
      - ``scp.tensor``
@@ -79,9 +82,8 @@ Versions and compatibility
 ==========================
 
 Official plugins are versioned independently from the SpectroChemPy core
-package. A core release and a plugin release therefore do not need to share the
-same version number. For example, a stable ``spectrochempy 0.9.2`` environment
-may use ``spectrochempy-nmr 0.1.3``.
+package. See the :doc:`NMR installation guide <nmr>` for the supported
+core and plugin combinations for NMR.
 
 Stable plugin packages are published on PyPI and on the main ``spectrocat``
 conda channel. Conda development builds are not published; users who need
@@ -99,9 +101,7 @@ plugin namespaces are available:
 
     scp.plugins()
 
-Use ``scp.plugins(verbose=True)`` to include lightweight package metadata such
-as versions. This inspection command reads entry-point and package metadata; it
-does not import optional plugin implementation modules.
+Use ``scp.plugins(verbose=True)`` to include installed versions.
 
 API convention
 ==============
@@ -136,7 +136,7 @@ The table above is the quick reference. The dedicated plugin pages below
 provide the user-facing details:
 
 * :doc:`iris` for 2D-IRIS workflows and the ``scp.iris`` / ``dataset.iris`` APIs
-* :doc:`nmr` for TopSpin reading and NMR-specific processing workflows
+* :doc:`nmr` for NMR readers and NMR-specific processing workflows
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
 * :doc:`carroucell` for carroucell experiment directory imports
 * :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading
@@ -144,9 +144,5 @@ provide the user-facing details:
 Examples and gallery convention
 ===============================
 
-Examples remain organized by scientific topic in the central SpectroChemPy
-gallery. Plugin-dependent examples live with the plugin source and are staged
-into the central gallery from the plugin ``examples/gallery.toml`` manifest.
-They should be clearly marked with their required plugin, but they do not need
-a separate plugin-only gallery. See :doc:`examples` for the user-facing example
-convention.
+See :doc:`examples` for examples in the core gallery and links to the NMR
+gallery.

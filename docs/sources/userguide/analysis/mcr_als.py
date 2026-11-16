@@ -222,21 +222,24 @@ print(f"Iterations: {mcr_s.result.n_iter}")
 
 # %% [markdown]
 # Now let's run the MCR-ALS algorithm with the EFA initialization for $C$ and the pure spectra as initial guess for $S^T$ and compare the two approaches.
-# %%0
+# %%
 mcr_c = scp.MCRALS(log_level="INFO")
 _ = mcr_c.fit(X, C0)
 
-import matplotlib.pyplot as plt
-
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(8, 6))
-mcr_c.C.T.plot(ax=axes[0, 0], title="C (EFA init)")
-mcr_s.C.T.plot(ax=axes[0, 1], title="C (Pure spectra init)")
-mcr_c.St.plot(ax=axes[1, 0], title="$S^T$ (EFA init)")
-mcr_s.St.plot(ax=axes[1, 1], title="$S^T$ (Pure spectra init)")
-mcr_c.plot_merit(ax=axes[2, 0], offset=5)
-mcr_s.plot_merit(ax=axes[2, 1], offset=5)
-plt.tight_layout()
-plt.show()
+_ = scp.multiplot(
+    [mcr_c.C.T, mcr_s.C.T, mcr_c.St, mcr_s.St],
+    labels=[
+        "C (EFA init)",
+        "C (pure spectra init)",
+        "$S^T$ (EFA init)",
+        "$S^T$ (pure spectra init)",
+    ],
+    nrow=2,
+    ncol=2,
+    figsize=(8, 5),
+)
+_ = mcr_c.plot_merit(offset=5, title="Reconstruction with EFA initialization")
+_ = mcr_s.plot_merit(offset=5, title="Reconstruction with pure spectra initialization")
 
 # %% [markdown]
 # The EFA initializations converges less rapidly but provides very
@@ -300,7 +303,7 @@ plt.show()
 # chemical concentrations and absorbance spectra are inherently non-negative.
 # For this reason, the default MCR-ALS configuration in SpectroChemPy applies
 # this constraint automatically to both concentration and spectral profiles.
-
+#
 # To illustrate its effect, we first remove all constraints and solve the
 # problem using unconstrained least squares
 
@@ -418,14 +421,15 @@ _ = ct.Unimodal("C", mod="smooth")  # allows a flat-topped region
 _ = ct.Unimodal("C", tolerance=1.0)  # no allowance for local violations
 
 # %% [markdown]
-# Here we illustrate
+# Here we illustrate the effect of unimodality with the NNLS solver.
 
+# %%
 mcr_nnl_u = scp.MCRALS(
     log_level="INFO", solver_C="nnls", constraints=[ct.Unimodal("C")]
 )
 
 mcr_nnl_u.fit(X, C0)
-_ = mcr_nnl_u.C.T.plot(title="NNSL solver + unimodality")
+_ = mcr_nnl_u.C.T.plot(title="NNLS solver + unimodality")
 
 # %% [markdown]
 # Unimodality can also be applied to spectral profiles when thy consist in a single band:
@@ -650,7 +654,7 @@ X_cd = X[:, split_index:].copy()
 X_cd.name = "Block B"
 X_cd.title = "centered absorbance"
 X_cd.x.title = "wavelength"
-X_cd.data = X_cd.data - X_cd.data.mean(axis=1, keepdims=True)
+X_cd -= X_cd.mean(dim="x", keepdims=True)
 
 print(f"{X_uv.name}: {X_uv.shape}")
 print(f"{X_cd.name}: {X_cd.shape}")
@@ -720,13 +724,12 @@ _ = mcr_h.fit([X_uv, X_cd], C0, augmentation="horizontal")
 # blocks via `St_blocks`, each preserving its own wavelength coordinate.
 
 # %%
-import matplotlib.pyplot as plt
-
-fig, axes = plt.subplots(1, 3, figsize=(12, 4))
-_ = mcr_h.C.T.plot(ax=axes[0], title="$C$")
-_ = mcr_h.St_blocks[0].plot(ax=axes[1], title="$S^T_1$ (Block A)")
-_ = mcr_h.St_blocks[1].plot(ax=axes[2], title="$S^T_2$ (Block B)")
-plt.tight_layout()
+_ = scp.multiplot(
+    [mcr_h.C.T, *mcr_h.St_blocks],
+    labels=["$C$", "$S^T_1$ (Block A)", "$S^T_2$ (Block B)"],
+    ncol=3,
+    figsize=(12, 4),
+)
 
 
 # %% [markdown]

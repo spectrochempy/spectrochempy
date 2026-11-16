@@ -72,6 +72,7 @@ _M2_METHODS = frozenset(
 
 _STRUCTURED_REDUCTION_METHODS = frozenset({"mean", "std", "sum", "var"})
 _REDUCTION_HISTORY_LABELS = {
+    "rms": "Root mean square",
     "mean": "Mean",
     "std": "Standard deviation",
     "sum": "Sum",
@@ -2501,6 +2502,111 @@ class NDMath:
             )
 
         return cls
+
+    def rms(dataset, dim=None, keepdims=False, *, axis=None, dims=None):
+        """
+        Compute the root mean square magnitude.
+
+        Parameters
+        ----------
+        dataset : array_like or Quantity
+            Real or complex input. Masked samples are excluded.
+        dim : int, str, sequence, or None, optional
+            Dimensions to reduce. By default, reduce over all dimensions.
+        keepdims : bool, optional
+            Keep reduced dimensions with size one.
+        axis, dims : optional
+            Aliases for `dim`. Supply only one dimension selector.
+
+        Returns
+        -------
+        float, Quantity, or NDDataset
+            Square root of the mean squared magnitude, in the input units.
+            An entirely masked slice produces a masked result. Unmasked NaNs
+            propagate, and a slice with infinity and no NaNs returns infinity.
+            Empty slices return NaN.
+
+        """
+        from spectrochempy.core.dataset.nddataset import NDDataset  # noqa: PLC0415
+
+        selectors = [selector for selector in (dim, axis, dims) if selector is not None]
+        if len(selectors) > 1:
+            raise TypeError("rms() accepts only one of dim, dims or axis")
+        requested_dim = selectors[0] if selectors else None
+        if not isinstance(dataset, NDArray):
+            quantity = isinstance(dataset, Quantity)
+            units = dataset.units if quantity else None
+            array = np.ma.asarray(dataset.magnitude if quantity else dataset)
+            dataset = NDDataset(array, dtype=array.dtype, units=units)
+        masked = (
+            np.ma.asarray(dataset.masked_data)
+            if dataset.data is not None
+            else np.ma.array([])
+        )
+        geometry = dataset if masked.size else NDDataset(np.empty((1,) * masked.ndim))
+        source_dims = list(geometry.dims)
+        axis, dim = geometry.get_axis(
+            requested_dim, allows_none=True, allow_multiple=True
+        )
+        values = np.asarray(
+            masked.filled(0), dtype=np.result_type(masked.dtype, np.float64)
+        )
+        components = np.maximum(np.abs(values.real), np.abs(values.imag))
+        scale = np.max(components, axis=axis, keepdims=True, initial=0)
+        finite = np.isfinite(scale)
+        nonzero = finite & (scale > 0)
+        real = np.divide(
+            values.real, scale, out=np.zeros_like(values.real), where=nonzero
+        )
+        square = real**2
+        if np.iscomplexobj(values):
+            imag = np.divide(
+                values.imag, scale, out=np.zeros_like(values.imag), where=nonzero
+            )
+            square += imag**2
+        if not keepdims:
+            scale = np.squeeze(scale, axis=axis)
+            finite = np.isfinite(scale)
+        mean_square = (
+            np.ma.mean(
+                np.ma.array(square, mask=np.ma.getmask(masked)),
+                axis=axis,
+                keepdims=keepdims,
+            )
+            if masked.size
+            else np.full(scale.shape, np.nan, dtype=scale.dtype)
+        )
+        with np.errstate(over="ignore"):
+            magnitude = np.sqrt(np.ma.getdata(mean_square)) * np.where(finite, scale, 0)
+        result = np.where(finite, magnitude, scale)
+
+        if result.ndim == 0:
+            if np.ma.is_masked(mean_square):
+                return np.ma.masked
+            value = result[()]
+            return (
+                Quantity(value, dataset.units) if dataset.units is not None else value
+            )
+
+        dims, coordset = _reduce_dims(geometry, dim, keepdims)
+        with np.errstate(over="ignore", under="ignore"):
+            reduced = dataset.copy(deep=False)
+        reduced._dtype = result.dtype
+        reduced._data = result
+        reduced._mask = np.ma.getmask(mean_square)
+        if result.size:
+            reduced.dims = dims
+        reduced._coordset = coordset
+        if reduced._implements("NDDataset"):
+            _append_reduction_history(
+                reduced,
+                operation="rms",
+                requested_dim=requested_dim,
+                resolved_dim=dim,
+                source_dims=source_dims,
+                keepdims=keepdims,
+            )
+        return reduced
 
     @_from_numpy_method
     def ones(cls, shape, dtype=None, **kwargs):

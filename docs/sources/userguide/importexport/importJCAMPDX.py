@@ -33,12 +33,20 @@
 # %% [markdown]
 # # Import/Export of JCAMP-DX files
 #
-# [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format initially developed for IR
-# data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented
-# in SpectroChemPy is limited to IR data and AFFN encoding (see <cite data-cite="mcdonald:1988">McDonald and Wilks, 1988</cite>.
+# [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format
+# used by several spectroscopies. Use `scp.read_jcamp()` or `scp.jcamp.read()`
+# to open infrared spectra and supported processed NMR spectra in 1D and 2D.
+# The reader selects the workflow from the data type declared in the file. If that type
+# is ambiguous, use `jcamp_kind="ir"` or `jcamp_kind="nmr"`.
 #
-# The JCAMP-DX reader of SpectroChemPy has been essentially written to read JCAMP-DX files
-# exported by the SpectroChemPy `write_jdx()` writer.
+# The IR reader supports AFFN and DIFDUP spectra on a regular grid, including
+# linked series on a shared grid. Reading processed NMR spectra requires
+# the [SpectroChemPy NMR plugin](https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html).
+# For a supported real 2D spectrum stored in JCAMP-DX NTUPLES, install
+# nmrglue-ng 1.3 or later and call `scp.read_jcamp("cosy.jdx")`. The reader
+# returns a 2D dataset with the F1 and F2 axes from the file.
+#
+# The example below shows how to export and read back an infrared spectrum.
 #
 
 # %%
@@ -49,13 +57,13 @@ S0 = X[0]
 S0
 
 # %%
-S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
+_ = S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
 
 # %% [markdown]
 # The namespace API is also available for writing:
 
 # %%
-scp.jcamp.write(S0, "CO@Mo_Al2O3_0.jdx", confirm=False, overwrite=True)
+_ = scp.jcamp.write(S0, "CO@Mo_Al2O3_0.jdx", confirm=False, overwrite=True)
 
 # %% [markdown]
 # Then used (and maybe changed) by a 3rd party software, and re-imported in

@@ -4,27 +4,37 @@
 Plugin public API reference
 ###########################
 
-This page collects the generated public API pages owned by official
-SpectroChemPy plugins.
+This page provides links and reference pages for the public APIs of
+official SpectroChemPy plugins.
 
 Workflow-oriented plugin guides remain in :doc:`/userguide/plugins/index`.
-
-The generated entries below target the public objects exported by each
-standalone plugin package. The ``scp.nmr.*`` and equivalent namespace routes
-remain the recommended user-facing aliases, but they are lazy proxies and are
-not suitable as autodoc targets.
+For file formats and their public reader entry points, see the
+:doc:`reader catalog </userguide/importexport/readers>`.
 
 NMR plugin
 ==========
 
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
+The standalone `NMR API reference
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/nmr_api.html>`_
+provides the following entry points.
 
-    spectrochempy_nmr.read
-    spectrochempy_nmr.read_topspin
-    spectrochempy_nmr.read_agilent
-    spectrochempy_nmr.Experiment
+.. list-table::
+   :header-rows: 1
+
+   * - Public entry point
+     - Purpose
+   * - `spectrochempy.nmr.read <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read.html>`_
+     - Select a reader from the input format.
+   * - `spectrochempy.nmr.read_topspin <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_topspin.html>`_
+     - Read Bruker TopSpin data.
+   * - `spectrochempy.nmr.read_agilent <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_agilent.html>`_
+     - Read Agilent and Varian data.
+   * - `spectrochempy.nmr.read_jeol <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_jeol.html>`_
+     - Read JEOL JDF data.
+   * - `spectrochempy.nmr.read_simpson <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_simpson.html>`_
+     - Read SIMPSON simulations.
+   * - `spectrochempy.nmr.Experiment <https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.Experiment.html>`_
+     - Inspect and process NMR acquisitions.
 
 PerkinElmer plugin
 ==================

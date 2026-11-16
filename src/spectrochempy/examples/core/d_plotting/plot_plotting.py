@@ -16,7 +16,6 @@ This short gallery example shows four common ideas:
 - saving any of them to a file with ``output``.
 """
 
-import numpy as np
 import spectrochempy as scp
 
 # %%
@@ -44,7 +43,7 @@ ax = dataset[0].plot()
 # -------------------------------
 dataset = dataset[:, ::100]
 
-sample_indices = np.linspace(0, dataset.shape[0] - 1, 5, dtype=int)
+sample_indices = [index * (dataset.shape[0] - 1) // 4 for index in range(5)]
 datasets = [dataset[index] for index in sample_indices]
 labels = [f"sample {index}" for index in sample_indices]
 
@@ -80,6 +79,12 @@ _ = scp.plot_multiple(
 # %%
 # The default style is used again on the next call:
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
+
+# %%
+# Plotting options
+# ----------------
+# - :ref:`Show complex components and masks in 1D <sphx_glr_gettingstarted_examples_gallery_auto_examples_core_d_plotting_plot_1d_options.py>`
+# - :ref:`Add projections to a 2D contour plot <sphx_glr_gettingstarted_examples_gallery_auto_examples_core_d_plotting_plot_2d_projections.py>`
 
 # %%
 # Uncomment the following line to display all figures when running the script

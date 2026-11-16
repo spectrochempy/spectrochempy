@@ -19,8 +19,11 @@ Processing
    smoothing
    baseline
    denoising
+   wavelet_denoising
    apodization
    td_baseline
    fourier
+   NMR processing in 1D <https://www.spectrochempy.fr/projects/nmr/latest/userguide/processing_1d.html>
+   NMR processing in 2D <https://www.spectrochempy.fr/projects/nmr/latest/userguide/processing_2d.html>
    interferogram
    alignment

@@ -323,7 +323,7 @@ nd.created
 
 # %%
 history_demo = NDDataset(
-    np.array([[1.0, 2.0, 4.0, 8.0], [2.0, 3.0, 5.0, 9.0]]),
+    [[1.0, 2.0, 4.0, 8.0], [2.0, 3.0, 5.0, 9.0]],
     dims=["y", "x"],
     coordset=[
         Coord([0.0, 1.0], title="sample"),
@@ -444,7 +444,7 @@ corrected = region - reference
 corrected.name = "referenced-OH-region"
 
 # %%
-corrected.plot()
+_ = corrected.plot()
 
 # %%
 reference.history
@@ -512,10 +512,10 @@ in_joules
 # %%
 d1D  # still expressed in eV
 
-# %% [raw] raw_mimetype="text/restructuredtext"
-# See :ref:`units and masks guide <userguide_units_masks>` for verified examples
-# of quantities, compatible and context-enabled conversions, in-place
-# conversion, incompatibility errors, and masks.
+# %% [markdown]
+# See the [units and masks guide](../units_and_masks.ipynb) for verified
+# examples of quantities, compatible and context-enabled conversions,
+# in-place conversion, incompatibility errors, and masks.
 
 # %% [markdown]
 # ## Coordinates

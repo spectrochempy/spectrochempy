@@ -416,6 +416,9 @@ class Meta:
             New Meta object if not inplace
 
         """
+        return self._swap(dim1, dim2, inplace=inplace)
+
+    def _swap(self, dim1, dim2, *, inplace=False, axis_count=None):
         newmeta = self.copy()
 
         newmeta.readonly = False
@@ -424,6 +427,8 @@ class Meta:
 
         for key in self:
             if isinstance(self[key], list) and len(self[key]) > 1:
+                if axis_count is not None and len(self[key]) != axis_count:
+                    continue
                 X = newmeta[key]
                 X[dim1], X[dim2] = X[dim2], X[dim1]
             else:
@@ -455,19 +460,24 @@ class Meta:
             New Meta object if not inplace
 
         """
+        return self._permute(dims, inplace=inplace)
+
+    def _permute(self, dims, *, inplace=False, match_rank=False):
         newmeta = self.copy()
 
         newmeta.readonly = False
         newmeta.parent = None
         newmeta.name = None
 
-        for key in self:
-            if isinstance(self[key], list) and len(self[key]) > 1:
-                newmeta[key] = type(self[key])()
+        for key, value in self.items():
+            if isinstance(value, list) and len(value) > 1:
+                if match_rank and len(value) != len(dims):
+                    continue
+                newmeta[key] = type(value)()
                 for dim in dims:
-                    newmeta[key].append(self[key][dim])
+                    newmeta[key].append(value[dim])
             else:
-                newmeta[key] = self[key]
+                newmeta[key] = value
 
         newmeta.readonly = self.readonly
         newmeta.parent = self.parent

@@ -175,3 +175,18 @@ def test_phasing_inv_false_matches_default(name):
     np.testing.assert_allclose(explicit.data, default.data)
     assert explicit.dims == default.dims
     assert explicit.meta == default.meta
+
+
+def test_fft_leaves_phasing_to_pk():
+    values = np.arange(8.0) + 1.0j
+    source = NDDataset(values, coordset=[Coord(np.arange(8.0), units="s")])
+    source.meta.phc0 = [30 * ur.degree]
+    source.meta.td = [values.size]
+    transformed = source.fft()
+    expected = np.fft.fftshift(np.fft.fft(values))
+    np.testing.assert_allclose(transformed.data, expected)
+    assert all(entry["operation"] != "pk" for entry in transformed.history_entries)
+    np.testing.assert_allclose(
+        transformed.pk(phc0=30).data, expected * np.exp(1j * np.pi / 6)
+    )
+    assert source.meta.phc0 == [30 * ur.degree]

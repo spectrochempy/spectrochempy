@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 2
 """
 PLS regression with a Pipeline
 ==============================
@@ -14,10 +13,10 @@ This example predicts corn moisture from NIR spectra using a SpectroChemPy
 only, then reuses the fitted preprocessing when predicting validation spectra.
 """
 
+# sphinx_gallery_thumbnail_number = 2
+
 # %%
 # Import the packages
-import numpy as np
-
 import spectrochempy as scp
 
 # %%
@@ -60,7 +59,7 @@ if ds_list is not None:
     # set spans the concentration range instead of becoming a simple high-index
     # holdout. This deterministic split is used only for demonstration;
     # real validation splits should follow the experimental design.
-    moisture_order = np.argsort(np.asarray(y.data).ravel())
+    moisture_order = y.squeeze().argsort()
     validation_indices = sorted(moisture_order[3::4].tolist())
     calibration_indices = [i for i in range(X.shape[0]) if i not in validation_indices]
 
@@ -87,7 +86,7 @@ if ds_list is not None:
     # ^^^^^^^^^^^^^^^^^^^^^^^^^^
     y_val_pred = pipeline.predict(X_val)
     residuals = y_val - y_val_pred
-    rmse_val = float(scp.Quantity((residuals**2).mean() ** 0.5).magnitude)
+    rmse_val = float(scp.Quantity(residuals.rms()).magnitude)
     units = f" {y_val.units}" if y_val.units else ""
     print(f"Validation RMSE: {rmse_val:.3f}{units}")
 

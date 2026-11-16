@@ -35,7 +35,7 @@ class TestLinearizeRegularAxes:
         # relative spacing deviation well below the linearization tolerance
         base = np.linspace(0.0, 10.0, 21)
         values = base.copy()
-        values[5] += 0.001  # ~0.01% spacing deviation
+        values[5] += 0.0001  # ~0.02% spacing deviation
         if reverse:
             values = values[::-1].copy()
         c = Coord(values)
@@ -195,3 +195,15 @@ class TestNDDatasetDescendingDuplicateIntegration:
         np.testing.assert_allclose(ds.x._data.squeeze(), values)
         np.testing.assert_allclose(ds.x.data, values)
         assert not ds.x.linear
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_default_linearization_tolerance_preserves_one_percent_spacing_change(reverse):
+    values = np.array([0.0, 1.0, 2.01])
+    if reverse:
+        values = values[::-1]
+    coord = Coord(values, rounding=False)
+
+    assert coord._linearize_below == 0.1
+    assert not coord.linear
+    np.testing.assert_array_equal(coord.data, values)

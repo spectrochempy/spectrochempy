@@ -4,6 +4,8 @@ About
 Discover SpectroChemPy, follow its releases, and find publications, citations,
 contributors, license information, and related projects.
 
+Read :doc:`what's new in this version </{{ current_whatsnew_doc }}>`.
+
 .. toctree::
     :maxdepth: 1
 

@@ -10,6 +10,7 @@ __all__ = [
     "_base",
     "_cross_validation",
     "constraints",
+    "correlation_spectroscopy",
     "cross_validation",
     "crossdecomposition",
     "curvefitting",
@@ -19,11 +20,13 @@ __all__ = [
     "model_selection",
     "peakfinding",
     "pipeline",
+    "segmentation",
 ]
 
 from . import _base
 from . import _cross_validation
 from . import constraints
+from . import correlation_spectroscopy
 from . import cross_validation
 from . import crossdecomposition
 from . import curvefitting
@@ -33,3 +36,4 @@ from . import kinetic
 from . import model_selection
 from . import peakfinding
 from . import pipeline
+from . import segmentation

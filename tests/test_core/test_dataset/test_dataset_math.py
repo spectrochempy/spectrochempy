@@ -102,6 +102,38 @@ def test_nddataset_transpose_swapdims(ds1):
     assert nd1 == nd2.T
 
 
+@pytest.mark.parametrize("operation", ["transpose", "swapdims"])
+def test_reloaded_dataset_reorders_only_axis_length_metadata(tmp_path, operation):
+    source = scp.NDDataset(np.arange(24).reshape(2, 3, 4))
+    source.meta.axis_sizes = [2, 3, 4]
+    source.meta.acquisition_encoding = ("ECHO-ANTIECHO", "DQD")
+    source.meta.global_values = [1, 2, 3, 4]
+    path = tmp_path / "metadata.scp"
+    source.dump(path)
+    dataset = scp.NDDataset.load(path)
+
+    result = dataset.T if operation == "transpose" else dataset.swapdims(0, -1)
+
+    assert result.shape == (4, 3, 2)
+    assert result.meta.axis_sizes == [4, 3, 2]
+    assert result.meta.acquisition_encoding == dataset.meta.acquisition_encoding
+    assert result.meta.global_values == [1, 2, 3, 4]
+    assert dataset.meta.axis_sizes == [2, 3, 4]
+    result.meta.global_values.append(5)
+    assert dataset.meta.global_values == [1, 2, 3, 4]
+
+
+def test_inplace_swap_preserves_axis_metadata_copy():
+    dataset = scp.NDDataset(np.arange(24).reshape(2, 3, 4))
+    dataset.meta.axis_values = [{"size": 2}, {"size": 3}, {"size": 4}]
+    original = dataset.meta
+
+    dataset.swapdims(0, -1, inplace=True)
+    original.axis_values[-1]["size"] = 99
+
+    assert dataset.meta.axis_values == [{"size": 4}, {"size": 3}, {"size": 2}]
+
+
 def test_nddataset_apply_funcs(dsm):
     nd = dsm.copy()
     # convert to masked array preserves shape
@@ -130,3 +162,96 @@ def test_take(dsm):
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+
+def test_rms_reduction_preserves_units_coordinates_and_masks():
+    ds = scp.NDDataset(
+        [[3, 4], [7, 9], [6, 8]],
+        units="V",
+        coordset=[scp.Coord([1, 2, 3], units="s"), scp.Coord([10, 20], units="Hz")],
+        mask=[[False, True], [True, True], [False, False]],
+    )
+    result = scp.rms(ds, dim="x", keepdims=True)
+    assert result.dims == ["y", "x"]
+    assert result.shape == (3, 1)
+    assert result.units == ds.units
+    assert_array_equal(result.y.data, ds.y.data)
+    assert_array_equal(result.mask, [[False], [True], [False]])
+    assert_array_almost_equal(result.data[[0, 2], 0], [3, np.sqrt(50)])
+    assert result.history_entries[-1]["operation"] == "rms"
+    assert ds.rms(dim=("y", "x")).magnitude == pytest.approx(np.sqrt(109 / 3))
+
+
+@pytest.mark.parametrize("value", [1e300, 1e-300, 1e-310])
+def test_rms_scales_real_and_complex_values(value):
+    result = scp.rms([value, -value])
+    assert result / value == pytest.approx(1.0)
+    data = scp.NDDataset([complex(value, value), 0j])
+    assert data.rms() / value == pytest.approx(1.0)
+
+
+def test_rms_nonfinite_and_entirely_masked():
+    ds = scp.NDDataset([[np.inf, 0], [np.inf, np.nan], [0, 1], [np.nan, 2]])
+    ds.mask = [[False, False], [False, False], [True, True], [True, False]]
+    reduced = ds.rms(axis=1)
+    assert_array_equal(reduced.mask, [False, False, True, False])
+    assert np.isposinf(reduced.data[0])
+    assert np.isnan(reduced.data[1])
+    assert reduced.data[3] == 2
+    assert np.ma.is_masked(ds[2].rms())
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).maxexp == np.finfo(np.float64).maxexp,
+    reason="extended floating-point range is unavailable",
+)
+@pytest.mark.parametrize("literal", ["1e4000", "1e-4000"])
+def test_rms_preserves_native_precision_in_both_entry_points(literal):
+    value = np.longdouble(literal)
+    ds = scp.NDDataset([[value, -value]], dtype=np.longdouble)
+    assert ds.rms() == value
+    assert scp.rms(dataset=ds) == value
+    assert ds.rms(dim="x", keepdims=True).data[0, 0] == value
+
+
+def test_rms_accepts_array_keyword_and_rejects_unsupported_arguments():
+    assert scp.rms(dataset=[3, 4]) == pytest.approx(np.sqrt(12.5))
+    ds = scp.NDDataset([3, 4], units="V")
+    with pytest.raises(TypeError, match="only one"):
+        ds.rms(dim="x", axis=0)
+    with pytest.raises(TypeError, match="units"):
+        scp.rms(ds, units="mV")
+    with pytest.raises(TypeError, match="where"):
+        ds.rms(where=[True, False])
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [
+        ([3.0, 4.0], np.sqrt(12.5)),
+        (np.ma.array([3.0, 4.0], mask=[True, False]), 4.0),
+    ],
+)
+def test_rms_preserves_quantity_input_units(values, expected):
+    quantity = scp.Quantity(values, "V")
+    result = scp.rms(quantity)
+    assert result.units == quantity.units
+    assert result.magnitude == pytest.approx(expected)
+
+
+def test_rms_empty_reductions_preserve_shape_and_units():
+    assert np.isnan(scp.rms([]))
+    result = scp.rms([], keepdims=True)
+    assert result.dims == ["x"]
+    np.testing.assert_array_equal(result.data, [np.nan])
+
+    empty = scp.NDDataset(np.empty((0, 2)), units="V")
+    global_rms = empty.rms(keepdims=True)
+    assert global_rms.dims == ["y", "x"]
+    np.testing.assert_array_equal(global_rms.data, [[np.nan]])
+
+    result = empty.rms(dim="y", keepdims=True)
+    assert result.dims == ["y", "x"]
+    assert result.units == empty.units
+    np.testing.assert_array_equal(result.data, [[np.nan, np.nan]])
+    assert empty.rms(dim="x").shape == (0,)

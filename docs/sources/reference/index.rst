@@ -87,20 +87,21 @@ All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`.
 Creating NDDataset
 ******************
 
-A `NDDataset` can be created using the `NDDataset` class constructor, for instance here we create a dataset from a
-`~numpy.random.random` two-dimensional array:
+Use ``NDDataset.random()`` to create a dataset of uniformly distributed
+random samples:
+
+.. ipython:: python
+
+    X = NDDataset.random((4, 4), seed=42)
+
+If the values already come from NumPy, pass the array to the
+``NDDataset`` constructor:
 
 .. ipython:: python
 
     import numpy as np
-    X = np.random.random((4,4))
-    nd = NDDataset(X)
-
-The above code in `SpectroChemPy` can be simplified using the `random` creation method:
-
-.. ipython:: python
-
-    X = NDDataset.random((4,4))
+    values = np.arange(16).reshape(4, 4)
+    nd = NDDataset(values)
 
 
 (see the :ref:`user_guide` for a large set of examples on how to use this constructor.)
@@ -180,9 +181,16 @@ kept as explicit public entry points. Their ``.ddr``, ``.hdr`` and ``.sdr``
 files are SPA-compatible and share the private OMNIC SPA parser, but the SOC
 readers preserve SOC provenance and their established multi-file defaults.
 
-The NMR readers ``read_topspin`` and ``read_agilent`` require the
-``spectrochempy-nmr`` plugin to be installed. The PerkinElmer reader
-``read_perkinelmer`` requires the ``spectrochempy-perkinelmer`` plugin.
+The :doc:`reader catalog </userguide/importexport/readers>` lists formats,
+explicit readers and required plugins. With ``spectrochempy-nmr`` installed,
+use `scp.nmr.read(...)
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read.html>`_ for NMR format detection.
+The compatibility aliases `scp.read_topspin()
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_topspin.html>`_
+and `scp.read_agilent()
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/generated/spectrochempy_nmr.read_agilent.html>`_
+are documented in the plugin API. The ``read_perkinelmer`` alias
+requires ``spectrochempy-perkinelmer``.
 
 .. autosummary::
     :nosignatures:
@@ -191,7 +199,6 @@ The NMR readers ``read_topspin`` and ``read_agilent`` require the
     load
     migrate_legacy_file
     read
-    read_agilent
     read_csv
     read_ddr
     read_dir
@@ -208,7 +215,6 @@ The NMR readers ``read_topspin`` and ``read_agilent`` require the
     read_spc
     read_spg
     read_srs
-    read_topspin
     read_wire
     read_wdf
     read_mat
@@ -454,6 +460,8 @@ Sums, integral, difference
     cumsum
     trapezoid
     simpson
+    integrate_region
+    RegionIntegrationResult
 
 
 Complex
@@ -534,6 +542,7 @@ Statistical operations
 
     mean
     average
+    rms
     std
     sum
     var
@@ -756,6 +765,30 @@ interpret ``NDDataset`` dimensions or coordinates.
 
     CrossValidationResult
 
+Two-dimensional correlation spectroscopy
+=========================================
+
+``correlation_spectroscopy`` calculates synchronous and asynchronous maps from a
+two-dimensional spectral series. The perturbation coordinate must be real and
+classified as linear by ``Coord``; its ``sigdigits`` and ``linearize_below``
+settings determine how near-linear source coordinates are normalized. A
+default ``Coord`` uses ``linearize_below=0.1``; set a stricter value when source
+deviations must remain visible to validation. Interpolate missing acquisitions
+before calculation. The asynchronous sign follows the perturbation order.
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+    :template: autosummary/result-class.rst
+
+    Correlation2DResult
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    correlation_spectroscopy
+
 Evolving factor analysis
 ========================
 
@@ -877,6 +910,7 @@ Lineshape models
     sigmoid
     sigmoidmodel
     polynomialbaseline
+    simulate_peaks
 
 Find peaks
 ----------
@@ -888,6 +922,18 @@ Find peaks
     find_peaks
     PeakFindingResult
     PeakTable
+    characterize_peaks_1d
+    characterize_peaks_2d
+    PeakCharacterizationResult
+
+Segmentation
+------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    segment_regions
 
 Kinetics
 --------

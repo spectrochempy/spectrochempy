@@ -99,6 +99,10 @@ def test_to_markdown_report_rejects_invalid_figure_targets(target):
             "https://example.org/a b.png?x=1&y=2",
             "https://example.org/a%20b.png?x=1&y=2",
         ),
+        (
+            "https://example.org/a&amp;b.png?x=1&y=2",
+            r"https://example.org/a\&amp;b.png?x=1&y=2",
+        ),
         ("http://example.org/spectrum.png", "http://example.org/spectrum.png"),
         ('figures/a[1]"<>.png', "figures/a%5B1%5D%22%3C%3E.png"),
     ],
@@ -467,6 +471,18 @@ def test_to_markdown_report_partial_coordset_does_not_log_error(caplog):
     assert "could not find this dimension name" not in caplog.text
 
 
+def test_to_markdown_report_resolves_referenced_coordinate():
+    coord = scp.Coord([100, 200, 300], title="Position", units="cm", name="x")
+    dataset = scp.NDDataset(np.ones((3, 3)), coordset=scp.CoordSet(x=coord, y="x"))
+
+    report = dataset.to_markdown_report(title="Report")
+
+    for dim in ("x", "y"):
+        assert (
+            f"- `{dim}` — Position; size: 3; unit: `cm`; min 100.0; max 300.0" in report
+        )
+
+
 def test_to_markdown_report_truncates_values_without_losing_later_operations():
     dataset = _dataset()
     dataset.meta.note = "signal. Savitzky-Golay " + "x" * 5000
@@ -559,6 +575,35 @@ def test_to_markdown_report_keeps_image_labels_and_captions_literal():
     assert report.startswith("# signal. Savitzky-Golay\n")
     assert r"![a\](/evil)!\[b](spectrum.png)" in report
     assert "<script>" not in report
+
+
+def test_to_markdown_report_keeps_history_entities_literal():
+    dataset = _dataset()
+    dataset.annotate("signal &copy; &#169; &#xA9; &amp; literal")
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert r"signal \&copy; \&\#169; \&\#xA9; \&amp; literal" in report
+
+
+def test_to_markdown_report_bounds_history_identifiers_and_large_integer():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "operation": "x" * 5000,
+                "parameters": {"model": "m" * 5000, "number": 10**5000},
+            },
+            {"operation": "next"},
+        ]
+    )
+    report = dataset.to_markdown_report(title="Report")
+
+    assert "x" * 4097 not in report
+    assert "m" * 4097 not in report
+    assert report.count("[truncated: text too long]") == 3
+    assert "Number: [truncated: integer too large]" in report
+    assert "##### 2. Next" in report
 
 
 def test_to_markdown_report_escapes_windows_path_text():

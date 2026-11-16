@@ -87,7 +87,7 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-nmr = ["spectrochempy-nmr>=0.1,<0.3"]
+nmr = ["spectrochempy-nmr>=0.1,<0.5"]
 iris = ["spectrochempy-iris>=0.1,<0.2"]
 tensor = ["spectrochempy-tensor>=0.1,<0.2"]
 plugins = [
@@ -112,6 +112,7 @@ test = [
   "numpydoc",
   "xarray",
 ]
+wavelets = ["pywavelets"]
 
 [project.urls]
 documentation = "https://www.spectrochempy.fr/"
@@ -134,6 +135,7 @@ where = ["src"]
 ]
 "spectrochempy.data" = [
   "databases/*",
+  "gallery/*.dx",
   "*.json",
   "*.cff",
 ]

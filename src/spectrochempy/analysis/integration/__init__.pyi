@@ -8,6 +8,8 @@
 
 __all__ = [
     "integrate",
+    "region",
 ]
 
 from . import integrate
+from . import region

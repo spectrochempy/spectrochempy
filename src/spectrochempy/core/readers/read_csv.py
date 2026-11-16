@@ -167,6 +167,8 @@ def read_csv(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if ``merge`` is set to ``False``.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+        Set the column delimiter in CSV file.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -186,8 +188,6 @@ def read_csv(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     description : `str`, optional
         A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
@@ -215,11 +215,6 @@ def read_csv(*paths, **kwargs):
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by

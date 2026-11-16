@@ -863,6 +863,31 @@ def merge_datasets(datasets, **kwargs):
     if not datasets:
         return datasets
 
+    if kwargs.get("merge") is False:
+        return datasets
+
+    def has_explicit_jcamp_grid(dataset):
+        data_type = dataset.meta.get("jcamp_data_type")
+        if not isinstance(data_type, str):
+            return False
+        if data_type == "UV/VIS SPECTRUM":
+            return True
+        return getattr(dataset, "_read_raman_jcamp", False)
+
+    if any(map(has_explicit_jcamp_grid, datasets)):
+        other = [ds for ds in datasets if not has_explicit_jcamp_grid(ds)]
+        merged_other = merge_datasets(other, **kwargs) if len(other) > 1 else other
+        if len(merged_other) == len(other):
+            return datasets
+        result = []
+        for ds in datasets:
+            if has_explicit_jcamp_grid(ds):
+                result.append(ds)
+            elif merged_other:
+                result.extend(merged_other)
+                merged_other = []
+        return result
+
     # Override merge setting if explicitly set in kwargs
     if "merge" in kwargs:
         merged = kwargs["merge"]

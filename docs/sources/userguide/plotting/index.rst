@@ -121,3 +121,56 @@ The following pages introduce plotting progressively:
    plot_types
    styles
    advanced
+
+2D Maps with Marginal Panels
+----------------------------
+
+Contour maps can carry calculated projections or external reference spectra.
+For a dataset with dimensions ``("y", "x")``, retain ``x`` above the map::
+
+    ax = dataset.plot_contour(
+        projections=("x",), projection_reducer="mean", equal_aspect=True
+    )
+
+``projections=True`` selects both dimensions. Named dimensions keep their
+meaning after transposition: the retained dimension determines whether its
+panel is above or to the right of the map. The legacy ``show_projections``
+and ``show_projection_x/y`` preferences are honored when ``projections`` is
+omitted; an explicit ``False`` disables panels for that call. These preferences
+apply to contour maps and do not add panels to line or surface plots.
+
+The reducers ``sum``, ``mean`` and ``max`` operate over the other dimension and
+exclude masked and non-finite samples. They are pointwise reductions, not
+coordinate-weighted integrals. Supply reference spectra instead when those
+curves have a different scientific meaning, as in the 2D-COS example::
+
+    ax = correlation_map.plot_contour(
+        projections=("x",),
+        projection_data={"x": [first_spectrum, last_spectrum]},
+        projection_kwargs={"x": {
+            "labels": ["Start", "End"], "legend": True,
+            "color": ["black", "orange"],
+        }},
+        positive_color="red", negative_color="blue",
+        positive_linestyle="-", negative_linestyle="--",
+        projection_size=0.25,
+    )
+
+A reference may be one 1D dataset, a list of datasets, or a 2D series with one
+curve per row. Reference coordinates can have a different sampling grid;
+compatible units are converted without interpolation or input mutation.
+Non-overlapping coordinate ranges and incompatible units are rejected. The
+reference signal units are independent of the map signal units, which is
+necessary when showing absorbance spectra above squared-absorbance maps.
+
+``multiplot`` composes these complete panels. Common plot options apply to
+every panel; ``panel_kwargs`` supplies one dictionary per dataset to override
+levels, references or styles. ``height_ratios`` and ``width_ratios`` control
+grid proportions, including grids mixing 1D spectra and 2D maps. Avoid sharing
+axes that represent different physical quantities.
+
+``return_dict=True`` on a contour plot returns ``fig`` and an ``axes`` mapping
+with roles ``main``, ``top`` and/or ``right``. In ``multiplot``, ``axes`` and
+``axes_dict`` still identify the main grid axes; the additional ``panel_axes``
+mapping exposes each panel's roles. ``output=`` saves the entire figure after
+all reference curves, legends and colorbars have been drawn.

@@ -1,7 +1,7 @@
 # ruff: noqa
 """
-Reading SPC format files
-===========================
+Reading Galactic SPC files
+==========================
 This example shows reading of 'Galactic Industries’ SPC data file format. (``.spc`` format).
 
 """

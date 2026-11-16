@@ -1,0 +1,7 @@
+<nav aria-label="Preview navigation">
+  {% if hasdoc('gallery/index') %}
+  <a href="{{ pathto('gallery/index') }}">Gallery preview</a>
+  {% else %}
+  <a href="{{ pathto('index') }}">Preview contents</a>
+  {% endif %}
+</nav>

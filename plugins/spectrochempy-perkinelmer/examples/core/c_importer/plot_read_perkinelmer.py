@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = 1
 
 """
 Reading a PerkinElmer SP file (plugin)
@@ -18,6 +17,8 @@ optional ``spectrochempy-perkinelmer`` plugin.
    **Requires the official ``spectrochempy-perkinelmer`` plugin.**
    Install with: ``pip install spectrochempy[perkinelmer]``.
 """
+
+# sphinx_gallery_thumbnail_number = 1
 
 # %%
 import spectrochempy as scp

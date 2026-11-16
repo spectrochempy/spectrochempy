@@ -46,11 +46,14 @@ def _assert_ftir_coordinate_matches_rfft_bins(source, transformed):
     x = np.asarray(transformed.x.data, dtype=float)
     spacing = abs(source.x.spacing)
     expected = np.fft.rfftfreq(source.size)[: transformed.x.size][::-1] / spacing
-    expected = scp.Coord(expected).to("cm^-1").data
+    expected_values = expected.to("cm^-1").magnitude
+    expected = scp.Coord(expected.to("cm^-1")).data
 
+    assert transformed.x.linear
+    np.testing.assert_allclose(x, expected_values, rtol=0.0, atol=0.001)
     assert np.array_equal(x, expected)
     assert x[0] == expected[0]
-    assert np.isclose(x[0], 7898.731)
+    assert np.isclose(x[0], 7898.719, rtol=0.0, atol=0.001)
     assert np.isclose(x[0] - x[1], expected[0] - expected[1])
     assert np.isclose(x[0] - x[1], 1.899)
 

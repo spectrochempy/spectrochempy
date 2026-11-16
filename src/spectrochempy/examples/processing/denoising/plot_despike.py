@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-# sphinx_gallery_thumbnail_number = -1
 
 """
 Removing cosmic ray spikes from a Raman spectrum
@@ -13,6 +12,8 @@ Removing cosmic ray spikes from a Raman spectrum
 In this example, we use the ``despike`` method to remove the noise from a Raman
 spectrum.
 """
+
+# sphinx_gallery_thumbnail_number = -1
 
 import spectrochempy as scp
 

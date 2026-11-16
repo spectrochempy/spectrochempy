@@ -1,0 +1,117 @@
+"""Test provenance and build selection for the Read the Docs entry point."""
+
+import hashlib
+import importlib
+from io import BytesIO
+from urllib.error import HTTPError
+from zipfile import ZipFile
+
+import pytest
+
+pytest.importorskip("nbformat")
+pytest.importorskip("nbconvert")
+pytest.importorskip("jupytext")
+pytest.importorskip("sphinx")
+
+rtd_build = importlib.import_module("docs.rtd_build")
+
+
+def test_selects_both_artifacts_from_one_successful_run(monkeypatch):
+    commit = "a" * 40
+    runs = [
+        {"id": 1, "head_sha": "b" * 40, "event": "push"},
+        {"id": 2, "head_sha": commit, "event": "push"},
+        {"id": 3, "head_sha": commit, "event": "push"},
+        {"id": 4, "head_sha": commit, "event": "workflow_dispatch"},
+    ]
+
+    def artifact(kind, artifact_id, expired=False):
+        return {"name": f"docs-{kind}-{commit}", "id": artifact_id, "expired": expired}
+
+    responses = {
+        2: [artifact("tutorials", 20)],
+        3: [artifact("gallery", 30), artifact("tutorials", 31, expired=True)],
+        4: [artifact("gallery", 40), artifact("tutorials", 41)],
+    }
+
+    def github(path, token):
+        assert token == "test-token"  # noqa: S105
+        if path.startswith("workflows/"):
+            assert f"head_sha={commit}" in path and "status=success" in path
+            return {"workflow_runs": runs}
+        return {"artifacts": responses[int(path.split("/")[1])]}
+
+    monkeypatch.setattr(rtd_build, "_json", github)
+    run_id, selected = rtd_build._find_artifacts(commit, "test-token", set())
+    assert run_id == 4
+    assert {kind: item["id"] for kind, item in selected.items()} == {
+        "gallery": 40,
+        "tutorials": 41,
+    }
+
+
+def test_zip_checksum_is_checked_before_extraction(tmp_path, monkeypatch):
+    data = BytesIO()
+    with ZipFile(data, "w") as bundle:
+        bundle.writestr("manifest.json", "{}")
+    content = data.getvalue()
+    monkeypatch.setattr(rtd_build, "_request", lambda *_: BytesIO(content))
+    destination = tmp_path / "bundle"
+    with pytest.raises(RuntimeError, match="checksum mismatch"):
+        rtd_build._download({"id": 1, "digest": "wrong"}, "token", destination)
+    assert not destination.exists()
+    digest = hashlib.sha256(content).hexdigest()
+    rtd_build._download({"id": 1, "digest": f"sha256:{digest}"}, "token", destination)
+    assert (destination / "manifest.json").read_text() == "{}"
+
+
+def test_artifact_mode_removes_token_from_environment(monkeypatch):
+    monkeypatch.setenv("SCPY_RTD_GITHUB_TOKEN", "test-token")
+    called = []
+
+    def render(token):
+        assert token == "test-token"  # noqa: S105
+        assert rtd_build.os.environ.get("SCPY_RTD_GITHUB_TOKEN") is None
+        called.append("artifact")
+
+    monkeypatch.setattr(rtd_build, "_render_from_actions", render)
+    rtd_build.main()
+    assert called == ["artifact"]
+
+
+@pytest.mark.parametrize("expired", [True, False], ids=["expired", "version-mismatch"])
+def test_unusable_artifact_retries_the_entire_pair(monkeypatch, expired):
+    monkeypatch.setattr(rtd_build.ci_artifacts, "_commit", lambda: "commit")
+    rendered = []
+
+    def find(_commit, _token, unavailable):
+        if unavailable:
+            assert unavailable == ({2} if expired else {1, 2})
+            return 20, {"tutorials": {"id": 3}, "gallery": {"id": 4}}
+        return 10, {"tutorials": {"id": 1}, "gallery": {"id": 2}}
+
+    def download(artifact, _token, path):
+        if expired and artifact["id"] == 2:
+            raise HTTPError("https://api.github.com", 410, "Gone", {}, None)
+        path.write_text(str(artifact["id"]))
+
+    def render(root):
+        pair = tuple((root / kind).read_text() for kind in ("tutorials", "gallery"))
+        rendered.append(pair)
+        if pair == ("1", "2"):
+            raise rtd_build.ci_artifacts.ArtifactVersionMismatchError("wrong version")
+
+    monkeypatch.setattr(rtd_build, "_find_artifacts", find)
+    monkeypatch.setattr(rtd_build, "_download", download)
+    monkeypatch.setattr(rtd_build.ci_artifacts, "render", render)
+    rtd_build._render_from_actions("test-token")
+    assert rendered == ([("3", "4")] if expired else [("1", "2"), ("3", "4")])
+
+
+def test_same_commit_with_different_installed_version_is_rejected(tmp_path):
+    commit = "a" * 40
+    (tmp_path / "manifest.json").write_text(
+        f'{{"commit": "{commit}", "kind": "tutorials", "version": "0.dev0"}}'
+    )
+    with pytest.raises(rtd_build.ci_artifacts.ArtifactVersionMismatchError):
+        rtd_build.ci_artifacts._verified_files(tmp_path, "tutorials", commit)

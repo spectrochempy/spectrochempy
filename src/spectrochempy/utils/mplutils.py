@@ -197,7 +197,7 @@ def get_figure(**kwargs):
     return fig
 
 
-def _setup_axes(ax=None, *, clear=True, projection=None):
+def _setup_axes(ax=None, *, clear=True, projection=None, figsize=None):
     """
     Create or prepare a Matplotlib Axes for plotting.
 
@@ -218,13 +218,15 @@ def _setup_axes(ax=None, *, clear=True, projection=None):
     projection : str or None
         Matplotlib projection type passed to ``add_subplot`` when
         creating new axes (e.g. ``"3d"``).
+    figsize : tuple of float, optional
+        Width and height in inches when creating a figure.
 
     Returns
     -------
     Axes
     """
     if ax is None:
-        fig = get_figure()
+        fig = get_figure(figsize=figsize)
         ax = fig.add_subplot(111, projection=projection)
     elif clear:
         ax.clear()
@@ -242,13 +244,14 @@ def _resolve_save_figure(target):
     Return the Matplotlib figure carrying a complete plot.
 
     Plotting functions return an axes, a figure, or - for composite two-panel
-    layouts - a tuple of axes belonging to a single figure. This helper maps any
+    layouts - a tuple of axes belonging to a single figure. With return_dict,
+    they return a mapping containing fig. This helper maps any
     of those results to the figure that must be written to disk, so that saving
     never depends on which figure happens to be globally active.
 
     Parameters
     ----------
-    target : `~matplotlib.figure.Figure`, `~matplotlib.axes.Axes`, or sequence of Axes
+    target : Figure, Axes, sequence of Axes, or dict containing fig
         Result of a plotting call.
 
     Returns
@@ -259,12 +262,15 @@ def _resolve_save_figure(target):
     Raises
     ------
     TypeError
-        If *target* is not a figure, an axes, or a sequence of axes.
+        If *target* cannot be resolved to a figure or axes.
     ValueError
         If a sequence of axes is given whose members belong to different figures.
     """
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
+
+    if isinstance(target, dict) and "fig" in target:
+        return _resolve_save_figure(target["fig"])
 
     if isinstance(target, Figure):
         return target
@@ -365,6 +371,36 @@ def _save_figure(fig, output):
         message = f"Could not save the figure to '{path}': {exc}"
         error_type = type(exc) if isinstance(exc, OSError) else OSError
         raise error_type(message) from exc
+
+
+def _add_secondary_x(ax, secondary_x, *, parent=None):
+    """Attach or move the managed upper axis to the topmost panel."""
+    parent = ax if parent is None else parent
+    upper = getattr(ax, "_scp_secondary_x", None)
+    if (
+        secondary_x is None
+        and upper is not None
+        and upper.axes is not None
+        and upper in upper.axes.child_axes
+    ):
+        secondary_x = ax._scp_secondary_x_spec
+
+    if secondary_x is not None:
+        if ax.name == "3d" or hasattr(ax, "zaxis"):
+            raise ValueError("secondary_x requires a 2D Cartesian plot.")
+        label, forward, inverse = secondary_x
+        if upper is not None and upper not in parent.child_axes:
+            if upper.axes is not None and upper in upper.axes.child_axes:
+                upper.remove()
+            upper = None
+        if upper is None:
+            upper = parent.secondary_xaxis("top", functions=(forward, inverse))
+            ax._scp_secondary_x = upper
+        else:
+            upper.set_functions((forward, inverse))
+        upper.set_xlabel(label)
+        ax._scp_secondary_x_spec = secondary_x
+    return ax
 
 
 def _finalize_plot(target, *, show=True, output=None):

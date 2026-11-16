@@ -10,13 +10,18 @@ __all__ = ["read_jcamp"]
 import io
 import re
 from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.plugins.deps import MissingPluginNamespaceError
 from spectrochempy.utils.datetimeutils import UTC
+from spectrochempy.utils.exceptions import SpectroChemPyError
 
 # ======================================================================================
 # Public functions
@@ -25,7 +30,7 @@ from spectrochempy.utils.datetimeutils import UTC
 
 def read_jcamp(*paths, **kwargs):
     r"""
-    Open Infrared ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
+    Open infrared, Raman, UV-visible, and supported processed 1D and real 2D NMR ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
 
     This is the explicit JCAMP reader in the public import API. Use
     :func:`spectrochempy.read` for generic format autodetection and
@@ -37,22 +42,21 @@ def read_jcamp(*paths, **kwargs):
     :func:`spectrochempy.read` for the complete description of the generic
     import convention and multi-object return behavior.
 
-    Limited to AFFN encoding (see :cite:t:`mcdonald:1988`)
+    The infrared reader supports AFFN and DIFDUP encoding
+    (see :cite:t:`mcdonald:1988`).
+    Raman and UV-visible spectra use explicit ASCII X/Y pairs in XYDATA or XYPOINTS.
+    Multiple Raman or UV-visible files are returned as separate spectra.
+    Processed NMR spectra use the optional NMR plugin's interop reader.
 
     Parameters
     ----------
-    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
-        The data source(s) can be specified by the name or a list of name for the
-        file(s) to be loaded:
-
-        - e.g., ( filename1, filename2, ...,  kwargs )
-
-        If the list of filenames are enclosed into brackets:
-
-        - e.g., ( [filename1, filename2, ...], kwargs )
-
-        The returned datasets are merged to form a single dataset,
-        except if ``merge`` is set to ``False``.
+    *paths : str or path-like, optional
+        JCAMP-DX file paths, URLs, or a list of paths.
+    jcamp_kind : {"auto", "ir", "nmr", "uvvis", "raman"}, optional
+        Route by the declared data type by default. Set a kind explicitly
+        when the declaration is ambiguous. Containers with conflicting
+        declared spectrum types are rejected. Processed real 2D NMR spectra
+        use the NTUPLES profile and require nmrglue-ng 1.3 or later.
     **kwargs : keyword parameters, optional
         See Other Parameters.
 
@@ -72,10 +76,6 @@ def read_jcamp(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a web application to handle drag and drop of files into a
         Browser.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
-    description : `str`, optional
-        A custom description.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
     download_only: `bool`, optional, default: `False`
@@ -86,26 +86,10 @@ def read_jcamp(*paths, **kwargs):
         arguments, then a single `NDDataset` with merged dataset (stacked along the first
         dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
         then several NDDatasets can be returned for different groups of compatible datasets.
-    origin : str, optional
-        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
-        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
-        automatically, but can be set manually.
-
-        It is used, for instance, when reading a directory with different types of
-        files and merging compatible datasets into separate groups by origin.
-
-        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
-        have been implemented.
     pattern : `str`, optional
         A pattern to filter the files to read.
 
         .. versionadded:: 0.7.2
-    protocol : `str`, optional
-        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'``, or ``'excel'``.
-        If not provided, the correct protocol is inferred whenever possible
-        from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -154,44 +138,373 @@ def read_jcamp(*paths, **kwargs):
 # ======================================================================================
 # private functions
 # ======================================================================================
-@_importer_method
-def _read_jdx(*args, **kwargs):
-    # read jdx file
-    dataset, filename = args
-    content = kwargs.get("content")
-    sortbydate = kwargs.pop("sortbydate", True)
+def _routing_headers(stream):
+    data_type = None
+    for line in stream:
+        line = line.strip()
+        if not line.startswith("##"):
+            if data_type is not None:
+                data_type.append(line.partition("$$")[0])
+            continue
+        if data_type is not None:
+            yield "##DATATYPE", "".join("".join(data_type).upper().split())
+            data_type = None
+        key, equal, value = line.partition("=")
+        if not equal:
+            continue
+        key = re.sub(r"[\s\-_/]", "", key.upper())
+        if key == "##DATATYPE":
+            data_type = [value.partition("$$")[0]]
+        elif key in {
+            "##TITLE",
+            "##END",
+            "##XYDATA",
+            "##XYPOINTS",
+            "##PEAKTABLE",
+            "##DATATABLE",
+        }:
+            yield key, ""
+    if data_type is not None:
+        yield "##DATATYPE", "".join("".join(data_type).upper().split())
 
-    if content is not None:
-        fid = io.StringIO(content.decode("utf-8"))
+
+def _declared_kind(stream, requested):
+    if requested not in ("auto", "ir", "nmr", "uvvis", "raman"):
+        raise SpectroChemPyError(
+            "jcamp_kind must be 'auto', 'ir', 'nmr', 'uvvis' or 'raman'"
+        )
+
+    spectrum_types = set()
+    linked = False
+    tables = 0
+    tables_outside_2d = 0
+    block_types = []
+    for key, declared in _routing_headers(stream):
+        if key == "##TITLE":
+            block_types.append(None)
+            continue
+        if key == "##END":
+            if block_types:
+                block_types.pop()
+            continue
+        if key != "##DATATYPE":
+            tables += 1
+            tables_outside_2d += not block_types or block_types[-1] != "NDNMRSPECTRUM"
+            continue
+        if block_types:
+            block_types[-1] = declared
+        if declared == "LINK":
+            linked = True
+            continue
+        spectrum_types.add(declared)
+        if not linked and declared != "NDNMRSPECTRUM":
+            break
+
+    if len(spectrum_types) > 1:
+        raise SpectroChemPyError("JCAMP-DX LINK contains conflicting data types")
+    declared = next(iter(spectrum_types), None)
+    if (
+        declared is not None
+        and declared.startswith("NMR")
+        and declared != "NMRSPECTRUM"
+    ):
+        raise SpectroChemPyError(
+            "JCAMP-DX routing supports processed 1D and real 2D NMR spectra only"
+        )
+    kind = {
+        "INFRAREDSPECTRUM": "ir",
+        "RAMANSPECTRUM": "raman",
+        "UVVISSPECTRUM": "uvvis",
+        "UV/VISSPECTRUM": "uvvis",
+        "NMRSPECTRUM": "nmr",
+        "NDNMRSPECTRUM": "nmr",
+    }.get(declared)
+    dimension = "2d" if declared == "NDNMRSPECTRUM" else "1d"
+    if kind is not None:
+        if requested not in ("auto", kind):
+            raise SpectroChemPyError(
+                "jcamp_kind conflicts with the declared JCAMP-DX data type"
+            )
+        if dimension == "2d" and tables_outside_2d:
+            raise SpectroChemPyError(
+                "2D NMR JCAMP-DX contains tables outside its spectrum"
+            )
+        if kind == "nmr" and dimension == "1d" and linked and tables != 1:
+            raise SpectroChemPyError(
+                "NMR JCAMP-DX LINK requires exactly one spectral table"
+            )
+        return kind, linked, dimension
+    if requested != "auto":
+        return requested, linked, dimension
+    if linked and not spectrum_types:
+        return "ir", linked, dimension
+    raise SpectroChemPyError(
+        "Cannot determine JCAMP-DX spectrum type. Set jcamp_kind='ir', 'nmr', 'uvvis' or 'raman'."
+    )
+
+
+def _read_nmr_jcamp(filename, content, dimension):
+    import spectrochempy as scp  # noqa: PLC0415
+
+    try:
+        reader = scp.nmr.read
+    except MissingPluginNamespaceError as exc:
+        raise SpectroChemPyError(
+            "NMR JCAMP-DX requires spectrochempy-nmr. "
+            "Install it with pip install 'spectrochempy[nmr]'."
+        ) from exc
+
+    def read(path):
+        try:
+            return reader(
+                path, protocol="interop", profile=f"jcampdx-spectrum-{dimension}"
+            )
+        except (ImportError, ValueError) as exc:
+            raise SpectroChemPyError(
+                f"Cannot read processed {dimension.upper()} NMR JCAMP-DX: {exc}"
+            ) from exc
+
+    if content is None:
+        dataset = read(filename)
     else:
-        fid = open(filename)  # noqa: SIM115
+        with TemporaryDirectory(prefix="scpy-jcamp-") as temporary:
+            path = Path(temporary) / Path(filename).name
+            path.write_bytes(content)
+            dataset = read(path)
+    dataset.filename = filename
+    dataset.origin = "jcamp-nmr"
+    dataset.history = f"Imported NMR JCAMP-DX file {Path(filename).name}"
+    return dataset
 
-    # Read header of outer Block
 
+def _open_jcamp(filename, content, *, errors="strict"):
+    if content is not None:
+        return io.TextIOWrapper(
+            io.BytesIO(content), encoding="utf-8-sig", errors=errors
+        )
+    return open(filename, encoding="utf-8-sig", errors=errors)  # noqa: SIM115
+
+
+@_importer_method
+def _read_jdx(dataset, filename, **kwargs):
+    content = kwargs.get("content")
+    with _open_jcamp(filename, content, errors="replace") as stream:
+        kind, linked, dimension = _declared_kind(
+            stream, kwargs.get("jcamp_kind", "auto")
+        )
+    if kind == "nmr":
+        return _read_nmr_jcamp(filename, content, dimension)
+    with _open_jcamp(filename, content) as stream:
+        if kind in {"uvvis", "raman"}:
+            technique = "Raman" if kind == "raman" else "UV-visible"
+            if linked:
+                raise SpectroChemPyError(
+                    f"{technique} JCAMP-DX requires a single spectrum"
+                )
+            return _read_explicit_jcamp(dataset, filename, stream, kind, technique)
+        return _read_ir_jcamp(
+            dataset, filename, stream, linked, kwargs.get("sortbydate", True)
+        )
+
+
+# JCAMP-DX IR 4.24, section 5 and table VII.
+_SQZ = dict(
+    zip("@ABCDEFGHIabcdefghi", (0, *range(1, 10), *range(-1, -10, -1)), strict=True)
+)
+_DIF = dict(
+    zip("%JKLMNOPQRjklmnopqr", (0, *range(1, 10), *range(-1, -10, -1)), strict=True)
+)
+_DUP = dict(zip("STUVWXYZs", range(1, 10), strict=True))
+_DECIMAL_NUMBER = r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)"
+_AFFN_NUMBER = rf"{_DECIMAL_NUMBER}(?:[Ee][+-]?[0-9]+)?"
+_AFFN_ROW = re.compile(rf"{_AFFN_NUMBER}(?:\s+(?:{_AFFN_NUMBER}|\?))+")
+_COMPRESSED_ROWS = tuple(
+    re.compile(rf"({number})\s*([@A-Ia-i?].*)")
+    for number in (_DECIMAL_NUMBER, _AFFN_NUMBER)
+)
+_PSEUDO_VALUE = re.compile(r"(?:[@A-Ia-i%J-Rj-rS-Zs][0-9]*|\?)")
+
+
+def _read_ir_xydata(fid, firstx, lastx, npoints, xfactor):
+    step = (lastx - firstx) / max(npoints - 1, 1)
+    values = []
+    checkpoint = False
+    while True:
+        keyword, text = _readl(fid)
+        if keyword == "##END":
+            break
+        if keyword:
+            raise ValueError(f"Unexpected JCAMP-DX record in XYDATA: {keyword}")
+        if not text:
+            continue
+        if not checkpoint and _AFFN_ROW.fullmatch(text):
+            values.extend(float(v) if v != "?" else np.nan for v in text.split()[1:])
+            if len(values) > npoints:
+                raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+            continue
+
+        index = len(values) - int(checkpoint)
+        if index >= npoints:
+            raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+        # E/e can introduce either an exponent or a SQZ ordinate. Prefer the
+        # closest grid position, with a compact SQZ ordinate first on ties.
+        expected_x = firstx + index * step
+        candidates = []
+        for pattern in _COMPRESSED_ROWS:
+            row = pattern.fullmatch(text)
+            if row is None:
+                continue
+            anchor, encoded = row.groups()
+            tokens = _PSEUDO_VALUE.findall(encoded)
+            if "".join(tokens) != "".join(encoded.split()):
+                continue
+            # Integer anchors are commonly rounded or truncated by the exporter.
+            precision = float(f"1e{Decimal(anchor).as_tuple().exponent}")
+            anchor_x = float(anchor) * xfactor
+            tolerance = abs(xfactor) * precision
+            if (
+                np.isfinite(anchor_x)
+                and np.isfinite(tolerance)
+                and np.isclose(anchor_x, expected_x, rtol=1e-12, atol=tolerance)
+            ):
+                candidates.append((abs(anchor_x - expected_x), tokens))
+        if not candidates:
+            raise ValueError("Invalid JCAMP-DX XYDATA row or abscissa")
+        _, tokens = min(candidates, key=lambda candidate: candidate[0])
+        difference = None
+        previous = None
+        for position, token in enumerate(tokens):
+            prefix, tail = token[0], token[1:]
+            if prefix in _DUP:
+                if previous is None:
+                    raise ValueError(
+                        "JCAMP-DX DUP has no preceding ordinate or difference"
+                    )
+                repeats = int(f"{_DUP[prefix]}{tail}") - 1
+                if len(values) + repeats > npoints:
+                    raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+                for _ in range(repeats):
+                    values.append(
+                        values[-1] + difference
+                        if difference is not None
+                        else values[-1]
+                    )
+                previous = None
+                continue
+
+            if prefix == "?":
+                value = np.nan
+                difference = None
+            else:
+                digits = _DIF if prefix in _DIF else _SQZ
+                leading = digits[prefix]
+                number = (-1 if leading < 0 else 1) * int(f"{abs(leading)}{tail}")
+                difference = number if prefix in _DIF else None
+                if difference is not None and (position == 0 or np.isnan(values[-1])):
+                    raise ValueError(
+                        "JCAMP-DX DIF requires a preceding absolute ordinate"
+                    )
+                value = values[-1] + difference if difference is not None else number
+            if position == 0 and checkpoint:
+                if value != values[-1]:
+                    raise ValueError("JCAMP-DX DIF ordinate checkpoint does not match")
+            else:
+                values.append(value)
+                if len(values) > npoints:
+                    raise ValueError("JCAMP-DX XYDATA exceeds NPOINTS")
+            previous = token if prefix != "?" else None
+        checkpoint = difference is not None
+
+    if checkpoint:
+        raise ValueError("JCAMP-DX XYDATA is missing its final DIF checkpoint")
+    if len(values) != npoints:
+        raise ValueError("JCAMP-DX XYDATA does not match NPOINTS")
+    return np.asarray(values, dtype=float)
+
+
+def _read_explicit_jcamp(dataset, filename, stream, kind, technique):
+    headers = {}
+    pairs = []
+    reading = False
+    while True:
+        label, value = _readl(stream, exact_end=True)
+        label = re.sub(r"[\s\-_]", "", label.upper())
+        value = value.strip()
+        if label == "##END":
+            break
+        if label in {"##XYDATA", "##XYPOINTS"}:
+            if reading or "".join(value.upper().split()) != "(XY..XY)":
+                raise ValueError(f"{technique} JCAMP-DX requires one explicit XY table")
+            reading = True
+        elif reading and value and not label:
+            values = re.split(r"\s*[,;]\s*|\s+", value)
+            if len(values) % 2 or not all(
+                re.fullmatch(_AFFN_NUMBER, item) for item in values
+            ):
+                raise ValueError(f"Invalid {technique} JCAMP-DX XY pair")
+            pairs.extend(map(float, values))
+        elif label:
+            if reading or (label == "##TITLE" and label in headers):
+                raise ValueError(f"{technique} JCAMP-DX requires a single spectrum")
+            headers[label] = value
+    if any(line.partition("$$")[0].strip() for line in stream):
+        raise ValueError(f"Unexpected content after {technique} JCAMP-DX END")
+    if not pairs or len(pairs) != 2 * int(headers.get("##NPOINTS", "0")):
+        raise ValueError(f"{technique} JCAMP-DX XY count disagrees with NPOINTS")
+    xfactor = float(headers.get("##XFACTOR", "1"))
+    yfactor = float(headers.get("##YFACTOR", "1"))
+    with np.errstate(over="ignore", invalid="ignore"):
+        x, y = np.asarray(pairs).reshape(-1, 2).T * np.array([[xfactor], [yfactor]])
+    if xfactor == 0 or yfactor == 0 or not np.isfinite([x, y]).all():
+        raise ValueError(f"Invalid {technique} JCAMP-DX values or factors")
+    for label, actual in (("##FIRSTX", x[0]), ("##LASTX", x[-1])):
+        if label in headers and not np.isclose(
+            float(headers[label]), actual, rtol=1e-7, atol=1e-12
+        ):
+            raise ValueError(f"{technique} JCAMP-DX {label} disagrees with XY table")
+    xunits = headers.get("##XUNITS", "")
+    yunits = headers.get("##YUNITS", "")
+    if kind == "raman":
+        accepted_xunits = {"1/cm", "cm^-1", "cm-1", "raman shift (cm-1)"}
+        axis_title, axis_unit = "Raman shift", "cm^-1"
+    else:
+        accepted_xunits = {"nm", "nanometers", "wavelength (nm)"}
+        axis_title, axis_unit = "wavelength", "nm"
+    if xunits.casefold() not in accepted_xunits:
+        raise ValueError(f"Unsupported {technique} JCAMP-DX XUNITS: {xunits!r}")
+    coord = Coord(title=axis_title, units=axis_unit, rounding=False)
+    coord._set_data(x)
+    dataset.data = y
+    dataset.set_coordset(x=coord)
+    dataset.name = headers.get("##TITLE", Path(filename).stem)
+    dataset.filename = filename
+    dataset.origin = headers.get("##ORIGIN") or f"jcamp-{kind}"
+    dataset.title = yunits or "intensity"
+    if kind == "uvvis" and yunits.casefold() == "transmittance":
+        dataset.units = "absolute_transmittance"
+    elif kind == "uvvis" and yunits.casefold() == "absorbance":
+        dataset.units = "absorbance"
+    dataset.meta.jcamp_data_type = (
+        "RAMAN SPECTRUM" if kind == "raman" else "UV/VIS SPECTRUM"
+    )
+    if kind == "raman":
+        dataset._read_raman_jcamp = True
+    dataset.meta.jcamp_xunits = xunits
+    dataset.meta.jcamp_yunits = yunits
+    dataset.history = f"Imported {technique} JCAMP-DX file {Path(filename).name}"
+    return dataset
+
+
+def _read_ir_jcamp(dataset, filename, fid, linked, sortbydate):
     keyword = ""
-
     while keyword != "##TITLE":
-        keyword, text = _readl(fid)
-    if keyword != "EOF":
-        jdx_title = text
-    else:  # pragma: no cover
-        raise ValueError("No ##TITLE LR in outer block header")
+        keyword, jdx_title = _readl(fid)
 
-    while (keyword != "##DATA TYPE") and (keyword != "##DATATYPE"):
-        keyword, text = _readl(fid)
-    if keyword != "EOF":
-        jdx_data_type = text
-    else:  # pragma: no cover
-        raise ValueError("No ##DATA TYPE LR in outer block header")
-
-    if jdx_data_type == "LINK":
+    nspec = 1
+    if linked:
         while keyword != "##BLOCKS":
             keyword, text = _readl(fid)
         nspec = int(text)
-    elif jdx_data_type.replace(" ", "") == "INFRAREDSPECTRUM":
-        nspec = 1
-    else:
-        raise ValueError("DATA TYPE must be LINK or INFRARED SPECTRUM")
 
     # Create variables
 
@@ -207,8 +520,8 @@ def _read_jdx(*args, **kwargs):
     )
     nx, firstx, lastx = (
         np.zeros(nspec, "int"),
-        np.zeros(nspec, "float"),
-        np.zeros(nspec, "float"),
+        np.full(nspec, np.nan),
+        np.full(nspec, np.nan),
     )
 
     # Read the spectra
@@ -216,6 +529,8 @@ def _read_jdx(*args, **kwargs):
     for i in range(nspec):
         # Reset variables
         keyword = ""
+        xfactor = yfactor = 1.0
+        values = None
 
         # (year, month,...) must be reset at each spectrum because labels "time"
         # and "longdate" are not required in JDX file
@@ -250,31 +565,22 @@ def _read_jdx(*args, **kwargs):
             elif keyword == "##NPOINTS":
                 nx[i] = float(text)
             elif keyword == "##XYDATA":
-                # Read the intensities
-                allintensities = []
-                while keyword != "##END":
-                    keyword, text = _readl(fid)
-                    # for each line, get all the values except the first one (first value = wavenumber)
-                    intensities = list(filter(None, text.split(" ")[1:]))
-                    if len(intensities) > 0:
-                        allintensities += intensities
-                spectra = np.array(
-                    [allintensities],
-                )  # convert allintensities into an array
-                spectra[
-                    spectra == "?"
-                ] = "nan"  # deals with missing or out of range intensity values
-                spectra = spectra.astype(np.float32)
-                spectra *= yfactor
-                # add spectra in "data" matrix
+                if (
+                    not np.isfinite([firstx[i], lastx[i], xfactor, yfactor]).all()
+                    or nx[i] <= 0
+                    or xfactor == 0
+                ):
+                    raise ValueError(
+                        "Invalid JCAMP-DX axis bounds, factors or point count"
+                    )
+                values = _read_ir_xydata(fid, firstx[i], lastx[i], nx[i], xfactor)
+                spectra = (values * yfactor)[None, :]
+                keyword = "##END"
                 data = spectra if not data.size else np.concatenate((data, spectra), 0)
 
-        # Check "firstx", "lastx" and "nx"
-        if firstx[i] != 0 and lastx[i] != 0 and nx[i] != 0:
+        if values is not None:
             if not xaxis.size:
-                # Creation of xaxis if it doesn't exist yet
-                xaxis = np.linspace(firstx[0], lastx[0], nx[0])
-                xaxis = np.around((xaxis * xfactor), 3)
+                xaxis = np.linspace(firstx[i], lastx[i], nx[i])
             else:
                 # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
@@ -290,9 +596,7 @@ def _read_jdx(*args, **kwargs):
                         "Inconsistent data set: the x axis should end at same value",
                     )
         else:
-            raise ValueError(
-                f"##FIRSTX, ##LASTX or ##NPOINTS are unusable in spectrum n°{i + 1}"
-            )
+            raise ValueError(f"Missing JCAMP-DX XYDATA in spectrum {i + 1}")
 
         # Creation of the acquisition date
         if (
@@ -352,7 +656,6 @@ def _read_jdx(*args, **kwargs):
     else:
         axisname = ""
         axisunit = ""
-    fid.close()
 
     dataset.data = data
     dataset.name = jdx_title
@@ -370,8 +673,8 @@ def _read_jdx(*args, **kwargs):
         dataset._units = None
 
     # now add coordinates
-    _x = Coord(xaxis, title=axisname, units=axisunit)
-    if jdx_data_type == "LINK":
+    _x = Coord(xaxis, title=axisname, units=axisunit, rounding=False, sigdigits=15)
+    if linked:
         _y = Coord(
             alltimestamps,
             title="acquisition timestamp (GMT)",
@@ -414,13 +717,13 @@ def _read_dx(*args, **kwargs):  # pragma: no cover
     return _read_jdx(*args, **kwargs)
 
 
-def _readl(fid):
+def _readl(fid, *, exact_end=False):
     line = fid.readline()
     if not line:
-        return "EOF", ""
-    line = line.strip(" \n")  # remove newline character
+        raise ValueError("Unexpected end of JCAMP-DX file")
+    line = line.partition("$$")[0].strip()
     if line[0:2] == "##":  # if line starts with "##"
-        if line[0:5] == "##END":  # END KEYWORD, no text
+        if (line.split("=", 1)[0].rstrip() if exact_end else line[:5]) == "##END":
             keyword = "##END"
             text = ""
         else:  # keyword + text
