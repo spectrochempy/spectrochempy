@@ -650,6 +650,21 @@ def test_to_markdown_report_sorts_members_of_composite_metadata_keys():
     assert "('reference', frozenset({'alpha', 'beta', 'gamma'})): 1" in report
 
 
+def test_to_markdown_report_handles_numpy_duration_metadata():
+    dataset = _dataset()
+    duration = np.timedelta64(200, "ms")
+    dataset.meta.integration_time = duration
+    dataset.meta.mapping = {duration: "calibration"}
+
+    report = dataset.to_markdown_report(
+        title="Report", metadata=("integration_time", "mapping")
+    )
+
+    assert "- `integration_time`: 200 milliseconds" in report
+    assert "200 milliseconds: calibration" in report
+    assert "Imported sample" in report
+
+
 def test_to_markdown_report_preserves_history_labels_and_code_spacing():
     dataset = _dataset()
     dataset.replace_history(

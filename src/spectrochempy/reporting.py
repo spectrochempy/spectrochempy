@@ -494,6 +494,8 @@ def _composite_key_repr(key, depth: int = 0) -> str:
 
 
 def _integer_text(value: Integral | np.integer) -> str:
+    if isinstance(value, np.timedelta64):
+        return str(value)
     if abs(int(value)) >= _INTEGER_LIMIT:
         return _INTEGER_TRUNCATED
     try:
