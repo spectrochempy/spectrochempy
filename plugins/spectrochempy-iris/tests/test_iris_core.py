@@ -228,6 +228,42 @@ def test_iris_kernel_and_penalty_are_invariant_to_grid_reversal():
     assert np.all(np.linalg.eigvalsh(penalty) > 0)
 
 
+def test_regularized_nnls_satisfies_optimality_on_both_grid_orders():
+    pressure = np.linspace(0.1, 1, 5)
+    spectra = scp.NDDataset(
+        np.column_stack((pressure, -pressure)),
+        coordset=[scp.Coord(pressure), scp.Coord(np.arange(2))],
+    )
+    ascending = IrisKernel(spectra, "langmuir", q=[-4, 0, 5]).kernel
+    descending = IrisKernel(spectra, "langmuir", q=[0, -4, 5]).kernel
+    options = {"qpsolver": "nnls", "reg_par": [-3, -1, 3]}
+    forward = IRIS(**options).fit(spectra, ascending)
+    reverse = IRIS(**options).fit(spectra, descending)
+    np.testing.assert_allclose(forward.f.data, reverse.f.data[:, ::-1], atol=1e-12)
+
+    kernel = ascending.data
+    penalty = _Smat(ascending.x.data)
+    for strength, coefficients in zip(
+        forward.lambdas.data, forward.f.data, strict=True
+    ):
+        gradient = kernel.T @ (kernel @ coefficients - spectra.data)
+        gradient += strength * (penalty @ coefficients)
+        assert np.all(coefficients >= 0)
+        assert np.all(gradient >= -1e-12)
+        np.testing.assert_allclose(gradient[coefficients > 0], 0, atol=1e-12)
+
+
+def test_adaptive_nnls_rejects_zero_sharpness():
+    pressure = np.linspace(0.1, 1, 5)
+    spectra = scp.NDDataset(
+        -pressure[:, None],
+        coordset=[scp.Coord(pressure), scp.Coord([0])],
+    )
+    kernel = IrisKernel(spectra, "langmuir", q=[-4, 0, 5])
+    with pytest.raises(ValueError, match="finite, positive residuals and sharpness"):
+        IRIS(qpsolver="nnls", reg_par=[-4, -2]).fit(spectra, kernel)
+
+
 def test_IRIS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy_iris._core"
@@ -390,6 +426,21 @@ def test_IRIS():
     np.testing.assert_array_equal(iris3.RSS.data, legacy_metric.RSS.data)
     np.testing.assert_array_equal(iris3.lambdas.data, legacy_metric.lambdas.data)
     np.testing.assert_allclose(iris3.SM.data, legacy_metric.SM.data, rtol=1e-11)
+
+    iris_nnls = IRIS(qpsolver="nnls", reg_par=reg_par).fit(X, K1)
+    assert iris_nnls.f.shape[1:] == f3.shape[1:]
+    assert np.all(iris_nnls.f.data >= 0)
+    assert iris_nnls.f.shape[0] > 4
+    distributions = iris_nnls.f.data
+    residuals = X.data - K1.data @ distributions
+    penalty = _Smat(K1.x.data)
+    np.testing.assert_allclose(iris_nnls.RSS, np.sum(residuals**2, axis=(1, 2)))
+    np.testing.assert_allclose(
+        iris_nnls.SM,
+        np.linalg.norm(
+            distributions.transpose(0, 2, 1) @ penalty @ distributions, axis=(1, 2)
+        ),
+    )
 
     # test other kernels (beware: it is chemical non-sense !)
     q = [5, 1, 10]

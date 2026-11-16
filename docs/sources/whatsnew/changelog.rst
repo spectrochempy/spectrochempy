@@ -19,6 +19,9 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Select SciPy's non-negative least-squares solver for regularized IRIS fits
+  with ``qpsolver='nnls'``.
+
 - Split one dataset axis into blocks with ``reshape(coord_policy='split')``.
 - Compute and invert one-sided Fourier transforms along a dataset dimension with ``rfft`` and ``irfft``.
 - ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown

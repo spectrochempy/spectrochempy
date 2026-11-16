@@ -15,6 +15,7 @@ from functools import partial
 import numpy as np
 import osqp
 import traitlets as tr
+from scipy import linalg
 from scipy import optimize
 from scipy import sparse
 
@@ -412,11 +413,13 @@ class IRIS(DecompositionAnalysis):
         [
             "osqp",
             "quadprog",
+            "nnls",
         ],
         default_value="osqp",
         allow_none=True,
-        help="Quatratic programming solver (`osqp` (default) or `quadprog`). "
-        "Note that quadprog is not installed with spectrochempy.",
+        help="Solver for regularized fits: `osqp` (default), `quadprog`, or `nnls`. "
+        "NNLS uses SciPy on an augmented least-squares system and requires real "
+        "data and a positive-definite penalty. Install quadprog separately to use it.",
     ).tag(config=True)
 
     reg_par = tr.List(
@@ -472,6 +475,7 @@ class IRIS(DecompositionAnalysis):
                     "quadprog module is not installed. Please install it or run IRIS Solver "
                     "with qpsolver='osqp'",
                 )
+        return qpsolver
 
     @tr.validate("reg_par")
     def _reg_par_validate(self, proposal):
@@ -632,6 +636,20 @@ class IRIS(DecompositionAnalysis):
                     with np.errstate(over="ignore", invalid="ignore", under="ignore"):
                         max_penalty = P0 + 2 * lambdas.max() * S
                     parallel_grid = np.isfinite(max_penalty).all()
+            elif self.qpsolver == "nnls":
+                if any(np.iscomplexobj(array) for array in (X, K, S)):
+                    raise ValueError("Regularized NNLS requires real data and penalty.")
+                # S = U.T @ U, so stacking sqrt(lambda) * U below K adds
+                # lambda * f.T @ S @ f to the squared residual.
+                try:
+                    penalty_factor = linalg.cholesky(S)
+                except (ValueError, np.linalg.LinAlgError) as exc:
+                    raise ValueError(
+                        "Regularized NNLS requires a finite, positive-definite penalty."
+                    ) from exc
+                augmented_kernel = np.vstack((K, np.empty((M, M))))
+                augmented_data = np.vstack((X, np.zeros((M, N))))
+                P0 = None
             else:
                 # The standard form used by quadprog() was
                 # minimize (1/2) xT P x - qT x ; subject to: A.T x >= b
@@ -666,6 +684,18 @@ class IRIS(DecompositionAnalysis):
                     fi = _solve_osqp_lambda(
                         lambda_, problem, make_solver, legacy_warning
                     )
+                elif self.qpsolver == "nnls":
+                    fi = np.empty((K.shape[1], X.shape[1]))
+                    if lambda_ == 0:
+                        design, observations = K, X
+                    else:
+                        augmented_kernel[K.shape[0] :] = (
+                            np.sqrt(lambda_) * penalty_factor
+                        )
+                        design, observations = augmented_kernel, augmented_data
+                    for j in range(X.shape[1]):
+                        fi[:, j] = optimize.nnls(design, observations[:, j])[0]
+
                 else:  # quadprog solver
                     fi = np.zeros((K.shape[-1], X.shape[-1]))
                     channels = self._channels
@@ -704,6 +734,16 @@ class IRIS(DecompositionAnalysis):
                 resi = X.data - np.dot(K.data, fi)
                 RSSi = np.sum(resi**2)
                 SMi = sharpness(fi)
+
+                if (
+                    self.qpsolver == "nnls"
+                    and self._search_reg
+                    and not (0 < RSSi < np.inf and 0 < SMi < np.inf)
+                ):
+                    raise ValueError(
+                        "Adaptive NNLS regularization requires finite, positive "
+                        "residuals and sharpness. Use a fixed regularization grid."
+                    )
 
                 msg = (
                     f"log10(lambda)={np.log10(lambda_):.3f} -->  "
@@ -784,6 +824,11 @@ class IRIS(DecompositionAnalysis):
                     info_(msg)
 
                     while "convergence not reached":
+                        if self.qpsolver == "nnls" and not x[0] < x[1] < x[2] < x[3]:
+                            raise ValueError(
+                                "Adaptive NNLS regularization could not find positive "
+                                "curvature. Use a fixed regularization grid."
+                            )
                         x[3] = x[2]
                         Rx[3] = Rx[2]
                         Sy[3] = Sy[2]
@@ -838,8 +883,8 @@ class IRIS(DecompositionAnalysis):
                         f_, Rx[2], Sy[2] = solve_for_lambda(X, K, P0, 10 ** x[2], S)
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
                         lambdas = np.append(lambdas, np.array(10 ** x[2]))
-                        RSS = np.concatenate((RSS, np.array(Rx[1:2])))
-                        SM = np.concatenate((SM, np.array(Sy[1:2])))
+                        RSS = np.concatenate((RSS, np.array(Rx[2:3])))
+                        SM = np.concatenate((SM, np.array(Sy[2:3])))
                     if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
                         break
                 id_opt = np.argmin(np.abs(lambdas - np.power(10, x_)))
