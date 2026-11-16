@@ -1129,28 +1129,19 @@ class Optimize(DecompositionAnalysis):
 
         # Residuals and chi2 functions -----------------------------------------------
 
-        def fun_residuals(params, X):
+        full_axis, keep, fit_axis = self._model_grid()
+
+        def fun_residuals(params, data):
             global ncalls
             ncalls += 1
+            return data - self._get_modelsum(params, data, full_axis, keep, fit_axis)
 
-            # model
-            modeldata = self._get_modeldata(X, model_spec=params)[0]
-
-            # baseline is already summed with modeldata[-1]
-            mdata = modeldata[-1]  # modelsum
-
-            # important to work with the real component of dataset
-            # not the complex number
-            data = X.real.squeeze()
-
-            return data - mdata
-
-        def fun_chi2(params, X):  # , *constraints):
+        def fun_chi2(params, data):
             """Return sum((y - x)**2)."""
             global chi2
 
             # model
-            res = fun_residuals(params, X)
+            res = fun_residuals(params, data)
             chi2 = np.sum(res**2)  # * merror
             return chi2
 
@@ -1201,7 +1192,7 @@ class Optimize(DecompositionAnalysis):
             model_spec, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
                 model_spec,
-                args=(X,),
+                args=(X.real.squeeze(),),
                 maxfun=self.max_fun_calls,
                 maxiter=self.max_iter,
                 method=self.method,
@@ -1452,6 +1443,66 @@ class Optimize(DecompositionAnalysis):
     #     else:
     #         return self.message
 
+    def _evaluate_component(self, x, model, prepared_spec):
+        return getmodel(
+            x,
+            modelname=model,
+            par=prepared_spec.component_view(model),
+            amplitude_mode=self.amplitude_mode,
+            usermodels=self.usermodels,
+        )
+
+    def _model_grid(self):
+        _, dim = self._X.get_axis(-1)
+        x = self._X_coordset[dim].data
+        keep = ~np.all(self._X_mask, axis=-2) if np.any(self._X_mask) else slice(None)
+        return x, keep, x[keep]
+
+    def _get_modelsum(self, model_spec, data, full_axis, keep, fit_axis):
+        """Stream ordinary solver totals, preserving component scaling and callbacks."""
+        prepared_spec = prepare_model(model_spec)
+        models = [component.label for component in prepared_spec.components]
+        baseline_count = sum(model.startswith("baseline") for model in models)
+        baseline_first = all(
+            model.startswith("baseline") for model in models[:baseline_count]
+        )
+        if (
+            self.autobase
+            or self.usermodels
+            or not models
+            or not baseline_first
+            or full_axis.size <= 1
+        ):
+            return self._assemble_modeldata(
+                prepared_spec, models, data, full_axis, keep, fit_axis
+            )[0][-1]
+
+        total = np.zeros(full_axis.size, dtype=np.float64)
+        for model in models[:baseline_count]:
+            total += self._evaluate_component(full_axis, model, prepared_spec)
+
+        peaks = iter(models[baseline_count:])
+        component = np.empty_like(total)
+        trial = np.empty_like(total)
+        for index, model in enumerate(peaks, start=baseline_count):
+            component[:] = self._evaluate_component(full_axis, model, prepared_spec)
+            try:
+                with np.errstate(over="raise", invalid="raise"):
+                    np.add(total, component, out=trial)
+            except FloatingPointError:
+                remaining = np.empty((len(models) - index + 1, total.size))
+                remaining[0] = total
+                remaining[1] = component
+                for row, pending in zip(remaining[2:], peaks, strict=True):
+                    row[:] = self._evaluate_component(full_axis, pending, prepared_spec)
+                total = remaining.sum(axis=0)
+                break
+            total, trial = trial, total
+
+        total = total[keep]
+        total += 0.0 * fit_axis + 0.0
+        return total
+
     def _get_modeldata(self, X, exp_idx=1, model_spec=None):
         # exp_idx is not used for the moment, but will be necessary for multidataset
         # fitting
@@ -1466,26 +1517,16 @@ class Optimize(DecompositionAnalysis):
 
         # Get the list of models
         models = [comp.label for comp in prepared_spec.components]
-        self._n_components = nbmodels = len(models)
-
-        # Make an array 'modeldata' with the size of the dataset of data
-        # which will contains the data produced by the models
-        # This name must always be 'modeldata'
-        # which will be returned to the main program.
-
         expedata = X.real.squeeze()
-
-        # we need to calculate the model with the full unmasked coordinates
-
         if expedata.ndim > 1:
-            # nD data
             raise NotImplementedError("Fit not implemented for nD data yet!")
 
-        # we need to keep track of the x axis before masking
-        axis, dim = self._X.get_axis(-1)
-        _xaxis = self._X_coordset[dim].data
+        return self._assemble_modeldata(
+            prepared_spec, models, expedata, *self._model_grid()
+        )
 
-        x = _xaxis
+    def _assemble_modeldata(self, prepared_spec, models, expedata, x, keep, fit_axis):
+        self._n_components = nbmodels = len(models)
         modeldata = np.zeros((nbmodels + 2, x.size), dtype=np.float64)
 
         if nbmodels < 1:
@@ -1501,13 +1542,7 @@ class Optimize(DecompositionAnalysis):
         ]
 
         for model in models:
-            calc = getmodel(
-                x,
-                modelname=model,
-                par=prepared_spec.component_view(model),
-                amplitude_mode=self.amplitude_mode,
-                usermodels=self.usermodels,
-            )
+            calc = self._evaluate_component(x, model, prepared_spec)
             if not model.startswith("baseline"):
                 row += 1
                 modeldata[row] = calc
@@ -1523,10 +1558,8 @@ class Optimize(DecompositionAnalysis):
         modeldata = modeldata[: row + 2]
 
         # remove masked column
-        if np.any(self._X_mask):
-            masked_columns = np.all(self._X_mask, axis=-2)
-            modeldata = modeldata[:, ~masked_columns]
-            x = x[~masked_columns]
+        modeldata = modeldata[:, keep]
+        x = fit_axis
 
         if self.autobase:
             A, a, b = self._ampbas(x, expedata, modeldata[-1])
@@ -1602,14 +1635,31 @@ class Optimize(DecompositionAnalysis):
         # with respect to A, a, and b
         expe = expe.squeeze()
         n = xi.size
-        sE = sum(expe)
-        sF = sum(calc)
-        sFI = sum(xi * calc)
-        sFd = sum(calc * calc)
-        sI = sum(xi)
-        sEF = sum(expe * calc)
-        sEI = sum(xi * expe)
-        sId = sum(xi**2)
+        reduce = sum
+        if n and all(
+            values.shape == (n,) and values.dtype == np.float64
+            for values in (xi, expe, calc)
+        ):
+            cumulative = np.empty(n + 1, dtype=np.float64)
+
+            def ordered_sum(values):
+                cumulative[0] = 0.0
+                cumulative[1:] = values
+                with np.errstate(over="ignore", invalid="ignore"):
+                    np.add.accumulate(cumulative, out=cumulative)
+                result = cumulative[-1]
+                return result if np.isfinite(result) else sum(values)
+
+            reduce = ordered_sum
+
+        sE = reduce(expe)
+        sF = reduce(calc)
+        sFI = reduce(xi * calc)
+        sFd = reduce(calc * calc)
+        sI = reduce(xi)
+        sEF = reduce(expe * calc)
+        sEI = reduce(xi * expe)
+        sId = reduce(xi**2)
 
         den = n * sFI**2 - n * sFd * sId + sF**2 * sId - 2 * sF * sFI * sI + sFd * sI**2
 
