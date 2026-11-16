@@ -109,6 +109,11 @@ def test_to_markdown_report_rejects_invalid_figure_targets(target):
         ("https://example.org/a?", "https://example.org/a?"),
         ("https://example.org/a#", "https://example.org/a#"),
         ("https://example.org/a;?#", "https://example.org/a;?#"),
+        (
+            "https://example.org/image;version=2.png",
+            "https://example.org/image;version=2.png",
+        ),
+        ("https://example.org/a'b?x='y'#z'", "https://example.org/a'b?x='y'#z'"),
         ('figures/a[1]"<>.png', "figures/a%5B1%5D%22%3C%3E.png"),
     ],
 )
@@ -617,6 +622,7 @@ def test_to_markdown_report_bounds_large_integer_keys():
         10**5000: "first",
         10**5001: "second",
         (10**5000, "sample"): "reference",
+        (10**5000, "sample2"): "another reference",
         1: "numeric",
         "1": "string",
     }
@@ -629,6 +635,7 @@ def test_to_markdown_report_bounds_large_integer_keys():
     assert r"\[truncated: integer too large\]: first" in report
     assert r"\[truncated: integer too large\]: second" in report
     assert r"\[omitted: tuple key\]: reference" in report
+    assert r"\[omitted: tuple key\]: another reference" in report
     assert "1: numeric, 1: string" in report
     assert "Imported sample" in report
 
@@ -649,6 +656,28 @@ def test_to_markdown_report_preserves_history_labels_and_code_spacing():
     assert r"  - 1\. literal: 1" in report
     assert r"  - \- literal: 2" in report
     assert "- Method: `  a  `" in report
+
+
+def test_to_markdown_report_preserves_distinct_history_parameter_names():
+    dataset = _dataset()
+    dataset.replace_history(
+        [
+            {
+                "operation": "fit",
+                "parameters": {
+                    "input_file": "raw",
+                    "input file": "corrected",
+                    "Input file": "normalized",
+                },
+            }
+        ]
+    )
+
+    report = dataset.to_markdown_report(title="Report")
+
+    assert "  - `input_file`: raw" in report
+    assert "  - `input file`: corrected" in report
+    assert "  - `Input file`: normalized" in report
 
 
 @pytest.mark.parametrize(

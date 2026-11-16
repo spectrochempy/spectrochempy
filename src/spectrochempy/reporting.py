@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import math
 import re
+from collections import Counter
 from collections.abc import Mapping
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from itertools import groupby
 from numbers import Integral
 from pathlib import Path
 from urllib.parse import quote
@@ -301,16 +303,19 @@ def _history_value(value, *, depth: int = 0, indent: str = "  ") -> list[str]:
     if not value:
         return [f"{indent}- {'{}' if isinstance(value, Mapping) else '[]'}"]
     items = (
-        _mapping_items(value)
+        [(key, value[key]) for key in sorted(value)[:_MAX_COLLECTION_ITEMS]]
         if isinstance(value, Mapping)
         else [
             (f"Item {i}", item)
             for i, item in enumerate(value[:_MAX_COLLECTION_ITEMS], start=1)
         ]
     )
+    labels = [_history_label(key) for key, _ in items]
+    label_counts = Counter(labels)
     lines = []
-    for key, child in items:
-        label = _history_label(key)
+    for (key, child), label in zip(items, labels, strict=True):
+        if label_counts[label] > 1:
+            label = _code(key)
         if isinstance(child, Mapping | list | tuple):
             lines.append(f"{indent}- {label}:")
             lines.extend(_history_value(child, depth=depth + 1, indent=indent + "  "))
@@ -370,13 +375,13 @@ def _figure_target(target: str) -> str:
         raise ValueError("figure target must be an HTTP(S) URL or relative path")
     if parsed.scheme:
         netloc = quote(parsed.netloc, safe="[]:@%")
-        path = quote(parsed.path, safe="/:%+@,;~!$&*-")
+        path = quote(parsed.path, safe="/:%+@,;=~!$&'*-")
         url = f"{parsed.scheme}://{netloc}{path}"
         before_fragment, fragment_separator, _ = target.partition("#")
         if "?" in before_fragment:
-            url += "?" + quote(parsed.query, safe="/?:=+@,;~!$&*-%")
+            url += "?" + quote(parsed.query, safe="/?:=+@,;~!$&'*-%")
         if fragment_separator:
-            url += "#" + quote(parsed.fragment, safe="/?:=+@,;~!$&*-%")
+            url += "#" + quote(parsed.fragment, safe="/?:=+@,;~!$&'*-%")
         return _ENTITY_START.sub(r"\\&", url)
     return quote(target, safe="/%+@,~!$*-")
 
@@ -414,7 +419,7 @@ def _value(value, *, depth: int = 0) -> str:
         if isinstance(value, Mapping):
             items = [
                 f"{_text(key)}: {_value(item, depth=depth + 1)}"
-                for key, item in _mapping_items(value)
+                for key, item in _mapping_items(value, item_depth=depth + 1)
             ]
             opening, closing = "{", "}"
         else:
@@ -430,8 +435,9 @@ def _value(value, *, depth: int = 0) -> str:
     return f"[omitted: {type(value).__name__}]"
 
 
-def _mapping_items(mapping: Mapping) -> list[tuple[str, object]]:
-    def sort_key(key):
+def _mapping_items(mapping: Mapping, *, item_depth: int) -> list[tuple[str, object]]:
+    def sort_key(item):
+        key, _ = item
         ordinal = 0
         if isinstance(key, Integral | np.integer) and not isinstance(key, bool):
             label = _integer_text(key)
@@ -444,8 +450,17 @@ def _mapping_items(mapping: Mapping) -> list[tuple[str, object]]:
                 label = f"[omitted: {type(key).__name__} key]"
         return label, type(key).__module__, type(key).__qualname__, ordinal
 
-    keys = sorted(mapping, key=sort_key)[:_MAX_COLLECTION_ITEMS]
-    return [(sort_key(key)[0], mapping[key]) for key in keys]
+    items = []
+    ordered = sorted(mapping.items(), key=sort_key)
+    for key, group in groupby(ordered, key=sort_key):
+        values = [value for _, value in group]
+        if len(values) > 1:
+            values.sort(key=lambda value: _value(value, depth=item_depth))
+        remaining = _MAX_COLLECTION_ITEMS - len(items)
+        items.extend((key[0], value) for value in values[:remaining])
+        if len(items) == _MAX_COLLECTION_ITEMS:
+            break
+    return items
 
 
 def _integer_text(value: Integral | np.integer) -> str:
