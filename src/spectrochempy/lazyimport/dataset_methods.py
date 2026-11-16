@@ -90,6 +90,8 @@ _LAZY_DATASETS_IMPORTS = {
     "blackmanharris": "spectrochempy.processing.fft.apodization",
     "fft": "spectrochempy.processing.fft.fft",
     "ifft": "spectrochempy.processing.fft.fft",
+    "rfft": "spectrochempy.processing.fft.fft",
+    "irfft": "spectrochempy.processing.fft.fft",
     "mc": "spectrochempy.processing.fft.fft",
     "ps": "spectrochempy.processing.fft.fft",
     "ht": "spectrochempy.processing.fft.fft",

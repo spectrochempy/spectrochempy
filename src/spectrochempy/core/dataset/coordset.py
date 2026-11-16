@@ -870,6 +870,159 @@ class CoordSet(HasTraits):
         """Reconstruct the current legacy CoordSet shape from lifecycle groups."""
         return _groups_to_coordset(groups, name=self.name)
 
+    @staticmethod
+    def _reshape_split_index(old_shape, new_shape):
+        """Identify the axis split into adjacent dimensions."""
+        splits = [
+            i
+            for i in range(len(old_shape))
+            if len(new_shape) == len(old_shape) + 1
+            and all(size > 0 for size in new_shape[i : i + 2])
+            and old_shape[:i] == new_shape[:i]
+            and old_shape[i] == new_shape[i] * new_shape[i + 1]
+            and old_shape[i + 1 :] == new_shape[i + 2 :]
+        ]
+        if len(splits) != 1:
+            raise ValueError("Split reshape must unambiguously split exactly one axis.")
+
+        return splits[0]
+
+    def _split_reshape(self, old_dims, new_dims, new_shape, index, overrides):
+        """Split one positional axis, retaining coordinates on the other axes."""
+        source_dim = old_dims[index]
+        source = self._resolved_axis_coord(source_dim)
+        if source is None or source.default is None:
+            raise ValueError("Split reshape requires a numeric coordinate.")
+        split_shape = new_shape[index : index + 2]
+        outer, inner = self._split_axis_coords(source, split_shape)
+        retained_dims = new_dims[:index] + new_dims[index + 2 :]
+        source_dims = old_dims[:index] + old_dims[index + 1 :]
+        axis_map = dict(zip(source_dims, retained_dims, strict=True))
+        result = {}
+        for old_dim, new_dim in axis_map.items():
+            target = self.references.get(old_dim)
+            if (
+                target in axis_map
+                and axis_map[target] in DEFAULT_DIM_NAME
+                and axis_map[target] not in (overrides or {})
+            ):
+                result[new_dim] = axis_map[target]
+            else:
+                coord = self._resolved_axis_coord(old_dim)
+                result[new_dim] = Coord() if coord is None else coord.copy()
+
+        result[new_dims[index]] = outer
+        result[new_dims[index + 1]] = inner
+        result.update(overrides or {})
+        references = {
+            key: value for key, value in result.items() if isinstance(value, str)
+        }
+        dims = [key for key in result if key not in references]
+        return CoordSet(*(result[key] for key in dims), dims=dims, **references)
+
+    def _resolved_axis_coord(self, dim):
+        """Resolve a dimension coordinate or its reference, if present."""
+        target = self.references.get(dim, dim)
+        return self[target] if target in self.names else None
+
+    @staticmethod
+    def _split_axis_coords(source, shape):
+        coordinates = source.coords if isinstance(source, CoordSet) else [source]
+        outer = []
+        inner = []
+        default_index = 0
+        for coordinate in coordinates:
+            values = coordinate._data
+            if values is not None and values.dtype.kind in "fiu":
+                values = values.astype(float, copy=False)
+                if not np.isfinite(values).all() or not (
+                    np.all(values[1:] > values[:-1]) or np.all(values[1:] < values[:-1])
+                ):
+                    values = None
+            else:
+                values = None
+
+            if values is None:
+                if coordinate is source.default:
+                    raise ValueError(
+                        "Split coordinate must be finite, numeric and strictly monotonic."
+                    )
+                warnings.warn(
+                    f"Dropping secondary coordinate {coordinate.title!r} during split reshape.",
+                    stacklevel=3,
+                )
+                continue
+
+            if coordinate is source.default:
+                default_index = len(outer)
+            blocks = values.reshape(shape)
+            with np.errstate(over="ignore"):
+                offsets = blocks - blocks[:, :1]
+                mean_offsets = offsets.mean(axis=0)
+            spread_scale = 1
+            if not np.isfinite(mean_offsets).all():
+                # Scale before summation. Scale before subtraction too if
+                # even one block offset exceeds the float range.
+                spread_scale = shape[0]
+                with np.errstate(over="ignore", invalid="ignore"):
+                    if np.isfinite(offsets).all():
+                        offsets = offsets / spread_scale
+                    else:
+                        scaled = blocks / spread_scale
+                        offsets = scaled - scaled[:, :1]
+                    mean_offsets = offsets.sum(axis=0)
+                if not np.isfinite(mean_offsets).all():
+                    raise ValueError("Split coordinate offsets cannot be represented.")
+            options = {
+                "units": coordinate.units,
+                "rounding": False,
+                "sigdigits": 15,
+                "linearize_below": 0,
+            }
+            source_irregular = coordinate.meta.get("split_irregular_sampling", False)
+            outer_coord = Coord(
+                blocks[:, 0], title=f"{coordinate.title} block start", **options
+            )
+            if source_irregular:
+                outer_coord.meta["split_irregular_sampling"] = True
+            outer.append(outer_coord)
+
+            # Keep the original within-block sampling check even if the mean
+            # offsets happen to make a regular grid.
+            with np.errstate(over="ignore"):
+                steps = np.diff(blocks, axis=1)
+            irregular = bool(
+                steps.size
+                and (
+                    not np.isfinite(steps).all()
+                    or not np.allclose(steps, steps.flat[0], rtol=1e-6, atol=0)
+                )
+            )
+            inner_coord = Coord(
+                mean_offsets,
+                title=f"offset within {coordinate.title} block",
+                **options,
+            )
+            inner_coord.meta["split_irregular_sampling"] = source_irregular or irregular
+            inner.append(inner_coord)
+            if steps.size and np.any(
+                np.ptp(offsets, axis=0) > np.median((0.5 / spread_scale) * abs(steps))
+            ):
+                warnings.warn(
+                    f"Offsets differ between blocks on coordinate {coordinate.title!r}.",
+                    stacklevel=3,
+                )
+
+        if len(outer) == 1:
+            return outer[0], inner[0]
+        outer_group = CoordSet(*reversed(outer), sorted=False)
+        inner_group = CoordSet(*reversed(inner), sorted=False)
+        outer_group._is_same_dim = True
+        inner_group._is_same_dim = True
+        outer_group.select(default_index + 1)
+        inner_group.select(default_index + 1)
+        return outer_group, inner_group
+
     def _reshape_dims(
         self,
         old_dims,

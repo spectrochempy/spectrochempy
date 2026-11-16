@@ -2509,7 +2509,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         dims : list of str, optional
             Explicit dimension names for the output. Must match the output
             number of dimensions and be unique.
-        coord_policy : {"safe", "drop", "strict"}, default="safe"
+        coord_policy : {"safe", "drop", "strict", "split"}, default="safe"
             Policy for handling existing coordinates:
 
             - ``"safe"`` : Preserve coordinates only for dimensions whose
@@ -2519,6 +2519,14 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
               coordinates for every dimension.
             - ``"strict"`` : Raise `ValueError` if any existing coordinate
               cannot be unambiguously mapped to the new shape.
+            - ``"split"`` : Split one axis into adjacent block and sample axes.
+              The new coordinates contain the block starts and the mean
+              offsets from those starts, in the original units. The source
+              coordinate must be finite, numeric and strictly monotonic.
+              Valid secondary coordinates follow the same rule. Other secondary
+              coordinates are dropped with a warning. A warning also reports
+              offsets that differ across blocks by more than half the median
+              sampling step. Data and masks are reshaped without interpolation.
         coords : dict, optional
             User-provided coordinates to override inferred ones. Keys are
             dimension names, values are `Coord` objects. The length of each
@@ -2545,14 +2553,20 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         Split raw spectra into cycles:
 
         >>> Y = X.reshape((2, 60, 1000), dims=("cycle", "time", "x"))  # doctest: +SKIP
+
+        Retain the start and mean relative time when splitting an acquisition axis:
+
+        >>> spectra = scp.NDDataset([[1, 2], [3, 4], [5, 6], [7, 8]])
+        >>> spectra.y = scp.Coord([0, 1, 2, 3], units="s")
+        >>> cycles = spectra.reshape((-1, 2, 2), coord_policy="split")
         """
         requested_shape = tuple(shape) if is_sequence(shape) else (shape,)
         source_shape = self.shape
         source_dims = list(self.dims)
 
-        if coord_policy not in {"safe", "drop", "strict"}:
+        if coord_policy not in {"safe", "drop", "strict", "split"}:
             raise ValueError(
-                f"coord_policy must be 'safe', 'drop', or 'strict'. Got {coord_policy!r}."
+                f"coord_policy must be 'safe', 'drop', 'strict', or 'split'. Got {coord_policy!r}."
             )
 
         # Resolve the shape, handling -1 like NumPy
@@ -2586,6 +2600,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         old_shape = source_shape
         old_dims = source_dims
         new_ndim = len(shape)
+        split_index = (
+            CoordSet._reshape_split_index(old_shape, shape)
+            if coord_policy == "split"
+            else None
+        )
 
         if dims is not None:
             if len(dims) != new_ndim:
@@ -2595,6 +2614,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             if len(set(dims)) != len(dims):
                 raise ValueError("dims must be unique.")
             new_dims = list(dims)
+        elif split_index is not None:
+            block_dim = next(
+                (dim for dim in reversed(DEFAULT_DIM_NAME) if dim not in old_dims),
+                None,
+            )
+            if block_dim is None:
+                raise ValueError(
+                    "Provide explicit dimension names for the split reshape."
+                )
+            new_dims = old_dims.copy()
+            new_dims.insert(split_index, block_dim)
         else:
             # Try to preserve dim names for unambiguously unchanged dimensions
             new_dims = []
@@ -2642,7 +2672,13 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                         f"expected {shape[new_dims.index(dim_name)]}."
                     )
 
-        if old_coordset is None:
+        if split_index is not None:
+            if old_coordset is None:
+                raise ValueError("Split reshape requires a numeric coordinate.")
+            new_coordset = old_coordset._split_reshape(
+                old_dims, new_dims, shape, split_index, coords
+            )
+        elif old_coordset is None:
             new_coordset = None
         else:
             new_coordset = old_coordset._reshape_dims(

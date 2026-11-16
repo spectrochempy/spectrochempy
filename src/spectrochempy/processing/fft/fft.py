@@ -3,7 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-__all__ = ["fft", "ifft", "mc", "ps", "ht"]
+__all__ = ["fft", "ifft", "rfft", "irfft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
@@ -14,6 +14,7 @@ from scipy.signal import hilbert
 
 from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
@@ -102,6 +103,194 @@ def _has_calibrated_interferogram_axis(coord):
 # ======================================================================================
 # Public methods
 # ======================================================================================
+def _real_fft_axis(dataset, dim):
+    if dataset.ndim == 0 or dataset.is_masked or not np.isfinite(dataset.data).all():
+        raise ValueError("Real FFT requires finite, unmasked data.")
+    axis, dim = dataset.get_axis(dim, allow_multiple=False)
+    if dataset.shape[axis] < 2:
+        raise ValueError("Real FFT requires at least two points on the selected axis.")
+    coords = dataset.coordset
+    coordinate = coords._resolved_axis_coord(dim) if coords is not None else None
+    if coordinate is None or coordinate.default is None or coordinate.default.is_empty:
+        coordinate = Coord(np.arange(dataset.shape[axis]), title="sample")
+    else:
+        coordinate = coordinate.default
+
+    values = coordinate._data
+    if (
+        values is None
+        or values.dtype.kind not in "fiu"
+        or not np.isfinite(values).all()
+    ):
+        raise ValueError("Real FFT requires a finite numeric coordinate.")
+    if coordinate.meta.get("split_irregular_sampling", False):
+        raise ValueError(
+            "Within-block samples are not uniformly spaced. Supply an explicit regular coordinate to use a uniform approximation."
+        )
+    with np.errstate(over="ignore"):
+        steps = np.diff(values.astype(float))
+    if (
+        not np.isfinite(steps).all()
+        or steps[0] <= 0
+        or not np.allclose(steps, steps[0], rtol=1e-6, atol=0.0)
+    ):
+        raise ValueError("Real FFT requires a uniformly spaced increasing coordinate.")
+    return axis, dim, coordinate, float(steps[0])
+
+
+def _real_fft_result(dataset, dim, data, coordinate, operation, **parameters):
+    result = dataset.copy()
+    result._data = data
+    coords = dataset.coordset
+    result_coords = {dim: coordinate}
+    for other in dataset.dims:
+        if other == dim:
+            continue
+        target = coords.references.get(other) if coords is not None else None
+        if target in dataset.dims and target != dim:
+            result_coords[other] = target
+        else:
+            original = (
+                coords._resolved_axis_coord(other) if coords is not None else None
+            )
+            result_coords[other] = original.copy() if original is not None else Coord()
+    references = {
+        key: value for key, value in result_coords.items() if isinstance(value, str)
+    }
+    dims = [key for key in result_coords if key not in references]
+    result._coordset = CoordSet(
+        *(result_coords[key] for key in dims), dims=dims, **references
+    )
+    result._append_history_entry(
+        operation=operation,
+        parameters={"dim": dim, **parameters},
+        message=f"Applied {operation.upper()} on dimension {dim}",
+    )
+    return result
+
+
+def rfft(dataset, *, dim=None, norm="backward"):
+    """
+    Compute the one-sided discrete Fourier transform along a dataset dimension.
+
+    The selected axis must have at least two uniformly spaced, increasing
+    samples. An axis without coordinates uses unit sample spacing. The
+    first sample defines the phase origin. The output coordinate uses the
+    inverse of the sample coordinate unit. The other axes are preserved.
+    After a split reshape, the original within-block sampling is checked
+    even if the mean coordinate is regular. To use a uniform approximation,
+    assign a regular coordinate explicitly before transforming.
+
+    Parameters
+    ----------
+    dataset : NDDataset
+        Real, finite, unmasked samples.
+    dim : str or int, optional
+        Axis to transform. Defaults to the last dimension.
+    norm : {"backward", "forward", "ortho"}, optional
+        NumPy FFT normalization. With "forward", divide by the sample count.
+
+    Returns
+    -------
+    NDDataset
+        Complex coefficients from DC up to the highest nonnegative frequency.
+    """
+    if dataset.is_empty or dataset.data.dtype.kind not in "fiub":
+        raise ValueError("rfft requires nonempty real input.")
+    axis, dim, source, step = _real_fft_axis(dataset, dim)
+    size = dataset.shape[axis]
+    with np.errstate(over="ignore", invalid="ignore"):
+        data = np.fft.rfft(dataset.data, axis=axis, norm=norm)
+        frequencies = np.fft.rfftfreq(size) / step
+    if not np.isfinite(data).all():
+        raise ValueError("The Fourier coefficients cannot be represented.")
+    if not np.isfinite(frequencies).all() or not np.all(np.diff(frequencies) > 0):
+        raise ValueError(
+            "The frequency grid cannot be represented in the coordinate units."
+        )
+    frequency = Coord(
+        frequencies,
+        title=f"frequency of {source.title}",
+        units=None if source.units is None else source.units**-1,
+        rounding=False,
+        sigdigits=15,
+    )
+    frequency.meta["rfft_source"] = {
+        "size": int(size),
+        "origin": float(source._data[0]),
+        "units": None if source.units is None else str(source.units),
+        "title": source.title,
+        "norm": norm,
+    }
+    return _real_fft_result(dataset, dim, data, frequency, "rfft", norm=norm)
+
+
+def irfft(dataset, *, dim=None, n=None, norm=None):
+    """
+    Invert a one-sided real Fourier transform along a dataset dimension.
+
+    Parameters
+    ----------
+    dataset : NDDataset
+        Finite, unmasked coefficients on an increasing frequency grid from DC.
+    dim : str or int, optional
+        Axis to invert. Defaults to the last dimension.
+    n : int, optional
+        Output length. Uses the original length recorded by rfft when
+        available, otherwise assumes an even length. For externally supplied
+        coefficients from an odd-length signal, give the original length.
+    norm : {"backward", "forward", "ortho"}, optional
+        Uses the normalization recorded by rfft, or "backward" if absent.
+
+    Returns
+    -------
+    NDDataset
+        Reconstructed real samples with coordinates derived from the frequency
+        spacing and the original origin, if recorded.
+    """
+    if dataset.is_empty or dataset.data.dtype.kind not in "cfiub":
+        raise ValueError(
+            "irfft requires nonempty real or complex Fourier coefficients."
+        )
+    axis, dim, frequency, step = _real_fft_axis(dataset, dim)
+    if frequency._data[0] != 0:
+        raise ValueError("irfft requires a frequency coordinate starting at zero.")
+    source = frequency.meta.get("rfft_source", {})
+    bins = dataset.shape[axis]
+    if n is None:
+        n = source.get("size", 2 * (bins - 1))
+    if not isinstance(n, (int, np.integer)) or n < 2 or n // 2 + 1 != bins:
+        raise ValueError(
+            "n must be an original sample count compatible with the spectrum."
+        )
+    if norm is None:
+        norm = source.get("norm", "backward")
+    with np.errstate(over="ignore", invalid="ignore"):
+        data = np.fft.irfft(dataset.data, n=n, axis=axis, norm=norm)
+    if not np.isfinite(data).all():
+        raise ValueError("The reconstructed samples cannot be represented.")
+    units = None if frequency.units is None else frequency.units**-1
+    origin = source.get("origin", 0.0)
+    if source.get("units") is not None and units is not None:
+        origin = ur.Quantity(origin, source["units"]).to(units).magnitude
+    with np.errstate(over="ignore"):
+        values = origin + (np.arange(n) / n) / step
+    if not np.isfinite(values).all() or not np.all(np.diff(values) > 0):
+        raise ValueError(
+            "The sample grid cannot be represented in the coordinate units."
+        )
+    coordinate = Coord(
+        values,
+        title=source.get("title", "sample"),
+        units=units,
+        rounding=False,
+        sigdigits=15,
+    )
+    return _real_fft_result(
+        dataset, dim, data, coordinate, "irfft", n=int(n), norm=norm
+    )
+
+
 def ifft(dataset, size=None, **kwargs):
     """
     Apply a inverse fast fourier transform.

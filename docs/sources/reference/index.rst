@@ -573,6 +573,8 @@ Fourier transform
 
     fft
     ifft
+    rfft
+    irfft
     ht
     fsh
     fsh2

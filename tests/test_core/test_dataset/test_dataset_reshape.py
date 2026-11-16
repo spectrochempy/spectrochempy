@@ -127,3 +127,73 @@ def test_reshape_preserves_current_reference_removal_behavior():
     assert reshaped.shape == (3,)
     assert reshaped.coordset.references == {}
     assert_array_equal(reshaped.x.data, coord_x.data)
+
+
+def test_split_reshape_keeps_block_geometry_coordinates_and_mask():
+    data = scp.NDDataset(np.arange(30.0).reshape(10, 3))
+    data.y = [
+        scp.Coord(np.arange(10) * 2 + 3, title="time", units="ms"),
+        scp.Coord(np.arange(10) * 3, title="elapsed", units="s"),
+    ]
+    data.y.select(2)
+    data.x = scp.Coord([10, 20, 30], units="eV")
+    data[8, 2] = scp.MASKED
+
+    grouped = data.reshape((-1, 5, 3), dims=("cycle", "y", "x"), coord_policy="split")
+
+    assert grouped.shape == (2, 5, 3)
+    assert grouped.mask[1, 3, 2]
+    assert grouped.x == data.x
+    old_default = data.y.default
+    assert grouped.y.default.units == old_default.units
+    assert_array_equal(grouped.coordset["cycle"].default.data, old_default.data[::5])
+    assert_array_equal(
+        grouped.y.default.data, old_default.data[:5] - old_default.data[0]
+    )
+
+
+def test_split_reshape_requires_an_unambiguous_axis_and_numeric_coordinate():
+    data = scp.NDDataset(np.ones((6, 4)))
+    with pytest.raises(ValueError, match="numeric coordinate"):
+        data.reshape((2, 3, 4), coord_policy="split")
+
+    data.y = scp.Coord(np.arange(6))
+    with pytest.raises(ValueError, match="exactly one axis"):
+        data.reshape((2, 2, 6), coord_policy="split")
+
+
+def test_split_reshape_default_names_preserve_the_unaffected_axis():
+    data = scp.NDDataset(np.arange(8.0).reshape(4, 2))
+    data.y = scp.Coord(np.arange(4), title="time")
+    data.x = scp.Coord([10, 20], title="energy")
+
+    grouped = data.reshape((2, 2, 2), coord_policy="split")
+    assert grouped.dims == ["z", "y", "x"]
+    assert grouped.x == data.x
+    assert_array_equal(grouped.z.data, [0, 2])
+    assert_array_equal(grouped.y.data, [0, 1])
+
+
+def test_split_reshape_keeps_representable_mean_of_large_offsets():
+    data = scp.NDDataset(np.arange(4.0))
+    data.set_coordset(
+        x=scp.Coord([-1.7e308, -0.6e308, 0.6e308, 1.65e308], rounding=False)
+    )
+
+    result = data.reshape((2, 2), coord_policy="split")
+    np.testing.assert_allclose(result.x.data, [0, 1.075e308])
+
+
+def test_split_reshape_keeps_mean_even_when_a_single_offset_overflows():
+    data = scp.NDDataset(np.arange(6.0))
+    data.set_coordset(
+        x=scp.Coord(
+            [-1.7e308, -0.9e308, 0.15e308, 0.2e308, 0.25e308, 0.3e308],
+            rounding=False,
+            linearize_below=0,
+        )
+    )
+
+    with pytest.warns(UserWarning, match="Offsets differ"):
+        result = data.reshape((2, 3), coord_policy="split")
+    np.testing.assert_allclose(result.x.data, [0, 4.25e307, 9.75e307])
