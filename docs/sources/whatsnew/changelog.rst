@@ -37,6 +37,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Preserve the values at shared coordinates when aligning spectra with
+  ``align(method="inner")``, including datasets containing a single spectrum.
+
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
 

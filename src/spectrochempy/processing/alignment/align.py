@@ -308,26 +308,25 @@ def align(dataset, *others, **kwargs):
 
                 # update the data and mask
                 coord = obj.coordset[dim]
-                coord_data = set(np.around(coord.data, ndec))
-
-                dim_loc = new_coord._loc2index(sorted(coord_data))
-                loc = tuple(prepend_keys + [dim_loc])
+                if method == "inner":
+                    _, source_indices, dim_loc = np.intersect1d(
+                        np.around(coord.data, ndec),
+                        np.around(new_coord.data, ndec),
+                        return_indices=True,
+                    )
+                else:
+                    coord_data = set(np.around(coord.data, ndec))
+                    dim_loc = new_coord._loc2index(sorted(coord_data))
+                    source_indices = slice(None)
+                loc = (*prepend_keys, dim_loc)
+                source_loc = (*prepend_keys, source_indices)
+                values = obj.data[source_loc]
+                mask = obj.mask[source_loc] if obj.is_masked else False
 
                 new_obj._data = new_obj_data
-
-                # mask all the data then unmask later the relevant data in
-                # the next step
-
-                if not new_obj.is_masked:
-                    new_obj.mask = MASKED
-                    new_obj.mask[loc] = False
-                else:
-                    mask = new_obj.mask.copy()
-                    new_obj.mask = MASKED
-                    new_obj.mask[loc] = mask
-
-                # set the data for the loc
-                new_obj._data[loc] = obj.data
+                new_obj.mask = MASKED
+                new_obj.mask[loc] = mask
+                new_obj._data[loc] = values
 
                 # update the coordinates
                 new_coordset = obj.coordset.copy()
@@ -338,7 +337,7 @@ def align(dataset, *others, **kwargs):
                         coord.labels.dtype,
                     )
                     new_coord._labels[:] = "--"
-                    new_coord._labels[dim_loc] = coord.labels
+                    new_coord._labels[dim_loc] = coord.labels[source_indices]
                 setattr(new_coordset, dim, new_coord)
                 new_obj._coordset = new_coordset
 
@@ -365,11 +364,8 @@ def align(dataset, *others, **kwargs):
             # and ~30 processing sites access .data instead of
             # .masked_data.  A sentinel avoids silent breakage in both
             # cases.  See audit/~align-sentinel-investigation.md.
-            # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
-            obj[
-                np.where(np.isnan(obj))
-            ] = 99999999999999.0  # replace NaN values (to simplify
-            # comparisons)
+            data = obj.data
+            data[np.isnan(data)] = 99999999999999.0
             idx = int(object["idx"])
             objects[idx] = obj
 
