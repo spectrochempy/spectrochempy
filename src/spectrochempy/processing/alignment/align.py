@@ -86,6 +86,10 @@ def align(dataset, *others, **kwargs):
         * 'interpolate' interpolates onto the first dataset's coordinates.
           Points outside the source range are masked.
 
+        Outer and reference joins match the available coordinate values.
+        When units are converted, matching uses 15 significant digits to
+        absorb floating-point conversion error.
+
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
     interpolate_sampling : {'auto'}, optional, default='auto'
@@ -250,11 +254,31 @@ def align(dataset, *others, **kwargs):
         # prepare a new Coord object to store the final new dimension
         new_coord = ref_coord.copy()
 
-        ndec = get_n_decimals(new_coord.data.max(), 5)
-        join_keys = set(np.around(new_coord.data, ndec))
+        ndec = get_n_decimals(ref_coord.data.max(), 5) if method == "inner" else None
+        converts_units = method in {"outer", "first", "last"} and any(
+            item["obj"].coordset[dim].units != ref_coord.units
+            for item in _objects.values()
+        )
+
+        def matching_grid(coord, decimals=ndec, normalize_units=converts_units):
+            if decimals is not None:
+                return np.around(coord.data, decimals)
+            if normalize_units:
+                return np.fromiter(
+                    (float(f"{point:.15g}") for point in coord.data),
+                    dtype=np.float64,
+                    count=coord.size,
+                )
+            return coord.data
+
+        reference_grid = matching_grid(ref_coord)
+        join_keys = set(reference_grid)
         if method in {"inner", "outer"} and len(join_keys) != new_coord.size:
             raise ValueError(
-                f"Coordinate rounding makes {method} alignment ambiguous "
+                f"Coordinate rounding makes inner alignment ambiguous "
+                f"along dimension {dim!r}."
+                if method == "inner"
+                else f"Duplicate coordinates make outer alignment ambiguous "
                 f"along dimension {dim!r}."
             )
 
@@ -288,10 +312,14 @@ def align(dataset, *others, **kwargs):
                 coord.ito(ref_coord)
 
             if method in {"inner", "outer"}:
-                source_keys = set(np.around(coord.data, ndec))
+                source_grid = matching_grid(coord)
+                source_keys = set(source_grid)
                 if len(source_keys) != coord.size:
                     raise ValueError(
-                        f"Coordinate rounding makes {method} alignment ambiguous "
+                        f"Coordinate rounding makes inner alignment ambiguous "
+                        f"along dimension {dim!r}."
+                        if method == "inner"
+                        else f"Duplicate coordinates make outer alignment ambiguous "
                         f"along dimension {dim!r}."
                     )
                 if method == "outer":
@@ -316,7 +344,7 @@ def align(dataset, *others, **kwargs):
             new_coord._data = join_grid
             new_coord._rounding = False
         else:
-            join_grid = np.around(new_coord.data, ndec)
+            join_grid = reference_grid
 
         # For interpolate method, use reference coordinate as target
         # instead of the union
@@ -364,7 +392,7 @@ def align(dataset, *others, **kwargs):
 
                 if method == "inner":
                     _, source_indices, target_indices = np.intersect1d(
-                        np.around(coord.data, ndec),
+                        matching_grid(coord),
                         join_grid,
                         return_indices=True,
                     )
@@ -385,13 +413,13 @@ def align(dataset, *others, **kwargs):
                         coord.labels[source_indices] if coord.is_labeled else None
                     )
                 else:
-                    source_grid = np.around(coord.data, ndec)
+                    source_grid = matching_grid(coord)
                     if (
                         np.unique(source_grid).size != source_grid.size
                         or np.unique(join_grid).size != join_grid.size
                     ):
                         raise ValueError(
-                            f"Coordinate rounding makes {method} alignment ambiguous "
+                            f"Duplicate coordinates make {method} alignment ambiguous "
                             f"along dimension {dim!r}."
                         )
                     _, source_indices, target_indices = np.intersect1d(

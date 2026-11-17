@@ -361,3 +361,42 @@ def test_align_linear_interpolation_keeps_exact_singleton_row():
 
     np.testing.assert_array_equal(aligned.mask, [[False] * 3, [True] * 3])
     np.testing.assert_array_equal(aligned.masked_data.compressed(), [3.0, 4.0, 5.0])
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_keeps_distinct_coordinates_on_wide_grids(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([1.0, 1e5])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([2.0, 1e5])])
+
+    left, right = scp.align(first, second, method=method)
+
+    if method == "outer":
+        np.testing.assert_array_equal(left.x.data, [1.0, 2.0, 1e5])
+        np.testing.assert_array_equal(left.mask, [False, True, False])
+        np.testing.assert_array_equal(right.mask, [True, False, False])
+    else:
+        target, aligned = (left, right) if method == "first" else (right, left)
+        np.testing.assert_array_equal(
+            target.x.data, [1.0 if method == "first" else 2.0, 1e5]
+        )
+        np.testing.assert_array_equal(aligned.mask, [True, False])
+        assert aligned.data[-1] == (40.0 if method == "first" else 20.0)
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_matches_converted_units_with_rounding_disabled(method):
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([0.007, 0.01], units="m", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([0.7, 1.0], units="cm", rounding=False)],
+    )
+
+    left, right = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(left.x.data, right.x.data)
+    np.testing.assert_array_equal(left.data, [10.0, 20.0])
+    np.testing.assert_array_equal(right.data, [30.0, 40.0])
+    assert not left.is_masked and not right.is_masked
