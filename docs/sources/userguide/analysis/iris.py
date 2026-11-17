@@ -99,13 +99,13 @@
 # For adsorption, the Langmuir kernel of SpectroChemPy (`"langmuir"`) is
 # $k(p,q)=p\,\exp(-q)/(1+p\,\exp(-q))$: half coverage is reached at
 # $p = \exp(q)$, in the pressure units of the dataset, and a smaller $q$
-# corresponds to a higher affinity. The figure shows columns of a Langmuir
+# corresponds to a higher affinity. Figure 1 shows columns of a Langmuir
 # kernel matrix, generated with the `IrisKernel` class of IRIS.
 #
 # ![Columns of the Langmuir kernel matrix on a logarithmic pressure
 # axis.](images/iris-langmuir-responses.png){width=70%}
 #
-# **Figure.** Columns of the Langmuir kernel matrix for $q$ from $-7$ to
+# **Figure 1.** Columns of the Langmuir kernel matrix for $q$ from $-7$ to
 # $-1$ (color scale), on a logarithmic pressure axis. Each curve
 # reaches half coverage at $p = \exp(q)$: the smaller $q$, the lower the
 # pressure at which the corresponding species saturates.
@@ -183,7 +183,7 @@
 # intuitive. For each $\lambda$, IRIS computes the residual sum of squares
 # (RSS) and the sharpness of the distribution (SM), and plots
 # $\log \mathrm{SM}$ against $\log \mathrm{RSS}$. The curve usually has an
-# L shape (see the figure below):
+# L shape (Figure 2):
 #
 # * at small $\lambda$, the vertical branch: residuals hardly decrease
 #   further while the distribution becomes increasingly rough, a sign that
@@ -193,10 +193,12 @@
 # * the **corner**, where the curvature is maximal, marks the best
 #   compromise.
 #
-# ![Schematic L-curve: the vertical branch at small λ corresponds to
-# under-smoothed solutions, the horizontal branch at large λ to over-smoothed
-# solutions, and the corner to the best
-# compromise.](images/iris-lcurve-schematic.png)
+# ![Schematic L-curve.](images/iris-lcurve-schematic.png)
+#
+# **Figure 2.** Schematic L-curve, $\log \mathrm{SM}$ against
+# $\log \mathrm{RSS}$. The vertical branch at small $\lambda$ corresponds to
+# under-smoothed solutions, the horizontal branch at large $\lambda$ to
+# over-smoothed solutions, and the corner to the best compromise.
 #
 # The `reg_par` parameter of `IRIS` controls which values of $\lambda$ are
 # evaluated:
@@ -235,6 +237,8 @@
 # strongly each binds CO. IRIS helps separate these contributions according
 # to their binding strength $q$.
 #
+# ### 1. Load the spectra
+#
 # Use the recorded pressures as the active observation coordinate and keep
 # the acquisition times as a secondary coordinate. Select the CO stretching
 # region using its wavenumber limits.
@@ -271,7 +275,7 @@ spectra = spectra[:, 2250.0:1950.0]
 _ = spectra.plot(colorbar=True)
 
 # %% [markdown]
-# ### Build the kernel and fit without regularization
+# ### 2. Build the kernel and fit without regularization
 #
 # The Langmuir kernel uses 50 grid points between $q=-8$ and $q=-1$.
 # The fit without a penalty gives a baseline for judging what the penalty
@@ -284,7 +288,7 @@ _ = unregularized.fit(spectra, kernel)
 _ = unregularized.result.f[0].plot_contour(equal_aspect=False)
 
 # %% [markdown]
-# ### Scan regularization strengths
+# ### 3. Scan regularization strengths
 #
 # Scan a broad range and read the L-curve. For this dataset the bend is
 # near $10^{-4}$ on this grid. Use the corresponding slice of the distribution
@@ -297,7 +301,7 @@ _ = scan.plotlcurve(title="Fixed scan of regularization strengths")
 _ = scan.result.f[6].plot_contour(equal_aspect=False)
 
 # %% [markdown]
-# ### Refine the search and inspect the reconstruction
+# ### 4. Refine the search and inspect the reconstruction
 #
 # Search within a narrower range around the bend. The default NNLS solver
 # reports the selected strength and its index when logging is set to INFO.
@@ -330,7 +334,7 @@ _ = result.f[selected_index].plot_contour(equal_aspect=False)
 _ = adaptive.plot_merit(index=selected_index)
 
 # %% [markdown]
-# ### Interpret the distribution
+# ### 5. Interpret the distribution
 #
 # Each spot of the map is a CO species: its wavenumber gives its band, and
 # its $q$ its binding strength (the more negative, the stronger). From the
@@ -365,7 +369,7 @@ _ = adaptive.plot_merit(index=selected_index)
 # independent quantitative measure.
 
 # %% [markdown]
-# ### Note on the interpretation of peak width and shape
+# ## Note on the interpretation of peak width and shape
 #
 # As discussed above, the width and shape of a peak along $q$ can have three
 # origins: a genuine distribution of sites or species, the non-ideality of a
