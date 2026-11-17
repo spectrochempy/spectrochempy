@@ -352,18 +352,21 @@ def test_adaptive_nnls_uses_positive_curvature_at_initial_points(adaptive_iris_i
     [([1, 0, 0, 0], 1), ([np.inf, 2, 0, 0], 2), ([1, 2, 3, 4], 4)],
 )
 def test_adaptive_nnls_uses_valid_curvature_at_convergence(
-    adaptive_iris_inputs, monkeypatch, caplog, curvatures, selected
+    adaptive_iris_inputs, monkeypatch, curvatures, selected
 ):
     spectra, kernel = adaptive_iris_inputs
     menger = Mock(side_effect=curvatures)
+    info = Mock()
     monkeypatch.setitem(IRIS._fit.__globals__, "_menger", menger)
+    monkeypatch.setitem(IRIS._fit.__globals__, "info_", info)
     IRIS(reg_par=[-4, -3.94], log_level="INFO").fit(spectra, kernel)
 
     assert menger.call_count == 4
-    optimum_log = next(
-        record.message for record in caplog.records if "optimum found" in record.message
-    )
-    assert optimum_log.endswith(f"curvature = {selected:.3f}")
+    optimum_messages = [
+        call.args[0] for call in info.call_args_list if "optimum found" in call.args[0]
+    ]
+    assert len(optimum_messages) == 1
+    assert optimum_messages[0].endswith(f"curvature = {selected:.3f}")
 
 
 def test_adaptive_iris_stops_at_terminal_flat_bracket(
