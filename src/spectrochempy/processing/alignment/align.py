@@ -9,6 +9,7 @@ __all__ = ["align"]
 __dataset_methods__ = __all__
 
 from decimal import Decimal
+from fractions import Fraction
 from functools import lru_cache
 
 import numpy as np
@@ -56,6 +57,28 @@ def _convert_coordinate(coord, reference, *, precise):
         return
     if np.allclose(values, coord.data, rtol=1e-14, atol=0):
         coord._data = values
+
+
+def _exact_coordinate_key(value):
+    if isinstance(value, (bool, int, np.bool_, np.integer)):
+        return Fraction(int(value))
+    return Fraction(*value.as_integer_ratio())
+
+
+def _outer_coordinates(values, dim):
+    grid = np.asarray(values)
+    if all(value.dtype == grid.dtype for value in values):
+        return grid
+    original_keys = [_exact_coordinate_key(value) for value in values]
+    if [_exact_coordinate_key(value) for value in grid] == original_keys:
+        return grid
+    grid = np.asarray(values, dtype=np.longdouble)
+    if [_exact_coordinate_key(value) for value in grid] == original_keys:
+        return grid
+    raise ValueError(
+        f"Cannot represent the outer alignment grid along dimension {dim!r} "
+        "without losing coordinate precision."
+    )
 
 
 def can_merge_or_align(coord1, coord2):
@@ -343,7 +366,9 @@ def align(dataset, *others, **kwargs):
                 raise ValueError(
                     f"Alignment produced non-finite coordinates along dimension {dim!r}."
                 )
-            if method != "interpolate" and np.unique(keys).size != keys.size:
+            if reference_join and not rounded:
+                keys = [_exact_coordinate_key(value) for value in keys]
+            if method != "interpolate" and len(set(keys)) != len(keys):
                 reason = (
                     "Coordinate rounding makes"
                     if method == "inner"
@@ -368,8 +393,9 @@ def align(dataset, *others, **kwargs):
             for keys, values in source_grids.values():
                 for key, value in zip(keys, values, strict=True):
                     representatives.setdefault(key, value)
-            join_grid = np.asarray(sorted(representatives))
-            new_coord._data = np.asarray([representatives[key] for key in join_grid])
+            join_grid = sorted(representatives)
+            coordinates = [representatives[key] for key in join_grid]
+            new_coord._data = _outer_coordinates(coordinates, dim)
             new_coord._rounding = False
         elif method not in {"first", "last", "interpolate"}:
             raise NotImplementedError(f"The method {method} is unknown!")
@@ -402,6 +428,9 @@ def align(dataset, *others, **kwargs):
             target_coord._labels = None
         else:
             target_coord = new_coord
+
+        if reference_join:
+            target_positions = {key: index for index, key in enumerate(join_grid)}
 
         # Now perform alignment of all objects on the new coordinates
         for index, object in _objects.items():
@@ -450,9 +479,14 @@ def align(dataset, *others, **kwargs):
                         coord.labels[source_indices] if coord.is_labeled else None
                     )
                 else:
-                    _, source_indices, target_indices = np.intersect1d(
-                        source_grids[index][0], join_grid, return_indices=True
-                    )
+                    source_indices = []
+                    target_indices = []
+                    for source_index, key in enumerate(source_grids[index][0]):
+                        if key in target_positions:
+                            source_indices.append(source_index)
+                            target_indices.append(target_positions[key])
+                    source_indices = np.asarray(source_indices, dtype=np.intp)
+                    target_indices = np.asarray(target_indices, dtype=np.intp)
                     shape = list(obj.shape)
                     shape[dim_index] = len(new_coord)
                     dtype = (

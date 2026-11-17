@@ -573,3 +573,42 @@ def test_align_preserves_extended_precision_complex_intensities(method):
 
     assert left.data.dtype == first.data.dtype
     np.testing.assert_array_equal(left.data, first.data)
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_matches_mixed_coordinate_dtypes_without_losing_integer_precision(method):
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([2**53, 2**53 + 1], dtype=np.int64, rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0], coordset=[scp.Coord([1e18, 2e18], rounding=False)]
+    )
+    if (
+        method == "outer"
+        and np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant
+    ):
+        with pytest.raises(ValueError, match="losing coordinate precision"):
+            scp.align(first, second, method=method)
+        return
+
+    left, right = scp.align(first, second, method=method)
+
+    if method == "outer":
+        assert [int(point) for point in left.x.data[:2]] == [2**53, 2**53 + 1]
+        np.testing.assert_array_equal(left.mask, [False, False, True, True])
+        np.testing.assert_array_equal(right.mask, [True, True, False, False])
+    elif method == "first":
+        assert [int(point) for point in left.x.data] == [2**53, 2**53 + 1]
+        assert right.mask.all()
+    else:
+        np.testing.assert_array_equal(right.x.data, [1e18, 2e18])
+        assert left.mask.all()
+    if method != "last":
+        np.testing.assert_array_equal(
+            np.ma.asarray(left.masked_data).compressed(), [10.0, 20.0]
+        )
+    if method != "first":
+        np.testing.assert_array_equal(
+            np.ma.asarray(right.masked_data).compressed(), [30.0, 40.0]
+        )
