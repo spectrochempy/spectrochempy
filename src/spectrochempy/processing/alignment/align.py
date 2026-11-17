@@ -36,6 +36,7 @@ def _convert_coordinate(coord, reference, *, precise):
     source_unit = coord.units
     target_unit = reference.units
     coord.ito(reference)
+    coord._rounding = False
     if not precise or source_unit is None or target_unit is None:
         return
 
@@ -318,9 +319,10 @@ def align(dataset, *others, **kwargs):
                 )
 
             if coord.units != ref_coord.units:
-                _convert_coordinate(
-                    coord, ref_coord, precise=ndec is None and not rounded
-                )
+                if method == "inner":
+                    coord.ito(ref_coord)
+                else:
+                    _convert_coordinate(coord, ref_coord, precise=not rounded)
             values = coord.data
 
             keys = values

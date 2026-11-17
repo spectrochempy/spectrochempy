@@ -520,3 +520,20 @@ def test_align_preserves_distinct_unrounded_neighbors_across_spectral_units():
     assert left.x.size == right.x.size == 2
     assert np.count_nonzero(left.mask) == np.count_nonzero(right.mask) == 1
     assert not np.any(left.mask == right.mask)
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "interpolate"])
+def test_align_does_not_round_converted_coordinates_again(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([0.0, 1000.0], units="m")])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([1.0, 1e12], units="nm")])
+
+    left, right = scp.align(first, second, method=method)
+
+    if method == "outer":
+        np.testing.assert_allclose(left.x.data, [0.0, 1e-9, 1000.0], atol=0.0)
+        np.testing.assert_array_equal(right.mask, [True, False, False])
+        np.testing.assert_array_equal(right.masked_data.compressed(), [30.0, 40.0])
+    else:
+        np.testing.assert_array_equal(right.x.data, [0.0, 1000.0])
+        np.testing.assert_array_equal(right.mask, [True, False])
+        np.testing.assert_array_equal(right.masked_data.compressed(), [40.0])
