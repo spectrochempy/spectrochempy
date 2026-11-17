@@ -123,15 +123,20 @@ def _get_coord_data(coord):
     return None
 
 
-def _center_large_integer_grids(old_x, new_x):
+def _center_wide_grids(old_x, new_x):
     """Translate grids before any float64 conversion can collapse distinct nodes."""
     grids = old_x, new_x
-    if not any(
-        grid.dtype.kind in "iu"
-        and grid.size
-        and (int(grid.min()) < -(2**53) or int(grid.max()) > 2**53)
-        for grid in grids
-    ):
+
+    def needs_centering(grid):
+        if grid.dtype.kind == "f":
+            return np.finfo(grid.dtype).nmant > np.finfo(np.float64).nmant
+        return (
+            grid.dtype.kind in "iu"
+            and grid.size
+            and (int(grid.min()) < -(2**53) or int(grid.max()) > 2**53)
+        )
+
+    if not any(needs_centering(grid) for grid in grids):
         return grids
 
     def exact(point):
@@ -140,18 +145,19 @@ def _center_large_integer_grids(old_x, new_x):
         return Fraction(*point.as_integer_ratio())
 
     origin = exact(old_x[0])
+    error = "Interpolation coordinates cannot be represented without losing precision after centering."
     centered = []
     representatives = {}
     for grid in grids:
         shifted = np.empty(grid.size, dtype=np.float64)
         for i, point in enumerate(grid):
             value = exact(point)
-            delta = float(value - origin)
+            try:
+                delta = float(value - origin)
+            except OverflowError as exc:
+                raise ValueError(error) from exc
             if representatives.setdefault(delta, value) != value:
-                raise ValueError(
-                    "Interpolation coordinates cannot be represented without "
-                    "losing precision after centering."
-                )
+                raise ValueError(error)
             shifted[i] = delta
         centered.append(shifted)
     return tuple(centered)
@@ -367,7 +373,7 @@ def interpolate(
         # Point-wise label carry-over: for each target point, find the exactly
         # matching original index so labels can follow the data (#1098). Both
         # arrays are now expressed in the source coordinate's units.
-        old_data, sample_points = _center_large_integer_grids(old_data, new_data)
+        old_data, sample_points = _center_wide_grids(old_data, new_data)
         match_idx = _match_indices(old_data, sample_points)
 
         sorted_old_x, sort_idx, _was_reversed = _validate_monotonic(

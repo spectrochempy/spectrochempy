@@ -799,3 +799,32 @@ def test_align_interpolate_distinguishes_large_integer_targets_from_float_nodes(
     np.testing.assert_array_equal(result.x.data, target.data)
     np.testing.assert_array_equal(result.mask, [True, False, False])
     np.testing.assert_array_equal(result.masked_data.compressed(), [40.0, 80.0])
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="requires a coordinate dtype wider than float64",
+)
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_preserves_extended_precision_target_positions(method):
+    origin = 2**53
+    x = scp.Coord(
+        [origin, origin + 4, origin + 8, origin + 12],
+        rounding=False,
+        linearize_below=0,
+    )
+    source = scp.NDDataset([0.0, 40.0, 80.0, 120.0], coordset=[x])
+    target = scp.Coord(
+        [np.longdouble(origin + offset) for offset in (3, 4, 8)],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [30.0, 40.0, 80.0])
+    assert not result.is_masked
