@@ -69,9 +69,10 @@ def test_align(ds1, ds2):
 
 
 @pytest.mark.parametrize("keep_row", [False, True])
-def test_align_inner_spectra(keep_row):
+@pytest.mark.parametrize("second_labels", [None, ["q", "r", "s"]])
+def test_align_inner_spectra(keep_row, second_labels):
     first_x = scp.Coord([1.0, 2.0, 3.0], labels=["a", "b", "c"])
-    second_x = scp.Coord([2.0, 3.0, 4.0], labels=["b", "c", "d"])
+    second_x = scp.Coord([2.0, 3.0, 4.0], labels=second_labels)
     first_values = np.array([10.0, 20.0, 30.0])
     second_values = np.array([2.0, 3.0, 4.0])
     if keep_row:
@@ -87,7 +88,10 @@ def test_align_inner_spectra(keep_row):
     np.testing.assert_array_equal(aligned_first.x.data, [2.0, 3.0])
     np.testing.assert_array_equal(aligned_second.x.data, [2.0, 3.0])
     np.testing.assert_array_equal(aligned_first.x.labels, ["b", "c"])
-    np.testing.assert_array_equal(aligned_second.x.labels, ["b", "c"])
+    if second_labels is None:
+        assert aligned_second.x.labels is None
+    else:
+        np.testing.assert_array_equal(aligned_second.x.labels, ["q", "r"])
     np.testing.assert_array_equal(
         (aligned_first - aligned_second).data.ravel(), [18.0, 27.0]
     )

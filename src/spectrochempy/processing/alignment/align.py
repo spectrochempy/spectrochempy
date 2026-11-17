@@ -332,15 +332,19 @@ def align(dataset, *others, **kwargs):
 
                 # update the coordinates
                 new_coordset = obj.coordset.copy()
+                output_coord = new_coord
+                if method == "inner":
+                    output_coord = new_coord.copy()
+                    output_coord._labels = None
                 if coord.is_labeled:
                     label_shape = list(coord.labels.shape)
-                    label_shape[0] = new_coord.size
-                    new_coord._labels = np.zeros(tuple(label_shape)).astype(
+                    label_shape[0] = output_coord.size
+                    output_coord._labels = np.zeros(tuple(label_shape)).astype(
                         coord.labels.dtype,
                     )
-                    new_coord._labels[:] = "--"
-                    new_coord._labels[dim_loc] = coord.labels[source_indices]
-                setattr(new_coordset, dim, new_coord)
+                    output_coord._labels[:] = "--"
+                    output_coord._labels[dim_loc] = coord.labels[source_indices]
+                setattr(new_coordset, dim, output_coord)
                 new_obj._coordset = new_coordset
 
                 # reversed?
