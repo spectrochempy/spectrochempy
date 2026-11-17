@@ -154,6 +154,37 @@ def test_align_inner_preserves_integer_values_and_labels():
     assert aligned_second.x.labels is None
 
 
+@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.complex64])
+def test_align_inner_keeps_exact_sentinel_for_narrow_dtypes(dtype):
+    first = scp.NDDataset(
+        np.array([10.0, np.nan, 30.0], dtype=dtype),
+        dtype=dtype,
+        mask=[False, True, False],
+        coordset=[scp.Coord([3.0, 2.0, 1.0])],
+    )
+    second = scp.NDDataset([2.0, 3.0, 4.0], coordset=[scp.Coord([2.0, 3.0, 4.0])])
+
+    aligned_first, _ = scp.align(first, second, method="inner")
+
+    missing = aligned_first.x.data == 2.0
+    np.testing.assert_array_equal(aligned_first.mask, missing)
+    np.testing.assert_array_equal(aligned_first.data[missing], [99999999999999.0])
+    np.testing.assert_array_equal(aligned_first.data[~missing], [10.0])
+
+
+def test_align_inner_accepts_numeric_object_arrays():
+    first = scp.NDDataset(
+        np.array([10, 20, 30], dtype=object),
+        dtype=object,
+        coordset=[scp.Coord([1.0, 2.0, 3.0])],
+    )
+    second = scp.NDDataset([2.0, 3.0, 4.0], coordset=[scp.Coord([2.0, 3.0, 4.0])])
+
+    aligned_first, _ = scp.align(first, second, method="inner")
+
+    np.testing.assert_array_equal(aligned_first.data, [20.0, 30.0])
+
+
 def test_align_rejects_incompatible_coord_units_with_clear_message():
     ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([100.0, 200.0], units="cm^-1")])
     ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])

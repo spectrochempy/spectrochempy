@@ -313,7 +313,11 @@ def align(dataset, *others, **kwargs):
                         if obj.is_masked
                         else NOMASK
                     )
-                    new_obj._data = np.take(obj.data, source_indices, axis=dim_index)
+                    values = np.take(obj.data, source_indices, axis=dim_index)
+                    if values.dtype.kind == "O":
+                        values = values.astype(np.float64)
+                        new_obj._dtype = None
+                    new_obj._data = values
                     new_obj._mask = mask
                     output_coord = new_coord.copy()
                     output_coord._labels = (
@@ -371,6 +375,12 @@ def align(dataset, *others, **kwargs):
             data = obj.data
             missing = np.isnan(data)
             if missing.any():
+                if data.dtype.kind in "fc":
+                    dtype = np.promote_types(data.dtype, np.float64)
+                    if dtype != data.dtype:
+                        obj._dtype = dtype
+                        obj._data = data.astype(dtype)
+                        data = obj.data
                 data[missing] = 99999999999999.0
             idx = int(object["idx"])
             objects[idx] = obj
