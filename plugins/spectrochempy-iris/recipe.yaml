@@ -23,7 +23,6 @@ requirements:
     - python >=3.11
     - spectrochempy >=1.1.0,<2
     - scipy
-    - osqp
 
 tests:
   - script:
@@ -32,9 +31,9 @@ tests:
 about:
   summary: "IRIS analysis extension for SpectroChemPy"
   description: |
-    Official SpectroChemPy plugin providing IRIS (Impulse Response Inverse
-    Solver) analysis, kernel matrix operations, and batch IRIS processing
-    for spectroscopic datasets.
+    Official SpectroChemPy plugin providing Integral-equation Regularized
+    Inversion for Spectroscopy (IRIS), kernel matrix operations, and batch
+    IRIS processing.
   homepage: https://www.spectrochempy.fr
   license: LicenseRef-CeCILL-B
   repository: https://github.com/spectrochempy/spectrochempy

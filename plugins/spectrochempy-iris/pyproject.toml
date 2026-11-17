@@ -13,8 +13,11 @@ classifiers = [
 dependencies = [
     "spectrochempy>=1.1.0,<2",
     "scipy",
-    "osqp",
 ]
+
+[project.optional-dependencies]
+osqp = ["osqp"]
+quadprog = ["quadprog"]
 
 [project.entry-points."spectrochempy.plugins"]
 iris = "spectrochempy_iris:IrisPlugin"

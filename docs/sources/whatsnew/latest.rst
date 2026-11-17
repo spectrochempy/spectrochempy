@@ -15,6 +15,9 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add an IRIS tutorial covering the Langmuir kernel, regularization and
+  interpretation of the CO adsorption example. (:pr:`1892`)
+
 - Split one dataset axis into blocks with ``reshape(coord_policy='split')``.
 - Compute and invert one-sided Fourier transforms along a dataset dimension with ``rfft`` and ``irfft``.
 - ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
@@ -42,8 +45,24 @@ Bug Fixes
 - Preserve the values at shared coordinates when aligning spectra with
   ``align(method="inner")``, including datasets containing a single spectrum. (:pr:`1893`)
 
+- Preserve IRIS quadrature weights and regularization when the kernel grid
+  is supplied in descending order. (:pr:`1892`)
+
+- Correct the association of residual sums of squares (RSS) and sharpness
+  values (SM) with their evaluated regularization strengths in adaptive IRIS
+  fits. Keep valid curvature points during the search, restart each fit
+  from the configured bounds, and allow switching off regularization between
+  fits. (:pr:`1892`)
+
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- IRIS uses SciPy NNLS by default for regularized fits. Install OSQP
+  separately and pass ``qpsolver="osqp"`` to keep using the previous solver.
+  Quadprog also requires a separate installation. (:pr:`1892`)
 
 Developer
 ~~~~~~~~~

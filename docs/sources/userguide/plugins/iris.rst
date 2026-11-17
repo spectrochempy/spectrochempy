@@ -54,8 +54,8 @@ The generated public API page for the IRIS plugin is listed in
 Examples
 ========
 
-Use dataset-bound helpers such as ``dataset.iris.kernel_matrix(...)`` together
-with the package-level ``scp.iris.IRIS()`` estimator shown above.
+See the :doc:`IRIS tutorial </userguide/analysis/iris>` for a complete CO
+adsorption analysis, including regularization selection and interpretation.
 
 Limitations
 ===========

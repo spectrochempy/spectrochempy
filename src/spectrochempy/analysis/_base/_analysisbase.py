@@ -1119,7 +1119,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     --------
     EFA : Perform an Evolving Factor Analysis (forward and reverse).
     FastICA : Perform Independent Component Analysis with a fast algorithm.
-    IRIS : Integral inversion solver for spectroscopic data.
+    IRIS : Integral-equation Regularized Inversion for Spectroscopy.
     MCRALS : Perform MCR-ALS of a dataset knowing the initial :math:`C` or :math:`S^T` matrix.
     NMF : Non-Negative Matrix Factorization.
     PCA : Perform Principal Components Analysis.
