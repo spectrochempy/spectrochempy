@@ -23,6 +23,8 @@ from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
 
+_MISSING_VALUE = 99999999999999
+
 
 @lru_cache(maxsize=1)
 def _decimal_registry():
@@ -45,17 +47,33 @@ def _convert_coordinate(coord, reference, *, precise):
     try:
         source = registry.Unit(str(source_unit._units))
         target = registry.Unit(str(target_unit._units))
-        values = np.fromiter(
-            (
-                str(registry.Quantity(Decimal(str(point)), source).to(target).magnitude)
-                for point in original
-            ),
-            dtype=coord.data.dtype,
-            count=original.size,
-        )
+        converted = [
+            registry.Quantity(Decimal(str(point)), source).to(target).magnitude
+            for point in original
+        ]
+        dtype = np.result_type(original.dtype, coord.data.dtype)
+        if dtype.kind != "f":
+            dtype = np.dtype(np.float64)
+        if original.dtype.kind in "iu" and all(
+            value == value.to_integral_value() for value in converted
+        ):
+            integers = [int(value) for value in converted]
+            limits = np.iinfo(original.dtype)
+            if all(limits.min <= value <= limits.max for value in integers):
+                values = np.asarray(integers, dtype=original.dtype)
+            else:
+                values = np.asarray(
+                    [str(value) for value in converted], dtype=np.longdouble
+                )
+        else:
+            decimals = [str(value) for value in converted]
+            values = np.asarray(decimals, dtype=dtype)
+            if len(set(converted)) > np.unique(values).size:
+                values = np.asarray(decimals, dtype=np.longdouble)
     except (PintError, ArithmeticError, TypeError, ValueError):
         return
     if np.allclose(values, coord.data, rtol=1e-14, atol=0):
+        coord._dtype = values.dtype
         coord._data = values
 
 
@@ -271,16 +289,14 @@ def align(dataset, *others, **kwargs):
                     f"along dimension {dim!r}."
                 )
 
-            working = object.copy()
-            if working.data.dtype != object.data.dtype and (
-                (method == "inner" and object.data.dtype.kind in "biufc")
-                or (
-                    method in {"outer", "first", "last"}
-                    and object.data.dtype.kind == "c"
-                )
+            working = object.copy(deep=copy)
+            if (
+                method != "interpolate"
+                and object.data.dtype.kind in "biufc"
+                and working.data.dtype != object.data.dtype
             ):
                 working._dtype = object.data.dtype
-                working._data = object.data
+                working._data = object.data.copy()
             _objects[_nobj] = {
                 "obj": working,
                 "idx": idx,
@@ -352,22 +368,20 @@ def align(dataset, *others, **kwargs):
                     )
             values = coord.data
 
-            keys = values
-            if ndec is not None:
-                keys = np.around(values, ndec)
-            elif reference_join and rounded:
-                keys = np.fromiter(
-                    (float(f"{point:.{precision}g}") for point in values),
-                    dtype=np.float64,
-                    count=coord.size,
-                )
-
+            keys = np.around(values, ndec) if ndec is not None else values
             if not np.isfinite(keys).all():
                 raise ValueError(
                     f"Alignment produced non-finite coordinates along dimension {dim!r}."
                 )
-            if reference_join and not rounded:
-                keys = [_exact_coordinate_key(value) for value in keys]
+            if reference_join:
+                if rounded:
+                    points = keys.astype(np.uint8) if keys.dtype.kind == "b" else keys
+                    keys = [
+                        Decimal(format(Decimal(str(point)), f".{precision}g"))
+                        for point in points
+                    ]
+                else:
+                    keys = [_exact_coordinate_key(value) for value in keys]
             if method != "interpolate" and len(set(keys)) != len(keys):
                 reason = (
                     "Coordinate rounding makes"
@@ -449,11 +463,7 @@ def align(dataset, *others, **kwargs):
             else:
                 dim_index = obj.dims.index(dim)
                 coord = obj.coordset[dim]
-                new_obj = (
-                    obj.copy()
-                    if copy and method != "inner" and obj.data.dtype.kind != "c"
-                    else obj
-                )
+                new_obj = obj
                 new_coordset = obj.coordset.copy()
 
                 if method == "inner":
@@ -489,12 +499,24 @@ def align(dataset, *others, **kwargs):
                     target_indices = np.asarray(target_indices, dtype=np.intp)
                     shape = list(obj.shape)
                     shape[dim_index] = len(new_coord)
-                    dtype = (
-                        np.result_type(obj.data.dtype, np.float64)
-                        if obj.data.dtype.kind == "c"
-                        else np.float64
-                    )
-                    values = np.full(shape, np.nan, dtype=dtype)
+                    dtype = obj.data.dtype
+                    if dtype.kind in "biu":
+                        if target_indices.size == len(new_coord):
+                            values = np.empty(shape, dtype=dtype)
+                        else:
+                            if (
+                                dtype.kind == "b"
+                                or np.iinfo(dtype).max < _MISSING_VALUE
+                            ):
+                                dtype = np.promote_types(dtype, np.int64)
+                            values = np.full(shape, _MISSING_VALUE, dtype=dtype)
+                    else:
+                        dtype = (
+                            np.result_type(dtype, np.float64)
+                            if dtype.kind in "fc"
+                            else np.float64
+                        )
+                        values = np.full(shape, np.nan, dtype=dtype)
                     mask = np.ones(shape, dtype=bool)
                     loc = (*([slice(None)] * dim_index), target_indices)
                     values[loc] = np.take(obj.data, source_indices, axis=dim_index)
@@ -503,6 +525,7 @@ def align(dataset, *others, **kwargs):
                         if obj.is_masked
                         else False
                     )
+                    new_obj._dtype = values.dtype
                     new_obj._data = values
                     new_obj._mask = mask if mask.any() else NOMASK
 
@@ -556,7 +579,7 @@ def align(dataset, *others, **kwargs):
                         obj._dtype = dtype
                         obj._data = data.astype(dtype)
                         data = obj.data
-                data[missing] = 99999999999999.0
+                data[missing] = _MISSING_VALUE
             idx = int(object["idx"])
             objects[idx] = obj
 

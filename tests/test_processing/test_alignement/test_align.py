@@ -612,3 +612,84 @@ def test_align_matches_mixed_coordinate_dtypes_without_losing_integer_precision(
         np.testing.assert_array_equal(
             np.ma.asarray(right.masked_data).compressed(), [30.0, 40.0]
         )
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_converts_large_integer_coordinates_exactly(method):
+    meters = [2**53, 2**53 + 1]
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord(meters, units="m", dtype=np.int64, rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[
+            scp.Coord(
+                [100 * point for point in meters],
+                units="cm",
+                dtype=np.int64,
+                rounding=False,
+            )
+        ],
+    )
+
+    left, right = scp.align(first, second, method=method)
+
+    expected = second.x.data if method == "last" else first.x.data
+    np.testing.assert_array_equal(left.x.data, expected)
+    np.testing.assert_array_equal(right.x.data, expected)
+    np.testing.assert_array_equal(left.data, first.data)
+    np.testing.assert_array_equal(right.data, second.data)
+    assert not left.is_masked and not right.is_masked
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_rounds_large_integer_keys_without_coercing_to_double(method):
+    points = [2**53, 2**53 + 1]
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord(points, dtype=np.int64, sigdigits=17)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([2.0, 3.0], sigdigits=17)],
+    )
+    if (
+        method == "outer"
+        and np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant
+    ):
+        with pytest.raises(ValueError, match="losing coordinate precision"):
+            scp.align(first, second, method=method)
+        return
+
+    left, right = scp.align(first, second, method=method)
+
+    if method != "last":
+        assert [int(point) for point in left.x.data[-2:]] == points
+        np.testing.assert_array_equal(
+            np.ma.asarray(left.masked_data).compressed(), first.data
+        )
+    if method != "first":
+        np.testing.assert_array_equal(
+            np.ma.asarray(right.masked_data).compressed(), second.data
+        )
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+@pytest.mark.parametrize("dtype", [np.int64, np.longdouble])
+def test_align_preserves_wide_intensities_when_inserting_missing_points(method, dtype):
+    points = (
+        [2**53 + 1, 2**53 + 3]
+        if dtype is np.int64
+        else [np.nextafter(np.longdouble(1), np.longdouble(2)), np.longdouble(2)]
+    )
+    source = scp.NDDataset(points, dtype=dtype, coordset=[scp.Coord([0.0, 1.0])])
+    reference = scp.NDDataset([30.0, 40.0, 50.0], coordset=[scp.Coord([0.0, 1.0, 2.0])])
+    inputs = [source, reference] if method == "last" else [reference, source]
+
+    result = scp.align(*inputs, method=method)[0 if method == "last" else 1]
+
+    assert result.data.dtype == source.data.dtype
+    np.testing.assert_array_equal(result.data[:2], source.data)
+    np.testing.assert_array_equal(result.mask, [False, False, True])
+    assert result.data[2] == 99999999999999
