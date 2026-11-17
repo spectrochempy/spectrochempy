@@ -78,61 +78,70 @@
 #
 # * relaxation and decay processes (luminescence decays, NMR $T_1$/$T_2$
 #   relaxation, dielectric relaxation), with $q = \ln\tau$;
-# * acid–base or complexation equilibria followed by spectroscopic titration,
-#   with $p$ the pH and $q$ the p$K_a$, when the selected bands belong to a
-#   single form;
-# * redox equilibria in spectroelectrochemistry, with $p$ the applied
-#   potential and $q$ the formal potential, under the same condition;
 # * thermally activated processes such as temperature-programmed desorption,
-#   with $p$ the temperature and $q$ the activation energy.
+#   with $p$ the temperature and $q$ the activation energy;
+# * …
 #
-# ### Example kernel for adsorption
+# ### From the integral to the kernel matrix
 #
-# For adsorption, the Langmuir response takes the form
-# $k(p,q)=p\,\exp(-q)/(1+p\,\exp(-q))$ in the gallery convention.
-# The pressure at half coverage is numerically $\exp(q)$ in the pressure
-# units used to build the kernel. Smaller $q$ corresponds to saturation
-# at lower pressure and higher affinity. The figure shows three individual
-# responses.
+# In practice, the integral is discretized on a grid of $q$ values
+# $q_1, \dots, q_M$, and the series of spectra becomes a matrix product
+#
+# $$
+# X = K F, \qquad K_{ij} = k(p_i, q_j)\, w_j,
+# $$
+#
+# where the rows of $X$ are the spectra measured at $p_i$, the rows of $F$
+# are the spectra of the distribution at $q_j$, and $w_j$ are the weights
+# of the trapezoidal rule. Each column of the kernel matrix $K$ is thus the
+# response of one value of $q$ over the experimental values of $p$.
+#
+# For adsorption, the Langmuir kernel of SpectroChemPy (`"langmuir"`) is
+# $k(p,q)=p\,\exp(-q)/(1+p\,\exp(-q))$: half coverage is reached at
+# $p = \exp(q)$, in the pressure units of the dataset, and a smaller $q$
+# corresponds to a higher affinity. The cell below builds the kernel matrix
+# with `IrisKernel` on a fine pressure axis and plots three of its columns.
+# Two details matter. A list of three numbers is read as
+# `[start, stop, number of points]`, so `q=[-7, -1, 7]` gives a grid from
+# $-7$ to $-1$ with a step of 1. With this step, the inner weights $w_j$
+# are equal to 1, and the columns at $q = -6, -4, -2$ are exactly
+# $k(p, q)$. The pressure coordinate is created with `rounding=False`,
+# because the default rounding of coordinates would set the lowest
+# pressures to zero.
+
+# %%
+import numpy as np
+
+import spectrochempy as scp
+
+p_axis = scp.Coord(
+    np.geomspace(1e-4, 10.0, 200),
+    title="pressure",
+    units="torr",
+    rounding=False,
+)
+dummy = scp.NDDataset(
+    np.zeros((200, 1)),
+    coordset=[p_axis, scp.Coord([0.0])],
+)
+K = scp.iris.IrisKernel(dummy, "langmuir", q=[-7, -1, 7]).kernel
+curves = [K[:, j].squeeze() for j in (1, 3, 5)]
+_ = scp.plot_multiple(
+    curves,
+    method="pen",
+    labels=["$q = -6$", "$q = -4$", "$q = -2$"],
+    figsize=(4.9, 2.4),
+    xscale="log",
+    ylim=(0, 1.05),
+    legend="best",
+)
 
 # %% [markdown]
-# ![Three Langmuir response curves on a logarithmic pressure axis. Smaller q
-# reaches half coverage at a lower pressure.](images/iris-langmuir-responses.png)
+# **Figure.** Columns of the Langmuir kernel matrix for $q = -6$, $-4$ and
+# $-2$, on a logarithmic pressure axis. Each curve reaches half coverage at
+# $p = \exp(q)$: the smaller $q$, the lower the pressure at which the
+# corresponding species saturates.
 #
-# <details>
-# <summary>Show code for the Langmuir curves</summary>
-#
-# ```python
-# import spectrochempy as scp
-#
-# pressure_values = scp.NDDataset.geomspace(1e-4, 10.0, 200)
-# pressure_values.x = scp.Coord(
-#     pressure_values.data, title="pressure", units="torr", rounding=False
-# )
-# responses = []
-# labels = []
-# for q in (-6, -4, -2):
-#     scaled_pressure = pressure_values * scp.exp(-q)
-#     coverage = scaled_pressure / (1 + scaled_pressure)
-#     coverage.title = "fractional coverage"
-#     responses.append(coverage)
-#     labels.append(rf"$q = {q}$")
-#
-# _ = scp.plot_multiple(
-#     responses,
-#     method="pen",
-#     labels=labels,
-#     figsize=(7, 3.4),
-#     xscale="log",
-#     xlim=(1e-4, 10.0),
-#     ylim=(0, 1.05),
-#     legend="best",
-# )
-# ```
-#
-# </details>
-
-# %% [markdown]
 # The experimental pressure window determines which responses the data can
 # distinguish. If two curves are almost flat or almost identical over that
 # window, their contributions are difficult to separate. A finer grid of $q$
@@ -247,8 +256,6 @@
 # region using its wavenumber limits.
 
 # %%
-import spectrochempy as scp
-
 spectra = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 pressures = [
     0.003,
@@ -387,10 +394,10 @@ _ = adaptive.plot_merit(index=selected_index)
 #   that change with these choices come from the inversion, not from the
 #   sample;
 # * look at the shape: a spot elongated or curved along $q$, like the arc of
-#   the aluminum sites, means that the band shifts as the surface fills up;
-# * use chemical knowledge and complementary experiments (other probe
-#   molecules, temperatures or samples) to decide between heterogeneity and
-#   non-ideality.
+#   the aluminum sites, means that the band shifts as the concentration
+#   changes;
+# * use chemical knowledge and complementary experiments to decide between
+#   heterogeneity and non-ideality.
 #
 # The [short CO gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris_intro.rst)
 # shows one fit at a fixed strength. See the
