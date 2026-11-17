@@ -204,7 +204,7 @@ _ = spectra.plot(colorbar=True)
 kernel = spectra.iris.kernel_matrix(kernel_type="langmuir", q=[-8, -1, 50])
 unregularized = scp.iris.IRIS(reg_par=None)
 _ = unregularized.fit(spectra, kernel)
-_ = unregularized.result.f[0].plot_contour()
+_ = unregularized.result.f[0].plot_contour(equal_aspect=False)
 
 # %% [markdown]
 # ### Scan regularization strengths
@@ -217,7 +217,7 @@ _ = unregularized.result.f[0].plot_contour()
 scan = scp.iris.IRIS(reg_par=[-10, 1, 12])
 _ = scan.fit(spectra, kernel)
 _ = scan.plotlcurve(title="Fixed scan of regularization strengths")
-_ = scan.result.f[6].plot_contour()
+_ = scan.result.f[6].plot_contour(equal_aspect=False)
 
 # %% [markdown]
 # ### Refine the search and inspect the reconstruction
@@ -249,7 +249,7 @@ print(
     result.SM[selected_index],
 )
 print(result.parameters)
-_ = result.f[selected_index].plot_contour()
+_ = result.f[selected_index].plot_contour(equal_aspect=False)
 _ = adaptive.plot_merit(index=selected_index)
 
 # %% [markdown]
