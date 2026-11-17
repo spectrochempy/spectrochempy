@@ -111,7 +111,7 @@ def align(dataset, *others, **kwargs):
     ValueError
         Issued when the dimensions given in `dim` or `dims` argument are not
         compatibles (units, titles, etc.), or an inner join finds no shared
-        coordinates.
+        coordinates or encounters duplicate coordinates after rounding.
 
     NotImplementedError
         Issued when ``interpolate_sampling`` is not ``'auto'``.
@@ -264,6 +264,14 @@ def align(dataset, *others, **kwargs):
                 new_coord._data = sorted(coord_data | new_coord_data)
 
             elif method == "inner":
+                if (
+                    len(coord_data) != coord.size
+                    or len(new_coord_data) != new_coord.size
+                ):
+                    raise ValueError(
+                        f"Coordinate rounding makes inner alignment ambiguous "
+                        f"along dimension {dim!r}."
+                    )
                 shared = coord_data & new_coord_data
                 if not shared:
                     raise ValueError(f"No shared coordinates along dimension {dim!r}.")

@@ -30,6 +30,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Reject ambiguous inner alignment when coordinate rounding would merge
+  samples within one dataset.
+
 - Preserve the values at shared coordinates when aligning spectra with
   ``align(method="inner")``, including datasets containing a single spectrum. (:pr:`1893`)
 
