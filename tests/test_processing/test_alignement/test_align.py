@@ -220,3 +220,113 @@ def test_align_rejects_incompatible_coord_units_with_clear_message():
     assert "s" in message
     assert "cm" in message
     assert "Convert the coordinates to compatible units before retrying." in message
+
+
+@pytest.mark.parametrize("method", ["first", "last"])
+@pytest.mark.parametrize("dim", ["x", "y"])
+def test_align_reference_join_uses_only_matching_points(method, dim):
+    coordinates = scp.Coord([0.0, 1.0])
+
+    def spectra(grid, values):
+        axis = scp.Coord(grid)
+        if dim == "x":
+            return scp.NDDataset(np.array(values).T, coordset=[coordinates, axis])
+        return scp.NDDataset(values, coordset=[axis, coordinates])
+
+    first = spectra([1.0, 2.0, 3.0], [[10.0, 11.0], [20.0, 21.0], [30.0, 31.0]])
+    second = spectra([2.0, 3.0, 4.0], [[40.0, 41.0], [50.0, 51.0], [60.0, 61.0]])
+
+    left, right = scp.align(first, second, dim=dim, method=method)
+
+    actual = right if method == "first" else left
+    data = actual.data if dim == "y" else actual.data.T
+    mask = actual.mask if dim == "y" else actual.mask.T
+    if method == "first":
+        np.testing.assert_array_equal(data[1:], [[40.0, 41.0], [50.0, 51.0]])
+        np.testing.assert_array_equal(mask[:, 0], [True, False, False])
+    else:
+        np.testing.assert_array_equal(data[:2], [[20.0, 21.0], [30.0, 31.0]])
+        np.testing.assert_array_equal(mask[:, 0], [False, False, True])
+
+
+def test_align_outer_preserves_complex_order_and_independent_labels():
+    first = scp.NDDataset(
+        [30.0 + 3j, 10.0 + 1j, 20.0 + 2j],
+        coordset=[scp.Coord([3.0, 1.0, 2.0], labels=np.array([300, 100, 200]))],
+    )
+    second = scp.NDDataset([40.0, 41.0], coordset=[scp.Coord([4.0, 5.0])])
+
+    left, right = scp.align(first, second, method="outer")
+
+    np.testing.assert_array_equal(left.x.data, [1.0, 2.0, 3.0, 4.0, 5.0])
+    np.testing.assert_array_equal(left.data[:3], [10.0 + 1j, 20.0 + 2j, 30.0 + 3j])
+    np.testing.assert_array_equal(left.mask, [False, False, False, True, True])
+    assert left.x.labels.tolist() == [100, 200, 300, "--", "--"]
+    assert right.x.labels is None
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+@pytest.mark.parametrize("dims", [["x", "y"], ["y", "x"]])
+def test_align_interpolation_masks_outside_range_on_both_axes(method, dims):
+    reference = scp.NDDataset(
+        np.ones((3, 3)),
+        coordset=[scp.Coord([1.0, 2.0, 3.0]), scp.Coord([1.0, 2.0, 3.0])],
+    )
+    source = scp.NDDataset(
+        np.ones((3, 3)),
+        coordset=[scp.Coord([2.0, 3.0, 4.0]), scp.Coord([2.0, 3.0, 4.0])],
+    )
+
+    _, aligned = scp.align(
+        reference, source, dims=dims, method="interpolate", interpolate_method=method
+    )
+
+    np.testing.assert_array_equal(
+        aligned.mask, [[True, True, True], [True, False, False], [True, False, False]]
+    )
+    np.testing.assert_allclose(aligned.masked_data.compressed(), np.ones(4))
+
+
+@pytest.mark.parametrize("method", ["first", "last"])
+def test_align_reference_join_masks_entirely_disjoint_spectrum(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([2.0, 1.0])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([4.0, 3.0])])
+
+    left, right = scp.align(first, second, method=method)
+
+    reference, other = (left, right) if method == "first" else (right, left)
+    expected_grid = [2.0, 1.0] if method == "first" else [4.0, 3.0]
+    np.testing.assert_array_equal(reference.x.data, expected_grid)
+    np.testing.assert_array_equal(other.x.data, expected_grid)
+    assert other.mask.all()
+
+
+@pytest.mark.parametrize("single_input", [False, True])
+def test_align_interpolate_uses_explicit_target_for_each_input(single_input):
+    first = scp.NDDataset(
+        [10.0, 20.0, 30.0], coordset=[scp.Coord([1.0, 2.0, 3.0], units="cm")]
+    )
+    second = scp.NDDataset(
+        [20.0, 40.0, 60.0], coordset=[scp.Coord([1.0, 2.0, 3.0], units="cm")]
+    )
+    target = scp.Coord([15.0, 25.0], units="mm")
+
+    inputs = (first,) if single_input else (first, second)
+    outputs = scp.align(*inputs, coord=target, method="interpolate")
+
+    assert len(outputs) == len(inputs)
+    for factor, output in enumerate(outputs, start=1):
+        np.testing.assert_allclose(output.x.data, [1.5, 2.5])
+        np.testing.assert_allclose(output.data, np.array([15.0, 25.0]) * factor)
+    np.testing.assert_array_equal(target.data, [15.0, 25.0])
+
+
+@pytest.mark.parametrize("coords", [None, [1.0, np.nan, 3.0], [1.0, np.inf, 3.0]])
+def test_align_rejects_missing_or_nonfinite_coordinates(coords):
+    first = scp.NDDataset([10.0, 20.0, 30.0])
+    if coords is not None:
+        first.x = scp.Coord(coords)
+    second = scp.NDDataset([10.0, 20.0, 30.0], coordset=[scp.Coord([1.0, 2.0, 3.0])])
+
+    with pytest.raises(ValueError, match="numeric coordinates along dimension 'x'"):
+        scp.align(first, second, method="outer")
