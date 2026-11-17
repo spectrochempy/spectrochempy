@@ -922,3 +922,26 @@ def test_align_interpolate_centers_near_a_distant_cluster_in_wide_grid(method):
     np.testing.assert_array_equal(result.x.data, target.data)
     np.testing.assert_allclose(result.data, [0.5, 1.5])
     assert not result.is_masked
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="requires a coordinate dtype wider than float64",
+)
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_masks_distant_targets_without_collapsing_output_grid(method):
+    source = scp.NDDataset([0.0, 1.0, 2.0], coordset=[scp.Coord([0.0, 1.0, 2.0])])
+    target = scp.Coord(
+        [np.longdouble(value) for value in ("0.5", "1e18", "1000000000000000001")],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_array_equal(result.mask, [False, True, True])
+    np.testing.assert_array_equal(result.data, [0.5, 99999999999999, 99999999999999])

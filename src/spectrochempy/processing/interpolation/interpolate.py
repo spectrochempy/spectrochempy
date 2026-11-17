@@ -123,7 +123,7 @@ def _get_coord_data(coord):
     return None
 
 
-def _center_wide_grids(old_x, new_x):
+def _center_wide_grids(old_x, new_x, *, extrapolate):
     """Translate grids before any float64 conversion can collapse distinct nodes."""
     grids = old_x, new_x
 
@@ -144,8 +144,16 @@ def _center_wide_grids(old_x, new_x):
             return Fraction(int(point))
         return Fraction(*point.as_integer_ratio())
 
-    exact_grids = [[exact(point) for point in grid] for grid in grids]
-    unique_values = sorted(set().union(*exact_grids))
+    source = [exact(point) for point in old_x]
+    target = [exact(point) for point in new_x]
+    lower, upper = min(source), max(source)
+    if extrapolate:
+        in_range = target
+    else:
+        # The output keeps the original grid. Outside the source range, the
+        # interpolator only needs distinct positions to evaluate extrapolation.
+        in_range = [point for point in target if lower <= point <= upper]
+    unique_values = sorted(set(source).union(in_range))
     gaps = [
         right - left
         for left, right in zip(unique_values[:-1], unique_values[1:], strict=True)
@@ -172,7 +180,7 @@ def _center_wide_grids(old_x, new_x):
         )
         return error, positions
 
-    origins = [Fraction(0), exact_grids[0][0]]
+    origins = [Fraction(0), source[0]]
     if gaps:
         # A tight cluster can be far from both zero and the first source
         # sample. It benefits most from a nearby origin.
@@ -192,7 +200,15 @@ def _center_wide_grids(old_x, new_x):
     _, positions = best
 
     mapping = dict(zip(unique_values, positions, strict=True))
-    return tuple(np.asarray([mapping[value] for value in grid]) for grid in exact_grids)
+    with np.errstate(over="ignore"):
+        below = np.nextafter(mapping[lower], -np.inf)
+        above = np.nextafter(mapping[upper], np.inf)
+    return (
+        np.asarray([mapping[point] for point in source]),
+        np.asarray(
+            [mapping.get(point, below if point < lower else above) for point in target]
+        ),
+    )
 
 
 def _match_indices(old_data, new_data):
@@ -405,7 +421,10 @@ def interpolate(
         # Point-wise label carry-over: for each target point, find the exactly
         # matching original index so labels can follow the data (#1098). Both
         # arrays are now expressed in the source coordinate's units.
-        old_data, sample_points = _center_wide_grids(old_data, new_data)
+        extrapolate = isinstance(fill_value, str) and fill_value == "extrapolate"
+        old_data, sample_points = _center_wide_grids(
+            old_data, new_data, extrapolate=extrapolate
+        )
         match_idx = _match_indices(old_data, sample_points)
 
         sorted_old_x, sort_idx, _was_reversed = _validate_monotonic(
@@ -425,8 +444,6 @@ def interpolate(
         # natively; ``PchipInterpolator`` only knows ``extrapolate`` True/False,
         # so the finite-constant case is applied by hand below so that
         # ``fill_value`` behaves consistently for both methods (#1093).
-        extrapolate = isinstance(fill_value, str) and fill_value == "extrapolate"
-
         if method == "linear":
             interpolator = interp1d(
                 sorted_old_x,
