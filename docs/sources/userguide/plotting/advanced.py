@@ -164,7 +164,7 @@ _ = scp.multiplot(
 # %% [markdown]
 # For the scientific interpretation and preprocessing of synchronous and
 # asynchronous maps, see the
-# [NH4Y 2D-COS gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_2d_cos_ir.rst).
+# [NH4Y 2D-COS tutorial](../analysis/correlation_spectroscopy.rst).
 # It uses the same composition API with corrected reference spectra above
 # signed correlation contours, independent amplitude scales and square maps.
 # `equal_aspect=True` is appropriate there because both map axes use the same

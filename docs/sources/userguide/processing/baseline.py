@@ -175,6 +175,20 @@ ranges = (
 )
 
 # %% [markdown]
+# Before fitting, inspect the spectrum and choose windows where the
+# signal is dominated by the baseline. Place windows across the region
+# being corrected, especially near its ends. A window on an absorption
+# band can pull the fitted baseline into the band and reduce its area.
+# Inspect the alignment of the baseline with the support windows and
+# check the corrected trace for distorted peaks or broad residual drift.
+#
+# The [short IR gallery example](../../gettingstarted/examples/gallery/auto_examples_processing/baseline/plot_baseline_correction.rst)
+# uses a known curved background and three windows away from the two
+# synthetic bands. The corrected trace returns close to zero outside the
+# bands. With measured data, the true baseline is unknown, so check that
+# reasonable changes in the windows or polynomial degree preserve the peaks.
+#
+# %% [markdown]
 # **Polynomial of degree: order**
 #
 # In this case, the base methods used for the interpolation are those of the
@@ -477,24 +491,3 @@ basc.n_components = 3  # only used for 'multivariate'
 _ = basc.fit(X)
 Xc = basc.corrected
 ax = basc.plot(show_regions=True)
-
-
-# %% [markdown]
-# <div class='alert alert-info'>
-#     <b>Exercises</b>
-#
-# **basic:**
-# - write commands to subtract (i) the first spectrum from a dataset and (ii)
-# the mean spectrum from a dataset
-# - write a code to correct the baseline of the last 10 spectra of the above dataset
-# in the 4000-3500 cm$^{-1}$ range
-#
-# **intermediate:**
-# - what would be the parameters to use in 'advanced' baseline correction to mimic
-# 'detrend' ? Write a code to check
-# your answer.
-#
-# **advanced:**
-# - simulate noisy spectra with baseline drifts and compare the performances of
-# `multivariate` vs `sequential` methods
-# </div>

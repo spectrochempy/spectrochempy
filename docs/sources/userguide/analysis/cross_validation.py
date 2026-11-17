@@ -141,6 +141,61 @@ print("valid pairs:", int(result.n_valid.data.squeeze()))
 # scores is subject to selection bias; use a separate design, such as nested
 # cross-validation, when model selection itself must be evaluated.
 #
-# A complete application to real NIR spectra, including OOF predictions and
-# parity/residual plots, is available in the
-# [Gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_cross_validation.rst).
+# %% [markdown]
+# ## Compare PLS with and without scatter correction
+#
+# The [short gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_cross_validation.rst)
+# shows the out-of-fold predictions from a PLS model on corn NIR spectra.
+# Use the same five shuffled folds for both models below. The archive has
+# one M5 spectrum per sample and provides no batch or replicate groups.
+# Both models use five PLS components fixed before validation.
+#
+# With its default reference, multiplicative scatter correction (MSC)
+# estimates a mean reference spectrum during each fit. Putting it inside
+# the pipeline keeps each fold's validation spectra out of that estimate.
+
+# %%
+datasets = scp.read("https://eigenvector.com/data/Corn/corn.mat", merge=False)
+by_name = {dataset.name: dataset for dataset in datasets}
+corn_spectra = by_name["m5spec"]
+moisture = by_name["propvals"][:, "Moisture"].squeeze()
+moisture.title = "Moisture content"
+moisture.units = "%"
+
+splitter = scp.KFold(n_splits=5, shuffle=True, random_state=7)
+metrics = ("rmsecv", "r2", "bias", "mae")
+pls = scp.PLSRegression(n_components=5)
+msc_pls = scp.Pipeline(
+    [
+        ("msc", scp.MSCTransformer(dim="y")),
+        ("pls", scp.PLSRegression(n_components=5)),
+    ]
+)
+raw = scp.cross_validate(pls, corn_spectra, moisture, cv=splitter, metrics=metrics)
+corrected = scp.cross_validate(
+    msc_pls, corn_spectra, moisture, cv=splitter, metrics=metrics
+)
+
+# %%
+for label, comparison in [("PLS", raw), ("MSC + PLS", corrected)]:
+    print(label)
+    for name in metrics:
+        value = float(comparison.metric(name).values.data.squeeze())
+        print(f"  {name}: {value:.4f}")
+
+# %% [markdown]
+# On a parity plot, departures from the diagonal are prediction errors.
+# Compare the spread and look for systematic offsets across the range of
+# moisture values. This comparison describes the two fixed models on
+# these folds. To assess a procedure that picks the better model, perform
+# the selection inside an outer validation design.
+
+# %%
+ax = pls.plot_parity(raw.observed, raw.oof_predictions, label="PLS")
+_ = pls.plot_parity(
+    corrected.observed,
+    corrected.oof_predictions,
+    ax=ax,
+    clear=False,
+    label="MSC + PLS",
+)

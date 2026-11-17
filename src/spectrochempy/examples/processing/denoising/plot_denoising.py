@@ -3,66 +3,29 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
-
+# ruff: noqa: D205, D400, D415
 """
-Denoising a 2D Raman spectrum
-=============================
+Denoise a Raman series with PCA
+===============================
 
-In this example, we use the ``denoise`` method to remove the noise from a 2D Raman
-spectrum.
+Reconstruct a series of Raman spectra from the principal components that
+explain at least 98% of its variance. Compare the same acquisitions before
+and after reconstruction in a region around two Raman bands. See the :doc:`denoising tutorial
+</userguide/processing/denoising>` for choosing the retained variance and
+handling cosmic ray spikes.
 """
 
-# sphinx_gallery_thumbnail_number = -1
-
-# %%
-# Import spectrochempy
 import spectrochempy as scp
 
-scp.set_loglevel("INFO")
+series = scp.read("ramandata/labspec/serie190214-1.txt")
+spectra = series[0.0:6500.0, 70.0:].snip()
+reconstructed = spectra.denoise(ratio=98)
+reconstructed.title = spectra.title
 
-# %%
-# Load and prepare the data
-# --------------------------
-dataset = scp.read("ramandata/labspec/serie190214-1.txt")
-
-# %%
-# Select the useful spectral region:
-nd = dataset[:, 60.0:]
-
-# %%
-# Plot the original data:
-_ = nd.plot(title="original data")
-
-# %%
-# Detrend for easier comparison:
-nd1 = nd.detrend()
-_ = nd1.plot(title="detrended data")
-
-# %%
-# Denoise with default parameters
-# --------------------------------
-# The default ``ratio`` is 99.8:
-nd2 = nd1.denoise()
-_ = nd2.plot(title="denoised data")
-
-# %%
-# Denoise with different ratios
-# ------------------------------
-nd3 = nd1.denoise(ratio=95)
-_ = nd3.plot(title="denoised data")
-
-nd4 = nd1.denoise(ratio=90)
-_ = nd4.plot(title="denoised data")
-
-# %%
-# Denoising increases the signal-to-noise ratio effectively but has limited
-# effect on cosmic ray spikes.  Consider using ``despike`` methods for those.
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+_ = scp.multiplot(
+    [spectra[::8, 500.0:760.0], reconstructed[::8, 500.0:760.0]],
+    method="lines",
+    ncol=2,
+    labels=["Before PCA", "After PCA"],
+    figsize=(10, 4),
+)

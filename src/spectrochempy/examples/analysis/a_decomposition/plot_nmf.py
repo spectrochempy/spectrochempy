@@ -1,85 +1,39 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
 """
-NMF analysis example
-====================
+Recover two non-negative spectral components
+============================================
 
+Fit NMF to synthetic spectra whose two overlapping bands contribute in
+different proportions across the series.
+See the :doc:`NMF tutorial </userguide/analysis/nmf>` for data preparation,
+rank comparison, and reconstruction.
 """
 
-# %%
-# Import the spectrochempy API package
 import spectrochempy as scp
 
-# %%
-# Prepare the dataset to NMF factorize
-# -------------------------------------
+time = scp.Coord.linspace(0.0, 10.0, 21, title="time", units="s")
+x = scp.Coord.linspace(1740.0, 1510.0, 121, title="wavenumber", units="cm^-1")
+band_a = scp.gaussian(x.data, pos=1640.0, width=50.0, normalized=False)
+band_b = scp.gaussian(x.data, pos=1605.0, width=50.0, normalized=False)
+fraction = 0.05 + 0.09 * time.data[:, None]
+spectra = scp.NDDataset(
+    (1.0 - fraction) * band_a + fraction * band_b,
+    coordset=[time, x],
+    title="absorbance",
+)
 
-# %%
-# Here we use a FTIR dataset corresponding the dehydration of a NH4Y zeolite
-# and recorded in the OMNIC format.
-dataset = scp.read_omnic("irdata/nh4y-activation.spg")
-
-# %%
-# Mask some columns (features) which correspond to saturated parts of the spectra.
-# Note that we use float number for defining the limits for masking as coordinates
-# (integer numbers would mean point index and s would lead t incorrect results)
-dataset[:, 882.0:1280.0] = scp.MASKED
-
-# %%
-# Make sure all data are positive. For this we use the math functionalities of NDDataset
-# objects (:meth:`min` function to find the minimum value of the dataset
-# and the ``-`` operator for subtrating this value to all spectra of the dataset.
-dataset -= dataset.min()
-
-# %%
-# Plot it for a visual check
-_ = dataset.plot()
-
-# %%
-# Create a NMF object
-# -------------------
-#
-# As argument of the object constructor we define log_level to ``"INFO"`` to
-# obtain verbose output during fit, and we set the number of component to use at 4.
-model = scp.NMF(n_components=4, log_level="INFO")
-
-# %%
-# Fit the model
-# -------------
-_ = model.fit(dataset)
-
-# %%
-# Get the results
-# ---------------
-#
-# The concentration :math:`C` and the transposed matrix of spectra :math:`S^T` can
-# be obtained as follow
-C = model.transform()
-St = model.components
-
-
-# %%
-# Plot results
-# ------------
-_ = C.T.plot(title="Concentration", colormap=None, legend=C.k.labels)
-
-# %%
-#
-m = St.ptp()
-for i in range(St.shape[0]):
-    St.data[i] -= i * m / 2
-ax = St.plot(title="Components", colormap=None, legend=St.k.labels)
-_ = ax.set_yticks([])
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+model = scp.NMF(n_components=2, init="nndsvda", random_state=0, max_iter=1000)
+_ = model.fit(spectra)
+components = model.result.components
+_ = scp.multiplot(
+    [spectra[::5], components],
+    method="pen",
+    ncol=2,
+    labels=["Mixture spectra", "Estimated components"],
+    figsize=(10, 3.5),
+)

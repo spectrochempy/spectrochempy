@@ -3,101 +3,37 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
-
+# ruff: noqa: D205, D400, D415
 """
-EFA (Keller and Massart original example)
-=========================================
+Detect two overlapping chromatographic factors
+==============================================
 
-In this example, we perform the Evolving Factor Analysis of a TEST dataset
-(ref. Keller and Massart, Chemometrics and Intelligent Laboratory Systems,
-12 (1992) 209-224 )
-
+Fit EFA to a simulated chromatogram based on :cite:t:`keller:1991`.
+Compare the first three eigenvalue curves in both directions.
+See the :doc:`EFA tutorial </userguide/analysis/efa>` for interpretation.
 """
 
-# sphinx_gallery_thumbnail_number = 5
-
-# %%
 import spectrochempy as scp
 
+time = scp.Coord.arange(15, units="min", title="elution time")
+profiles = scp.zeros((2, time.size), coordset=[None, time])
+profiles[0, 3:8] = [1, 3, 6, 3, 1]
+profiles[1, 5:11] = [1, 3, 5, 3, 1, 0.5]
+spectra = scp.NDDataset([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
+chromatogram = scp.dot(profiles.T, spectra)
+chromatogram += scp.normal(scale=0.1, size=chromatogram.shape, seed=42)
 
-# %%
-# Generate a test dataset
-# -----------------------
-# 1) simulated chromatogram
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-t = scp.Coord.arange(15, units="minutes", title="time")  # time coordinates
-c = scp.Coord(range(2), title="components")  # component coordinates
-
-dsc = scp.zeros((2, 15), coords=[c, t])
-dsc[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
-dsc[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
-
-_ = dsc.plot(title="concentration")
-
-# %%
-# 2) absorption spectra
-# ~~~~~~~~~~~~~~~~~~~~~~
-
-spec = [[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]]
-w = scp.Coord.arange(1, 5, 1, units="nm", title="wavelength")
-
-dss = scp.NDDataset(data=spec, coords=[c, w])
-_ = dss.plot(title="spectra")
-
-# %%
-# 3) simulated data matrix
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-dataset = scp.dot(dsc.T, dss)
-dataset += scp.normal(scale=0.1, size=dataset.shape, seed=42)
-dataset.title = "intensity"
-
-_ = dataset.plot(title="calculated dataset")
-
-# %%
-# 4) evolving factor analysis (EFA)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 efa = scp.EFA()
-_ = efa.fit(dataset)
-
-# %%
-# Plots of the log(EV) for the forward and backward analysis
-#
-_ = efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.k.labels)
-
-# %%
-_ = efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
-
-# %%
-# Looking at these EFA curves, it is quite obvious that only two components
-# are really significant, and this corresponds to the data that we have in
-# input.
-# We can consider that the third EFA components is mainly due to the noise,
-# and so we can use it to set a cut of values
-n_pc = efa.n_components = 2
-
-efa.cutoff = efa.f_ev[:, n_pc].max()
-f2 = efa.f_ev[:, :n_pc]
-b2 = efa.b_ev[:, :n_pc]
-
-# %%
-# plot forward and backward EFA curves together without concatenating datasets,
-# which would emit a coordinate warning here.
-_ = f2.T.plot(yscale="log")
-_ = b2.T.plot(yscale="log", clear=False)
-
-# %%
-# Get the abstract concentration profile based on the FIFO EFA analysis
-#
-C = efa.transform()
-_ = C.T.plot(title="EFA concentration")
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+_ = efa.fit(chromatogram)
+forward = efa.f_ev[:, :3]
+backward = efa.b_ev[:, :3]
+forward.title = backward.title = "squared singular value"
+_ = scp.multiplot(
+    [scp.log10(forward.clip(1e-4)).T, scp.log10(backward.clip(1e-4)).T],
+    labels=["Forward EFA", "Backward EFA"],
+    ncol=2,
+    method="pen",
+    legend=["First", "Second", "Third"],
+    sharey=True,
+    figsize=(10, 4),
+)

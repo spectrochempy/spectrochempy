@@ -308,6 +308,17 @@ for size in [3, 7, 11]:
 # but also the greater the chance to distort the spectrum.
 
 # %% [markdown]
+# The [short gallery example](../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_smoothing_window_size.rst)
+# compares two moving averages on a synthetic Raman spectrum with a narrow
+# and a broad band. The window size is a number of samples. With uniform
+# spacing, multiply the spacing by one less than the size to obtain the
+# span from the first to the last sample in the window.
+#
+# Compare that span with the width of the narrowest feature you want
+# to preserve. Check peak height, width and separation against the original
+# spectrum before using a smoothed spectrum for peak measurements.
+
+# %% [markdown]
 # ### Convolution with windows
 #
 # Besides the window `size`, the user can also choose the type of

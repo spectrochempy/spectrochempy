@@ -21,5 +21,13 @@ The transform operates in sample space and requires real, finite, unmasked
 data. The result retains the input shape, coordinates, and units. The
 processing history records the effective settings.
 
+Inspect the filtered spectrum alongside the original. A stronger threshold
+can reduce noise further while attenuating weak bands or changing their
+shape. Check peak heights and widths before measuring them on a filtered
+spectrum.
+
+The :doc:`short wavelet example </gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_wavelet_denoising>`
+uses overlapping bands and a known clean reference.
+
 The :doc:`smoothing comparison </gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_compare_spectral_smoothers>`
 shows the effects on noise, peak position, height, and width.

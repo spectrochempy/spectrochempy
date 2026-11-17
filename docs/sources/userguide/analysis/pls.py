@@ -56,16 +56,17 @@ import spectrochempy as scp
 # Here we show how PLSRegression is implemented in Scpy on a dataset consisting of 80 samples of corn measured
 # on 3 different NIR spectrometers, together with moisture, oil,
 # protein and starch values for each of the samples. This dataset (and others) can be loaded from
-# [http://www.eigenvector.com](http://www.eigenvector.com/data/).
+# [https://eigenvector.com](https://eigenvector.com/data/).
 # %%
-A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+A = scp.read("https://eigenvector.com/data/Corn/corn.mat", merge=False)
 
 # %% [markdown]
 # The .mat file contains 7 eigenvectors's datasets which are thus returned in A as a list of 7
 # NDDatasets. We print the names and dimensions of these datasets:
 # %%
-for a in A:
-    print(f"{a.name} : {a.shape}")
+by_name = {dataset.name: dataset for dataset in A}
+for name, dataset in by_name.items():
+    print(f"{name} : {dataset.shape}")
 
 # %% [markdown]
 # In this tutorial, we are first interested in the dataset named `'m5spec'`, corresponding to the 80 spectra
@@ -77,7 +78,7 @@ for a in A:
 # intensity unit is imposed:
 
 # %%
-X = A[-3]
+X = by_name["m5spec"]
 X.title = "NIR spectra"
 X.x.title = "Wavelength"
 X.x.units = "nm"
@@ -90,7 +91,7 @@ _ = X_.plot(cmap=None)
 # Let's plot the properties of the sample:
 
 # %%
-Y = A[3]
+Y = by_name["propvals"]
 _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
@@ -103,7 +104,12 @@ _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 # %% [markdown]
 # ## Running PLSRegression
 # First we select the first 57 samples (out of the 80 total) to train/calibrate the model and the remaining ones
-# to test/validate the model, and we restrict first our analysis to the moisture content:
+# to evaluate it, using moisture as the response. This fixed split makes the
+# example reproducible. In a calibration study, choose the split to reflect
+# future use. If samples have replicate spectra, keep all replicates of a
+# sample together. Use the calibration set to select the number of components,
+# for example by cross-validation, then evaluate the selected model on the
+# held-out samples.
 
 # %%
 X_train = X[:57]
@@ -143,7 +149,7 @@ _ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 
 # %%
 ax = pls.plot_parity(label="calibration")
-pls.plot_parity(
+_ = pls.plot_parity(
     y_test,
     y_test_hat,
     ax=ax,
@@ -163,4 +169,10 @@ print(f"R-squared training dataset: {pls.score():.3}")
 print(f"R-squared test dataset: {pls.score(X_test, y_test):.3}")
 
 # %% [markdown]
-# As expected, the goodness of fit is slightly lower for the validation than for the calibration.
+# On the parity plot, points along the diagonal have matching predicted and
+# measured values. Look for systematic departures from the diagonal across
+# the moisture range. The held-out $R^2$ summarizes prediction performance on
+# these samples.
+#
+# The [short gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.rst)
+# shows the calibration, prediction and parity plot for the held-out samples.

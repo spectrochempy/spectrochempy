@@ -47,13 +47,28 @@ build:
           python -u -m docs.preexecute_notebooks execute gettingstarted/quickstart.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/analysis/correlation_spectroscopy.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/analysis/cp.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
           python -u -m docs.preexecute_notebooks execute userguide/analysis/cross_validation.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/analysis/efa.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/analysis/fast_ica.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
           python -u -m docs.preexecute_notebooks execute userguide/analysis/fitting.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
           python -u -m docs.preexecute_notebooks execute userguide/analysis/mcr_als.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/analysis/nmf.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
           python -u -m docs.preexecute_notebooks execute userguide/analysis/pca.ipynb; fi

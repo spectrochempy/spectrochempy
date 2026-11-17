@@ -3,44 +3,23 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
 """
 Find peaks in an experimental 2D-IR spectrum
 ============================================
 
-This example loads a pump-probe 2D-IR spectrum, finds positive cross-peaks and
-negative diagonal bleach peaks, and locates them on a two-dimensional map.
-It then assigns the positive peaks to connected regions.
-
-The experimental data describe D-silicalite at 210 °C, measured with parallel
-polarization at a waiting time of 0 ps. They accompany Donaldson, Hawkins and
-Howe, *Chemical Science* (2025), `DOI: 10.1039/D4SC08093A
-<https://doi.org/10.1039/D4SC08093A>`_, and originate from `STFC eData
-<https://doi.org/10.5286/edata/938>`_ under the `CC BY 4.0 license
+Mark positive peaks and negative bleach minima on the same map.
+The D-silicalite spectrum is from `Donaldson, Hawkins and Howe (2025)
+<https://doi.org/10.1039/D4SC08093A>`_ and is available from `STFC eData
+<https://doi.org/10.5286/edata/938>`_ under `CC BY 4.0
 <https://creativecommons.org/licenses/by/4.0/>`_.
-
-The native ``.scp`` file preserves the cropped CSV matrix, its pump and probe
-coordinates, and difference-absorbance units. Preparation retained the 128
-parallel-detector probe rows and the pump range 2176–2831 cm⁻¹, removing the
-mirrored half. No baseline correction, smoothing or normalization was applied.
-The diagonal bleach is negative. See the `dataset README
-<https://github.com/spectrochempy/spectrochempy_data/blob/master/testdata/irdata/2dir/README.md>`_
-for the original filename and preparation details.
+See the :doc:`peak finding tutorial </userguide/analysis/peak_finding>`
+for data preparation, peak tables, and connected regions.
 """
-
-# sphinx_gallery_thumbnail_number = 2
 
 import spectrochempy as scp
 
-# %%
-# Download and read the 2D matrix
-# --------------------------------
 dataset = scp.read("irdata/2dir/silicalite_210C_0ps_2DIR.scp")
-_ = dataset.plot(method="lines", figsize=(7, 5), colorbar=True)
-
-# %%
-# Detect positive cross-peaks and negative diagonal bleach
-# ---------------------------------------------------------
 distance = {"y": scp.ur("3 cm^-1"), "x": scp.ur("5 cm^-1")}
 cross_peaks = dataset.find_peaks(
     dims=("y", "x"), height=0.01, distance=distance, as_result=True
@@ -49,16 +28,6 @@ bleach_peaks = (-dataset).find_peaks(
     dims=("y", "x"), height=0.02, distance=distance, as_result=True
 )
 
-cross_peaks.table.top(5, by="height")
-
-# %%
-# Peak coordinates are reported in the dataset's probe (y) and pump (x) axes.
-# Bleach heights are positive amplitudes measured on the negated spectrum.
-bleach_peaks.table.top(5, by="height")
-
-# %%
-# Locate the detected peaks on the 2D-IR map
-# ------------------------------------------
 ax = dataset.plot_image(figsize=(7, 5), cmap="RdBu_r", colorbar=True)
 for result, marker, color, label in (
     (cross_peaks, "o", "black", "Positive peaks"),
@@ -76,47 +45,3 @@ for result, marker, color, label in (
         label=label,
     )
 _ = ax.legend()
-
-# %%
-# Assign positive peaks to connected regions
-# ------------------------------------------
-# Label samples strictly above 0.008 in the dataset's intensity units.
-# This threshold retains connections below the 0.01 peak height cutoff.
-# The labels describe connected support at this threshold. Peaks in the
-# same region can still be distinct local maxima.
-
-labels, regions = dataset.segment_regions(dim=("y", "x"), threshold=0.008)
-
-# %%
-# Look up each peak using its native grid indices. Three positive maxima
-# share the largest region, and the other two belong to separate regions.
-
-rows = cross_peaks.table.to_dict()
-regions_by_label = {region["label"]: region for region in regions}
-for peak in rows:
-    label = int(labels.data[peak["y_index"], peak["x_index"]])
-    size = regions_by_label[label]["size"]
-    print(f"Peak {peak['index'] + 1}: region {label}, {size} samples")
-
-# %%
-# The same peak markers appear on the label map. Each color identifies a
-# region or the background (label zero).
-
-ax = labels.plot_image(figsize=(7, 5), cmap="tab10", colorbar=False)
-_ = ax.set_title("Connected regions above 0.008")
-_ = ax.scatter(
-    [peak["x_position"].magnitude for peak in rows],
-    [peak["y_position"].magnitude for peak in rows],
-    facecolors="none",
-    edgecolors="white",
-    linewidths=1.5,
-    s=65,
-)
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()

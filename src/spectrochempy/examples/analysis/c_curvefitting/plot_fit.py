@@ -3,111 +3,53 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
+"""
+Fit two overlapping Gaussian bands
+==================================
 
+Fit two overlapping bands in a synthetic spectrum and inspect the
+fitted components and residuals.
+See the :doc:`fitting tutorial </userguide/analysis/fitting>` for model
+scripts, parameter bounds, and fitting overlapping experimental bands.
 """
 
-Fitting 1D dataset
-==================
-In this example, we find the least  square solution of a simple linear
-equation.
+from contextlib import redirect_stdout
+from io import StringIO
 
-"""
-
-# sphinx_gallery_thumbnail_number = 2
-
-# %%
 import spectrochempy as scp
 
-# %%
-# Load and prepare an IR spectrum
-# --------------------------------
-nd = scp.read_omnic("irdata/nh4y-activation.spg")
+x = scp.Coord.linspace(1500.0, 1700.0, 201, title="wavenumber", units="cm^-1")
+band_a = scp.gaussian(x.data, ampl=20.0, pos=1588.0, width=30.0)
+band_b = scp.gaussian(x.data, ampl=16.0, pos=1610.0, width=34.0)
+signal = band_a + band_b
+noise = scp.normal(scale=0.01, size=signal.shape, seed=42)
+spectrum = scp.NDDataset(signal + noise.data, coordset=[x], title="absorbance")
 
-# %%
-# Select the OH region and mask a noisy interval:
-ndOH = nd[54, 3800.0:3300.0]
-ndOH[:, 3505.0:3500.0] = scp.MASKED
-_ = ndOH.plot()
-
-# %%
-# Define the fitting model
-# -------------------------
-# Fit parameters are defined in a script with the following syntax:
 script = """
-#-----------------------------------------------------------
-# syntax for parameters definition:
-# name: value, low_bound,  high_bound
-# available prefix:
-#  # for comments
-#  * for fixed parameters
-#  $ for variable parameters
-#  > for reference to a parameter in the COMMON block
-#    (> is forbidden in the COMMON block)
-# common block parameters should not have a _ in their names
-#-----------------------------------------------------------
-#
+MODEL: band_a
+shape: gaussianmodel
+$ ampl: 18, 0, none
+$ pos: 1585, 1550, 1599
+$ width: 35, 1, 80
 
-COMMON:
-# common parameters ex.
-# $ gwidth: 1.0, 0.0, none
-$ gratio: 0.1, 0.0, 1.0
-
-MODEL: LINE_1
-shape: asymmetricvoigtmodel
-    * ampl:  1.1, 0.0, none
-    $ pos:   3620, 3400.0, 3700.0
-    $ ratio: 0.0147, 0.0, 1.0
-    $ asym: 0.1, 0, 1
-    $ width: 50, 0, 1000
-
-MODEL: LINE_2
-shape: asymmetricvoigtmodel
-    $ ampl:  0.8, 0.0, none
-    $ pos:   3540, 3400.0, 3700.0
-    > ratio: gratio
-    $ asym: 0.1, 0, 1
-    $ width: 50, 0, 1000
-
+MODEL: band_b
+shape: gaussianmodel
+$ ampl: 14, 0, none
+$ pos: 1615, 1599, 1650
+$ width: 30, 1, 80
 """
-
-# %%
-# Create the optimizer and inspect the starting model
-# ----------------------------------------------------
-f1 = scp.Optimize(log_level="INFO")
-f1.script = script
-
-# Use dry mode to preview the starting parameters
-f1.dry = True
-f1.autobase = True
-_ = f1.fit(ndOH)
-
-scp.info_(f"numbers of components: {f1.n_components}")
-_ = ndOH.plot()
-ax = (f1.components[:]).plot(clear=False)
-_ = ax.autoscale(enable=True, axis="y")
-
-# %%
-# Fit the model
-# --------------
-f1.max_iter = 1000
-_ = f1.fit(ndOH)
-
-# %%
-# Show the result
-_ = ndOH.plot()
-ax = (f1.components[:]).plot(clear=False)
-_ = ax.autoscale(enable=True, axis="y")
-
-# %%
-# Evaluate the fit quality
-som = f1.inverse_transform()
-_ = f1.plot_merit(ndOH, som, offset=15)
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+model = scp.Optimize(script=script, method="least_squares")
+with redirect_stdout(StringIO()):
+    _ = model.fit(spectrum)
+ax = model.plot_merit(
+    exp_label="Data", calc_label="Sum of bands", resid_label="Residual"
+)
+legend = ax.get_legend()
+handles = list(legend.legend_handles)
+labels = [entry.get_text() for entry in legend.get_texts()]
+for component, label in zip(model.components.data, ("Band A", "Band B"), strict=True):
+    (line,) = ax.plot(x.data, component, linestyle=":")
+    handles.append(line)
+    labels.append(label)
+_ = ax.legend(handles, labels)

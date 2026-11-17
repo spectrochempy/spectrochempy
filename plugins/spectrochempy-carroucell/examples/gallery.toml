@@ -1,0 +1,8 @@
+[plugin]
+name = "spectrochempy-carroucell"
+title = "Carroucell plugin"
+
+[[examples]]
+path = "core/c_importer/plot_read_carroucell.py"
+section = "Import / Export"
+section_ref = "examples-importer-index"

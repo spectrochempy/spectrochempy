@@ -3,67 +3,26 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
-
+# ruff: noqa: D205, D400, D415
 """
-Removing cosmic ray spikes from a Raman spectrum
-================================================
+Remove spikes from a Raman spectrum
+===================================
 
-In this example, we use the ``despike`` method to remove the noise from a Raman
-spectrum.
+Remove sharp positive spikes from one measured Raman spectrum and compare
+the result with the input. See the :doc:`denoising tutorial
+</userguide/processing/denoising>` for choosing a detection threshold and
+checking that narrow Raman bands survive the correction.
 """
-
-# sphinx_gallery_thumbnail_number = -1
 
 import spectrochempy as scp
 
-# %%
-# Load and prepare the data
-# --------------------------
-dataset = scp.read("ramandata/labspec/serie190214-1.txt")
+series = scp.read("ramandata/labspec/serie190214-1.txt")
+spectrum = series[0, 70.0:].snip()
+cleaned = spectrum.despike(size=11, delta=5)
 
-# %%
-# Keep one spectrum and select the useful region:
-X = dataset[0, 70.0:]
-
-# %%
-# Apply a fast SNIP baseline correction:
-X1 = X.snip()
-
-# %%
-prefs = scp.preferences
-prefs.figure.figsize = (8, 4)
-_ = X1.plot()
-
-# %%
-# Despike with the default method
-# --------------------------------
-# The ``despike`` method has two key parameters: ``size`` (Savitzky-Golay filter
-# width) and ``delta`` (detection threshold in standard deviation units):
-X2 = scp.despike(X1, size=11, delta=5)
-_ = X1.plot()
-_ = X2.plot(clear=False, ls="-", c="r")
-
-# %%
-# Despike with the Whitaker method
-# ---------------------------------
-X3 = scp.despike(X1, size=11, delta=5, method="whitaker")
-_ = X1.plot()
-_ = X3.plot(clear=False, ls="-", c="r")
-
-# %%
-# The importance of parameter tuning
-# -----------------------------------
-# Poorly chosen parameters may remove valid peaks:
-X4 = scp.despike(X1, size=21, delta=2)
-_ = X1.plot()
-_ = X4.plot(clear=False, ls="-", c="r")
-
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+_ = scp.plot_multiple(
+    [spectrum, cleaned],
+    method="pen",
+    labels=["Before despiking", "After despiking"],
+    legend="best",
+)

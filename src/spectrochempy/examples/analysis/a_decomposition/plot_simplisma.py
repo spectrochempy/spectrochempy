@@ -1,68 +1,29 @@
-# %%
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
 """
-SIMPLISMA example
-=================
-In this example, we perform the PCA dimensionality reduction of a spectra
-dataset
+Estimate component spectra with SIMPLISMA
+=========================================
 
+Estimate up to four component spectra from an HPLC-DAD run using pure
+variable selection on a non-negative copy of the data. See the :doc:`MCR-ALS tutorial </userguide/analysis/mcr_als>`
+for the selection settings and how to use the spectra as initial estimates.
 """
 
-# %%
-# Import the package
 import spectrochempy as scp
 
-# %%
-# Load and annotate the dataset
-# ------------------------------
-print("Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):")
-lnd = scp.read_matlab("matlabdata/als2004dataset.MAT", merge=False)
-for mat in lnd:
-    print("    " + mat.name, str(mat.shape))
+datasets = scp.read_matlab("matlabdata/als2004dataset.MAT", merge=False)
+chromatogram = next(dataset for dataset in datasets if dataset.name == "m1")
 
-ds = lnd[-1]
-_ = ds.plot()
-
-# %%
-# Add metadata for a nicer display. The archived file does not store the
-# physical elution time and wavelength coordinates, so the axes are plain
-# indices without physical units:
-ds.title = "absorbance"
-ds.units = "absorbance"
-ds.set_coordset(None, None)
-ds.y.title = "elution time (index)"
-ds.x.title = "wavelength (index)"
-
-# %%
-# Fit the SIMPLISMA model
-# ------------------------
-print("Fit SIMPLISMA on {}\n".format(ds.name))
-simpl = scp.SIMPLISMA(n_components=20, tol=0.2, noise=3, log_level="INFO")
-_ = simpl.fit(ds)
-
-# %%
-# Visualize the results
-# ----------------------
-# Concentration profiles:
-_ = simpl.C.T.plot(title="Concentration")
-
-# %%
-# Pure component spectra:
-_ = simpl.components.plot(title="Pure profiles")
-
-# %%
-# Merit plot after reconstruction:
-_ = simpl.plot_merit(offset=0, nb_traces=5)
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+model = scp.SIMPLISMA(n_components=4, noise=3, tol=0.05)
+_ = model.fit(chromatogram.clip(0))
+spectra = model.result.components
+spectra.set_coordset(
+    None, scp.Coord.arange(spectra.shape[-1], title="spectral channel")
+)
+spectra.title = "relative intensity"
+labels = [f"Component {i + 1}" for i in range(spectra.shape[0])]
+_ = spectra.plot_pen(legend=labels, legend_loc="upper right")

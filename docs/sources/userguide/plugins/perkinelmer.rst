@@ -50,8 +50,7 @@ The generated public API page for the PerkinElmer plugin is listed in
 Examples
 ========
 
-Use the same namespaced reader shown above for ordinary PerkinElmer ``.sp``
-import workflows.
+See :ref:`PerkinElmer infrared spectra <import-perkinelmer-ir>` in the IR import guide.
 
 Limitations
 ===========

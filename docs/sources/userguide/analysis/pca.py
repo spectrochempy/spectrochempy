@@ -48,8 +48,13 @@ import spectrochempy as scp
 #
 # ## Loading of the dataset
 # Here we show how PCA is implemented in Scpy on a dataset corresponding to a HPLC-DAD run,
-# from Jaumot et al. Chemolab, 76 (2005), pp. 101-110 and Jaumot et al. Chemolab, 140 (2015)
-# pp. 1-12. This dataset (and others) can be loaded from the [Multivariate Curve Resolution
+# from the Multivariate Curve Resolution example collection.
+#
+# ```{=rst}
+# See :cite:t:`jaumot:2005,jaumot:2015` for the original publications.
+# ```
+#
+# This dataset (and others) can be loaded from the [Multivariate Curve Resolution
 # Homepage](https://mcrals.wordpress.com/download/example-data-sets). For the user convenience,
 # this dataset is present in the 'datadir' of spectrochempy in 'als2004dataset.MAT' and can be
 # read as follows in Scpy:
@@ -188,3 +193,104 @@ _ = pca.plot_merit()
 # %%
 _ = pca.plot_score()
 _ = pca.plot_score(components=(1, 2, 3))
+
+
+# %% [markdown]
+# ## Compare PCA before and after masking a saturated band
+#
+# A large contribution to the variance can come from the instrument. In the
+# NH₄Y activation series, detector saturation affects the band between 882 and
+# 1280 cm⁻¹. Compare the PCA results on the same subset of spectra with and
+# without that interval. Float slice bounds select wavenumbers.
+#
+# Use `n_components=0.999` to retain enough components to explain at least
+# 99.9% of the variance. Compare the number of components retained by the
+# two fits. Each percentage refers to the variance of its own input matrix.
+
+# %%
+spectra = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
+masked = spectra.copy()
+masked[:, 882.0:1280.0] = scp.MASKED
+
+full_pca = scp.PCA(n_components=0.999)
+masked_pca = scp.PCA(n_components=0.999)
+_ = full_pca.fit(spectra)
+_ = masked_pca.fit(masked)
+print(f"Components retained before masking: {full_pca.n_components}")
+print(f"Components retained after masking: {masked_pca.n_components}")
+
+# %% [markdown]
+# With 11 spectra, centering limits the rank to at most 10. The threshold
+# selects a number of components for this dataset and preprocessing. To
+# interpret the result, use the loadings to locate the wavenumbers that
+# contribute to each component and the scores to compare the spectra.
+# Assigning a component to a chemical species requires independent evidence.
+
+# %%
+_ = masked_pca.result.loadings.plot(legend=True)
+_ = masked_pca.plot_score(components=(1, 2))
+
+# %% [markdown]
+# The [short IR gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.rst)
+# shows the fit after masking and its score plot.
+
+
+# %% [markdown]
+# ## Explore the iris measurements
+#
+# Each row describes a flower, with sepal and petal length and width in
+# the columns. The PCA uses the measurements on their original scale.
+# Species labels are used to color the scores after fitting.
+#
+# ```{=rst}
+# The iris measurements were used by :cite:t:`fisher:1936`.
+# ```
+#
+# Compare two ways to choose how many components to retain. The maximum
+# likelihood estimate (`n_components="mle"`) requires at least as many
+# observations as variables. A fraction such as `0.999` sets a target
+# for cumulative explained variance.
+
+# %%
+flowers = scp.load_iris()
+mle_pca = scp.PCA(n_components="mle")
+variance_pca = scp.PCA(n_components=0.999)
+_ = mle_pca.fit(flowers)
+_ = variance_pca.fit(flowers)
+for label, model in [
+    ("Maximum likelihood", mle_pca),
+    ("99.9% threshold", variance_pca),
+]:
+    retained = model.cumulative_explained_variance[-1].value.magnitude
+    print(f"{label}: {model.n_components} components, {retained:.2f}% variance")
+
+# %% [markdown]
+# The scores give the coordinates of each flower in the projection.
+# The loadings describe how the original measurements contribute to
+# those axes. The scree plot shows the variance explained by each axis.
+
+# %%
+iris_scores = variance_pca.result.scores
+iris_loadings = variance_pca.result.loadings
+print(f"Scores: {iris_scores.shape}, loadings: {iris_loadings.shape}")
+iris_loadings
+
+# %%
+_ = variance_pca.plot_scree()
+
+# %% [markdown]
+# The first two axes separate setosa from the other species in this
+# projection. Versicolor and virginica still overlap. Use a third axis
+# to inspect their separation from another angle. Explained variance
+# measures how much variation the projection retains across all flowers.
+
+# %%
+_ = variance_pca.plot_score(components=(1, 2), color_mapping="labels")
+
+# %%
+ax = variance_pca.plot_score(components=(1, 2, 3), color_mapping="labels")
+_ = ax.view_init(10, 75)
+
+# %% [markdown]
+# The [short iris gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.rst)
+# fits two components directly and shows the 2D score plot.

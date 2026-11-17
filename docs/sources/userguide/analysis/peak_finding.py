@@ -424,6 +424,78 @@ result2d.table.column("x_position", unit="cm^-1", as_float=True)
 # ordering is scientifically important.
 
 # %% [markdown]
+# ### Detect both signs in an experimental 2D-IR map
+#
+# ```{=rst}
+# This D-silicalite spectrum accompanies :cite:t:`donaldson:2025`.
+# ```
+#
+# The [STFC data](https://doi.org/10.5286/edata/938) are available under
+# [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The spectrum
+# was measured at 210 °C, with parallel polarization and a waiting time of
+# 0 ps. The native file retains 128 probe rows and the pump interval
+# 2176–2831 cm⁻¹. See the [dataset README](https://github.com/spectrochempy/spectrochempy_data/blob/master/testdata/irdata/2dir/README.md)
+# for cropping and conversion details.
+#
+# Negating the data turns negative bleach minima into positive maxima
+# while preserving their coordinates. Use separate height cutoffs for
+# the two searches. Bleach heights refer to the negated map.
+# The [2D-IR gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_finding_2d_ir.rst)
+# overlays both sets of detections on the original map.
+
+# %%
+dataset = scp.read("irdata/2dir/silicalite_210C_0ps_2DIR.scp")
+distance = {"y": scp.ur("3 cm^-1"), "x": scp.ur("5 cm^-1")}
+cross_peaks = dataset.find_peaks(
+    dims=("y", "x"), height=0.01, distance=distance, as_result=True
+)
+bleach_peaks = (-dataset).find_peaks(
+    dims=("y", "x"), height=0.02, distance=distance, as_result=True
+)
+
+cross_peaks.table.top(5, by="height")
+
+# %%
+bleach_peaks.table.top(5, by="height")
+
+# %% [markdown]
+# ### Assign positive peaks to connected regions
+#
+# Segment samples strictly above 0.008 in the map's intensity units.
+# This cutoff is lower than the peak height cutoff of 0.01, so it can
+# retain connections between distinct maxima. Look up each peak using
+# its grid indices to find the region containing it.
+
+# %%
+labels, regions = dataset.segment_regions(dim=("y", "x"), threshold=0.008)
+
+# %%
+# Look up each peak using its native grid indices. Three positive maxima
+# share the largest region, and the other two belong to separate regions.
+
+rows = cross_peaks.table.to_dict()
+regions_by_label = {region["label"]: region for region in regions}
+for peak in rows:
+    label = int(labels.data[peak["y_index"], peak["x_index"]])
+    size = regions_by_label[label]["size"]
+    print(f"Peak {peak['index'] + 1}: region {label}, {size} samples")
+
+# %%
+# The same peak markers appear on the label map. Each color identifies a
+# region or the background (label zero).
+
+ax = labels.plot_image(figsize=(7, 5), cmap="tab10", colorbar=False)
+_ = ax.set_title("Connected regions above 0.008")
+_ = ax.scatter(
+    [peak["x_position"].magnitude for peak in rows],
+    [peak["y_position"].magnitude for peak in rows],
+    facecolors="none",
+    edgecolors="white",
+    linewidths=1.5,
+    s=65,
+)
+
+# %% [markdown]
 # ### More on peak properties
 #
 # If the concept of "peak height" is pretty clear, it is worth examining further some
@@ -667,4 +739,31 @@ for i in range(len(peaks)):
         ax.axvline(w.m, linestyle="--", color="green")
 
 # %% [markdown]
-# -- this is the end of this tutorial --
+# ## Track peak positions over time
+#
+# Select a window around the band of interest. In this example, if several
+# peaks satisfy the criteria in a spectrum, we keep the one at the highest
+# wavenumber. Check that this rule follows the same band when peaks overlap
+# or change intensity. A missing detection leaves a gap in the curve.
+# Lowering the prominence threshold can recover weaker peaks, but can also
+# admit noise. The distance sets the minimum separation between detections.
+
+# %%
+window = reg[:, 2145.0:2085.0]
+positions = []
+for spectrum in window:
+    peaks, _ = spectrum.find_peaks(distance="5 cm^-1", prominence=0.02)
+    positions.append(None if peaks is None else peaks.x.data.max())
+
+evolution = scp.NDDataset(
+    [0.0 if position is None else position for position in positions],
+    mask=[position is None for position in positions],
+    title="peak position",
+    units=window.x.units,
+)
+evolution.x = scp.Coord(window.y, title="elapsed time")
+_ = evolution.plot(marker="o", ls=":")
+
+# %% [markdown]
+# The [short gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/d_peak_analysis/plot_peak_finding.rst)
+# marks all detections on the final spectrum in the wider carbonyl region.

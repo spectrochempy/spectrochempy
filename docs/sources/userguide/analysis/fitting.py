@@ -123,6 +123,28 @@ _ = dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="be
 
 
 # %% [markdown]
+# ### Interpret the coefficients and inspect residuals
+#
+# The slope has the units of the response divided by those of the predictor.
+# In this example it is a speed in km/h, and the intercept is a distance
+# in km. With plain lists or arrays, call `fit(X, Y)` and keep track of the
+# units yourself. With a single dataset, `fit(Y)` uses its x-coordinate
+# as the predictor.
+#
+# Subtract the fitted values from the observations to inspect the errors
+# in the original response units. A trend or curvature in the residuals
+# can indicate that a straight line misses part of the response.
+
+# %%
+residuals = d - dfit
+residuals.title = "distance residual"
+_ = residuals.plot_scatter()
+
+# %% [markdown]
+# The [short calibration example](../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.rst)
+# uses the same single-dataset approach on synthetic absorbance measurements.
+
+# %% [markdown]
 # Let's try now with a quadratic increase of the speed:
 
 
@@ -427,7 +449,7 @@ shape: asymmetricvoigtmodel
 #
 #   ```
 #   MODEL: linez
-#   shape: voigtmodel
+#   shape: asymmetricvoigtmodel
 #   $ ampl: val, 0.0, None
 #   $ width: val, 0.0, None
 #   $ pos: val, lob, upb
@@ -435,10 +457,68 @@ shape: asymmetricvoigtmodel
 #   $ asym: val, 0.0, 1.0
 #   ```
 
-# For quick synthetic profiles outside the fitting workflow, SpectroChemPy also
-# exposes direct helpers at the top level: `scp.gaussian`, `scp.lorentzian`,
-# `scp.voigt`, `scp.asymmetricvoigt`, and `scp.sigmoid`.
+# %% [markdown]
+# #### Compare line shapes at equal peak height
+#
+# The [line-shape gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lineshapes.rst)
+# uses the direct helpers `scp.gaussian`, `scp.lorentzian`, `scp.voigt`
+# and `scp.asymmetricvoigt` on the same wavenumber grid.
+# Set `normalized=False` to compare profiles at equal peak height.
+# With the default `normalized=True`, `ampl` scales the area instead.
+# On a finite grid, the integral may miss part of the tails.
+#
+# A Lorentzian has longer tails than a Gaussian. Voigt broadening combines
+# Gaussian and Lorentzian contributions, with `ratio` ranging from pure
+# Lorentzian at 0 to pure Gaussian at 1. The asymmetric Voigt adds a
+# shape parameter `asym`. Compare fits and residuals over a window wide
+# enough to include the tails when choosing a profile.
 
+# %% [markdown]
+# #### Build synthetic elution profiles
+#
+# The [synthetic elution example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_synthetic_profiles.rst)
+# uses one Gaussian per component. With `normalized=False`, `ampl` is
+# the peak height, `pos` is the elution time at the maximum, and `width`
+# is the full width at half maximum. A wider peak overlaps more of its
+# neighbors at the same spacing between centers.
+#
+# To write the profile as an expression, use the standard deviation
+# $\sigma$. Convert it to full width at half maximum using
+# $2\sqrt{2\ln 2}\,\sigma$. The two constructions below agree on the
+# same sampling grid.
+
+# %%
+time = scp.Coord.linspace(0.0, 1.0, 200, title="relative elution time")
+height, center, sigma = 0.8, 0.55, 0.12
+width = 2.0 * (2.0 * scp.log(2.0)) ** 0.5 * sigma
+analytical = height * scp.exp(-0.5 * ((time.data - center) / sigma) ** 2)
+gaussian = scp.gaussian(
+    time.data, ampl=height, pos=center, width=width, normalized=False
+)
+print(f"Maximum difference: {abs(analytical - gaussian).max():.2e}")
+
+# %% [markdown]
+# Store one profile per row when plotting them over a shared time axis.
+# For a bilinear model $X = C S^T$, transpose that array so the rows of
+# $C$ correspond to observations and the columns to components.
+
+# %% [markdown]
+# #### Fit overlapping bands
+#
+# The [short gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.rst)
+# fits two overlapping Gaussians to synthetic data. For a normalized Gaussian,
+# `ampl` scales the area, `pos` gives the center, and `width` gives the full
+# width at half maximum. Estimate starting values from the spectrum.
+# Use a positive lower bound for each width. The synthetic example gives
+# each center its own interval and uses a flat baseline set to zero.
+# On measured spectra, use center bounds that reflect what you know about
+# the bands. Several component profiles can reproduce a strongly overlapping
+# envelope, even when the residuals are small.
+# For the experimental bands below, inspect and correct the baseline first.
+#
+# Check the residuals after fitting. Patterns near a band can indicate a
+# poor line shape, a missing component, or an imperfect baseline correction.
+#
 # %% [markdown]
 # #### Validate the script before fitting
 #
@@ -633,8 +713,114 @@ _ = f1.plot_merit(
 
 
 # %% [markdown]
-# <div class='alert alert-warning'>
-# <b>Todo</b>
+# ## Fit overlapping peaks in a 2D spectrum
 #
-# Tutorial to be continued with other methods of optimization and fitting (2D...)
-# </div>
+# A separable peak is the product of one profile per axis, scaled by its
+# height at the center. Each profile can have its own shape, center and
+# width. Fit both peaks to the same map so that the model accounts for
+# their overlap. The [short gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit_multiplet_2d.rst)
+# uses Gaussian profiles along both axes. Here we mix Gaussian and
+# Lorentzian profiles and compare the fits with and without a mask.
+
+# %%
+x = scp.Coord.linspace(-4, 4, 61, units="Hz")
+y = scp.Coord.linspace(-3, 3, 51, units="ppm")
+grid = scp.zeros((y.size, x.size), coordset=[y, x], units="V")
+true_peaks = [
+    {
+        "height": 2.0,
+        "axes": {
+            "y": {"model": "gaussian", "center": -0.4, "width": 1.1},
+            "x": {"model": "lorentzian", "center": -0.5, "width": 1.4},
+        },
+    },
+    {
+        "height": 1.3,
+        "axes": {
+            "y": {"model": "lorentzian", "center": 0.6, "width": 1.4},
+            "x": {"model": "gaussian", "center": 0.8, "width": 1.6},
+        },
+    },
+]
+clean = scp.simulate_peaks(grid, true_peaks)
+noise = scp.normal(scale=0.015, size=grid.shape, seed=42, units=grid.units)
+spectrum = clean + noise
+
+# %% [markdown]
+# ### Fit the complete map
+#
+# Fit both peaks in one optimization. Give each width a strictly positive
+# lower bound. The initial values describe the approximate location, size,
+# and shape of each peak on the map.
+
+# %%
+starting_peaks = [
+    {
+        "height": {"value": height, "bounds": (0, 4)},
+        "axes": {
+            dim: {
+                "model": model,
+                "center": center,
+                "width": {"value": width, "bounds": (0.3, 3)},
+            }
+            for dim, model, center, width in profiles
+        },
+    }
+    for height, profiles in [
+        (1.7, [("y", "gaussian", -0.3, 1.3), ("x", "lorentzian", -0.3, 1.6)]),
+        (1.1, [("y", "lorentzian", 0.5, 1.6), ("x", "gaussian", 0.6, 1.8)]),
+    ]
+]
+complete_result = scp.Optimize(peaks=starting_peaks).fit(spectrum).result
+
+# %%
+_ = scp.multiplot(
+    [spectrum, complete_result.fitted, complete_result.residuals],
+    labels=["Observed", "Fitted", "Residuals"],
+    ncol=3,
+    method="image",
+    colorbar=True,
+    figsize=(12, 4),
+)
+
+# %% [markdown]
+# ### Repeat the fit with missing rows and columns
+#
+# Make a copy of the same noisy map and mask two strips that cross near
+# the first peak (x ≈ −0.5 Hz, y ≈ −0.4 ppm). Start a new optimization
+# with the same initial parameters. Masked points contribute neither
+# to the fit nor to the residual statistics.
+
+# %%
+masked_spectrum = spectrum.copy()
+missing = scp.zeros(spectrum.shape, dtype=bool).data
+missing[20:24, :] = True
+missing[:, 25:28] = True
+masked_spectrum.mask = missing
+masked_result = scp.Optimize(peaks=starting_peaks).fit(masked_spectrum).result
+
+# %%
+_ = scp.multiplot(
+    [masked_spectrum, masked_result.fitted, masked_result.residuals],
+    labels=["Observed", "Fitted", "Residuals"],
+    ncol=3,
+    method="image",
+    colorbar=True,
+    figsize=(12, 4),
+)
+
+# %% [markdown]
+# ### Compare the two fits
+#
+# The model is evaluated across the grid, and the fitted and residual maps
+# retain the mask so the gaps remain visible. Compare the two estimates of
+# each peak height. Each residual RMSE is calculated on the points used
+# in its own fit, so the two values refer to different sets of observations.
+
+# %%
+for label, result in [("Complete map", complete_result), ("Masked map", masked_result)]:
+    print(label)
+    print(f"Converged: {result.diagnostics['success']}")
+    print(f"Residual RMSE: {result.diagnostics['rmse']:.4f} V")
+    for i, peak in enumerate(result.peaks, start=1):
+        print(f"Peak {i} height: {peak['height']:.3f} V")

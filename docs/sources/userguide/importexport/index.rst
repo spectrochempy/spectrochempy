@@ -16,3 +16,5 @@ Import & Export
    import
    readers
    importIR
+   importJCAMPDX
+   export

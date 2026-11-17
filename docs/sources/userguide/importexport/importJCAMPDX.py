@@ -33,21 +33,112 @@
 # %% [markdown]
 # # Import/Export of JCAMP-DX files
 #
-# [JCAMP-DX](https://artefacts.ceda.ac.uk/formats/jcamp_dx/) is an open format
-# used by several spectroscopies. Use `scp.read_jcamp()` or `scp.jcamp.read()`
-# to open infrared spectra and supported processed NMR spectra in 1D and 2D.
-# The reader selects the workflow from the data type declared in the file. If that type
-# is ambiguous, use `jcamp_kind="ir"` or `jcamp_kind="nmr"`.
+# JCAMP-DX is a text exchange format used across several spectroscopies.
+# Files with the same extension (`.dx` or `.jdx`) can contain different
+# kinds of spectral data. Use `scp.jcamp.read()` to read an existing file.
 #
-# The IR reader supports AFFN and DIFDUP spectra on a regular grid, including
-# linked series on a shared grid. Reading processed NMR spectra requires
-# the [SpectroChemPy NMR plugin](https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html).
-# For a supported real 2D spectrum stored in JCAMP-DX NTUPLES, install
-# nmrglue-ng 1.3 or later and call `scp.read_jcamp("cosy.jdx")`. The reader
-# returns a 2D dataset with the F1 and F2 axes from the file.
+# ```{=rst}
+# See :cite:t:`mcdonald:1988` for the original infrared exchange format.
+# ```
+
+# %% [markdown]
+# ## Check the technique and the data table
 #
-# The example below shows how to export and read back an infrared spectrum.
+# The reader selects a route from the `DATA TYPE` header. The table below
+# describes which representations SpectroChemPy accepts for each technique.
 #
+# | Technique | Supported data | Limits |
+# | --- | --- | --- |
+# | Infrared | `XYDATA` with a regular spectral grid, including AFFN and DIFDUP encodings | Linked (`LINK`) spectra must share their grid and units. |
+# | Raman | One explicit ASCII X/Y table in `XYDATA` or `XYPOINTS`, with Raman shift in cm⁻¹ | Compressed tables and linked containers are outside this profile. |
+# | UV–visible | One explicit ASCII X/Y table in `XYDATA` or `XYPOINTS`, with wavelength in nm | Compressed tables and linked containers are outside this profile. |
+# | Processed NMR 1D | One real spectrum in a regular `X++(Y..Y)` table, with the NMR plugin | The profile excludes raw FIDs and peak lists. |
+# | Processed NMR 2D | One supported real F1/F2 plane in an `NTUPLES` spectrum | Requires `spectrochempy-nmr` 0.4.0 or later. Complex or hypercomplex planes and higher-dimensional spectra are outside this profile. |
+#
+# For Raman and UV–visible spectra the reader keeps the supplied coordinates,
+# including irregular grids. The number of X/Y pairs must match `NPOINTS`.
+# Reading several files gives separate spectra, even with `merge=True`.
+# For UV–visible files, absorbance and transmittance are recognized from
+# `YUNITS`. For Raman, the ordinate label is kept as text.
+#
+# ### Choose the route when the header is ambiguous
+#
+# When the file does not declare a recognized technique and you know it
+# from the instrument or export settings, pass `jcamp_kind` explicitly:
+#
+# ```python
+# import spectrochempy as scp
+#
+# spectrum = scp.jcamp.read("spectrum.dx", jcamp_kind="raman")
+# ```
+#
+# Supported choices are `"auto"` (the default), `"ir"`, `"raman"`,
+# `"uvvis"`, and `"nmr"`. An explicit choice must agree with a recognized
+# declaration. A linked file with conflicting technique declarations is
+# rejected. If the table layout or units are unsupported, re-export from
+# the instrument software using a supported representation.
+#
+# ### Read processed NMR data
+#
+# Install a compatible [SpectroChemPy NMR plugin](https://www.spectrochempy.fr/projects/nmr/latest/getting_started/installation.html).
+# The public reader delegates to the plugin and returns an `NDDataset`.
+# A supported 2D file preserves the F1 and F2 coordinates from the
+# exported plane. See the [NMR reading guide](https://www.spectrochempy.fr/projects/nmr/latest/userguide/reading_data.html)
+# for other acquisition and exchange formats.
+
+# %% [markdown]
+# ### Read a processed NMR spectrum
+#
+# With a compatible SpectroChemPy NMR plugin (version 0.3 or later),
+# the reader recognizes the NMR data type declared in this synthetic JCAMP-DX
+# file and returns a spectrum on a chemical-shift axis in ppm.
+
+# %%
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from packaging.version import Version
+
+import spectrochempy as scp
+
+try:
+    nmr_version = Version(version("spectrochempy-nmr"))
+except PackageNotFoundError:
+    nmr_version = None
+
+if nmr_version is not None and nmr_version >= Version("0.3"):
+    nmr_jcamp = """##TITLE=Synthetic proton spectrum
+##JCAMP-DX=5.01
+##DATA TYPE=NMR SPECTRUM
+##DATA CLASS=XYDATA
+##.OBSERVE FREQUENCY=400
+##.OBSERVE NUCLEUS=^1H
+##XUNITS=PPM
+##YUNITS=ARBITRARY UNITS
+##FIRSTX=8
+##LASTX=0
+##NPOINTS=9
+##XFACTOR=1
+##YFACTOR=1
+##XYDATA=(X++(Y..Y))
+8 0 1 2 10 2 1 6 1 0
+##END=
+"""
+    with TemporaryDirectory() as directory:
+        filename = Path(directory) / "proton.jdx"
+        filename.write_text(nmr_jcamp, encoding="ascii")
+        proton = scp.read_jcamp(filename)
+
+    _ = proton.plot()
+
+# %% [markdown]
+# ## Export and read back an infrared spectrum
+#
+# The JCAMP-DX writer exports real infrared spectral data. The read support
+# described above includes techniques beyond the writer's scope. For other
+# export options, see [Export and share data](export.rst).
 
 # %%
 import spectrochempy as scp

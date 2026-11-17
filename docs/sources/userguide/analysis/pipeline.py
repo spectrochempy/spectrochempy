@@ -138,6 +138,23 @@ summary.title = f"test predictions, RMSE = {rmse:.3f}"
 summary
 
 # %% [markdown]
+# Autoscaling is fitted on the calibration rows, feature by feature.
+# During prediction the fitted scaler applies those same statistics to
+# the test rows. Disable PLS's internal scaling because the transformer
+# already scales the predictors. To inspect the steps individually, use
+# the fitted clones held by the pipeline.
+#
+# The [short corn example](../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls_pipeline.rst)
+# applies these steps to NIR spectra and uses the same 57/23 split as
+# the [PLS tutorial](pls.rst).
+
+# %%
+fitted_steps = regression_pipeline.fitted_named_steps_
+X_test_scaled = fitted_steps["scale"].transform(X_test)
+manual_prediction = fitted_steps["pls"].predict(X_test_scaled)
+print(f"Maximum difference: {abs(y_pred - manual_prediction).max():.3g}")
+
+# %% [markdown]
 # The fitted final estimator can still be inspected directly. Here we reuse its
 # parity-plot helper and add the independent test predictions in red.
 

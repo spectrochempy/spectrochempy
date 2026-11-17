@@ -3,93 +3,25 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
 """
-PLS regression example
-======================
-In this example, we perform a PLS regression to predict the moisture of corn samples
-from their NIR spectra.
+Predict corn moisture from NIR spectra
+======================================
 
+Fit a PLS regression on 57 corn samples and compare the predictions for the
+remaining 23 samples with their measured moisture values.
+See the :doc:`PLS tutorial </userguide/analysis/pls>` for the dataset,
+the calibration split, and how to interpret the parity plot.
 """
 
-# %%
-# Import the package
 import spectrochempy as scp
 
-# %%
-# Load the corn NIR dataset
-# --------------------------
-# The data is available from the Eigenvector archive:
-try:
-    ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
-except FileNotFoundError:
-    ds_list = None
-    print("Eigenvector corn dataset not reachable; skipping the remote PLS example.")
-else:
-    ds_list_names = [f"{i} : {ds.name}({ds.shape})" for i, ds in enumerate(ds_list)]
-    print(ds_list_names)
+datasets = scp.read("https://eigenvector.com/data/Corn/corn.mat", merge=False)
+by_name = {dataset.name: dataset for dataset in datasets}
+spectra = by_name["m5spec"]
+moisture = by_name["propvals"][:, "Moisture"]
 
-# %%
-if ds_list is not None:
-    # %%
-    # Inspect the spectra
-    # ^^^^^^^^^^^^^^^^^^^^
-    # The 5th dataset ``m5spec`` contains NIR spectra from 80 corn samples
-    # recorded on the same instrument. The ``corn.mat`` archive does not
-    # record whether the intensities are stored as reflectance or as
-    # ``log(1/R)`` absorbance, so the series is labeled with the neutral title
-    # "NIR spectra" and no intensity unit is imposed:
-    X = ds_list[4]
-    X.title = "NIR spectra"
-    X.x.title = "Wavelength"
-    X.x.units = "nm"
-    _ = X.plot(cmap=None)
-
-    # %%
-    # The properties to predict are in the ``propval`` dataset:
-    Y = ds_list[3]
-    _ = Y.T.plot(cmap=None, legend=Y.x.labels)
-
-    # %%
-    # Predict moisture content
-    # ^^^^^^^^^^^^^^^^^^^^^^^^
-    y = Y[:, "Moisture"]
-
-    # %%
-    # Split into training and test sets
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    # Use the first 57 samples (out of 80) for calibration and the rest for
-    # validation:
-    X_train = X[:57]
-    X_test = X[57:]
-    y_train = y[:57]
-    y_test = y[57:]
-
-    # %%
-    # Fit the PLS model
-    # ^^^^^^^^^^^^^^^^^^
-    pls = scp.PLSRegression(n_components=5)
-    _ = pls.fit(X_train, y_train)
-
-    # %%
-    # Validate with a parity plot
-    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ax = pls.plot_parity(label="calibration", s=150)
-    _ = pls.plot_parity(
-        y_test,
-        pls.predict(X_test),
-        ax=ax,
-        s=150,
-        c="red",
-        label="validation",
-        clear=False,
-    )
-    _ = ax.legend(loc="lower right")
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+model = scp.PLSRegression(n_components=5)
+_ = model.fit(spectra[:57], moisture[:57])
+predicted = model.predict(spectra[57:])
+_ = model.plot_parity(moisture[57:], predicted, label="Held-out samples")

@@ -61,17 +61,24 @@ _ = nd2.plot()
 # The problem is that, not only the spikes are not removed, but they are also broadened.
 
 # %% [markdown]
-# A better way to simply denoise this spectra is to use the `denoise` dataset method.
+# ### Reconstruct a series with PCA
 #
-# The ratio parameter fix the amount of variance we want to preserve in % (default 99.8%)
+# The `denoise()` method fits PCA to a 2D dataset of spectra. It reconstructs
+# the series using enough principal components to meet the explained variance
+# target set by `ratio`, expressed as a percentage (99.8 by default).
+#
+# A lower ratio can remove more noise and can also erase weak bands or
+# changes that occur in only a few acquisitions. Compare the same spectra
+# before and after reconstruction, checking peak shapes and trends across
+# the series before using the denoised data for quantitative analysis.
 
 # %%
 nd3 = nd1.denoise(ratio=90)
 _ = nd3.plot()
 
 # %% [markdown]
-# This clearly help to increase the signal-to-noise ratio.
-# However, it apparently has in the present case a poor effect on eliminating cosmic ray peaks.
+# Here PCA reduces the noise but some cosmic ray spikes are still visible.
+# Use the dedicated despiking methods below to target those isolated spikes.
 
 # %% [markdown]
 # ## Removing cosmic rays spike from Raman spectra
@@ -93,11 +100,24 @@ _ = nd4.plot()
 # %% [markdown]
 # ### `despike` method
 #
-# To obtain better results, one can use the despike methods. The default method ('katsumo') is based on
-# :cite:t:`katsumoto:2003`. The second one ('whitaker') is based on :cite:t:`Whitaker:2018`
-# For both methods, only two parameters needs to be tuned: `delta`, a threshold for the detection of spikes, and
-# `size` the size of the window to consider around the spike to estimate the original intensity.
-
+# ```{=rst}
+# The default ``katsumoto`` method (:cite:t:`katsumoto:2003`) detects
+# sharp deviations of either sign from a locally smoothed spectrum. The
+# ``whitaker`` method (:cite:t:`whitaker:2018`) detects outliers in
+# differences between adjacent samples.
+# ```
+#
+# For these methods, `delta` sets the detection threshold and `size`
+# sets the window length in samples. Start with a conservative threshold
+# and check the result against the input, especially near narrow bands.
+#
+# When a spike affects one acquisition in an ordered series, use
+# `series.despike(method="neighbors", dim="y")` if `y` is the acquisition
+# axis. This method compares each intensity with the two neighboring
+# acquisitions at the same wavenumber. It uses `delta` to detect positive
+# excursions above both neighbors and replaces them with the neighbors' mean.
+# Inspect rapid changes across the series before accepting the correction.
+#
 # %%
 X = nd1[0]
 nd5 = scp.despike(X, size=11, delta=5)

@@ -6,6 +6,8 @@ Save and reload a native SpectroChemPy dataset
 Use the native SpectroChemPy format (``.scp``) to save an NDDataset with its
 coordinates, units and metadata. Galactic SPC files use the ``.spc`` extension
 and have a separate reader.
+
+See the :ref:`native dataset guide <export-native>`.
 """
 
 from pathlib import Path

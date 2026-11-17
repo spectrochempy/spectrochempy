@@ -5,6 +5,10 @@ Decompose a 3D dataset with CP/PARAFAC
 
 Use the Tensor plugin to separate a synthetic spectral dataset into sample,
 time and spectral profiles, then reconstruct the original dataset.
+Install the optional plugin with ``pip install spectrochempy[tensor]``.
+
+See the :doc:`CP/PARAFAC tutorial </userguide/analysis/cp>` for rank
+selection and interpretation.
 """
 
 import spectrochempy as scp
@@ -23,8 +27,7 @@ dataset = scp.NDDataset(values, coordset=[samples, time, x], title="absorbance")
 # %%
 # Fit one component. Each factor has one row per position along its axis.
 model = scp.tensor.CP(n_components=1)
-model.fit(dataset)
-sample_factor, time_factor, spectral_factor = model.result.factors
+_ = model.fit(dataset)
 
 # %%
 # Reconstruct the tensor and compare the first spectrum of the first sample.

@@ -3,92 +3,36 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
-
+# ruff: noqa: D205, D400, D415
 """
-FastICA example
-===============
+Separate two mixed signals with FastICA
+=======================================
 
+Separate a smooth oscillation and a switching signal from two mixtures.
+See the :doc:`FastICA tutorial </userguide/analysis/fast_ica>` for the
+orientation of the input matrix and how to interpret the sources.
 """
 
-# sphinx_gallery_thumbnail_number = 3
+import numpy as np
 
-# %%
-# Import the spectrochempy API package
 import spectrochempy as scp
 
-# %%
-# Independent component analysis (ICA) is a computational method for separating a multivariate signal such as spectra
-# into additive components. This is done by assuming that at most one subcomponent is Gaussian and that the
-# components are statistically independents from each other.
+time = scp.Coord.linspace(0.0, 6.0, 601, title="time", units="s")
+smooth = scp.sin(2.0 * np.pi * time.data)
+switching = (scp.sin(5.0 * np.pi * time.data) >= 0) * 2.0 - 1.0
+mixtures = scp.NDDataset(
+    [smooth + 0.6 * switching, 0.4 * smooth + switching],
+    coordset=[scp.Coord(labels=["Mixture 1", "Mixture 2"]), time],
+    title="relative signal",
+)
+model = scp.FastICA(n_components=2, random_state=42)
+sources = model.fit_transform(mixtures.T).T
+sources.title = "relative signal"
 
-# Load, prepare and plot the dataset
-# ----------------------------------
-# Here we use a dataset from :cite:t:`jaumot:2005`
-
-X = scp.read("matlabdata/als2004dataset.MAT")[-1]
-
-X.title = "absorbance"
-X.units = "absorbance"
-# The archived file does not store the physical elution time and wavelength
-# coordinates, so the axes below are plain sample/channel indices without
-# physical units (see also the MCR-ALS example on the same dataset).
-X.y = scp.Coord.arange(
-    X.shape[0], dtype="float", title="elution time (index)"
-)  # floats to trigger sequential colormap
-X.x.title = "wavelength (index)"
-_ = X.plot()
-
-# %%
-# Create and fit a FastICA object
-# -------------------------------
-#
-# As argument of the object constructor we define log_level to ``"INFO"`` to
-# obtain verbose output during fit, and we set the number of component to use at 4.
-
-ica = scp.FastICA(n_components=4, log_level="INFO")
-_ = ica.fit(X)
-
-# %%
-# Get the mixing system and source spectral profiles
-# --------------------------------------------------
-#
-# The mixing system :math:`A` and the source spectral profiles :math:`S^T` can
-# be obtained as follows (the Sklearn equivalents - also valid with Scpy - are
-# indicated as comments
-
-A = ica.A  # or model.transform()
-St = ica.St  # or model.mixing.T
-
-# %%
-# Plot them
-
-
-_ = A.T.plot(title="Mixing System", colormap=None)
-_ = St.plot(title="Sources spectral profiles", colormap=None)
-
-# %%
-# Reconstruct the dataset
-# -----------------------
-#
-# The dataset can be reconstructed from these matrices and the mean:
-
-X_hat_a = scp.dot(A, St) + X.mean(dim=0).data
-_ = X_hat_a.plot(title=r"$\hat{X} = \bar{X} + A S^t$")
-
-# %%
-# Or using the transform() method:
-X_hat_b = ica.inverse_transform()
-_ = X_hat_b.plot(title=r"$\hat{X} =$ ica.inverse_transform()")
-
-# %%
-# Finally, the quality of the reconstriction can be checked by ``plot_merit()``
-
-_ = ica.plot_merit(nb_traces=15)
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+_ = scp.multiplot(
+    [mixtures, sources],
+    labels=["Observed mixtures", "Estimated sources"],
+    ncol=2,
+    method="pen",
+    figsize=(10, 4),
+)

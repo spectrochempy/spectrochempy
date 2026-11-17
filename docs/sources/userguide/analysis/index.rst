@@ -31,4 +31,9 @@ in the :doc:`analysis gallery </gettingstarted/examples/gallery/auto_examples_an
    cross_validation
    pca
    pls
+   efa
+   fast_ica
    mcr_als
+   nmf
+   cp
+   correlation_spectroscopy

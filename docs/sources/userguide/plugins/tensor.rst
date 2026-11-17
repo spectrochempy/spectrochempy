@@ -55,8 +55,8 @@ The generated public API page for the Tensor plugin is listed in
 Examples
 ========
 
-Use the package-level ``scp.tensor.CP(...)`` estimator shown above for
-TensorLy-backed CP/PARAFAC workflows on existing datasets.
+See the :doc:`CP/PARAFAC tutorial </userguide/analysis/cp>` for organizing
+a 3D dataset, selecting the rank, and interpreting the factors.
 
 Limitations
 ===========

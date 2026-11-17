@@ -3,54 +3,29 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
 """
-Compare smoothing window sizes on a Raman spectrum
-==================================================
+Compare two smoothing windows
+=============================
 
-This example shows how the smoothing window size changes the balance between
-noise reduction and signal distortion on a Raman spectrum.
+Smooth a noisy synthetic spectrum with two moving averages. Compare
+how the narrow and broad bands respond. See the :doc:`smoothing tutorial
+</userguide/processing/smoothing>` for guidance on choosing the window.
 """
 
 import spectrochempy as scp
 
-# %%
-# Prepare a noisy spectrum
-# -------------------------
-dataset = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
-region = dataset[:, :400.0]
-region += 200 * scp.random(region.shape, seed=42)
-region.name = "noisy spectrum"
+shift = scp.Coord.linspace(100.0, 240.0, 141, title="Raman shift", units="cm^-1")
+narrow = scp.gaussian(shift.data, pos=145.0, width=7.0, normalized=False)
+broad = scp.gaussian(shift.data, ampl=0.75, pos=198.0, width=30.0, normalized=False)
+noise = scp.normal(scale=0.07, size=shift.size, seed=42)
+spectrum = scp.NDDataset(
+    narrow + broad + noise.data, coordset=[shift], title="intensity"
+)
 
-prefs = scp.preferences
-prefs.figure.figsize = (8, 4)
-_ = region.plot()
-
-# %%
-# Moving-average smoothing
-# -------------------------
-smoothed = {size: region.smooth(size) for size in (3, 7, 11)}
-
-# %%
-# Compare the results. Larger windows remove more noise but can also flatten
-# narrow features:
-for size, smoothed_region in smoothed.items():
-    _ = scp.plot_compare(
-        region,
-        smoothed_region,
-        title=f"Moving-average smoothing (size={size})",
-    )
-
-# %%
-# Savitzky-Golay smoothing
-# -------------------------
-sg = scp.Filter(method="savgol", size=7, order=2)(region)
-_ = scp.plot_compare(region, sg, title="Savitzky-Golay smoothing (size=7, order=2)")
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()
+_ = scp.plot_multiple(
+    [spectrum, spectrum.smooth(5), spectrum.smooth(21)],
+    method="pen",
+    labels=["Noisy spectrum", "5 points", "21 points"],
+    legend="best",
+)

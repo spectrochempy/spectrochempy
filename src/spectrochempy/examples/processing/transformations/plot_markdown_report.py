@@ -12,6 +12,8 @@ Report a processed IR spectrum in Markdown
 ``NDDataset.to_markdown_report()`` summarizes a dataset and its recorded history.
 It does not provide an executable workflow or a complete provenance record.
 Figures are included only through explicit references.
+
+See the :ref:`export guide <export-markdown-report>`.
 """
 
 from pathlib import Path

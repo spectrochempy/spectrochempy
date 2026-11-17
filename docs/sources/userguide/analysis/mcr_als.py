@@ -61,8 +61,10 @@
 # %% [markdown]
 # ### 1. Loading and inspecting the data
 #
-# We use the ALS2004 benchmark dataset from Jaumot et al.,
-# *Chemolab*, 76 (2005) 101–110 and *Chemolab*, 140 (2015) 1–12.
+# ```{=rst}
+# We use the ALS2004 benchmark dataset from :cite:t:`jaumot:2005,jaumot:2015`.
+# ```
+#
 # It contains HPLC-DAD measurements of a mixture of four co-eluting species.
 
 # %%
@@ -77,18 +79,20 @@ for d in datasets:
 # pure-component spectra (`spure`, 4 × 96) which will be used to initialize the MCRALS.
 
 # %%
-X = datasets[-1]
-St0 = datasets[3]
+by_name = {dataset.name: dataset for dataset in datasets}
+X = by_name["m1"]
+St0 = by_name["spure"]
 
 X.title = "absorbance"
 X.set_coordset(None, None)
-X.set_coordtitles(y="elution time", x="wavelength")
+X.set_coordtitles(y="elution index", x="spectral channel")
 
 _ = X.plot(title="experimental spectra")
 _ = St0.plot(title="pure-component spectra")
 
 # %% [markdown]
-# The 51 rows of `X`are elution times; the 96 columns are wavelengths.
+# The 51 rows of `X` follow elution order, and the 96 columns are spectral
+# channels. The file provides indices for these axes.
 # Overlapping bands cannot be resolved by inspection alone — this is
 # where curve resolution is needed.
 
@@ -179,13 +183,45 @@ _ = C0.T.plot()
 
 
 # %% [markdown]
+# #### Initialize from pure variables with SIMPLISMA
+#
+# ```{=rst}
+# See :cite:t:`windig:1997` for examples of pure-variable selection.
+# ```
+#
+# SIMPLISMA selects spectral variables that vary strongly relative to
+# their mean and add information beyond the variables already selected.
+# This works best when each component contributes a channel dominated by
+# that component. Strong overlap can make the resulting spectra ambiguous.
+#
+# Set `n_components` to cap the number of components. `noise` adds an
+# offset to reduce the influence of weak channels. `tol` sets the
+# stopping threshold as a percentage of unexplained variance.
+# For this benchmark, set the small negative values to zero on a copy
+# used only for SIMPLISMA. Check the cause of negative intensities before
+# applying this choice to other data. MCR-ALS fits the original matrix.
+# The [short SIMPLISMA example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.rst)
+# shows the estimated spectra. Pass them to MCR-ALS as the initial $S^T$
+# when independent reference spectra are unavailable.
+
+# %%
+simplisma = scp.SIMPLISMA(n_components=4, noise=3, tol=0.05)
+_ = simplisma.fit(X.clip(0))
+mcr_pure_variables = scp.MCRALS()
+_ = mcr_pure_variables.fit(X, simplisma.result.components)
+_ = mcr_pure_variables.plot_merit(offset=5, nb_traces=5)
+
+# %% [markdown]
 # ### 5. Running the optimisation
 #
 # The default configuration already applies non-negativity to both $C$ and
 # $S^T$, and unimodality to $C$ — sensible defaults for chromatographic
 # data.
 #
-# Let's first run the MCR-ALS algorithm with the pure spectra as initial guess for $S^T$.
+# Start with the pure spectra as the initial estimate of $S^T$. The
+# [short gallery example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.rst)
+# shows this one fit. The next sections compare it with an EFA initialization
+# and examine the effect of the constraints.
 
 # %%
 mcr_s = scp.MCRALS(log_level="INFO")
@@ -468,6 +504,85 @@ _ = ct.Monotonic("C", "decreasing", components=[1])
 #     return C_constrained
 #
 # ct.ModelProfile("C", model=kinetic_model)
+
+# %% [markdown]
+# #### Fit a sequential reaction
+#
+# ```{=rst}
+# The UV–visible data in ``METING9.MAT`` accompany :cite:t:`bijlsma:2001`.
+# ```
+#
+# The file stores time in seconds and wavelengths in nm. Keep every fourth
+# spectrum and use 300–500 nm for both fits. The first fit uses profiles
+# initialized by EFA and the default MCR-ALS constraints.
+
+# %%
+time_data, spectral_data = scp.read("matlabdata/METING9.MAT")
+time = scp.Coord(time_data.data.squeeze(), title="elapsed time", units="s")
+wavelength = scp.Coord(
+    spectral_data[:, 0].data.squeeze(), title="wavelength", units="nm"
+)
+spectra = scp.NDDataset(
+    spectral_data[:, 1:].data.T,
+    coordset=[time.to("min"), wavelength],
+    title="absorbance",
+)
+reaction_spectra = spectra[::4, 300.0:500.0]
+
+efa_reaction = scp.EFA(n_components=3)
+initial_efa = efa_reaction.fit_transform(reaction_spectra)
+soft_mcr = scp.MCRALS()
+_ = soft_mcr.fit(reaction_spectra, initial_efa)
+
+# %% [markdown]
+# For the second fit, assume two irreversible first-order steps,
+# A → B → C. Start with A at a relative concentration of 5, with B and C
+# initially absent. The rate guesses are in inverse minutes because the time
+# coordinate was converted to minutes. Use `ModelProfile` to refit the two
+# rates against the current concentration estimates during ALS. The
+# component indices connect the three concentration columns to the species
+# in reaction order.
+
+# %%
+rates = {"k[0]": 0.5, "k[1]": 0.05}
+kinetics = scp.ActionMassKinetics(
+    ("A -> B", "B -> C"), {"A": 5.0, "B": 0.0, "C": 0.0}, list(rates.values())
+)
+initial = kinetics.integrate(reaction_spectra.y.data)
+kinetic_mcr = scp.MCRALS(
+    constraints=[
+        ct.ModelProfile(
+            "C",
+            components=[0, 1, 2],
+            model=kinetics.fit_to_concentrations,
+            model_args=([0, 1, 2], [0, 1, 2], rates),
+            model_kwargs={
+                "ivp_solver_kwargs": {"return_NDDataset": False},
+                "optimizer_kwargs": {"options": {"disp": False}},
+            },
+        )
+    ]
+)
+_ = kinetic_mcr.fit(reaction_spectra, initial)
+
+# %% [markdown]
+# Compare the timing and shape of the profiles. Their amplitudes can
+# differ because the kinetic model fixes the initial concentration
+# scale. Inspect the residuals to look for departures from the proposed
+# model. A good reconstruction alone cannot establish a reaction mechanism.
+#
+# The [short kinetic example](../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.rst)
+# shows the fit with the kinetic constraint.
+
+# %%
+_ = scp.multiplot(
+    [soft_mcr.C.T, kinetic_mcr.C.T],
+    labels=["Default constraints", "Kinetic constraint"],
+    ncol=2,
+    method="pen",
+    figsize=(10, 4),
+)
+_ = kinetic_mcr.plot_merit(nb_traces=5)
 
 # %% [markdown]
 # #### `ComponentPresence`

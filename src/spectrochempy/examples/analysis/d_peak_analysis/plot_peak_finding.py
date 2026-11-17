@@ -3,101 +3,27 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+# ruff: noqa: D205, D400, D415
 """
-Find peak maxima in an IR time series
+Mark detected peaks on an IR spectrum
 =====================================
 
-This example shows a compact workflow to locate peak maxima on an IR dataset
-and visualize the detected positions on top of the last spectrum.
+Find peaks in the last spectrum of a CO adsorption series and mark their
+positions. See the :doc:`peak finding tutorial </userguide/analysis/peak_finding>`
+for the detection criteria and an example of tracking a band over time.
 """
 
 import spectrochempy as scp
 
+spectra = scp.read("irdata/CO@Mo_Al2O3.SPG")
+spectrum = spectra[-1, 2300.0:1900.0]
+peaks, _ = spectrum.find_peaks(distance="5 cm^-1", prominence=0.02)
 
-def _as_iterable(values):
-    if getattr(values, "shape", ()) == ():
-        return [values]
-    return values
-
-
-def _tracked_peak_position(spec):
-    peaks, _ = spec.find_peaks(distance="5 cm^-1", prominence=0.02)
-    if peaks is not None:
-        return peaks.x.values.max()
-
-    index = spec.data.argmax()
-    return spec.x[index].values
-
-
-# %%
-# Load and focus on the carbonyl region
-# ---------------------------------------
-dataset = scp.read("irdata/CO@Mo_Al2O3.SPG")
-dataset.y -= dataset.y.data[0]
-dataset.y.title = "time"
-dataset.y = dataset.y.to("minutes")
-
-region = dataset[:, 2300.0:1900.0]
-prefs = scp.preferences
-prefs.figure.figsize = (7, 4)
-prefs.colormap = "Dark2"
-prefs.colorbar = True
-_ = region.plot()
-
-# %%
-# Find peaks with coordinate-aware constraints
-# ---------------------------------------------
-last = region[-1]
-peaks, properties = last.find_peaks(distance="5 cm^-1", prominence=0.02)
-peaks.x.values
-
-# %%
-# Visualize detected peaks
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-ax = last.plot_pen()
-markers = peaks + 0.015
-_ = markers.plot_scatter(
+ax = spectrum.plot_pen()
+_ = peaks.plot_scatter(
     ax=ax,
     clear=False,
     data_only=True,
     marker="v",
     color="black",
 )
-
-for x, y in zip(
-    _as_iterable(markers.x.values),
-    _as_iterable(markers.values),
-    strict=False,
-):
-    _ = ax.annotate(
-        f"{x.m:0.0f}",
-        xy=(x.m, y.m),
-        xytext=(-5, 0),
-        rotation=90,
-        textcoords="offset points",
-    )
-
-# %%
-# Inspect the properties dictionary:
-sorted(properties)
-
-# %%
-# Track a band across the time series
-# ------------------------------------
-# Follow one band in a restricted region:
-tracked_region = region[:, 2220.0:2180.0]
-positions = [_tracked_peak_position(spec) for spec in tracked_region]
-
-evolution = scp.NDDataset(positions, title="peak maxima position")
-evolution.x = scp.Coord(region.y, title="acquisition time")
-evolution.units = "cm^-1"
-_ = evolution.plot(ls=":", marker="o", ms=3)
-
-# %%
-# Uncomment the following line to display all figures when running the script
-# directly with Python.
-
-# %%
-
-# scp.show()

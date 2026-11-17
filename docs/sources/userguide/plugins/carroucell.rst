@@ -28,7 +28,7 @@ Use the recommended namespaced API:
 
     import spectrochempy as scp
 
-    dataset = scp.carroucell.read("path/to/carroucell-directory")
+    series = scp.carroucell.read("path/to/carroucell-directory")
 
 Compatibility aliases
 =====================
@@ -46,11 +46,10 @@ The generated public API page for the Carroucell plugin is listed in
 Examples
 ========
 
-Use the same namespaced reader shown above when importing a carroucell
-experiment directory.
+See :ref:`Carroucell experiment directories <import-carroucell-ir>` in the IR import guide.
 
 Limitations
 ===========
 
-Currently, the user-facing documentation for this plugin focuses on directory
-imports for carroucell experiment workflows.
+The reader can return a single dataset or a collection of datasets. See the
+IR import guide for the directory layout and the temperature-log constraints.
