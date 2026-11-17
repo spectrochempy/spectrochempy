@@ -8,12 +8,14 @@
 __all__ = ["align"]
 __dataset_methods__ = __all__
 
-# import scipy.interpolate
+from decimal import Decimal
+
 import numpy as np
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.units import ur
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
@@ -86,9 +88,9 @@ def align(dataset, *others, **kwargs):
         * 'interpolate' interpolates onto the first dataset's coordinates.
           Points outside the source range are masked.
 
-        Outer and reference joins match the available coordinate values.
-        When units are converted, matching uses 15 significant digits to
-        absorb floating-point conversion error.
+        Outer and reference joins match with at least five significant digits
+        at each coordinate's scale. If any input coordinate disables rounding,
+        those joins use full precision.
 
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
@@ -255,49 +257,21 @@ def align(dataset, *others, **kwargs):
         new_coord = ref_coord.copy()
 
         ndec = get_n_decimals(ref_coord.data.max(), 5) if method == "inner" else None
-        converts_units = method in {"outer", "first", "last"} and any(
-            item["obj"].coordset[dim].units != ref_coord.units
-            for item in _objects.values()
-        )
-
-        def matching_grid(coord, decimals=ndec, normalize_units=converts_units):
-            if decimals is not None:
-                return np.around(coord.data, decimals)
-            if normalize_units:
-                return np.fromiter(
-                    (float(f"{point:.15g}") for point in coord.data),
-                    dtype=np.float64,
-                    count=coord.size,
-                )
-            return coord.data
-
-        reference_grid = matching_grid(ref_coord)
-        join_keys = set(reference_grid)
-        if method in {"inner", "outer"} and len(join_keys) != new_coord.size:
-            raise ValueError(
-                f"Coordinate rounding makes inner alignment ambiguous "
-                f"along dimension {dim!r}."
-                if method == "inner"
-                else f"Duplicate coordinates make outer alignment ambiguous "
-                f"along dimension {dim!r}."
-            )
+        reference_join = method in {"outer", "first", "last"}
+        input_coords = [item["obj"].coordset[dim] for item in _objects.values()]
+        rounded = all(coord._rounding for coord in input_coords)
+        precision = max(5, *(coord.sigdigits for coord in input_coords))
+        source_grids = {}
 
         # loop on all object
         for _index, object in _objects.items():
             obj = object["obj"]
 
-            if obj is ref_obj:
-                # not necessary to compare with itself!
-                continue
-
-            if reversed and method in {"inner", "outer"}:
+            if obj is not ref_obj and reversed and method in {"inner", "outer"}:
                 obj.sort(descend=False, dim=dim, inplace=True)
 
-            # get the current object coordinates and check compatibility
             coord = obj.coordset[dim]
-
             if not coord.is_units_compatible(ref_coord):
-                # not compatible, stop everything
                 raise exceptions.UnitsCompatibilityError(
                     exceptions.format_incompatible_units_message(
                         "align datasets",
@@ -307,44 +281,72 @@ def align(dataset, *others, **kwargs):
                     ),
                 )
 
-            # do units transform if necessary so coords can be compared
+            values = coord.data
             if coord.units != ref_coord.units:
-                coord.ito(ref_coord)
-
-            if method in {"inner", "outer"}:
-                source_grid = matching_grid(coord)
-                source_keys = set(source_grid)
-                if len(source_keys) != coord.size:
-                    raise ValueError(
-                        f"Coordinate rounding makes inner alignment ambiguous "
-                        f"along dimension {dim!r}."
-                        if method == "inner"
-                        else f"Duplicate coordinates make outer alignment ambiguous "
-                        f"along dimension {dim!r}."
+                if reference_join and not rounded:
+                    source_unit = coord.units or ur.dimensionless
+                    target_unit = ref_coord.units or ur.dimensionless
+                    values = np.fromiter(
+                        (
+                            float(
+                                ur.Quantity(Decimal(str(point)), source_unit)
+                                .to(target_unit)
+                                .magnitude
+                            )
+                            for point in values
+                        ),
+                        dtype=np.float64,
+                        count=coord.size,
                     )
-                if method == "outer":
-                    join_keys |= source_keys
                 else:
-                    join_keys &= source_keys
-                    if not join_keys:
-                        raise ValueError(
-                            f"No shared coordinates along dimension {dim!r}."
-                        )
+                    coord.ito(ref_coord)
+                    values = coord.data
 
-            elif method in ["first", "last", "interpolate"]:
-                # we take the reference coordinates already determined as
-                # basis (masking the missing values)
-                continue
+            keys = values
+            if ndec is not None:
+                keys = np.around(values, ndec)
+            elif reference_join and rounded:
+                keys = np.fromiter(
+                    (float(f"{point:.{precision}g}") for point in values),
+                    dtype=np.float64,
+                    count=coord.size,
+                )
 
-            else:
-                raise NotImplementedError(f"The method {method} is unknown!")
+            if not np.isfinite(keys).all():
+                raise ValueError(
+                    f"Alignment produced non-finite coordinates along dimension {dim!r}."
+                )
+            if method != "interpolate" and np.unique(keys).size != keys.size:
+                reason = (
+                    "Coordinate rounding makes"
+                    if method == "inner"
+                    else "Duplicate matching coordinates make"
+                )
+                raise ValueError(
+                    f"{reason} {method} alignment ambiguous along dimension {dim!r}."
+                )
+            source_grids[_index] = keys, values
 
-        if method in {"inner", "outer"}:
+        join_grid = source_grids[ref_obj_index][0]
+        if method == "inner":
+            join_keys = set(join_grid)
+            for keys, _ in source_grids.values():
+                join_keys.intersection_update(keys)
+            if not join_keys:
+                raise ValueError(f"No shared coordinates along dimension {dim!r}.")
             join_grid = np.asarray(sorted(join_keys))
             new_coord._data = join_grid
             new_coord._rounding = False
-        else:
-            join_grid = reference_grid
+        elif method == "outer":
+            representatives = {}
+            for keys, values in source_grids.values():
+                for key, value in zip(keys, values, strict=True):
+                    representatives.setdefault(key, value)
+            join_grid = np.asarray(sorted(representatives))
+            new_coord._data = np.asarray([representatives[key] for key in join_grid])
+            new_coord._rounding = False
+        elif method not in {"first", "last", "interpolate"}:
+            raise NotImplementedError(f"The method {method} is unknown!")
 
         # For interpolate method, use reference coordinate as target
         # instead of the union
@@ -366,6 +368,11 @@ def align(dataset, *others, **kwargs):
                     )
                 elif target_coord.units != ref_coord.units:
                     target_coord.ito(ref_coord.units)
+                if not np.isfinite(target_coord.data).all():
+                    raise ValueError(
+                        f"Alignment target produced non-finite coordinates "
+                        f"along dimension {dim!r}."
+                    )
             target_coord._labels = None
         else:
             target_coord = new_coord
@@ -392,7 +399,7 @@ def align(dataset, *others, **kwargs):
 
                 if method == "inner":
                     _, source_indices, target_indices = np.intersect1d(
-                        matching_grid(coord),
+                        source_grids[index][0],
                         join_grid,
                         return_indices=True,
                     )
@@ -413,17 +420,8 @@ def align(dataset, *others, **kwargs):
                         coord.labels[source_indices] if coord.is_labeled else None
                     )
                 else:
-                    source_grid = matching_grid(coord)
-                    if (
-                        np.unique(source_grid).size != source_grid.size
-                        or np.unique(join_grid).size != join_grid.size
-                    ):
-                        raise ValueError(
-                            f"Duplicate coordinates make {method} alignment ambiguous "
-                            f"along dimension {dim!r}."
-                        )
                     _, source_indices, target_indices = np.intersect1d(
-                        source_grid, join_grid, return_indices=True
+                        source_grids[index][0], join_grid, return_indices=True
                     )
                     shape = list(obj.shape)
                     shape[dim_index] = len(new_coord)

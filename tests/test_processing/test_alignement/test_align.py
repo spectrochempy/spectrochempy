@@ -400,3 +400,62 @@ def test_align_matches_converted_units_with_rounding_disabled(method):
     np.testing.assert_array_equal(left.data, [10.0, 20.0])
     np.testing.assert_array_equal(right.data, [30.0, 40.0])
     assert not left.is_masked and not right.is_masked
+
+
+def test_align_mixed_units_preserves_distinct_unrounded_points():
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([1e5, 1e5 + 1e-10], units="m", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0], coordset=[scp.Coord([5.0, 6.0], units="cm", rounding=False)]
+    )
+
+    left, _ = scp.align(first, second, method="outer")
+
+    np.testing.assert_array_equal(left.x.data, [0.05, 0.06, 1e5, 1e5 + 1e-10])
+    np.testing.assert_array_equal(left.masked_data.compressed(), [10.0, 20.0])
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_rounded_slices_match_small_spectroscopic_coordinate_drift(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([3500.685, 3502.685])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([3500.686, 3502.686])])
+
+    left, right = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(left.x.data, right.x.data)
+    np.testing.assert_array_equal(left.data, [10.0, 20.0])
+    np.testing.assert_array_equal(right.data, [30.0, 40.0])
+    assert not left.is_masked and not right.is_masked
+
+
+def test_align_does_not_merge_unrounded_neighbors_after_unit_conversion():
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([1e5, 1e6], units="m", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([(1e5 + 1e-10) * 100, 2e8], units="cm", rounding=False)],
+    )
+
+    left, right = scp.align(first, second, method="outer")
+
+    assert len(left.x.data) == 4
+    np.testing.assert_array_equal(left.mask, [False, True, False, True])
+    np.testing.assert_array_equal(right.mask, [True, False, True, False])
+
+
+def test_align_rejects_coordinate_overflow_after_unit_conversion():
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([1.0, 2.0], units="nm", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([1e290, 1e308], units="m", rounding=False)],
+    )
+
+    with pytest.raises(ValueError, match="non-finite coordinates"):
+        scp.align(first, second, method="outer")
