@@ -99,14 +99,14 @@
 # For adsorption, the Langmuir kernel of SpectroChemPy (`"langmuir"`) is
 # $k(p,q)=p\,\exp(-q)/(1+p\,\exp(-q))$: half coverage is reached at
 # $p = \exp(q)$, in the pressure units of the dataset, and a smaller $q$
-# corresponds to a higher affinity. The figure shows three columns of a
-# Langmuir kernel matrix, generated with the `IrisKernel` class of IRIS.
+# corresponds to a higher affinity. The figure shows columns of a Langmuir
+# kernel matrix, generated with the `IrisKernel` class of IRIS.
 #
-# ![Three columns of the Langmuir kernel matrix on a logarithmic pressure
+# ![Columns of the Langmuir kernel matrix on a logarithmic pressure
 # axis.](images/iris-langmuir-responses.png){width=70%}
 #
-# **Figure.** Columns of the Langmuir kernel matrix for $q = -6$, $-4$ and
-# $-2$ (color scale), on a logarithmic pressure axis. Each curve
+# **Figure.** Columns of the Langmuir kernel matrix for $q$ from $-7$ to
+# $-1$ (color scale), on a logarithmic pressure axis. Each curve
 # reaches half coverage at $p = \exp(q)$: the smaller $q$, the lower the
 # pressure at which the corresponding species saturates.
 #
@@ -120,8 +120,9 @@
 #
 # p = scp.Coord(np.geomspace(1e-4, 10, 200), title="pressure", units="torr", rounding=False)
 # X = scp.NDDataset(np.zeros((200, 1)), coordset=[p, [0.0]])
-# K = scp.iris.IrisKernel(X, "langmuir", q=[-7, -1, 7]).kernel
-# _ = K[:, 1::2].T.plot(xscale="log", colorbar=True)
+# K = scp.iris.IrisKernel(X, "langmuir", q=[-8, 0, 9]).kernel
+# K.x.title = "$q$"
+# _ = K[:, 1:-1].T.plot(xscale="log", colorbar=True)
 # ```
 #
 # </details>
