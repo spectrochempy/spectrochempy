@@ -91,8 +91,14 @@ def _validate_monotonic(coord, assume_sorted, tol=1e-12):
         return data, np.arange(len(data)), False
 
     diffs = np.diff(data)
+    sort_idx = None
+    if np.all(diffs > 0) or np.all(diffs < 0):
+        gaps = np.abs(diffs)
+    else:
+        sort_idx = np.argsort(data)
+        gaps = np.diff(data[sort_idx])
 
-    if np.any(np.abs(diffs) <= tol):
+    if np.any(gaps <= tol):
         raise ValueError(
             "Duplicate or near-duplicate coordinate values detected. "
             "Interpolation requires strictly monotonic coordinates. "
@@ -107,9 +113,7 @@ def _validate_monotonic(coord, assume_sorted, tol=1e-12):
     if strictly_decreasing:
         return data[::-1], np.arange(len(data) - 1, -1, -1), True
 
-    sorted_data = np.sort(data)
-    sort_idx = np.argsort(data)
-    return sorted_data, sort_idx, False
+    return data[sort_idx], sort_idx, False
 
 
 def _get_coord_data(coord):
@@ -334,7 +338,11 @@ def interpolate(
                 sorted_old_x,
                 sorted_data,
                 axis=ax,
-                kind="linear",
+                kind=(
+                    "nearest"
+                    if sorted_old_x.size == 1 and not extrapolate
+                    else "linear"
+                ),
                 bounds_error=False,
                 fill_value=fill_value,
                 assume_sorted=True,
@@ -394,7 +402,7 @@ def interpolate(
                 sorted_old_x,
                 sorted_mask.astype(float),
                 axis=ax,
-                kind="linear",
+                kind="nearest" if sorted_old_x.size == 1 else "linear",
                 bounds_error=False,
                 fill_value=True,
                 assume_sorted=True,
@@ -427,7 +435,7 @@ def interpolate(
                         _sorted_old_x,
                         old_sec_data,
                         axis=0,
-                        kind="linear",
+                        kind="nearest" if _sorted_old_x.size == 1 else "linear",
                         bounds_error=False,
                         fill_value=np.nan,
                         assume_sorted=True,

@@ -251,6 +251,12 @@ def align(dataset, *others, **kwargs):
         new_coord = ref_coord.copy()
 
         ndec = get_n_decimals(new_coord.data.max(), 5)
+        join_keys = set(np.around(new_coord.data, ndec))
+        if method in {"inner", "outer"} and len(join_keys) != new_coord.size:
+            raise ValueError(
+                f"Coordinate rounding makes {method} alignment ambiguous "
+                f"along dimension {dim!r}."
+            )
 
         # loop on all object
         for _index, object in _objects.items():
@@ -281,29 +287,21 @@ def align(dataset, *others, **kwargs):
             if coord.units != ref_coord.units:
                 coord.ito(ref_coord)
 
-            # adjust the new_cord depending on the method of alignment
-
-            new_coord_data = set(np.around(new_coord.data, ndec))
-            coord_data = set(np.around(coord.data, ndec))
-
-            if method == "outer":
-                # in this case we do a union of the coords (masking the
-                # missing values)
-                new_coord._data = sorted(coord_data | new_coord_data)
-
-            elif method == "inner":
-                if (
-                    len(coord_data) != coord.size
-                    or len(new_coord_data) != new_coord.size
-                ):
+            if method in {"inner", "outer"}:
+                source_keys = set(np.around(coord.data, ndec))
+                if len(source_keys) != coord.size:
                     raise ValueError(
-                        f"Coordinate rounding makes inner alignment ambiguous "
+                        f"Coordinate rounding makes {method} alignment ambiguous "
                         f"along dimension {dim!r}."
                     )
-                shared = coord_data & new_coord_data
-                if not shared:
-                    raise ValueError(f"No shared coordinates along dimension {dim!r}.")
-                new_coord._data = sorted(shared)
+                if method == "outer":
+                    join_keys |= source_keys
+                else:
+                    join_keys &= source_keys
+                    if not join_keys:
+                        raise ValueError(
+                            f"No shared coordinates along dimension {dim!r}."
+                        )
 
             elif method in ["first", "last", "interpolate"]:
                 # we take the reference coordinates already determined as
@@ -312,6 +310,13 @@ def align(dataset, *others, **kwargs):
 
             else:
                 raise NotImplementedError(f"The method {method} is unknown!")
+
+        if method in {"inner", "outer"}:
+            join_grid = np.asarray(sorted(join_keys))
+            new_coord._data = join_grid
+            new_coord._rounding = False
+        else:
+            join_grid = np.around(new_coord.data, ndec)
 
         # For interpolate method, use reference coordinate as target
         # instead of the union
@@ -360,7 +365,7 @@ def align(dataset, *others, **kwargs):
                 if method == "inner":
                     _, source_indices, target_indices = np.intersect1d(
                         np.around(coord.data, ndec),
-                        np.around(new_coord.data, ndec),
+                        join_grid,
                         return_indices=True,
                     )
                     source_indices = source_indices[np.argsort(target_indices)]
@@ -381,17 +386,16 @@ def align(dataset, *others, **kwargs):
                     )
                 else:
                     source_grid = np.around(coord.data, ndec)
-                    target_grid = np.around(new_coord.data, ndec)
                     if (
                         np.unique(source_grid).size != source_grid.size
-                        or np.unique(target_grid).size != target_grid.size
+                        or np.unique(join_grid).size != join_grid.size
                     ):
                         raise ValueError(
                             f"Coordinate rounding makes {method} alignment ambiguous "
                             f"along dimension {dim!r}."
                         )
                     _, source_indices, target_indices = np.intersect1d(
-                        source_grid, target_grid, return_indices=True
+                        source_grid, join_grid, return_indices=True
                     )
                     shape = list(obj.shape)
                     shape[dim_index] = len(new_coord)

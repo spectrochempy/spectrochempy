@@ -330,3 +330,34 @@ def test_align_rejects_missing_or_nonfinite_coordinates(coords):
 
     with pytest.raises(ValueError, match="numeric coordinates along dimension 'x'"):
         scp.align(first, second, method="outer")
+
+
+def test_align_outer_retains_small_coordinates_when_union_expands_the_range():
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([0.00014, 0.00116])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([1.0, 2.0])])
+    third = scp.NDDataset([50.0, 60.0], coordset=[scp.Coord([2.0, 3.0])])
+
+    left, _, _ = scp.align(first, second, third, method="outer")
+
+    np.testing.assert_array_equal(left.x.data, [0.00014, 0.00116, 1.0, 2.0, 3.0])
+    np.testing.assert_array_equal(left.mask, [False, False, True, True, True])
+    np.testing.assert_array_equal(left.masked_data.compressed(), [10.0, 20.0])
+
+
+def test_align_interpolate_rejects_nonadjacent_duplicate_source_coordinates():
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([1.0, 2.0])])
+    second = scp.NDDataset([30.0, 40.0, 50.0], coordset=[scp.Coord([1.0, 2.0, 1.0])])
+
+    with pytest.raises(ValueError, match="Duplicate or near-duplicate"):
+        scp.align(first, second, method="interpolate")
+
+
+def test_align_linear_interpolation_keeps_exact_singleton_row():
+    x = scp.Coord([1.0, 2.0, 3.0])
+    reference = scp.NDDataset(np.ones((2, 3)), coordset=[scp.Coord([2.0, 3.0]), x])
+    source = scp.NDDataset([[3.0, 4.0, 5.0]], coordset=[scp.Coord([2.0]), x])
+
+    _, aligned = scp.align(reference, source, dim="y", method="interpolate")
+
+    np.testing.assert_array_equal(aligned.mask, [[False] * 3, [True] * 3])
+    np.testing.assert_array_equal(aligned.masked_data.compressed(), [3.0, 4.0, 5.0])
