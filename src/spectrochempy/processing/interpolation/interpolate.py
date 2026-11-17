@@ -144,6 +144,26 @@ def _match_indices(old_data, new_data):
     return match_idx
 
 
+def _interpolation_mask(mask, old_x, new_x, axis, method):
+    """Mask points whose interpolation depends on a masked sample."""
+    right = np.searchsorted(old_x, new_x)
+    at = np.minimum(right, old_x.size - 1)
+    exact = old_x[at] == new_x
+    left = np.clip(right - 1, 0, old_x.size - 1)
+
+    result = np.take(mask, left, axis=axis) | np.take(mask, at, axis=axis)
+    if method == "pchip":
+        # The derivatives at the ends of an interval use adjacent slopes.
+        before = np.maximum(left - 1, 0)
+        after = np.minimum(at + 1, old_x.size - 1)
+        result |= np.take(mask, before, axis=axis) | np.take(mask, after, axis=axis)
+
+    shape = [1] * mask.ndim
+    shape[axis] = new_x.size
+    result = np.where(exact.reshape(shape), np.take(mask, at, axis=axis), result)
+    return result | ((new_x < old_x[0]) | (new_x > old_x[-1])).reshape(shape)
+
+
 def _carry_labels(old_labels, match_idx):
     """
     Carry labels onto interpolated points using precomputed match indices.
@@ -226,6 +246,8 @@ def interpolate(
     - Secondary coordinates are interpolated numerically. If they represent
       analytical transformations of the primary coordinate (e.g., wavelength = 1/wavenumber),
       the result may be approximate - consider recomputing them analytically after interpolation.
+    - With a masked source, exact points retain their source mask. Resampled
+      points are masked whenever a sample used by the interpolator is masked.
     - Unit conversion is performed if needed before interpolation.
     - Sequential interpolation is applied for multiple dimensions (not true N-D).
     """
@@ -319,12 +341,13 @@ def interpolate(
             primary_old_coord, assume_sorted
         )
 
-        if sort_idx is not None and len(sort_idx) > 0:
-            sorted_data = new._data[
-                tuple(sort_idx if i == ax else slice(None) for i in range(new.ndim))
-            ].copy()
-        else:
-            sorted_data = new._data
+        sorted_data = np.take(new._data, sort_idx, axis=ax)
+        sorted_mask = np.take(new._mask, sort_idx, axis=ax) if new.is_masked else None
+        values = (
+            np.where(sorted_mask, 0, sorted_data)
+            if sorted_mask is not None
+            else sorted_data
+        )
 
         # ``fill_value`` may be NaN (the default), a finite constant or the
         # string ``"extrapolate"``. ``interp1d`` (linear) handles all three
@@ -336,7 +359,7 @@ def interpolate(
         if method == "linear":
             interpolator = interp1d(
                 sorted_old_x,
-                sorted_data,
+                values,
                 axis=ax,
                 kind=(
                     "nearest"
@@ -355,7 +378,7 @@ def interpolate(
                 )
             interpolator = PchipInterpolator(
                 sorted_old_x,
-                sorted_data,
+                values,
                 axis=ax,
                 extrapolate=extrapolate,
             )
@@ -382,33 +405,25 @@ def interpolate(
                     )
                 ] = fill_value
 
-        if sort_idx is not None and len(sort_idx) > 0:
-            new._data = interpolated_data
-        else:
-            new._data = interpolated_data
-
-        if new.is_masked:
-            # The mask must be reordered with the same ``sort_idx`` as the data
-            # so it is interpolated against ``sorted_old_x`` in matching order;
-            # otherwise a decreasing source coordinate flips the mask relative to
-            # its samples (closely related to #1100).
-            if sort_idx is not None and len(sort_idx) > 0:
-                sorted_mask = new._mask[
-                    tuple(sort_idx if i == ax else slice(None) for i in range(new.ndim))
-                ]
-            else:
-                sorted_mask = new._mask
-            mask_interpolator = interp1d(
-                sorted_old_x,
-                sorted_mask.astype(float),
-                axis=ax,
-                kind="nearest" if sorted_old_x.size == 1 else "linear",
-                bounds_error=False,
-                fill_value=True,
-                assume_sorted=True,
+        if sorted_mask is not None:
+            new._mask = _interpolation_mask(
+                sorted_mask, sorted_old_x, new_data, ax, method
             )
-            new_mask = mask_interpolator(new_data) > 0.5
-            new._mask = new_mask
+            # Exact samples retain their stored value and mask. For PCHIP,
+            # neighboring samples affect only the interpolation between nodes.
+            matched = match_idx >= 0
+            selection = tuple(
+                matched if i == ax else slice(None) for i in range(new.ndim)
+            )
+            interpolated_data[selection] = np.take(
+                new._data, match_idx[matched], axis=ax
+            )
+            if isinstance(fill_value, float) and np.isnan(fill_value):
+                shape = [1] * new.ndim
+                shape[ax] = new_data.size
+                interpolated_data[new._mask & ~matched.reshape(shape)] = fill_value
+
+        new._data = interpolated_data
 
         if new._coordset is None:
             new._coordset = CoordSet()

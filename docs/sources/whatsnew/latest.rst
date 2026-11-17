@@ -35,8 +35,9 @@ Bug Fixes
 
 - Match each measurement to its coordinate in ``align()`` reference and
   outer joins. Preserve complex intensities and per-input labels, and
-  mask out-of-range interpolation results. Interpolation can also use
-  an explicit target coordinate along one dimension. (:pr:`1895`)
+  mask interpolation results outside the source range or depending on
+  masked samples. Interpolation can also use an explicit target coordinate
+  along one dimension. (:pr:`1895`)
 
 - Preserve the values at shared coordinates when aligning spectra with
   ``align(method="inner")``, including datasets containing a single spectrum. (:pr:`1893`)

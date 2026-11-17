@@ -151,7 +151,8 @@ ndadd.shape
 # * **first** which means that the first dataset is used as reference
 # * **last** which means that the last dataset is used as reference
 # * **interpolate** uses the first dataset's grid by default and masks
-#   positions outside each source range. For one dimension, pass
+#   positions outside each source range and positions that depend on masked
+#   samples. For one dimension, pass
 #   `scp.align(first, second, dim="x", method="interpolate", coord=target)`
 #   to choose a different grid. `interpolate_sampling="auto"` keeps the
 #   chosen grid unchanged.

@@ -164,7 +164,8 @@ def align(dataset, *others, **kwargs):
           with no matching coordinate.
         * 'last' does the same using the last dataset's coordinates.
         * 'interpolate' interpolates onto the first dataset's coordinates.
-          Points outside the source range are masked.
+          Points outside the source range or depending on masked samples
+          are masked.
 
         Outer and reference joins match with at least five significant digits
         at each coordinate's scale. If any input coordinate disables rounding,

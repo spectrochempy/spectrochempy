@@ -693,3 +693,47 @@ def test_align_preserves_wide_intensities_when_inserting_missing_points(method, 
     np.testing.assert_array_equal(result.data[:2], source.data)
     np.testing.assert_array_equal(result.mask, [False, False, True])
     assert result.data[2] == 99999999999999
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+@pytest.mark.parametrize("dim", ["x", "y"])
+def test_align_interpolate_does_not_expose_sentinel_from_outer_join(method, dim):
+    unchanged = scp.Coord([0.0, 1.0])
+
+    def spectrum(data, points):
+        sampled = scp.Coord(points)
+        if dim == "y":
+            return scp.NDDataset(np.asarray(data).T, coordset=[sampled, unchanged])
+        return scp.NDDataset(data, coordset=[unchanged, sampled])
+
+    source = spectrum([[1.0, 3.0], [2.0, 6.0]], [1.0, 3.0])
+    other = spectrum([[2.0, 3.0], [4.0, 6.0]], [2.0, 3.0])
+    joined, _ = scp.align(source, other, dim=dim, method="outer")
+    target = scp.Coord([1.0, 1.25, 2.0, 2.75, 3.0])
+
+    (result,) = scp.align(
+        joined, dim=dim, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    if dim == "y":
+        result = result.T
+    np.testing.assert_array_equal(result.mask, [[False, True, True, True, False]] * 2)
+    np.testing.assert_array_equal(result.masked_data.compressed(), [1.0, 3.0, 2.0, 6.0])
+    assert np.all(result.data[result.mask] == 99999999999999)
+
+
+def test_align_pchip_masks_intervals_adjacent_to_a_masked_sample():
+    source = scp.NDDataset(
+        [0.0, 1.0, np.nan, 9.0, 16.0, 25.0],
+        mask=[False, False, True, False, False, False],
+        coordset=[scp.Coord([0.0, 1.0, 2.0, 3.0, 4.0, 5.0])],
+    )
+    target = scp.Coord([0.5, 1.0, 3.5, 4.0, 4.5])
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method="pchip", coord=target
+    )
+
+    np.testing.assert_array_equal(result.mask, [True, False, True, False, False])
+    np.testing.assert_array_equal(result.data[[1, 3]], [1.0, 16.0])
+    assert 16.0 < result.data[-1] < 25.0
