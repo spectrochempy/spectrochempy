@@ -99,56 +99,53 @@
 # For adsorption, the Langmuir kernel of SpectroChemPy (`"langmuir"`) is
 # $k(p,q)=p\,\exp(-q)/(1+p\,\exp(-q))$: half coverage is reached at
 # $p = \exp(q)$, in the pressure units of the dataset, and a smaller $q$
-# corresponds to a higher affinity. The cell below builds the kernel matrix
-# with `IrisKernel` on a fine pressure axis and plots three of its columns.
-# Two details matter. A list of three numbers is read as
-# `[start, stop, number of points]`, so `q=[-7, -1, 7]` gives a grid from
-# $-7$ to $-1$ with a step of 1. With this step, the inner weights $w_j$
-# are equal to 1, and the columns at $q = -6, -4, -2$ are exactly
-# $k(p, q)$. The pressure coordinate is created with `rounding=False`,
-# because the default rounding of coordinates would set the lowest
-# pressures to zero.
-
-# %%
-import numpy as np
-
-import spectrochempy as scp
-
-p_axis = scp.Coord(
-    np.geomspace(1e-4, 10.0, 200),
-    title="pressure",
-    units="torr",
-    rounding=False,
-)
-dummy = scp.NDDataset(
-    np.zeros((200, 1)),
-    coordset=[p_axis, scp.Coord([0.0])],
-)
-K = scp.iris.IrisKernel(dummy, "langmuir", q=[-7, -1, 7]).kernel
-curves = [K[:, j].squeeze() for j in (1, 3, 5)]
-_ = scp.plot_multiple(
-    curves,
-    method="pen",
-    labels=["$q = -6$", "$q = -4$", "$q = -2$"],
-    figsize=(4.9, 2.4),
-    xscale="log",
-    ylim=(0, 1.05),
-    legend="best",
-)
-
-# %% [markdown]
+# corresponds to a higher affinity. The figure shows three columns of a
+# Langmuir kernel matrix, generated with the `IrisKernel` class of IRIS.
+#
+# ![Three columns of the Langmuir kernel matrix on a logarithmic pressure
+# axis.](images/iris-langmuir-responses.png){width=70%}
+#
 # **Figure.** Columns of the Langmuir kernel matrix for $q = -6$, $-4$ and
 # $-2$, on a logarithmic pressure axis. Each curve reaches half coverage at
 # $p = \exp(q)$: the smaller $q$, the lower the pressure at which the
 # corresponding species saturates.
 #
+# <details>
+# <summary>Show code for the figure</summary>
+#
+# ```python
+# import numpy as np
+#
+# import spectrochempy as scp
+#
+# p_axis = scp.Coord(
+#     np.geomspace(1e-4, 10.0, 200),
+#     title="pressure",
+#     units="torr",
+#     rounding=False,
+# )
+# dummy = scp.NDDataset(np.zeros((200, 1)), coordset=[p_axis, scp.Coord([0.0])])
+# K = scp.iris.IrisKernel(dummy, "langmuir", q=[-7, -1, 7]).kernel
+# curves = [K[:, j].squeeze() for j in (1, 3, 5)]
+# _ = scp.plot_multiple(
+#     curves,
+#     method="pen",
+#     labels=["$q = -6$", "$q = -4$", "$q = -2$"],
+#     figsize=(4.9, 2.4),
+#     xscale="log",
+#     ylim=(0, 1.05),
+#     legend="best",
+# )
+# ```
+#
+# </details>
+
+# %% [markdown]
 # The experimental pressure window determines which responses the data can
 # distinguish. If two curves are almost flat or almost identical over that
 # window, their contributions are difficult to separate. A finer grid of $q$
 # can sample the model more closely, but it cannot supply missing
-# experimental information. For an adsorption series, check that the
-# pressure coordinate is the active observation axis and that its units
-# match the kernel convention.
+# experimental information.
 
 # %% [markdown]
 # ## Why regularization matters
@@ -256,6 +253,8 @@ _ = scp.plot_multiple(
 # region using its wavenumber limits.
 
 # %%
+import spectrochempy as scp
+
 spectra = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 pressures = [
     0.003,
