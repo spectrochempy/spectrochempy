@@ -222,6 +222,6 @@ Getting started
 
 * :ref:`Installation guide <installation>`
 * :ref:`Gallery of examples <examples-index>`
-* :ref:`User's guide and tutorials <user_guide>`
+* :ref:`User guide <user_guide>`
 * :ref:`Getting help <getting_help>`
 * :ref:`How to cite <citing>` and :ref:`papers using SpectroChemPy <papers>`

@@ -49,12 +49,12 @@
 # used.
 
 # %% [markdown]
-# ## About this user's guide
+# ## About this guide
 #
-# The ``User's guide and tutorials`` section is designed to give you a quick overview of the main features of **SpectroChemPy**. It does not cover all
-# features, but should help you to get started quickly, and to find your way around.
-# For more details on the various features, check out the [Public API reference](../../reference/index.rst) section which gives
-# [Gallery of Examples](../../gettingstarted/examples/index.rst)
+# The user guide explains how to use the main features of SpectroChemPy.
+# For API details, see the [Public API reference](../../reference/index.rst).
+# For short, executable workflows, see the
+# [example gallery](../../gettingstarted/examples/index.rst).
 #
 # ## What to do if questions arise
 #
@@ -118,7 +118,7 @@ nd
 # ## Where to go next?
 
 # %% [markdown]
-# The ``User's guide & tutorial`` section is divided into several sections describing the main features of spectrochempy.
+# Use the guide sections below to find the features you need.
 #
 # * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) or `Project`.
 #

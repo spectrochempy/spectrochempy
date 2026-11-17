@@ -15,7 +15,7 @@ Documentation Structure
 SpectroChemPy documentation consists of:
 
 1. **Docstrings** in the code (API reference)
-2. **Guides and tutorials** in the ``docs/`` folder
+2. **User guide** in ``docs/sources/userguide/``
 3. **Examples** in Jupyter notebooks
 
 We use:
@@ -23,7 +23,7 @@ We use:
 - **reStructuredText** (reST) markup
 - **Sphinx** documentation builder
 - **NumPy docstring standard**
-- **Jupyter notebooks** for tutorials
+- **Jupyter notebooks** for executable guide pages
 
 Documentation Sources
 ---------------------
@@ -36,8 +36,10 @@ API Documentation
 - Examples are tested during builds
 - Located in ``docs/reference``
 
-Guides & Tutorials
-~~~~~~~~~~~~~~~~~~
+.. _guides-tutorials:
+
+User Guide
+~~~~~~~~~~
 - Written in reST or Jupytext Python files with ``# %%`` cells
 - Located in ``docs/sources/userguide/``
 - Provide high-level overviews and examples
