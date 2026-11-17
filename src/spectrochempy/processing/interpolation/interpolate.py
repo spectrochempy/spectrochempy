@@ -144,23 +144,36 @@ def _center_wide_grids(old_x, new_x):
             return Fraction(int(point))
         return Fraction(*point.as_integer_ratio())
 
-    origin = exact(old_x[0])
-    error = "Interpolation coordinates cannot be represented without losing precision after centering."
-    centered = []
-    representatives = {}
-    for grid in grids:
-        shifted = np.empty(grid.size, dtype=np.float64)
-        for i, point in enumerate(grid):
-            value = exact(point)
-            try:
-                delta = float(value - origin)
-            except OverflowError as exc:
-                raise ValueError(error) from exc
-            if representatives.setdefault(delta, value) != value:
-                raise ValueError(error)
-            shifted[i] = delta
-        centered.append(shifted)
-    return tuple(centered)
+    exact_grids = [[exact(point) for point in grid] for grid in grids]
+    unique_values = set().union(*exact_grids)
+
+    def convert(origin):
+        try:
+            mapping = {value: float(value - origin) for value in unique_values}
+        except OverflowError:
+            return None, False
+        if len(set(mapping.values())) != len(mapping):
+            return None, False
+        converted = tuple(
+            np.asarray([mapping[value] for value in grid]) for grid in exact_grids
+        )
+        return converted, all(
+            delta == value - origin for value, delta in mapping.items()
+        )
+
+    # Preserve grids that can already be represented exactly, even when
+    # subtracting the origin would collapse nearby points in a wide span.
+    narrowed, lossless = convert(Fraction(0))
+    if lossless:
+        return narrowed
+    centered, _ = convert(exact_grids[0][0])
+    if centered is not None:
+        return centered
+    if narrowed is not None:
+        return narrowed
+    raise ValueError(
+        "Interpolation coordinates cannot be represented as distinct float64 points."
+    )
 
 
 def _match_indices(old_data, new_data):
