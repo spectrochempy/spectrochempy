@@ -15,6 +15,7 @@ from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
 
 
@@ -174,8 +175,12 @@ def align(dataset, *others, **kwargs):
                 )
                 return None
 
+            working = object.copy()
+            if method == "inner" and working.data.dtype != object.data.dtype:
+                working._dtype = object.data.dtype
+                working._data = object.data
             _objects[_nobj] = {
-                "obj": object.copy(),
+                "obj": working,
                 "idx": idx,
             }
             _nobj += 1
@@ -291,62 +296,52 @@ def align(dataset, *others, **kwargs):
                     inplace=False,
                 )
             else:
-                # get the dim index for the given object
                 dim_index = obj.dims.index(dim)
-
-                # prepare slicing keys ; set slice(None) for the untouched
-                # dimensions preceding the dimension of interest
-                prepend_keys = [slice(None)] * dim_index
-
-                # New objects for obj must be created with the new coordinates
-
-                # change the data shape
-                new_obj_shape = list(obj.shape)
-                new_obj_shape[dim_index] = len(new_coord)
-                dtype = np.result_type(obj.data.dtype, np.float64)
-                if method != "inner":
-                    dtype = np.float64
-                new_obj_data = np.full(new_obj_shape, np.nan, dtype=dtype)
-
-                # create new dataset for obj and ref_objects
-                new_obj = obj.copy() if copy else obj
-
-                # update the data and mask
                 coord = obj.coordset[dim]
+                new_obj = obj.copy() if copy and method != "inner" else obj
+                new_coordset = obj.coordset.copy()
+
                 if method == "inner":
-                    _, source_indices, dim_loc = np.intersect1d(
+                    _, source_indices, target_indices = np.intersect1d(
                         np.around(coord.data, ndec),
                         np.around(new_coord.data, ndec),
                         return_indices=True,
                     )
+                    source_indices = source_indices[np.argsort(target_indices)]
+                    mask = (
+                        np.take(obj.mask, source_indices, axis=dim_index)
+                        if obj.is_masked
+                        else NOMASK
+                    )
+                    new_obj._data = np.take(obj.data, source_indices, axis=dim_index)
+                    new_obj._mask = mask
+                    output_coord = new_coord.copy()
+                    output_coord._labels = (
+                        coord.labels[source_indices] if coord.is_labeled else None
+                    )
                 else:
+                    new_obj_shape = list(obj.shape)
+                    new_obj_shape[dim_index] = len(new_coord)
+                    new_obj_data = np.full(new_obj_shape, np.nan)
                     coord_data = set(np.around(coord.data, ndec))
                     dim_loc = new_coord._loc2index(sorted(coord_data))
-                    source_indices = slice(None)
-                loc = (*prepend_keys, dim_loc)
-                source_loc = (*prepend_keys, source_indices)
-                values = obj.data[source_loc]
-                mask = obj.mask[source_loc] if obj.is_masked else False
+                    loc = (*([slice(None)] * dim_index), dim_loc)
+                    new_obj_data[loc] = obj.data
+                    mask = obj.mask.copy() if obj.is_masked else False
+                    new_obj._data = new_obj_data
+                    new_obj.mask = MASKED
+                    new_obj.mask[loc] = mask
 
-                new_obj._data = new_obj_data
-                new_obj.mask = MASKED
-                new_obj.mask[loc] = mask
-                new_obj._data[loc] = values
+                    output_coord = new_coord
+                    if coord.is_labeled:
+                        label_shape = list(coord.labels.shape)
+                        label_shape[0] = output_coord.size
+                        output_coord._labels = np.zeros(tuple(label_shape)).astype(
+                            coord.labels.dtype,
+                        )
+                        output_coord._labels[:] = "--"
+                        output_coord._labels[dim_loc] = coord.labels
 
-                # update the coordinates
-                new_coordset = obj.coordset.copy()
-                output_coord = new_coord
-                if method == "inner":
-                    output_coord = new_coord.copy()
-                    output_coord._labels = None
-                if coord.is_labeled:
-                    label_shape = list(coord.labels.shape)
-                    label_shape[0] = output_coord.size
-                    output_coord._labels = np.zeros(tuple(label_shape)).astype(
-                        coord.labels.dtype,
-                    )
-                    output_coord._labels[:] = "--"
-                    output_coord._labels[dim_loc] = coord.labels[source_indices]
                 setattr(new_coordset, dim, output_coord)
                 new_obj._coordset = new_coordset
 
@@ -374,7 +369,9 @@ def align(dataset, *others, **kwargs):
             # .masked_data.  A sentinel avoids silent breakage in both
             # cases.  See audit/~align-sentinel-investigation.md.
             data = obj.data
-            data[np.isnan(data)] = 99999999999999.0
+            missing = np.isnan(data)
+            if missing.any():
+                data[missing] = 99999999999999.0
             idx = int(object["idx"])
             objects[idx] = obj
 

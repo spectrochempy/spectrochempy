@@ -138,6 +138,22 @@ def test_align_inner_preserves_complex_values():
     np.testing.assert_array_equal(aligned_second.data, [2.0, 3.0])
 
 
+def test_align_inner_preserves_integer_values_and_labels():
+    first = scp.NDDataset(
+        np.array([1, 2**53 + 1, 3], dtype=np.int64),
+        dtype=np.int64,
+        coordset=[scp.Coord([1.0, 2.0, 3.0], labels=np.array([100, 200, 300]))],
+    )
+    second = scp.NDDataset([2.0, 3.0, 4.0], coordset=[scp.Coord([2.0, 3.0, 4.0])])
+
+    aligned_first, aligned_second = scp.align(first, second, method="inner")
+
+    assert aligned_first.data.dtype == np.int64
+    assert aligned_first.data.tolist() == [2**53 + 1, 3]
+    np.testing.assert_array_equal(aligned_first.x.labels, [200, 300])
+    assert aligned_second.x.labels is None
+
+
 def test_align_rejects_incompatible_coord_units_with_clear_message():
     ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([100.0, 200.0], units="cm^-1")])
     ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])
