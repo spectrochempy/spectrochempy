@@ -93,6 +93,34 @@ def test_align_inner_spectra(keep_row):
     )
 
 
+def test_align_inner_rejects_disjoint_coordinates():
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([1.0, 2.0])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([3.0, 4.0])])
+
+    with pytest.raises(ValueError, match="No shared coordinates along dimension 'x'"):
+        scp.align(first, second, method="inner")
+
+
+def test_align_inner_preserves_each_spectrum_mask():
+    first = scp.NDDataset(
+        [10.0, 20.0, 30.0],
+        mask=[True, False, True],
+        coordset=[scp.Coord([1.0, 2.0, 3.0])],
+    )
+    second = scp.NDDataset(
+        [2.0, 3.0, 4.0],
+        mask=[True, False, False],
+        coordset=[scp.Coord([2.0, 3.0, 4.0])],
+    )
+
+    aligned_first, aligned_second = scp.align(first, second, method="inner")
+
+    np.testing.assert_array_equal(aligned_first.data, [20.0, 30.0])
+    np.testing.assert_array_equal(aligned_second.data, [2.0, 3.0])
+    np.testing.assert_array_equal(aligned_first.mask, [False, True])
+    np.testing.assert_array_equal(aligned_second.mask, [True, False])
+
+
 def test_align_rejects_incompatible_coord_units_with_clear_message():
     ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([100.0, 200.0], units="cm^-1")])
     ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])

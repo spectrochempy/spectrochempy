@@ -109,7 +109,8 @@ def align(dataset, *others, **kwargs):
     ------
     ValueError
         Issued when the dimensions given in `dim` or `dims` argument are not
-        compatibles (units, titles, etc.).
+        compatibles (units, titles, etc.), or an inner join finds no shared
+        coordinates.
 
     NotImplementedError
         Issued when ``interpolate_sampling`` is not ``'auto'``.
@@ -254,9 +255,10 @@ def align(dataset, *others, **kwargs):
                 new_coord._data = sorted(coord_data | new_coord_data)
 
             elif method == "inner":
-                # take only intersection of the coordinates
-                # and generate a warning if it result something null or
-                new_coord._data = sorted(coord_data & new_coord_data)
+                shared = coord_data & new_coord_data
+                if not shared:
+                    raise ValueError(f"No shared coordinates along dimension {dim!r}.")
+                new_coord._data = sorted(shared)
 
             elif method in ["first", "last"]:
                 # we take the reference coordinates already determined as
