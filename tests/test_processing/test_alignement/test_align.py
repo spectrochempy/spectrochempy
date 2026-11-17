@@ -771,3 +771,31 @@ def test_align_interpolate_sorts_unsigned_source_without_wrapping(method):
     np.testing.assert_array_equal(result.mask, [False, True, False])
     np.testing.assert_array_equal(result.masked_data.compressed(), [10.0, 80.0])
     assert result.data[1] == 99999999999999
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_distinguishes_large_integer_targets_from_float_nodes(method):
+    origin = 2**53
+    x = scp.Coord(
+        [origin, origin + 4, origin + 8, origin + 12],
+        dtype=np.float64,
+        rounding=False,
+        linearize_below=0,
+    )
+    source = scp.NDDataset([np.nan, 40.0, 80.0, 120.0], coordset=[x])
+    reference = scp.NDDataset([0.0, 40.0, 80.0, 120.0], coordset=[x])
+    joined, _ = scp.align(source, reference, method="first")
+    target = scp.Coord(
+        [origin + 3, origin + 4, origin + 8],
+        dtype=np.int64,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        joined, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_array_equal(result.mask, [True, False, False])
+    np.testing.assert_array_equal(result.masked_data.compressed(), [40.0, 80.0])

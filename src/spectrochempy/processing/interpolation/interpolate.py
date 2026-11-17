@@ -8,6 +8,8 @@
 __all__ = ["interpolate"]
 __dataset_methods__ = __all__
 
+from fractions import Fraction
+
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from scipy.interpolate import interp1d
@@ -68,14 +70,14 @@ def _interp_along_axis(values, old_x, new_x, axis, method, fill_value):
     return interpolator(new_x)
 
 
-def _validate_monotonic(coord, assume_sorted, tol=1e-12):
+def _validate_monotonic(data, assume_sorted, tol=1e-12):
     """
     Validate coordinate monotonicity with tolerance for floating point noise.
 
     Parameters
     ----------
-    coord : Coord
-        Coordinate to validate.
+    data : np.ndarray
+        Coordinates to validate.
     assume_sorted : bool
         If True, skip validation.
     tol : float, optional
@@ -85,8 +87,6 @@ def _validate_monotonic(coord, assume_sorted, tol=1e-12):
     -------
     tuple: (sorted_data, sorted_indices, was_reversed)
     """
-    data = coord.data
-
     if assume_sorted:
         return data, np.arange(len(data)), False
 
@@ -121,6 +121,40 @@ def _get_coord_data(coord):
     if coord.has_data:
         return coord.data
     return None
+
+
+def _center_large_integer_grids(old_x, new_x):
+    """Translate grids before any float64 conversion can collapse distinct nodes."""
+    grids = old_x, new_x
+    if not any(
+        grid.dtype.kind in "iu"
+        and grid.size
+        and (int(grid.min()) < -(2**53) or int(grid.max()) > 2**53)
+        for grid in grids
+    ):
+        return grids
+
+    def exact(point):
+        if isinstance(point, (np.integer, np.bool_)):
+            return Fraction(int(point))
+        return Fraction(*point.as_integer_ratio())
+
+    origin = exact(old_x[0])
+    centered = []
+    representatives = {}
+    for grid in grids:
+        shifted = np.empty(grid.size, dtype=np.float64)
+        for i, point in enumerate(grid):
+            value = exact(point)
+            delta = float(value - origin)
+            if representatives.setdefault(delta, value) != value:
+                raise ValueError(
+                    "Interpolation coordinates cannot be represented without "
+                    "losing precision after centering."
+                )
+            shifted[i] = delta
+        centered.append(shifted)
+    return tuple(centered)
 
 
 def _match_indices(old_data, new_data):
@@ -333,10 +367,11 @@ def interpolate(
         # Point-wise label carry-over: for each target point, find the exactly
         # matching original index so labels can follow the data (#1098). Both
         # arrays are now expressed in the source coordinate's units.
-        match_idx = _match_indices(old_data, new_data)
+        old_data, sample_points = _center_large_integer_grids(old_data, new_data)
+        match_idx = _match_indices(old_data, sample_points)
 
         sorted_old_x, sort_idx, _was_reversed = _validate_monotonic(
-            primary_old_coord, assume_sorted
+            old_data, assume_sorted
         )
 
         sorted_data = np.take(new._data, sort_idx, axis=ax)
@@ -383,7 +418,7 @@ def interpolate(
         else:
             raise ValueError(f"Unknown method: {method}")
 
-        interpolated_data = interpolator(new_data)
+        interpolated_data = interpolator(sample_points)
 
         if (
             method == "pchip"
@@ -394,7 +429,9 @@ def interpolate(
             # replace them with the requested constant so ``fill_value`` matches
             # the linear method. ``sorted_old_x`` is ascending, so this mask is
             # independent of the target-coordinate direction.
-            out_of_range = (new_data < sorted_old_x[0]) | (new_data > sorted_old_x[-1])
+            out_of_range = (sample_points < sorted_old_x[0]) | (
+                sample_points > sorted_old_x[-1]
+            )
             if out_of_range.any():
                 interpolated_data[
                     tuple(
@@ -405,7 +442,7 @@ def interpolate(
 
         if sorted_mask is not None:
             new_mask = _interpolation_mask(
-                sorted_mask, sorted_old_x, new_data, ax, method
+                sorted_mask, sorted_old_x, sample_points, ax, method
             )
             # Exact samples retain their stored value and mask. For PCHIP,
             # neighboring samples affect only the interpolation between nodes.
@@ -433,7 +470,7 @@ def interpolate(
         def _interpolate_secondary(
             coord,
             _sorted_old_x=sorted_old_x,
-            _new_data=new_data,
+            _new_data=sample_points,
             _sort_idx=sort_idx,
             _match_idx=match_idx,
         ):
