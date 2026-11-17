@@ -106,9 +106,9 @@
 # axis.](images/iris-langmuir-responses.png){width=70%}
 #
 # **Figure.** Columns of the Langmuir kernel matrix for $q = -6$, $-4$ and
-# $-2$, on a logarithmic pressure axis. Each curve reaches half coverage at
-# $p = \exp(q)$: the smaller $q$, the lower the pressure at which the
-# corresponding species saturates.
+# $-2$ (color scale), on a logarithmic pressure axis. Each curve
+# reaches half coverage at $p = \exp(q)$: the smaller $q$, the lower the
+# pressure at which the corresponding species saturates.
 #
 # <details>
 # <summary>Show code for the figure</summary>
@@ -118,24 +118,10 @@
 #
 # import spectrochempy as scp
 #
-# p_axis = scp.Coord(
-#     np.geomspace(1e-4, 10.0, 200),
-#     title="pressure",
-#     units="torr",
-#     rounding=False,
-# )
-# dummy = scp.NDDataset(np.zeros((200, 1)), coordset=[p_axis, scp.Coord([0.0])])
-# K = scp.iris.IrisKernel(dummy, "langmuir", q=[-7, -1, 7]).kernel
-# curves = [K[:, j].squeeze() for j in (1, 3, 5)]
-# _ = scp.plot_multiple(
-#     curves,
-#     method="pen",
-#     labels=["$q = -6$", "$q = -4$", "$q = -2$"],
-#     figsize=(4.9, 2.4),
-#     xscale="log",
-#     ylim=(0, 1.05),
-#     legend="best",
-# )
+# p = scp.Coord(np.geomspace(1e-4, 10, 200), title="pressure", units="torr", rounding=False)
+# X = scp.NDDataset(np.zeros((200, 1)), coordset=[p, [0.0]])
+# K = scp.iris.IrisKernel(X, "langmuir", q=[-7, -1, 7]).kernel
+# _ = K[:, 1::2].T.plot(xscale="log", colorbar=True)
 # ```
 #
 # </details>
