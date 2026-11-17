@@ -754,3 +754,20 @@ def test_align_masks_a_nan_that_is_replaced_by_the_sentinel(method):
     )
     np.testing.assert_array_equal(result.mask, [False, True, True, True, False])
     np.testing.assert_array_equal(result.masked_data.compressed(), [1.0, 3.0])
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_sorts_unsigned_source_without_wrapping(method):
+    coords = scp.Coord([1, 4, 2, 8], dtype=np.uint8, rounding=False, linearize_below=0)
+    source = scp.NDDataset([10.0, np.nan, 20.0, 80.0], coordset=[coords])
+    reference = scp.NDDataset([10.0, 40.0, 20.0, 80.0], coordset=[coords])
+    joined, _ = scp.align(source, reference, method="first")
+    target = scp.Coord([1.0, 4.0, 8.0], rounding=False)
+
+    (result,) = scp.align(
+        joined, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.mask, [False, True, False])
+    np.testing.assert_array_equal(result.masked_data.compressed(), [10.0, 80.0])
+    assert result.data[1] == 99999999999999

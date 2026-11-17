@@ -90,30 +90,30 @@ def _validate_monotonic(coord, assume_sorted, tol=1e-12):
     if assume_sorted:
         return data, np.arange(len(data)), False
 
-    diffs = np.diff(data)
-    sort_idx = None
-    if np.all(diffs > 0) or np.all(diffs < 0):
-        gaps = np.abs(diffs)
+    increasing = np.all(data[:-1] < data[1:])
+    decreasing = np.all(data[:-1] > data[1:])
+    if increasing:
+        sort_idx = np.arange(data.size)
+    elif decreasing:
+        sort_idx = np.arange(data.size - 1, -1, -1)
     else:
         sort_idx = np.argsort(data)
-        gaps = np.diff(data[sort_idx])
+    sorted_data = data[sort_idx]
 
-    if np.any(gaps <= tol):
+    # Integer gaps are at least one whenever neighbors differ. Subtraction
+    # can overflow for both signed and unsigned coordinates.
+    if data.dtype.kind in "biu" and 0 <= tol < 1:
+        duplicates = sorted_data[:-1] == sorted_data[1:]
+    else:
+        duplicates = np.diff(sorted_data) <= tol
+    if np.any(duplicates):
         raise ValueError(
             "Duplicate or near-duplicate coordinate values detected. "
             "Interpolation requires strictly monotonic coordinates. "
             "Use `assume_sorted=True` only if data is known to be strictly monotonic."
         )
 
-    strictly_increasing = np.all(diffs > tol)
-    strictly_decreasing = np.all(diffs < -tol)
-
-    if strictly_increasing:
-        return data, np.arange(len(data)), False
-    if strictly_decreasing:
-        return data[::-1], np.arange(len(data) - 1, -1, -1), True
-
-    return data[sort_idx], sort_idx, False
+    return sorted_data, sort_idx, not increasing and decreasing
 
 
 def _get_coord_data(coord):
@@ -148,7 +148,6 @@ def _interpolation_mask(mask, old_x, new_x, axis, method):
     """Mask points whose interpolation depends on a masked sample."""
     right = np.searchsorted(old_x, new_x)
     at = np.minimum(right, old_x.size - 1)
-    exact = old_x[at] == new_x
     left = np.clip(right - 1, 0, old_x.size - 1)
 
     result = np.take(mask, left, axis=axis) | np.take(mask, at, axis=axis)
@@ -160,7 +159,6 @@ def _interpolation_mask(mask, old_x, new_x, axis, method):
 
     shape = [1] * mask.ndim
     shape[axis] = new_x.size
-    result = np.where(exact.reshape(shape), np.take(mask, at, axis=axis), result)
     return result | ((new_x < old_x[0]) | (new_x > old_x[-1])).reshape(shape)
 
 
@@ -406,7 +404,7 @@ def interpolate(
                 ] = fill_value
 
         if sorted_mask is not None:
-            new._mask = _interpolation_mask(
+            new_mask = _interpolation_mask(
                 sorted_mask, sorted_old_x, new_data, ax, method
             )
             # Exact samples retain their stored value and mask. For PCHIP,
@@ -418,10 +416,12 @@ def interpolate(
             interpolated_data[selection] = np.take(
                 new._data, match_idx[matched], axis=ax
             )
+            new_mask[selection] = np.take(new._mask, match_idx[matched], axis=ax)
             if isinstance(fill_value, float) and np.isnan(fill_value):
                 shape = [1] * new.ndim
                 shape[ax] = new_data.size
-                interpolated_data[new._mask & ~matched.reshape(shape)] = fill_value
+                interpolated_data[new_mask & ~matched.reshape(shape)] = fill_value
+            new._mask = new_mask
 
         new._data = interpolated_data
 
