@@ -172,19 +172,24 @@ def _center_wide_grids(old_x, new_x):
         )
         return error, positions
 
-    narrowed = convert(Fraction(0))
-    if narrowed is not None and narrowed[0] == 0:
-        positions = narrowed[1]
-    else:
-        centered = convert(exact_grids[0][0])
-        candidates = [
-            candidate for candidate in (narrowed, centered) if candidate is not None
-        ]
-        if not candidates:
-            raise ValueError(
-                "Interpolation coordinates cannot be represented as distinct float64 points."
-            )
-        _, positions = min(candidates, key=lambda candidate: candidate[0])
+    origins = [Fraction(0), exact_grids[0][0]]
+    if gaps:
+        # A tight cluster can be far from both zero and the first source
+        # sample. It benefits most from a nearby origin.
+        origins.append(unique_values[gaps.index(min(gaps))])
+
+    best = None
+    for origin in dict.fromkeys(origins):
+        conversion = convert(origin)
+        if conversion is not None and (best is None or conversion[0] < best[0]):
+            best = conversion
+            if best[0] == 0:
+                break
+    if best is None:
+        raise ValueError(
+            "Interpolation coordinates cannot be represented as distinct float64 points."
+        )
+    _, positions = best
 
     mapping = dict(zip(unique_values, positions, strict=True))
     return tuple(np.asarray([mapping[value] for value in grid]) for grid in exact_grids)
@@ -473,18 +478,15 @@ def interpolate(
                     )
                 ] = fill_value
 
+        # Evaluating the interpolant at a node can still lose precision,
+        # especially at the end of a PCHIP interval with a large dynamic range.
+        matched = match_idx >= 0
+        selection = tuple(matched if i == ax else slice(None) for i in range(new.ndim))
+        interpolated_data[selection] = np.take(new._data, match_idx[matched], axis=ax)
+
         if sorted_mask is not None:
             new_mask = _interpolation_mask(
                 sorted_mask, sorted_old_x, sample_points, ax, method
-            )
-            # Exact samples retain their stored value and mask. For PCHIP,
-            # neighboring samples affect only the interpolation between nodes.
-            matched = match_idx >= 0
-            selection = tuple(
-                matched if i == ax else slice(None) for i in range(new.ndim)
-            )
-            interpolated_data[selection] = np.take(
-                new._data, match_idx[matched], axis=ax
             )
             new_mask[selection] = np.take(new._mask, match_idx[matched], axis=ax)
             if isinstance(fill_value, float) and np.isnan(fill_value):

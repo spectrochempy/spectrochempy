@@ -869,3 +869,56 @@ def test_align_interpolate_chooses_the_most_accurate_wide_grid_conversion(method
     np.testing.assert_array_equal(result.x.data, target.data)
     np.testing.assert_allclose(result.data, [300.01, 500.01, 1500.01])
     assert not result.is_masked
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_preserves_exact_unmasked_samples_at_high_dynamic_range(
+    method,
+):
+    coordinates = scp.Coord([0.0, 1.0])
+    source = scp.NDDataset(
+        [[1e16, 1.0], [1e17, 2.0]], coordset=[coordinates, coordinates]
+    )
+    target = scp.Coord([0.0, 0.5, 1.0])
+
+    (result,) = scp.align(
+        source, dim="x", method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.data[:, [0, 2]], source.data)
+    assert not result.is_masked
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="requires a coordinate dtype wider than float64",
+)
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_centers_near_a_distant_cluster_in_wide_grid(method):
+    x = scp.Coord(
+        [
+            np.longdouble(value)
+            for value in ("-1e18", "1e18", "1000000000000000001", "1000000000000000002")
+        ],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+    source = scp.NDDataset([-2e18, 0.0, 1.0, 2.0], coordset=[x])
+    target = scp.Coord(
+        [
+            np.longdouble(value)
+            for value in ("1000000000000000000.5", "1000000000000000001.5")
+        ],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [0.5, 1.5])
+    assert not result.is_masked
