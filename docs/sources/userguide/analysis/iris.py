@@ -13,13 +13,13 @@
 # ---
 
 # %% [markdown]
-# # Integral inversion of spectroscopic data (IRIS)
+# # Integral-equation Regularized Inversion for Spectroscopy (IRIS)
 #
-# During a gas adsorption experiment, two surface species can absorb in the
-# same spectral region yet respond to pressure over different ranges. A
-# series of spectra collected at equilibrium over a range of pressures can
-# help separate those contributions. IRIS uses a physical model of the
-# pressure response to estimate which contributions fit the entire series.
+# A series of spectra recorded as pressure, time, or another experimental
+# variable changes can help distinguish contributions whose bands overlap.
+# IRIS fits the whole series using a response law shared by the contributions.
+# Each contribution responds to the experimental variable according to its
+# own physical parameter, such as an adsorption affinity or a rate constant.
 #
 # The result is a map with **wavenumber** on one axis and a **physical
 # parameter** on the other. For adsorption, a slice at a given affinity
@@ -31,20 +31,31 @@
 # %% [markdown]
 # ## From measured spectra to a distribution
 #
-# Let $X(p,\tilde{\nu})$ be the measured signal at pressure $p$ and
-# wavenumber $\tilde{\nu}$. The kernel $k(p,q)$ describes how a single
-# contribution with parameter $q$ responds to pressure. IRIS estimates the
-# distribution $f(q,\tilde{\nu})$ in the model
+# Let $X(p,\epsilon)$ be the measured signal at experimental setting $p$
+# and spectral channel $\epsilon$. The kernel $k(p,q)$ describes the
+# response of a contribution with parameter $q$. For discrete contributions,
+# the signal is a sum of spectra weighted by their respective responses.
+# For a continuous distribution $f(q,\epsilon)$, the sum becomes an integral.
 #
 # $$
-# X(p,\tilde{\nu}) \approx \int_{q_{\min}}^{q_{\max}}
-#     k(p,q)\,f(q,\tilde{\nu})\,\mathrm{d}q.
+# X(p,\epsilon) \approx \int_{q_{\min}}^{q_{\max}}
+#     k(p,q)\,f(q,\epsilon)\,\mathrm{d}q.
 # $$
 #
 # The calculation samples $q$ on a grid, incorporates the quadrature weights
 # into a matrix $K$, and fits $X \approx Kf$. Each column of $K$ is the
-# predicted response of one grid point at the experimental pressures. Each
-# column of $f$ is the recovered distribution for one spectral channel.
+# response of one grid point at the experimental settings, weighted for
+# quadrature. Each column of $f$ is the recovered distribution for one
+# spectral channel.
+#
+# Built-in kernels cover first-order reactant decay and product growth,
+# adsorption equilibrium, diffusion uptake, and pulsed-field-gradient NMR
+# (`stejskal-tanner`). You can also supply a callable for your own response law.
+# Check that the chosen law describes the contributions in the spectral
+# region you fit. For example, a monotonic kernel cannot represent a transient
+# intermediate whose signal first grows and then decays.
+#
+# ### Example kernel for adsorption
 #
 # For adsorption, the Langmuir response takes the form
 # $k(p,q)=p\,\exp(-q)/(1+p\,\exp(-q))$ in the gallery convention.
@@ -113,15 +124,29 @@
 # A large $\lambda$ can merge contributions or leave systematic structure
 # in the residuals.
 #
+# A peak's width along $q$ can reflect a spread of physical parameters,
+# departures from the assumed response law, or the resolution of the
+# inversion. Try neighboring values of $\lambda$ and different grid
+# spacings, and use independent evidence to interpret persistent features.
+#
 # | `reg_par` | What IRIS evaluates |
 # | --- | --- |
 # | `None` | A nonnegative fit without a roughness penalty |
 # | `[-10, 1, 12]` | Twelve logarithmically spaced strengths from $10^{-10}$ to $10^1$ |
-# | `[-6, -2]` | An adaptive search between $10^{-6}$ and $10^{-2}$ |
+# | `[-6, -4]` | An adaptive search between $10^{-6}$ and $10^{-4}$ |
 #
-# Plot the residual sum of squares against the sharpness measure on
-# logarithmic axes to obtain the **L-curve**. Its corner helps identify a
-# compromise. Start with a fixed scan to see whether the range covers the
+# Plot the sharpness measure (SM) against the residual sum of squares (RSS)
+# on logarithmic axes to obtain the **L-curve**. Small $\lambda$ can fit noise
+# and produce high sharpness at nearly constant RSS. At large $\lambda$, the
+# distribution varies little with $\lambda$ while the residuals increase.
+# The corner helps identify a compromise. See
+# `hansen:1992`{.interpreted-text role="cite:t"} for the L-curve criterion and
+# `bauer:2011`{.interpreted-text role="cite:t"} for a comparison with other
+# parameter selection methods.
+#
+# ![Schematic L-curve showing the compromise between residuals and roughness.](images/iris-lcurve-schematic.png)
+#
+# Start with a fixed scan to see whether the range covers the
 # trade-off, then narrow it for an adaptive search. If the curve has no
 # clear corner, compare a few fixed strengths and inspect the reconstructed
 # spectra and residuals before interpreting the map.
@@ -130,7 +155,9 @@
 # ## Work through the CO adsorption series
 #
 # [Install the IRIS plugin](../plugins/iris.rst#installation) to run this tutorial.
-# The dataset contains 19 infrared spectra measured during CO adsorption.
+# The dataset contains 19 infrared difference spectra of CO measured at
+# increasing pressures on a sulfided CoMo/Al$_2$O$_3$ catalyst
+# `oliviero:2021`{.interpreted-text role="cite:p"}.
 # Use the recorded pressures as the active observation coordinate and keep
 # the acquisition times as a secondary coordinate. Select the CO stretching
 # region using its wavenumber limits.
@@ -164,7 +191,7 @@ pressure = scp.Coord(pressures, title="pressure", units="torr")
 spectra.y = [spectra.y.copy(), pressure]
 spectra.y.select(2)
 spectra = spectra[:, 2250.0:1950.0]
-_ = spectra.plot_contourf(colorbar=True)
+_ = spectra.plot(colorbar=True)
 
 # %% [markdown]
 # ### Build the kernel and fit without regularization
@@ -197,23 +224,46 @@ _ = scan.result.f[6].plot_contour()
 #
 # Search within a narrower range around the bend. The default NNLS solver
 # reports the selected strength and its index when logging is set to INFO.
-# For this fit the search selects about $2.11 \times 10^{-5}$ at index 4.
+# For these bounds the search selects about $7.45 \times 10^{-5}$ at index 9.
 # Use the index reported by your fit to select the matching distribution
 # and reconstruction.
 
 # %%
-adaptive = scp.iris.IRIS(reg_par=[-6, -2], log_level="INFO")
+adaptive = scp.iris.IRIS(reg_par=[-6, -4], log_level="INFO")
 _ = adaptive.fit(spectra, kernel)
 _ = adaptive.plotlcurve(title="Adaptive search")
-selected_index = 4
-_ = adaptive.result.f[selected_index].plot_contour()
+
+# %% [markdown]
+# The result contains the evaluated strengths (`lambdas`), the two series
+# plotted on the L-curve (`RSS` and `SM`), and the fit configuration
+# (`parameters`). Use the same index to inspect the distribution and both
+# diagnostics for a particular strength.
+
+# %%
+result = adaptive.result
+selected_index = 9
+print(
+    "λ, RSS, SM:",
+    result.lambdas.data[selected_index],
+    result.RSS[selected_index],
+    result.SM[selected_index],
+)
+print(result.parameters)
+_ = result.f[selected_index].plot_contour()
 _ = adaptive.plot_merit(index=selected_index)
 
 # %% [markdown]
-# The contours near 2115 cm$^{-1}$ show where the strongest recovered
-# contribution lies in $q$. Bands extending across neighboring wavenumbers
-# at similar $q$ may share a pressure response. Check the reconstructed
-# spectra and residuals against the measurements. Residual structure that
+# ### Interpret the distribution and residuals
+#
+# Features at lower $q$ reach half coverage at lower pressures. In this
+# catalyst, bands near 2110 cm$^{-1}$ are associated with CO on unpromoted
+# molybdenum sulfide edges. Bands below about 2090 cm$^{-1}$ include
+# contributions from cobalt-promoted sites, as discussed in the study cited
+# above. A band that shifts with pressure can leave a curved feature in the
+# map, so use the original spectra when interpreting the contours.
+#
+# Check the reconstructed spectra and residuals against the measurements.
+# Residual structure that
 # persists across pressures can indicate a mismatch in the kernel or
 # preprocessing. Check that the map features persist across reasonable
 # choices of grid and $\lambda$. The recovered amplitude describes a

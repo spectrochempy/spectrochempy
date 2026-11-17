@@ -11,7 +11,6 @@ import sys
 import warnings
 from os import environ
 from unittest.mock import Mock
-from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -288,13 +287,19 @@ def test_regularized_nnls_satisfies_optimality_on_both_grid_orders():
         np.testing.assert_allclose(gradient[coefficients > 0], 0, atol=1e-12)
 
 
-def test_adaptive_nnls_preserves_search_bounds_on_refit():
+@pytest.fixture
+def adaptive_iris_inputs():
     pressure = np.linspace(0.1, 1, 5)
     spectra = scp.NDDataset(
         np.column_stack((pressure, -pressure)),
         coordset=[scp.Coord(pressure), scp.Coord(np.arange(2))],
     )
     kernel = IrisKernel(spectra, "langmuir", q=[-4, 0, 5])
+    return spectra, kernel
+
+
+def test_adaptive_nnls_preserves_search_bounds_on_refit(adaptive_iris_inputs):
+    spectra, kernel = adaptive_iris_inputs
     iris = IRIS(qpsolver="nnls", reg_par=[-4, -2]).fit(spectra, kernel)
     strengths = iris.lambdas.data.copy()
     np.testing.assert_allclose(strengths[[0, -1]], [1e-4, 1e-2], atol=0)
@@ -303,15 +308,113 @@ def test_adaptive_nnls_preserves_search_bounds_on_refit():
     np.testing.assert_array_equal(iris.lambdas.data, strengths)
 
 
-def test_adaptive_nnls_rejects_zero_sharpness():
+@pytest.mark.parametrize("reg_par", [[-4, -2], [-4, -2, 3]])
+def test_iris_can_disable_regularization_on_refit(adaptive_iris_inputs, reg_par):
+    spectra, kernel = adaptive_iris_inputs
+    iris = IRIS(reg_par=reg_par).fit(spectra, kernel)
+    previous = iris.result
+    previous.parameters["reg_par"][0] = -10
+    assert iris.result.parameters["reg_par"] == reg_par
+
+    iris.reg_par = [-3, -1]
+    iris.qpsolver = "osqp"
+    iris.reg_par = None
+    np.testing.assert_array_equal(iris.result.lambdas.data, previous.lambdas.data)
+    np.testing.assert_array_equal(iris.result.f.data, previous.f.data)
+    assert iris.result.parameters["reg_par"] == reg_par
+    assert iris.result.parameters["qpsolver"] == "nnls"
+
+    iris.fit(spectra, kernel)
+    reference = IRIS(reg_par=None).fit(spectra, kernel)
+
+    np.testing.assert_array_equal(iris.lambdas.data, [0])
+    np.testing.assert_array_equal(iris.f.data, reference.f.data)
+    np.testing.assert_array_equal(iris.RSS, reference.RSS)
+    np.testing.assert_array_equal(iris.SM, reference.SM)
+    assert iris.result.parameters["reg_par"] is None
+    assert not iris.result.parameters["regularization"]
+    assert not iris.result.parameters["search_reg"]
+
+
+def test_adaptive_nnls_uses_positive_curvature_at_initial_points(adaptive_iris_inputs):
+    spectra, kernel = adaptive_iris_inputs
+    iris = IRIS(reg_par=[-10, -6], log_level="INFO").fit(spectra, kernel)
+
+    strengths = iris.lambdas.data
+    np.testing.assert_allclose(strengths[[0, -1]], [1e-10, 1e-6], atol=0)
+    assert np.all(np.isfinite(iris.RSS))
+    assert np.all(np.isfinite(iris.SM))
+    assert "optimum found:" in iris.log
+
+
+@pytest.mark.parametrize(
+    ("curvatures", "selected"),
+    [([1, 0, 0, 0], 1), ([np.inf, 2, 0, 0], 2), ([1, 2, 3, 4], 4)],
+)
+def test_adaptive_nnls_uses_valid_curvature_at_convergence(
+    adaptive_iris_inputs, monkeypatch, caplog, curvatures, selected
+):
+    spectra, kernel = adaptive_iris_inputs
+    menger = Mock(side_effect=curvatures)
+    monkeypatch.setitem(IRIS._fit.__globals__, "_menger", menger)
+    IRIS(reg_par=[-4, -3.94], log_level="INFO").fit(spectra, kernel)
+
+    assert menger.call_count == 4
+    optimum_log = next(
+        record.message for record in caplog.records if "optimum found" in record.message
+    )
+    assert optimum_log.endswith(f"curvature = {selected:.3f}")
+
+
+def test_adaptive_iris_stops_at_terminal_flat_bracket(
+    adaptive_iris_inputs, monkeypatch
+):
+    spectra, kernel = adaptive_iris_inputs
+    menger = Mock(return_value=0)
+    monkeypatch.setitem(IRIS._fit.__globals__, "_menger", menger)
+
+    with pytest.raises(ValueError, match="could not find positive curvature"):
+        IRIS(reg_par=[-4, -3.98]).fit(spectra, kernel)
+
+    assert menger.call_count == 2
+
+
+@pytest.mark.parametrize("solver", ["nnls", "osqp"])
+def test_adaptive_iris_rejects_undefined_curvature(solver):
+    if solver == "osqp":
+        pytest.importorskip("osqp")
     pressure = np.linspace(0.1, 1, 5)
     spectra = scp.NDDataset(
-        -pressure[:, None],
+        np.zeros((pressure.size, 1)),
         coordset=[scp.Coord(pressure), scp.Coord([0])],
     )
     kernel = IrisKernel(spectra, "langmuir", q=[-4, 0, 5])
-    with pytest.raises(ValueError, match="finite, positive residuals and sharpness"):
-        IRIS(qpsolver="nnls", reg_par=[-4, -2]).fit(spectra, kernel)
+    with (
+        np.errstate(divide="raise", invalid="raise"),
+        pytest.raises(ValueError, match="finite, positive residuals and sharpness"),
+    ):
+        IRIS(qpsolver=solver, reg_par=[-4, -2]).fit(spectra, kernel)
+
+
+@pytest.mark.parametrize(
+    ("data", "error"),
+    [
+        (np.column_stack((np.ones(5), np.full(5, -1e160))), "over"),
+        (np.full((5, 2), -1e-170), "under"),
+    ],
+)
+def test_adaptive_iris_reports_unusable_diagnostics_in_strict_numpy_mode(data, error):
+    observations = scp.Coord(np.arange(5))
+    grid = scp.Coord(np.arange(4))
+    channels = scp.Coord(np.arange(2))
+    kernel = scp.NDDataset(np.eye(5, 4), coordset=[observations, grid])
+    spectra = scp.NDDataset(data, coordset=[observations, channels])
+
+    with np.errstate(**{error: "raise"}):
+        with pytest.raises(ValueError, match="Use a fixed regularization grid"):
+            IRIS(reg_par=[-4, -2]).fit(spectra, kernel)
+        with pytest.raises(FloatingPointError, match=f"{error}flow"):
+            IRIS(reg_par=[-4, -2, 3]).fit(spectra, kernel)
 
 
 def test_IRIS_docstrings():
@@ -470,7 +573,7 @@ def test_IRIS():
     iris3.fit(X, K1)
     f3 = iris3.f
     assert (f3.shape[1], f3.shape[2]) == (q[2], X.shape[1])
-    with patch.object(np.linalg, "cholesky", side_effect=np.linalg.LinAlgError):
+    with np.errstate(under="warn"):
         legacy_metric = IRIS(reg_par=reg_par).fit(X, K1)
     np.testing.assert_array_equal(f3.data, legacy_metric.f.data)
     np.testing.assert_array_equal(iris3.RSS.data, legacy_metric.RSS.data)

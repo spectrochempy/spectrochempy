@@ -6,8 +6,8 @@ Run manually with the spectrochempy-iris plugin and its OSQP extra installed:
 
 Scientific source:
 plugins/spectrochempy-iris/examples/analysis/a_decomposition/plot_iris_intro.py
-The contours use the gallery data and the OSQP adaptive result at index 5
-to reproduce the checked-in homepage illustrations.
+The contours use the gallery data and the fixed OSQP strength from the
+original adaptive fit to reproduce the checked-in homepage illustrations.
 Only the saved SVGs are needed to build the documentation.
 """
 
@@ -55,9 +55,12 @@ def main():
     data.y.select(2)
     data = data[:, 2250.0:1950.0]
     kernel = data.iris.kernel_matrix(kernel_type="langmuir", q=[-8, -1, 50])
-    model = scp.iris.IRIS(qpsolver="osqp", log_level="INFO", reg_par=[-6, -2])
+    log_strength = -4.622325850054677
+    model = scp.iris.IRIS(
+        qpsolver="osqp", log_level="INFO", reg_par=[log_strength, log_strength, 1]
+    )
     model.fit(data, kernel)
-    distribution = model.result.f[5].squeeze()
+    distribution = model.result.f[0].squeeze()
 
     def canvas():
         fig = plt.figure(figsize=(2.8, 3.3))
@@ -126,7 +129,7 @@ def main():
     )
     bounds = bounds.transformed(fig.dpi_scale_trans.inverted()).padded(0.08)
     save(fig, "insights", bounds)
-    scp.info_(f"Saved illustrations to {output}; lambda = {model.lambdas.data[5]}")
+    scp.info_(f"Saved illustrations to {output}; lambda = {model.lambdas.data[0]}")
 
 
 if __name__ == "__main__":

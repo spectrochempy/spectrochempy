@@ -44,6 +44,7 @@ pressures = [
     1.004,
 ]
 spectra.y = scp.Coord(pressures, title="pressure", units="torr")
+_ = spectra.plot(colorbar=True)
 
 # %%
 # Fit once at a fixed regularization strength of :math:`10^{-4}`.

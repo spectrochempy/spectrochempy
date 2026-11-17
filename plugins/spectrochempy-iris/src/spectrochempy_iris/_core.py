@@ -9,6 +9,7 @@
 __all__ = ["IrisKernel", "IRIS"]
 
 from contextlib import closing
+from contextlib import nullcontext
 from contextlib import suppress
 from functools import partial
 
@@ -316,7 +317,7 @@ class IrisKernel(tr.HasTraits):
 @signature_has_configurable_traits
 class IRIS(DecompositionAnalysis):
     r"""
-    Integral inversion solver for spectroscopic data (IRIS).
+    Integral-equation Regularized Inversion for Spectroscopy (IRIS).
 
     `IRIS`, a model developed by :cite:t:`stelmachowski:2013`, solves integral
     equation of the first kind of 1 or 2 dimensions, *i.e.,*
@@ -449,39 +450,29 @@ class IRIS(DecompositionAnalysis):
             **kwargs,
         )
         self.workers = workers
-        # no validation of reg_par triggred when it is None
-        # so we need to init self._lambdas manually else itt will not be inited
-        if self.reg_par is None:
-            self._lambdas = Coord([0], title="lambda", rounding=False)
 
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
     # ----------------------------------------------------------------------------------
+    @tr.default("_lambdas")
+    def _lambdas_default(self):
+        return Coord([0], title="lambda", rounding=False)
+
     @tr.validate("reg_par")
     def _reg_par_validate(self, proposal):
         reg_par = proposal.value
-        if reg_par is None or len(reg_par) == 1:
-            self._regularization = False
-            self._search_reg = False
-            _lambdas = [0]
-        elif len(reg_par) == 2:
-            self._regularization = True
-            self._search_reg = True
-            _lambdas = reg_par
-        elif len(reg_par) == 3:
-            self._regularization = True
-            self._search_reg = False
-            _lambdas = np.logspace(reg_par[0], reg_par[1], reg_par[2])
-        else:
-            raise ValueError(
-                "reg_par should be either None or a set of 2 or 3 integers",
-            )
-
-        # create the lambdas coordinate
-        self._lambdas = Coord(_lambdas, title="lambda", rounding=False)
-
-        # return the validated reg_par with no transformation
+        lambdas = self._regularization_grid(reg_par)
+        if not self._fitted:
+            self._lambdas = Coord(lambdas, title="lambda", rounding=False)
         return reg_par
+
+    @staticmethod
+    def _regularization_grid(reg_par):
+        if reg_par is None or len(reg_par) == 1:
+            return [0]
+        if len(reg_par) == 2:
+            return reg_par
+        return np.logspace(*reg_par)
 
     @tr.validate("_Y")
     def _Y_validate(self, proposal):
@@ -517,12 +508,15 @@ class IRIS(DecompositionAnalysis):
         if K is None:
             K = self._Y_preprocessed
 
+        reg_par = self.reg_par
+        regularization = reg_par is not None and len(reg_par) >= 2
+        search_reg = regularization and len(reg_par) == 2
         q = self._q.data
-        lambdas = self._lambdas.data
+        lambdas = np.asarray(self._regularization_grid(reg_par))
 
         # define containers for outputs
         M, N, W = K.shape[-1], X.shape[-1], X.shape[0]
-        L = len(lambdas) if not self._search_reg else 4
+        L = len(lambdas) if not search_reg else 4
         f = np.zeros((L, M, N))
         RSS = np.zeros(L)
         SM = np.zeros(L)
@@ -532,14 +526,16 @@ class IRIS(DecompositionAnalysis):
         S = _Smat(q)
         info_("... done")
 
-        factor_transpose = None
-        if (
+        solver = self.qpsolver or "nnls"
+        use_reduced_sharpness = (
             N > M
             and np.geterr()["under"] == "ignore"
             and S.dtype.type in (np.float32, np.float64)
             and S[0, 0] >= 6 * np.finfo(S.dtype).tiny
             and np.isfinite(S).all()
-        ):
+        )
+        factor_transpose = None
+        if use_reduced_sharpness and not (regularization and solver == "nnls"):
             with suppress(np.linalg.LinAlgError):
                 factor_transpose = np.linalg.cholesky(S).T
 
@@ -554,7 +550,7 @@ class IRIS(DecompositionAnalysis):
             return np.linalg.norm(np.dot(np.dot(distribution.T, S), distribution))
 
         # Solve non-regularized problem
-        if not self._regularization:
+        if not regularization:
             msg = f"Solving for {N} channels and {W} observations, no regularization"
             info_(msg)
 
@@ -572,7 +568,6 @@ class IRIS(DecompositionAnalysis):
             # some matrices used for QP optimization do not depend on lambdaR
             # and are computed here.
 
-            solver = self.qpsolver or "nnls"
             if self.workers > 1 and solver != "osqp":
                 info_(
                     "workers is only used for eligible OSQP fixed-grid fits. "
@@ -609,7 +604,7 @@ class IRIS(DecompositionAnalysis):
                     )
                 parallel_grid = (
                     self.workers > 1
-                    and not self._search_reg
+                    and not search_reg
                     and len(lambdas) > 1
                     and backend == "builtin"
                     and legacy_warning is None
@@ -636,6 +631,8 @@ class IRIS(DecompositionAnalysis):
                     raise ValueError(
                         "Regularized NNLS requires a finite, positive-definite penalty."
                     ) from exc
+                if use_reduced_sharpness:
+                    factor_transpose = penalty_factor
                 augmented_kernel = np.vstack((K, np.empty((M, M))))
                 augmented_data = np.vstack((X, np.zeros((M, N))))
                 P0 = None
@@ -719,17 +716,21 @@ class IRIS(DecompositionAnalysis):
                 return summarize_lambda(X, K, lambda_, fi)
 
             def summarize_lambda(X, K, lambda_, fi):
-                resi = X.data - np.dot(K.data, fi)
-                RSSi = np.sum(resi**2)
-                SMi = sharpness(fi)
+                # Adaptive curvature uses logarithms of both diagnostics.
+                # Let the check below handle unusable values in this mode.
+                diagnostics_policy = (
+                    np.errstate(over="ignore", under="ignore", invalid="ignore")
+                    if search_reg
+                    else nullcontext()
+                )
+                with diagnostics_policy:
+                    resi = X.data - np.dot(K.data, fi)
+                    RSSi = np.sum(resi**2)
+                    SMi = sharpness(fi)
 
-                if (
-                    solver == "nnls"
-                    and self._search_reg
-                    and not (0 < RSSi < np.inf and 0 < SMi < np.inf)
-                ):
+                if search_reg and not (0 < RSSi < np.inf and 0 < SMi < np.inf):
                     raise ValueError(
-                        "Adaptive NNLS regularization requires finite, positive "
+                        "Adaptive regularization requires finite, positive "
                         "residuals and sharpness. Use a fixed regularization grid."
                     )
 
@@ -744,7 +745,7 @@ class IRIS(DecompositionAnalysis):
 
             # --------------------------------------------------------------------------
 
-            if not self._search_reg:
+            if not search_reg:
                 msg = (
                     f"Solving for {X.shape[1]} channels, {X.shape[0]} observations and "
                     f"{len(lambdas)} regularization parameters"
@@ -782,16 +783,16 @@ class IRIS(DecompositionAnalysis):
                 msg = (
                     f"Solving for {X.shape[1]} channel(s) and {X.shape[0]} "
                     f"observations, search optimum regularization parameter "
-                    f"in the range: [10**{min(self.reg_par)}, 10**{max(self.reg_par)}]"
+                    f"in the range: [10**{min(reg_par)}, 10**{max(reg_par)}]"
                 )
                 info_(msg)
 
                 x = np.zeros(4)
-                epsilon = 0.1
+                max_log_width = -np.log10(0.9)
                 phi = (1 + np.sqrt(5)) / 2
 
-                x[0] = min(self.reg_par)
-                x[3] = max(self.reg_par)
+                x[0] = min(reg_par)
+                x[3] = max(reg_par)
                 x[1] = (x[3] + phi * x[0]) / (1 + phi)
                 x[2] = x[0] + x[3] - x[1]
                 lambdas = 10**x
@@ -803,7 +804,8 @@ class IRIS(DecompositionAnalysis):
 
                 Rx = np.copy(RSS)
                 Sy = np.copy(SM)
-                while "convergence not reached":
+                optimum = None
+                while True:
                     C1 = _menger(np.log10(Rx[0:3]), np.log10(Sy[0:3]))
                     C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
                     msg = (
@@ -811,36 +813,18 @@ class IRIS(DecompositionAnalysis):
                     )
                     info_(msg)
 
-                    while "convergence not reached":
-                        if solver == "nnls" and not x[0] < x[1] < x[2] < x[3]:
-                            raise ValueError(
-                                "Adaptive NNLS regularization could not find positive "
-                                "curvature. Use a fixed regularization grid."
-                            )
-                        x[3] = x[2]
-                        Rx[3] = Rx[2]
-                        Sy[3] = Sy[2]
-                        x[2] = x[1]
-                        Rx[2] = Rx[1]
-                        Sy[2] = Sy[1]
-                        x[1] = (x[3] + phi * x[0]) / (1 + phi)
-                        msg = "New range of Log(lambda) values: " + str(x)
-                        info_(msg)
+                    valid_left = np.isfinite(C1) and C1 > 0
+                    valid_right = np.isfinite(C2) and C2 > 0
+                    left_is_better = valid_left and (not valid_right or C1 > C2)
+                    if left_is_better:
+                        optimum = x[1], C1
+                    elif valid_right:
+                        optimum = x[2], C2
 
-                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, P0, 10 ** x[1], S)
-                        lambdas = np.append(lambdas, np.array(10 ** x[1]))
-                        f = np.concatenate((f, np.atleast_3d(f_.T).T))
-                        RSS = np.concatenate((RSS, np.array(Rx[1:2])))
-                        SM = np.concatenate((SM, np.array(Sy[1:2])))
-                        C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
-                        msg = f"new curvature: C2 = {C2:.3f}"
-                        info_(msg)
+                    if x[3] - x[0] < max_log_width or not x[0] < x[1] < x[2] < x[3]:
+                        break
 
-                        if C2 > 0:
-                            break
-                    if C1 > C2:
-                        x_ = x[1]
-                        C_ = C1
+                    if left_is_better or not valid_right:
                         x[3] = x[2]
                         Rx[3] = Rx[2]
                         Sy[3] = Sy[2]
@@ -856,8 +840,6 @@ class IRIS(DecompositionAnalysis):
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
                     else:
-                        x_ = x[2]
-                        C_ = C2
                         x[0] = x[1]
                         Rx[0] = Rx[1]
                         Sy[0] = Sy[1]
@@ -872,8 +854,12 @@ class IRIS(DecompositionAnalysis):
                         lambdas = np.append(lambdas, np.array(10 ** x[2]))
                         RSS = np.concatenate((RSS, np.array(Rx[2:3])))
                         SM = np.concatenate((SM, np.array(Sy[2:3])))
-                    if (10 ** x[3] - 10 ** x[0]) / 10 ** x[3] < epsilon:
-                        break
+                if optimum is None:
+                    raise ValueError(
+                        "Adaptive regularization could not find positive "
+                        "curvature. Use a fixed regularization grid."
+                    )
+                x_, C_ = optimum
                 id_opt = np.argmin(np.abs(lambdas - np.power(10, x_)))
                 id_opt_ranked = np.argmin(np.abs(np.argsort(lambdas) - id_opt))
                 msg = (
@@ -892,7 +878,11 @@ class IRIS(DecompositionAnalysis):
 
         info_("Done.")
 
-        self._lambdas.data = lambdas
+        self._lambdas = Coord(lambdas, title="lambda", rounding=False)
+        self._regularization = regularization
+        self._search_reg = search_reg
+        self._fitted_solver = solver
+        self._fitted_reg_par = None if reg_par is None else reg_par.copy()
         return f, RSS, SM
 
     # ----------------------------------------------------------------------------------
@@ -955,11 +945,12 @@ class IRIS(DecompositionAnalysis):
 
         from spectrochempy.analysis._base._result import AnalysisResult
 
+        reg_par = self._fitted_reg_par
         return AnalysisResult(
             estimator="IRIS",
             parameters={
-                "qpsolver": self.qpsolver or "nnls",
-                "reg_par": self.reg_par,
+                "qpsolver": self._fitted_solver,
+                "reg_par": None if reg_par is None else reg_par.copy(),
                 "warm_start": self._warm_start,
                 "regularization": self._regularization,
                 "search_reg": self._search_reg,

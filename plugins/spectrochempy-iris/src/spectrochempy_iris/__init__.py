@@ -2,7 +2,7 @@
 """
 spectrochempy-iris — IRIS analysis for SpectroChemPy.
 
-Provides Integral Inversion for Spectroscopic data (IRIS) analysis,
+Provides Integral-equation Regularized Inversion for Spectroscopy (IRIS),
 including the :class:`IrisKernel` and :class:`IRIS` classes,
 plus additional kernels, batch analysis, model comparison, and
 extended visualisation.

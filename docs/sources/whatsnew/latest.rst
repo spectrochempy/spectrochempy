@@ -50,7 +50,9 @@ Bug Fixes
 
 - Correct the association of residual sums of squares (RSS) and sharpness
   values (SM) with their evaluated regularization strengths in adaptive IRIS
-  fits, and restart each fit from the configured search bounds. (:pr:`1892`)
+  fits. Keep valid curvature points during the search, restart each fit
+  from the configured bounds, and allow switching off regularization between
+  fits. (:pr:`1892`)
 
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
