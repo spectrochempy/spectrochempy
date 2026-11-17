@@ -122,7 +122,6 @@
 # p = scp.Coord(np.geomspace(1e-4, 10, 200), title="pressure", units="torr", rounding=False)
 # X = scp.NDDataset(np.zeros((200, 1)), coordset=[p, [0.0]])
 # K = scp.iris.IrisKernel(X, "langmuir", q=[-8, 0, 9]).kernel
-# K.x.title = "$q$"
 # _ = K[:, 1:-1].T.plot(xscale="log", colorbar=True)
 # ```
 #
