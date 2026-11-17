@@ -537,3 +537,39 @@ def test_align_does_not_round_converted_coordinates_again(method):
         np.testing.assert_array_equal(right.x.data, [0.0, 1000.0])
         np.testing.assert_array_equal(right.mask, [True, False])
         np.testing.assert_array_equal(right.masked_data.compressed(), [40.0])
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+@pytest.mark.parametrize("explicit_target", [False, True])
+def test_align_interpolate_keeps_converted_endpoints_with_default_rounding(
+    method, explicit_target
+):
+    reference = scp.NDDataset(
+        [10.0, 20.0], coordset=[scp.Coord([0.3048, 0.6096], units="m")]
+    )
+    source = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([1.0, 2.0], units="ft")])
+    target = scp.Coord([1.0, 2.0], units="ft") if explicit_target else None
+
+    left, right = scp.align(
+        reference, source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(right.x.data, reference.x.data)
+    np.testing.assert_array_equal(left.data, reference.data)
+    np.testing.assert_array_equal(right.data, source.data)
+    assert not left.is_masked and not right.is_masked
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_preserves_extended_precision_complex_intensities(method):
+    first = scp.NDDataset(
+        np.array([1.0 + 3.0j, 2.0 + 4.0j], dtype=np.clongdouble),
+        dtype=np.clongdouble,
+        coordset=[scp.Coord([0.0, 1.0])],
+    )
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([0.0, 1.0])])
+
+    left, _ = scp.align(first, second, method=method)
+
+    assert left.data.dtype == first.data.dtype
+    np.testing.assert_array_equal(left.data, first.data)

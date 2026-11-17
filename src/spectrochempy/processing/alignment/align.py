@@ -249,10 +249,12 @@ def align(dataset, *others, **kwargs):
                 )
 
             working = object.copy()
-            if (
-                method == "inner"
-                and object.data.dtype.kind in "biufc"
-                and working.data.dtype != object.data.dtype
+            if working.data.dtype != object.data.dtype and (
+                (method == "inner" and object.data.dtype.kind in "biufc")
+                or (
+                    method in {"outer", "first", "last"}
+                    and object.data.dtype.kind == "c"
+                )
             ):
                 working._dtype = object.data.dtype
                 working._data = object.data
@@ -322,7 +324,9 @@ def align(dataset, *others, **kwargs):
                 if method == "inner":
                     coord.ito(ref_coord)
                 else:
-                    _convert_coordinate(coord, ref_coord, precise=not rounded)
+                    _convert_coordinate(
+                        coord, ref_coord, precise=method == "interpolate" or not rounded
+                    )
             values = coord.data
 
             keys = values
@@ -389,11 +393,7 @@ def align(dataset, *others, **kwargs):
                         ),
                     )
                 elif target_coord.units != ref_coord.units:
-                    _convert_coordinate(
-                        target_coord,
-                        ref_coord,
-                        precise=not (target_coord._rounding and ref_coord._rounding),
-                    )
+                    _convert_coordinate(target_coord, ref_coord, precise=True)
                 if not np.isfinite(target_coord.data).all():
                     raise ValueError(
                         f"Alignment target produced non-finite coordinates "
@@ -420,7 +420,11 @@ def align(dataset, *others, **kwargs):
             else:
                 dim_index = obj.dims.index(dim)
                 coord = obj.coordset[dim]
-                new_obj = obj.copy() if copy and method != "inner" else obj
+                new_obj = (
+                    obj.copy()
+                    if copy and method != "inner" and obj.data.dtype.kind != "c"
+                    else obj
+                )
                 new_coordset = obj.coordset.copy()
 
                 if method == "inner":
