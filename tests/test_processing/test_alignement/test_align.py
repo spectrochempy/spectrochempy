@@ -105,6 +105,22 @@ def test_align_inner_rejects_disjoint_coordinates():
         scp.align(first, second, method="inner")
 
 
+@pytest.mark.parametrize(
+    ("first_grid", "second_grid"),
+    [
+        ([1000.0, 1000.001, 1001.0], [1000.0, 1000.001, 1001.0]),
+        ([1000.0, 1000.001, 1001.0], [1000.0, 1001.0]),
+        ([1000.0, 1001.0], [1000.0, 1000.001, 1001.0]),
+    ],
+)
+def test_align_inner_rejects_colliding_rounded_coordinates(first_grid, second_grid):
+    first = scp.NDDataset(first_grid, coordset=[scp.Coord(first_grid)])
+    second = scp.NDDataset(second_grid, coordset=[scp.Coord(second_grid)])
+
+    with pytest.raises(ValueError, match="Coordinate rounding.*dimension 'x'"):
+        scp.align(first, second, method="inner")
+
+
 def test_align_inner_preserves_each_spectrum_mask():
     first = scp.NDDataset(
         [10.0, 20.0, 30.0],
