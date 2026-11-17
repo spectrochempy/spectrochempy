@@ -21,6 +21,20 @@ spectra = by_name["m5spec"]
 moisture = by_name["propvals"][:, "Moisture"]
 moisture.units = "%"
 
+# %%
+# A subset of the measured NIR spectra shows the variation across corn
+# samples. Each spectrum has one reference moisture value.
+
+_ = spectra[::10].plot(
+    method="lines",
+    title="Measured corn NIR spectra",
+    xlabel="Wavelength / nm",
+    ylabel="NIR signal",
+)
+
+# %%
+# Fit autoscaling and PLS on the training samples.
+
 pipeline = scp.Pipeline(
     [
         ("scale", scp.AutoscaleTransformer(dim="y")),

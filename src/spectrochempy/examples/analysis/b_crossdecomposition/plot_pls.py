@@ -21,6 +21,20 @@ by_name = {dataset.name: dataset for dataset in datasets}
 spectra = by_name["m5spec"]
 moisture = by_name["propvals"][:, "Moisture"]
 
+# %%
+# A subset of the measured NIR spectra shows the variation across corn
+# samples. Each spectrum has one reference moisture value.
+
+_ = spectra[::10].plot(
+    method="lines",
+    title="Measured corn NIR spectra",
+    xlabel="Wavelength / nm",
+    ylabel="NIR signal",
+)
+
+# %%
+# Fit the calibration and compare held-out predictions with measured moisture.
+
 model = scp.PLSRegression(n_components=5)
 _ = model.fit(spectra[:57], moisture[:57])
 predicted = model.predict(spectra[57:])

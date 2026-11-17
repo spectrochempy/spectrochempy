@@ -9,9 +9,8 @@ Autoscale held-out spectra with training statistics
 ===================================================
 
 Fit an autoscaling transformer to the first 40 spectra in an IR series,
-then apply the same scaling to the remaining spectra. The figure shows the
-held-out spectra in standard deviations from the training mean at each
-wavenumber. See the :doc:`transformations tutorial
+then apply the same scaling to the remaining spectra. Compare the held-out spectra before and after scaling with the training
+mean and standard deviation at each wavenumber. See the :doc:`transformations tutorial
 </userguide/processing/transformations>` for use in model validation.
 """
 
@@ -27,4 +26,11 @@ scaled = scaler.transform(held_out)
 scaled.title = "standardized intensity"
 scaled.units = None
 
-_ = scaled.plot(method="lines", title="Held-out spectra on the training scale")
+_ = scp.multiplot(
+    [held_out, scaled],
+    method="lines",
+    ncol=2,
+    labels=["Measured held-out spectra", "After scaling with training statistics"],
+    x_reverse=True,
+    figsize=(10, 4),
+)

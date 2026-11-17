@@ -29,6 +29,15 @@ spectra = scp.NDDataset(
     units="absorbance",
 )
 
+# %%
+# Both bands grow with time. The band near 1680 cm⁻¹ grows faster at the
+# start than the band near 1540 cm⁻¹.
+
+_ = spectra[::5].plot(method="lines", title="Simulated IR series")
+
+# %%
+# Compare synchronous and asynchronous maps of the spectral changes.
+
 result = scp.correlation_spectroscopy(spectra, perturbation_dim="y")
 _ = scp.multiplot(
     [result.synchronous, result.asynchronous],

@@ -18,6 +18,21 @@ import spectrochempy as scp
 datasets = scp.read_matlab("matlabdata/als2004dataset.MAT", merge=False)
 chromatogram = next(dataset for dataset in datasets if dataset.name == "m1")
 
+# %%
+# Each row contains the spectrum at one elution step. The map shows
+# where the detector signal varies over the run.
+
+_ = chromatogram.plot_image(
+    title="Measured HPLC-DAD run",
+    xlabel="Spectral channel",
+    ylabel="Elution index",
+    zlabel="Absorbance",
+    colorbar=True,
+)
+
+# %%
+# Estimate the component spectra from the measured matrix.
+
 model = scp.SIMPLISMA(n_components=4, noise=3, tol=0.05)
 _ = model.fit(chromatogram.clip(0))
 spectra = model.result.components

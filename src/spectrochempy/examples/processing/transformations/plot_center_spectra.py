@@ -20,8 +20,11 @@ series = scp.read_omnic("irdata/nh4y-activation.spg")
 spectra = series[:, 4000.0:2000.0]
 centered = spectra.center(dim="y")
 
-_ = centered[::10].plot(
+_ = scp.multiplot(
+    [spectra[::10], centered[::10]],
     method="lines",
-    title="Deviations from the mean spectrum",
+    ncol=2,
+    labels=["Measured spectra", "Deviations from the mean spectrum"],
     x_reverse=True,
+    figsize=(10, 4),
 )

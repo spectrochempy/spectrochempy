@@ -30,6 +30,17 @@ spectra = scp.NDDataset(
 )
 reaction_spectra = spectra[::4, 300.0:500.0]
 
+# %%
+# Absorbance changes as the reaction progresses. Plot a subset of the
+# spectra across the wavelength window used for fitting.
+
+_ = reaction_spectra[::5].plot(
+    method="lines", title="UV–visible spectra during the reaction"
+)
+
+# %%
+# Fit concentration profiles constrained by a sequential reaction model.
+
 rates = {"k[0]": 0.5, "k[1]": 0.05}
 kinetics = scp.ActionMassKinetics(
     ("A -> B", "B -> C"), {"A": 5.0, "B": 0.0, "C": 0.0}, list(rates.values())

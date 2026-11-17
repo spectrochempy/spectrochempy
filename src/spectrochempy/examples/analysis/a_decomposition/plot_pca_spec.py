@@ -17,6 +17,14 @@ masking, the explained variance, and the interpretation of scores and loadings.
 import spectrochempy as scp
 
 spectra = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
+# %%
+# The measured spectra contain a saturated band near 1100 cm⁻¹.
+
+_ = spectra[::2].plot(method="lines", title="NH₄Y activation before masking")
+
+# %%
+# Mask the saturated range before fitting PCA.
+
 spectra[:, 882.0:1280.0] = scp.MASKED
 
 pca = scp.PCA(n_components=0.999)

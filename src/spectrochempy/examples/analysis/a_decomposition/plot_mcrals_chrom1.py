@@ -21,6 +21,21 @@ by_name = {dataset.name: dataset for dataset in datasets}
 chromatogram = by_name["m1"]
 chromatogram.title = "absorbance"
 
+# %%
+# Each row contains the spectrum at one elution step. The map shows
+# where the detector signal varies over the run.
+
+_ = chromatogram.plot_image(
+    title="Measured HPLC-DAD run",
+    xlabel="Spectral channel",
+    ylabel="Elution index",
+    zlabel="Absorbance",
+    colorbar=True,
+)
+
+# %%
+# Estimate the component spectra from the measured matrix.
+
 model = scp.MCRALS()
 _ = model.fit(chromatogram, by_name["spure"])
 result = model.result

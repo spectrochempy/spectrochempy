@@ -23,6 +23,15 @@ spectra.y.title = "elapsed time"
 spectra[:, 1230.0:920.0] = scp.MASKED
 spectra[:, 5997.0:5993.0] = scp.MASKED
 
+# %%
+# Inspect every third spectrum from the series used in the fit. The gaps
+# mark the masked regions.
+
+_ = spectra[::3].plot(method="lines", title="NH₄Y activation spectra used for EFA")
+
+# %%
+# Follow the eigenvalues as the acquisition window expands.
+
 efa = scp.EFA()
 _ = efa.fit(spectra)
 forward = efa.f_ev[:, :5]

@@ -21,6 +21,14 @@ region.y -= region.y[0]
 region.y.ito("min")
 region.y.title = "elapsed time"
 
+# %%
+# Inspect the spectral region used to calculate each area.
+
+_ = region[::4].plot(method="lines", title="Measured IR region before correction")
+
+# %%
+# Remove the baseline before integrating each spectrum.
+
 baseline = scp.Baseline(
     model="polynomial",
     order=3,
