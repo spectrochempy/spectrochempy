@@ -573,6 +573,11 @@ class IRIS(DecompositionAnalysis):
             # and are computed here.
 
             solver = self.qpsolver or "nnls"
+            if self.workers > 1 and solver != "osqp":
+                info_(
+                    "workers is only used for eligible OSQP fixed-grid fits. "
+                    f"The {solver} fit runs in a single process."
+                )
             parallel_grid = False
             if solver == "osqp":
                 osqp = import_optional_dependency(

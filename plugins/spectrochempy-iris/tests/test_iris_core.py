@@ -44,9 +44,12 @@ def test_regularized_iris_runs_without_optional_qp_solvers(monkeypatch):
     spectra = scp.NDDataset(np.ones((5, 2)), coordset=[observations, channels])
     regularization = [-4, -2, 3]
 
-    iris = IRIS(reg_par=regularization).fit(spectra, kernel)
+    iris = IRIS(reg_par=regularization, workers=2, log_level="INFO").fit(
+        spectra, kernel
+    )
     assert iris.qpsolver == "nnls"
     assert iris.f.shape == (3, 4, 2)
+    assert "The nnls fit runs in a single process." in iris.log
     for solver in ("osqp", "quadprog"):
         with pytest.raises(ImportError, match=f"qpsolver='{solver}'"):
             IRIS(qpsolver=solver, reg_par=regularization).fit(spectra, kernel)

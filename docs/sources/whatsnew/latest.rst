@@ -48,6 +48,10 @@ Bug Fixes
 - Preserve IRIS quadrature weights and regularization when the kernel grid
   is supplied in descending order. (:pr:`1892`)
 
+- Correct the association of residual sums of squares (RSS) and sharpness
+  values (SM) with their evaluated regularization strengths in adaptive IRIS
+  fits, and restart each fit from the configured search bounds. (:pr:`1892`)
+
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
 
