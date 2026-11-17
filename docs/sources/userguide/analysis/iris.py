@@ -42,7 +42,8 @@
 # and the law $k(p, q)$ is the kernel of the integral. Recovering $f$
 # requires inverting this Fredholm integral equation of the first kind, an
 # ill-posed problem that IRIS solves with Tikhonov regularization
-# `stelmachowski:2013`{.interpreted-text role="cite:p"}. The result is a map
+# `stelmachowski:2013`{.interpreted-text role="cite:p"}`[#iris-history]_`{=rst}.
+# The result is a map
 # with the spectroscopic channel on one axis and the parameter $q$ on the
 # other: a slice at a given $q$ shows the spectrum of the species with that
 # parameter, and a slice at a given channel shows how the signal is
@@ -393,3 +394,30 @@ _ = adaptive.plot_merit(index=selected_index)
 # shows one fit at a fixed strength. See the
 # [IRIS API reference](../../reference/generated/spectrochempy.iris.IRIS.rst)
 # for estimator parameters, methods and outputs.
+
+# %% [markdown]
+# ```{=rst}
+# .. rubric:: Notes
+#
+# .. [#iris-history] **To go further.** Recovering a distribution from an
+#    integral equation of this kind is a classical ill-posed problem
+#    :cite:p:`tikhonov:1977`. In adsorption science, energy distributions of
+#    heterogeneous surfaces have long been obtained by inverting the overall
+#    adsorption isotherm, a one-dimensional version of the equation above with
+#    a local isotherm as kernel :cite:p:`house:1983,jaroniec:1988`, and this
+#    inversion was stabilized by regularization :cite:p:`szombathely:1992`.
+#    The CONTIN program made constrained regularization available for general
+#    linear integral equations :cite:p:`provencher:1982`. In NMR, it was used
+#    to compute diffusion-ordered spectra (DOSY) from the signal decay at each
+#    point of the spectrum :cite:p:`morris:1993`. IRIS was developed
+#    independently, from the one-dimensional adsorption approach: it applies
+#    the regularized inversion to each channel of a series of spectra, and
+#    thus resolves the spectra of the species according to their affinity
+#    :cite:p:`stelmachowski:2013`. It has since been used, for example, to
+#    separate the CO species adsorbed on promoted and non-promoted sulfide
+#    catalysts :cite:p:`oliviero:2021`, and to analyze pulsed-field-gradient
+#    NMR diffusion data :cite:p:`quillard:2025`. Related kernel-based inversions are
+#    used in solid-state NMR, for example to recover two-dimensional
+#    distributions of isotropic chemical shift and quadrupolar coupling from
+#    MQMAS spectra of glasses :cite:p:`angeli:1999`.
+# ```
