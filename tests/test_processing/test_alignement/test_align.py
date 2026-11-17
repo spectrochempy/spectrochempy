@@ -737,3 +737,20 @@ def test_align_pchip_masks_intervals_adjacent_to_a_masked_sample():
     np.testing.assert_array_equal(result.mask, [True, False, True, False, False])
     np.testing.assert_array_equal(result.data[[1, 3]], [1.0, 16.0])
     assert 16.0 < result.data[-1] < 25.0
+
+
+@pytest.mark.parametrize("method", ["inner", "outer", "first", "last"])
+def test_align_masks_a_nan_that_is_replaced_by_the_sentinel(method):
+    coord = scp.Coord([1.0, 2.0, 3.0])
+    first = scp.NDDataset([1.0, np.nan, 3.0], coordset=[coord])
+    second = scp.NDDataset([4.0, 5.0, 6.0], coordset=[coord])
+
+    aligned, _ = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(aligned.mask, [False, True, False])
+    assert aligned.data[1] == 99999999999999
+    (result,) = scp.align(
+        aligned, method="interpolate", coord=scp.Coord([1.0, 1.5, 2.0, 2.5, 3.0])
+    )
+    np.testing.assert_array_equal(result.mask, [False, True, True, True, False])
+    np.testing.assert_array_equal(result.masked_data.compressed(), [1.0, 3.0])
