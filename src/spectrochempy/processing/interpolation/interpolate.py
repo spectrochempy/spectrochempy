@@ -8,6 +8,8 @@
 __all__ = ["interpolate"]
 __dataset_methods__ = __all__
 
+from fractions import Fraction
+
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from scipy.interpolate import interp1d
@@ -68,14 +70,14 @@ def _interp_along_axis(values, old_x, new_x, axis, method, fill_value):
     return interpolator(new_x)
 
 
-def _validate_monotonic(coord, assume_sorted, tol=1e-12):
+def _validate_monotonic(data, assume_sorted, tol=1e-12):
     """
     Validate coordinate monotonicity with tolerance for floating point noise.
 
     Parameters
     ----------
-    coord : Coord
-        Coordinate to validate.
+    data : np.ndarray
+        Coordinates to validate.
     assume_sorted : bool
         If True, skip validation.
     tol : float, optional
@@ -85,31 +87,33 @@ def _validate_monotonic(coord, assume_sorted, tol=1e-12):
     -------
     tuple: (sorted_data, sorted_indices, was_reversed)
     """
-    data = coord.data
-
     if assume_sorted:
         return data, np.arange(len(data)), False
 
-    diffs = np.diff(data)
+    increasing = np.all(data[:-1] < data[1:])
+    decreasing = np.all(data[:-1] > data[1:])
+    if increasing:
+        sort_idx = np.arange(data.size)
+    elif decreasing:
+        sort_idx = np.arange(data.size - 1, -1, -1)
+    else:
+        sort_idx = np.argsort(data)
+    sorted_data = data[sort_idx]
 
-    if np.any(np.abs(diffs) <= tol):
+    # Integer gaps are at least one whenever neighbors differ. Subtraction
+    # can overflow for both signed and unsigned coordinates.
+    if data.dtype.kind in "biu" and 0 <= tol < 1:
+        duplicates = sorted_data[:-1] == sorted_data[1:]
+    else:
+        duplicates = np.diff(sorted_data) <= tol
+    if np.any(duplicates):
         raise ValueError(
             "Duplicate or near-duplicate coordinate values detected. "
             "Interpolation requires strictly monotonic coordinates. "
             "Use `assume_sorted=True` only if data is known to be strictly monotonic."
         )
 
-    strictly_increasing = np.all(diffs > tol)
-    strictly_decreasing = np.all(diffs < -tol)
-
-    if strictly_increasing:
-        return data, np.arange(len(data)), False
-    if strictly_decreasing:
-        return data[::-1], np.arange(len(data) - 1, -1, -1), True
-
-    sorted_data = np.sort(data)
-    sort_idx = np.argsort(data)
-    return sorted_data, sort_idx, False
+    return sorted_data, sort_idx, not increasing and decreasing
 
 
 def _get_coord_data(coord):
@@ -117,6 +121,94 @@ def _get_coord_data(coord):
     if coord.has_data:
         return coord.data
     return None
+
+
+def _center_wide_grids(old_x, new_x, *, extrapolate):
+    """Translate grids before any float64 conversion can collapse distinct nodes."""
+    grids = old_x, new_x
+
+    def needs_centering(grid):
+        if grid.dtype.kind == "f":
+            return np.finfo(grid.dtype).nmant > np.finfo(np.float64).nmant
+        return (
+            grid.dtype.kind in "iu"
+            and grid.size
+            and (int(grid.min()) < -(2**53) or int(grid.max()) > 2**53)
+        )
+
+    if not any(needs_centering(grid) for grid in grids):
+        return grids
+
+    def exact(point):
+        if isinstance(point, (np.integer, np.bool_)):
+            return Fraction(int(point))
+        return Fraction(*point.as_integer_ratio())
+
+    source = [exact(point) for point in old_x]
+    target = [exact(point) for point in new_x]
+    lower, upper = min(source), max(source)
+    if extrapolate:
+        in_range = target
+    else:
+        # The output keeps the original grid. Outside the source range, the
+        # interpolator only needs distinct positions to evaluate extrapolation.
+        in_range = [point for point in target if lower <= point <= upper]
+    unique_values = sorted(set(source).union(in_range))
+    gaps = [
+        right - left
+        for left, right in zip(unique_values[:-1], unique_values[1:], strict=True)
+    ]
+
+    def convert(origin):
+        try:
+            positions = [float(value - origin) for value in unique_values]
+        except OverflowError:
+            return None
+        if len(set(positions)) != len(positions):
+            return None
+        # Interpolation depends on relative distances. Compare the distortion
+        # of adjacent gaps, including gaps between source and target points.
+        binary_values = [Fraction(position) for position in positions]
+        error = max(
+            (
+                abs((right - left) / gap - 1)
+                for left, right, gap in zip(
+                    binary_values[:-1], binary_values[1:], gaps, strict=True
+                )
+            ),
+            default=0,
+        )
+        return error, positions
+
+    origins = [Fraction(0), source[0]]
+    if gaps:
+        # A tight cluster can be far from both zero and the first source
+        # sample. It benefits most from a nearby origin.
+        origins.append(unique_values[gaps.index(min(gaps))])
+
+    best = None
+    for origin in dict.fromkeys(origins):
+        conversion = convert(origin)
+        if conversion is not None and (best is None or conversion[0] < best[0]):
+            best = conversion
+            if best[0] == 0:
+                break
+    if best is None:
+        raise ValueError(
+            "Interpolation coordinates cannot be represented as distinct float64 points."
+        )
+    _, positions = best
+
+    mapping = dict(zip(unique_values, positions, strict=True))
+    with np.errstate(over="ignore"):
+        below = np.nextafter(mapping[lower], -np.inf)
+        above = np.nextafter(mapping[upper], np.inf)
+    return (
+        np.asarray([mapping[point] for point in source]),
+        np.asarray(
+            [mapping.get(point, below if point < lower else above) for point in target]
+        ),
+    )
 
 
 def _match_indices(old_data, new_data):
@@ -138,6 +230,24 @@ def _match_indices(old_data, new_data):
         if hits.size:
             match_idx[j] = hits[0]
     return match_idx
+
+
+def _interpolation_mask(mask, old_x, new_x, axis, method):
+    """Mask points whose interpolation depends on a masked sample."""
+    right = np.searchsorted(old_x, new_x)
+    at = np.minimum(right, old_x.size - 1)
+    left = np.clip(right - 1, 0, old_x.size - 1)
+
+    result = np.take(mask, left, axis=axis) | np.take(mask, at, axis=axis)
+    if method == "pchip":
+        # The derivatives at the ends of an interval use adjacent slopes.
+        before = np.maximum(left - 1, 0)
+        after = np.minimum(at + 1, old_x.size - 1)
+        result |= np.take(mask, before, axis=axis) | np.take(mask, after, axis=axis)
+
+    shape = [1] * mask.ndim
+    shape[axis] = new_x.size
+    return result | ((new_x < old_x[0]) | (new_x > old_x[-1])).reshape(shape)
 
 
 def _carry_labels(old_labels, match_idx):
@@ -222,6 +332,8 @@ def interpolate(
     - Secondary coordinates are interpolated numerically. If they represent
       analytical transformations of the primary coordinate (e.g., wavelength = 1/wavenumber),
       the result may be approximate - consider recomputing them analytically after interpolation.
+    - With a masked source, exact points retain their source mask. Resampled
+      points are masked whenever a sample used by the interpolator is masked.
     - Unit conversion is performed if needed before interpolation.
     - Sequential interpolation is applied for multiple dimensions (not true N-D).
     """
@@ -309,32 +421,39 @@ def interpolate(
         # Point-wise label carry-over: for each target point, find the exactly
         # matching original index so labels can follow the data (#1098). Both
         # arrays are now expressed in the source coordinate's units.
-        match_idx = _match_indices(old_data, new_data)
+        extrapolate = isinstance(fill_value, str) and fill_value == "extrapolate"
+        old_data, sample_points = _center_wide_grids(
+            old_data, new_data, extrapolate=extrapolate
+        )
+        match_idx = _match_indices(old_data, sample_points)
 
         sorted_old_x, sort_idx, _was_reversed = _validate_monotonic(
-            primary_old_coord, assume_sorted
+            old_data, assume_sorted
         )
 
-        if sort_idx is not None and len(sort_idx) > 0:
-            sorted_data = new._data[
-                tuple(sort_idx if i == ax else slice(None) for i in range(new.ndim))
-            ].copy()
-        else:
-            sorted_data = new._data
+        sorted_data = np.take(new._data, sort_idx, axis=ax)
+        sorted_mask = np.take(new._mask, sort_idx, axis=ax) if new.is_masked else None
+        values = (
+            np.where(sorted_mask, 0, sorted_data)
+            if sorted_mask is not None
+            else sorted_data
+        )
 
         # ``fill_value`` may be NaN (the default), a finite constant or the
         # string ``"extrapolate"``. ``interp1d`` (linear) handles all three
         # natively; ``PchipInterpolator`` only knows ``extrapolate`` True/False,
         # so the finite-constant case is applied by hand below so that
         # ``fill_value`` behaves consistently for both methods (#1093).
-        extrapolate = isinstance(fill_value, str) and fill_value == "extrapolate"
-
         if method == "linear":
             interpolator = interp1d(
                 sorted_old_x,
-                sorted_data,
+                values,
                 axis=ax,
-                kind="linear",
+                kind=(
+                    "nearest"
+                    if sorted_old_x.size == 1 and not extrapolate
+                    else "linear"
+                ),
                 bounds_error=False,
                 fill_value=fill_value,
                 assume_sorted=True,
@@ -347,14 +466,14 @@ def interpolate(
                 )
             interpolator = PchipInterpolator(
                 sorted_old_x,
-                sorted_data,
+                values,
                 axis=ax,
                 extrapolate=extrapolate,
             )
         else:
             raise ValueError(f"Unknown method: {method}")
 
-        interpolated_data = interpolator(new_data)
+        interpolated_data = interpolator(sample_points)
 
         if (
             method == "pchip"
@@ -365,7 +484,9 @@ def interpolate(
             # replace them with the requested constant so ``fill_value`` matches
             # the linear method. ``sorted_old_x`` is ascending, so this mask is
             # independent of the target-coordinate direction.
-            out_of_range = (new_data < sorted_old_x[0]) | (new_data > sorted_old_x[-1])
+            out_of_range = (sample_points < sorted_old_x[0]) | (
+                sample_points > sorted_old_x[-1]
+            )
             if out_of_range.any():
                 interpolated_data[
                     tuple(
@@ -374,33 +495,24 @@ def interpolate(
                     )
                 ] = fill_value
 
-        if sort_idx is not None and len(sort_idx) > 0:
-            new._data = interpolated_data
-        else:
-            new._data = interpolated_data
+        # Evaluating the interpolant at a node can still lose precision,
+        # especially at the end of a PCHIP interval with a large dynamic range.
+        matched = match_idx >= 0
+        selection = tuple(matched if i == ax else slice(None) for i in range(new.ndim))
+        interpolated_data[selection] = np.take(new._data, match_idx[matched], axis=ax)
 
-        if new.is_masked:
-            # The mask must be reordered with the same ``sort_idx`` as the data
-            # so it is interpolated against ``sorted_old_x`` in matching order;
-            # otherwise a decreasing source coordinate flips the mask relative to
-            # its samples (closely related to #1100).
-            if sort_idx is not None and len(sort_idx) > 0:
-                sorted_mask = new._mask[
-                    tuple(sort_idx if i == ax else slice(None) for i in range(new.ndim))
-                ]
-            else:
-                sorted_mask = new._mask
-            mask_interpolator = interp1d(
-                sorted_old_x,
-                sorted_mask.astype(float),
-                axis=ax,
-                kind="linear",
-                bounds_error=False,
-                fill_value=True,
-                assume_sorted=True,
+        if sorted_mask is not None:
+            new_mask = _interpolation_mask(
+                sorted_mask, sorted_old_x, sample_points, ax, method
             )
-            new_mask = mask_interpolator(new_data) > 0.5
+            new_mask[selection] = np.take(new._mask, match_idx[matched], axis=ax)
+            if isinstance(fill_value, float) and np.isnan(fill_value):
+                shape = [1] * new.ndim
+                shape[ax] = new_data.size
+                interpolated_data[new_mask & ~matched.reshape(shape)] = fill_value
             new._mask = new_mask
+
+        new._data = interpolated_data
 
         if new._coordset is None:
             new._coordset = CoordSet()
@@ -410,7 +522,7 @@ def interpolate(
         def _interpolate_secondary(
             coord,
             _sorted_old_x=sorted_old_x,
-            _new_data=new_data,
+            _new_data=sample_points,
             _sort_idx=sort_idx,
             _match_idx=match_idx,
         ):
@@ -427,7 +539,7 @@ def interpolate(
                         _sorted_old_x,
                         old_sec_data,
                         axis=0,
-                        kind="linear",
+                        kind="nearest" if _sorted_old_x.size == 1 else "linear",
                         bounds_error=False,
                         fill_value=np.nan,
                         assume_sorted=True,

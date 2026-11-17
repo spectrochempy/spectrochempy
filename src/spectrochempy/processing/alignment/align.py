@@ -8,15 +8,95 @@
 __all__ = ["align"]
 __dataset_methods__ = __all__
 
-# import scipy.interpolate
+from decimal import Decimal
+from fractions import Fraction
+from functools import lru_cache
+
 import numpy as np
+from pint import UnitRegistry
+from pint.errors import PintError
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
+
+_MISSING_VALUE = 99999999999999
+
+
+@lru_cache(maxsize=1)
+def _decimal_registry():
+    """Use exact decimal definitions for standard Pint units."""
+    registry = UnitRegistry(non_int_type=Decimal)
+    registry.enable_contexts("spectroscopy", "boltzmann", "chemistry")
+    return registry
+
+
+def _convert_coordinate(coord, reference, *, precise):
+    original = coord.data
+    source_unit = coord.units
+    target_unit = reference.units
+    coord.ito(reference)
+    coord._rounding = False
+    if not precise or source_unit is None or target_unit is None:
+        return
+
+    registry = _decimal_registry()
+    try:
+        source = registry.Unit(str(source_unit._units))
+        target = registry.Unit(str(target_unit._units))
+        converted = [
+            registry.Quantity(Decimal(str(point)), source).to(target).magnitude
+            for point in original
+        ]
+        dtype = np.result_type(original.dtype, coord.data.dtype)
+        if dtype.kind != "f":
+            dtype = np.dtype(np.float64)
+        if original.dtype.kind in "iu" and all(
+            value == value.to_integral_value() for value in converted
+        ):
+            integers = [int(value) for value in converted]
+            limits = np.iinfo(original.dtype)
+            if all(limits.min <= value <= limits.max for value in integers):
+                values = np.asarray(integers, dtype=original.dtype)
+            else:
+                values = np.asarray(
+                    [str(value) for value in converted], dtype=np.longdouble
+                )
+        else:
+            decimals = [str(value) for value in converted]
+            values = np.asarray(decimals, dtype=dtype)
+            if len(set(converted)) > np.unique(values).size:
+                values = np.asarray(decimals, dtype=np.longdouble)
+    except (PintError, ArithmeticError, TypeError, ValueError):
+        return
+    if np.allclose(values, coord.data, rtol=1e-14, atol=0):
+        coord._dtype = values.dtype
+        coord._data = values
+
+
+def _exact_coordinate_key(value):
+    if isinstance(value, (bool, int, np.bool_, np.integer)):
+        return Fraction(int(value))
+    return Fraction(*value.as_integer_ratio())
+
+
+def _outer_coordinates(values, dim):
+    grid = np.asarray(values)
+    if all(value.dtype == grid.dtype for value in values):
+        return grid
+    original_keys = [_exact_coordinate_key(value) for value in values]
+    if [_exact_coordinate_key(value) for value in grid] == original_keys:
+        return grid
+    grid = np.asarray(values, dtype=np.longdouble)
+    if [_exact_coordinate_key(value) for value in grid] == original_keys:
+        return grid
+    raise ValueError(
+        f"Cannot represent the outer alignment grid along dimension {dim!r} "
+        "without losing coordinate precision."
+    )
 
 
 def can_merge_or_align(coord1, coord2):
@@ -80,26 +160,30 @@ def align(dataset, *others, **kwargs):
         * 'outer' means that a union of the different coordinates is
           achieved (missing values are masked).
         * 'inner' means that the intersection of the coordinates is used.
-        * 'first' means that the first dataset is used as reference.
-        * 'last' means that the last dataset is used as reference.
-        * 'interpolate' means that interpolation is performed relative to
-          the first dataset.
+        * 'first' uses the first dataset's coordinates, masking positions
+          with no matching coordinate.
+        * 'last' does the same using the last dataset's coordinates.
+        * 'interpolate' interpolates onto the first dataset's coordinates.
+          Points outside the source range or depending on masked samples
+          are masked.
+
+        Outer and reference joins match with at least five significant digits
+        at each coordinate's scale. If any input coordinate disables rounding,
+        those joins use full precision.
 
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
     interpolate_sampling : {'auto'}, optional, default='auto'
         Sampling of the target coordinate when ``method='interpolate'``.
-        ``'auto'`` uses the first dataset coordinate unchanged. Numeric target
-        sampling is not implemented and is explicitly refused; use
-        `NDDataset.interpolate` with an explicit target coordinate instead.
+        ``'auto'`` uses the target grid unchanged. Pass ``coord`` to supply
+        an explicit grid. A numeric sampling interval is unsupported.
 
     coord :  `Coord` , optional, default=None
-        Coordinates to use for alignment. Ignore those corresponding to the
-        dimensions to align.
+        Explicit target for interpolation along a single dimension. A
+        unitless target is interpreted in the reference coordinate's units.
     copy : bool, optional, default=True
-        If False then the returned objects will share memory with the
-        original objects, whenever it is possible :
-        in principle only if reindexing is not necessary.
+        If False, avoid extra copies where possible. Alignment can still
+        allocate data buffers and does not guarantee memory sharing.
 
     Returns
     -------
@@ -139,9 +223,8 @@ def align(dataset, *others, **kwargs):
     if not (isinstance(interpolate_sampling, str) and interpolate_sampling == "auto"):
         raise NotImplementedError(
             "align() only supports interpolate_sampling='auto', which uses the "
-            "first dataset coordinate as the interpolation target. Other values "
-            "require target-grid construction that is not implemented; use "
-            "NDDataset.interpolate() with an explicit coordinate instead."
+            "target coordinate unchanged. To use a different grid, pass an "
+            "explicit coord with method='interpolate'."
         )
 
     # trivial cases where alignment is not possible or unnecessary
@@ -160,6 +243,24 @@ def align(dataset, *others, **kwargs):
     # evaluate on which axis we align
     axis, dims = dataset.get_axis(only_first=False, **kwargs)
 
+    if extern_coord is not None:
+        if method != "interpolate" or len(dims) != 1:
+            raise ValueError(
+                "coord requires method='interpolate' and one alignment dimension."
+            )
+        if not isinstance(extern_coord, Coord):
+            raise TypeError("The explicit alignment target must be a Coord.")
+        if (
+            extern_coord.data is None
+            or extern_coord.data.size == 0
+            or extern_coord.data.dtype.kind not in "biuf"
+            or not np.isfinite(extern_coord.data).all()
+            or extern_coord.is_masked
+        ):
+            raise ValueError(
+                "The explicit alignment target must be finite, unmasked and numeric."
+            )
+
     # check compatibility of the dims and prepare the dimension for alignment
     for _axis, dim in zip(axis, dims, strict=False):
         # get all objects to align
@@ -175,14 +276,28 @@ def align(dataset, *others, **kwargs):
                 )
                 return None
 
-            working = object.copy()
+            coord = object.coord(dim)
             if (
-                method == "inner"
+                coord is None
+                or coord.data is None
+                or coord.data.size == 0
+                or coord.data.dtype.kind not in "biuf"
+                or not np.isfinite(coord.data).all()
+                or coord.is_masked
+            ):
+                raise ValueError(
+                    f"Alignment requires finite, unmasked numeric coordinates "
+                    f"along dimension {dim!r}."
+                )
+
+            working = object.copy(deep=copy)
+            if (
+                method != "interpolate"
                 and object.data.dtype.kind in "biufc"
                 and working.data.dtype != object.data.dtype
             ):
                 working._dtype = object.data.dtype
-                working._data = object.data
+                working._data = object.data.copy()
             _objects[_nobj] = {
                 "obj": working,
                 "idx": idx,
@@ -203,7 +318,7 @@ def align(dataset, *others, **kwargs):
         # if the coordinates need to be reversed at
         # the end of the alignment process
         reversed = ref_obj.coordset[dim].reversed
-        if reversed:
+        if reversed and method in {"inner", "outer"}:
             ref_obj.sort(descend=False, dim=dim, inplace=True)
 
         # get the coordset corresponding to the reference object
@@ -220,24 +335,22 @@ def align(dataset, *others, **kwargs):
         # prepare a new Coord object to store the final new dimension
         new_coord = ref_coord.copy()
 
-        ndec = get_n_decimals(new_coord.data.max(), 5)
+        ndec = get_n_decimals(ref_coord.data.max(), 5) if method == "inner" else None
+        reference_join = method in {"outer", "first", "last"}
+        input_coords = [item["obj"].coordset[dim] for item in _objects.values()]
+        rounded = all(coord._rounding for coord in input_coords)
+        precision = max(5, *(coord.sigdigits for coord in input_coords))
+        source_grids = {}
 
         # loop on all object
         for _index, object in _objects.items():
             obj = object["obj"]
 
-            if obj is ref_obj:
-                # not necessary to compare with itself!
-                continue
-
-            if reversed:
+            if obj is not ref_obj and reversed and method in {"inner", "outer"}:
                 obj.sort(descend=False, dim=dim, inplace=True)
 
-            # get the current object coordinates and check compatibility
             coord = obj.coordset[dim]
-
             if not coord.is_units_compatible(ref_coord):
-                # not compatible, stop everything
                 raise exceptions.UnitsCompatibilityError(
                     exceptions.format_incompatible_units_message(
                         "align datasets",
@@ -247,51 +360,92 @@ def align(dataset, *others, **kwargs):
                     ),
                 )
 
-            # do units transform if necessary so coords can be compared
             if coord.units != ref_coord.units:
-                coord.ito(ref_coord)
-
-            # adjust the new_cord depending on the method of alignment
-
-            new_coord_data = set(np.around(new_coord.data, ndec))
-            coord_data = set(np.around(coord.data, ndec))
-
-            if method in ["outer", "interpolate"]:
-                # in this case we do a union of the coords (masking the
-                # missing values)
-                # For method=`interpolate` , the interpolation will be
-                # performed in a second step
-                new_coord._data = sorted(coord_data | new_coord_data)
-
-            elif method == "inner":
-                if (
-                    len(coord_data) != coord.size
-                    or len(new_coord_data) != new_coord.size
-                ):
-                    raise ValueError(
-                        f"Coordinate rounding makes inner alignment ambiguous "
-                        f"along dimension {dim!r}."
+                if method == "inner":
+                    coord.ito(ref_coord)
+                else:
+                    _convert_coordinate(
+                        coord, ref_coord, precise=method == "interpolate" or not rounded
                     )
-                shared = coord_data & new_coord_data
-                if not shared:
-                    raise ValueError(f"No shared coordinates along dimension {dim!r}.")
-                new_coord._data = sorted(shared)
+            values = coord.data
 
-            elif method in ["first", "last"]:
-                # we take the reference coordinates already determined as
-                # basis (masking the missing values)
-                continue
-
-            else:
-                raise NotImplementedError(f"The method {method} is unknown!")
+            keys = np.around(values, ndec) if ndec is not None else values
+            if not np.isfinite(keys).all():
+                raise ValueError(
+                    f"Alignment produced non-finite coordinates along dimension {dim!r}."
+                )
+            if reference_join:
+                if rounded:
+                    points = keys.astype(np.uint8) if keys.dtype.kind == "b" else keys
+                    keys = [
+                        Decimal(format(Decimal(str(point)), f".{precision}g"))
+                        for point in points
+                    ]
+                else:
+                    keys = [_exact_coordinate_key(value) for value in keys]
+            if method != "interpolate" and len(set(keys)) != len(keys):
+                reason = (
+                    "Coordinate rounding makes"
+                    if method == "inner"
+                    else "Duplicate matching coordinates make"
+                )
+                raise ValueError(
+                    f"{reason} {method} alignment ambiguous along dimension {dim!r}."
+                )
+            source_grids[_index] = keys, values
+        join_grid = source_grids[ref_obj_index][0]
+        if method == "inner":
+            join_keys = set(join_grid)
+            for keys, _ in source_grids.values():
+                join_keys.intersection_update(keys)
+            if not join_keys:
+                raise ValueError(f"No shared coordinates along dimension {dim!r}.")
+            join_grid = np.asarray(sorted(join_keys))
+            new_coord._data = join_grid
+            new_coord._rounding = False
+        elif method == "outer":
+            representatives = {}
+            for keys, values in source_grids.values():
+                for key, value in zip(keys, values, strict=True):
+                    representatives.setdefault(key, value)
+            join_grid = sorted(representatives)
+            coordinates = [representatives[key] for key in join_grid]
+            new_coord._data = _outer_coordinates(coordinates, dim)
+            new_coord._rounding = False
+        elif method not in {"first", "last", "interpolate"}:
+            raise NotImplementedError(f"The method {method} is unknown!")
 
         # For interpolate method, use reference coordinate as target
         # instead of the union
         if method == "interpolate":
-            target_coord = ref_coord.copy()
+            if extern_coord is None:
+                target_coord = ref_coord.copy()
+            else:
+                target_coord = extern_coord.copy()
+                if target_coord.units is None:
+                    target_coord.units = ref_coord.units
+                elif not target_coord.is_units_compatible(ref_coord):
+                    raise exceptions.UnitsCompatibilityError(
+                        exceptions.format_incompatible_units_message(
+                            "align to explicit coordinates",
+                            target_coord.units,
+                            ref_coord.units,
+                            dim=dim,
+                        ),
+                    )
+                elif target_coord.units != ref_coord.units:
+                    _convert_coordinate(target_coord, ref_coord, precise=True)
+                if not np.isfinite(target_coord.data).all():
+                    raise ValueError(
+                        f"Alignment target produced non-finite coordinates "
+                        f"along dimension {dim!r}."
+                    )
             target_coord._labels = None
         else:
             target_coord = new_coord
+
+        if reference_join:
+            target_positions = {key: index for index, key in enumerate(join_grid)}
 
         # Now perform alignment of all objects on the new coordinates
         for index, object in _objects.items():
@@ -310,13 +464,13 @@ def align(dataset, *others, **kwargs):
             else:
                 dim_index = obj.dims.index(dim)
                 coord = obj.coordset[dim]
-                new_obj = obj.copy() if copy and method != "inner" else obj
+                new_obj = obj
                 new_coordset = obj.coordset.copy()
 
                 if method == "inner":
                     _, source_indices, target_indices = np.intersect1d(
-                        np.around(coord.data, ndec),
-                        np.around(new_coord.data, ndec),
+                        source_grids[index][0],
+                        join_grid,
                         return_indices=True,
                     )
                     source_indices = source_indices[np.argsort(target_indices)]
@@ -336,33 +490,64 @@ def align(dataset, *others, **kwargs):
                         coord.labels[source_indices] if coord.is_labeled else None
                     )
                 else:
-                    new_obj_shape = list(obj.shape)
-                    new_obj_shape[dim_index] = len(new_coord)
-                    new_obj_data = np.full(new_obj_shape, np.nan)
-                    coord_data = set(np.around(coord.data, ndec))
-                    dim_loc = new_coord._loc2index(sorted(coord_data))
-                    loc = (*([slice(None)] * dim_index), dim_loc)
-                    new_obj_data[loc] = obj.data
-                    mask = obj.mask.copy() if obj.is_masked else False
-                    new_obj._data = new_obj_data
-                    new_obj.mask = MASKED
-                    new_obj.mask[loc] = mask
-
-                    output_coord = new_coord
-                    if coord.is_labeled:
-                        label_shape = list(coord.labels.shape)
-                        label_shape[0] = output_coord.size
-                        output_coord._labels = np.zeros(tuple(label_shape)).astype(
-                            coord.labels.dtype,
+                    source_indices = []
+                    target_indices = []
+                    for source_index, key in enumerate(source_grids[index][0]):
+                        if key in target_positions:
+                            source_indices.append(source_index)
+                            target_indices.append(target_positions[key])
+                    source_indices = np.asarray(source_indices, dtype=np.intp)
+                    target_indices = np.asarray(target_indices, dtype=np.intp)
+                    shape = list(obj.shape)
+                    shape[dim_index] = len(new_coord)
+                    dtype = obj.data.dtype
+                    if dtype.kind in "biu":
+                        if target_indices.size == len(new_coord):
+                            values = np.empty(shape, dtype=dtype)
+                        else:
+                            if (
+                                dtype.kind == "b"
+                                or np.iinfo(dtype).max < _MISSING_VALUE
+                            ):
+                                dtype = np.promote_types(dtype, np.int64)
+                            values = np.full(shape, _MISSING_VALUE, dtype=dtype)
+                    else:
+                        dtype = (
+                            np.result_type(dtype, np.float64)
+                            if dtype.kind in "fc"
+                            else np.float64
                         )
-                        output_coord._labels[:] = "--"
-                        output_coord._labels[dim_loc] = coord.labels
+                        values = np.full(shape, np.nan, dtype=dtype)
+                    mask = np.ones(shape, dtype=bool)
+                    loc = (*([slice(None)] * dim_index), target_indices)
+                    values[loc] = np.take(obj.data, source_indices, axis=dim_index)
+                    mask[loc] = (
+                        np.take(obj.mask, source_indices, axis=dim_index)
+                        if obj.is_masked
+                        else False
+                    )
+                    new_obj._dtype = values.dtype
+                    new_obj._data = values
+                    new_obj._mask = mask if mask.any() else NOMASK
+
+                    output_coord = new_coord.copy()
+                    output_coord._labels = None
+                    if coord.is_labeled:
+                        labels = coord.labels[source_indices]
+                        if target_indices.size == len(new_coord):
+                            output_coord._labels = labels[np.argsort(target_indices)]
+                        else:
+                            label_shape = (len(new_coord), *labels.shape[1:])
+                            output_coord._labels = np.full(
+                                label_shape, "--", dtype=np.object_
+                            )
+                            output_coord._labels[target_indices] = labels
 
                 setattr(new_coordset, dim, output_coord)
                 new_obj._coordset = new_coordset
 
                 # reversed?
-                if reversed:
+                if reversed and method in {"inner", "outer"}:
                     # we must reverse the given coordinates
                     new_obj.sort(descend=reversed, dim=dim, inplace=True)
 
@@ -377,23 +562,20 @@ def align(dataset, *others, **kwargs):
 
         for _index, object in _objects.items():
             obj = object["obj"]
-            # NOTE: NaN is deliberately replaced with a sentinel value
-            # rather than MASKED (np.ma.masked).  The mask is already set
-            # correctly above, so .masked_data is accurate.  However,
-            # __eq__ compares raw .data directly (IEEE 754 NaN != NaN),
-            # and ~30 processing sites access .data instead of
-            # .masked_data.  A sentinel avoids silent breakage in both
-            # cases.  See audit/~align-sentinel-investigation.md.
+            # Preserve the historical finite placeholder in raw data, which
+            # dataset equality compares directly. Mask every replacement so
+            # the placeholder cannot enter later calculations as a sample.
             data = obj.data
             missing = np.isnan(data)
             if missing.any():
+                obj._mask = np.logical_or(obj.mask, missing)
                 if data.dtype.kind in "fc":
                     dtype = np.promote_types(data.dtype, np.float64)
                     if dtype != data.dtype:
                         obj._dtype = dtype
                         obj._data = data.astype(dtype)
                         data = obj.data
-                data[missing] = 99999999999999.0
+                data[missing] = _MISSING_VALUE
             idx = int(object["idx"])
             objects[idx] = obj
 

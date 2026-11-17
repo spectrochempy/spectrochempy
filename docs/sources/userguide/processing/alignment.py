@@ -150,9 +150,12 @@ ndadd.shape
 # * **inner** which means that the intersection of the coordinates is used
 # * **first** which means that the first dataset is used as reference
 # * **last** which means that the last dataset is used as reference
-# * **interpolate** interpolates every dataset onto the first dataset coordinate. The default and only supported
-# value of `interpolate_sampling` is `"auto"`, which preserves that target grid. Numeric sampling requests are
-# explicitly refused; use `NDDataset.interpolate` with an explicit target coordinate when a new grid is required.
+# * **interpolate** uses the first dataset's grid by default and masks
+#   positions outside each source range and positions that depend on masked
+#   samples. For one dimension, pass
+#   `scp.align(first, second, dim="x", method="interpolate", coord=target)`
+#   to choose a different grid. `interpolate_sampling="auto"` keeps the
+#   chosen grid unchanged.
 
 # %% [markdown]
 # ### `inner` method

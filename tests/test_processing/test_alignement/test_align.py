@@ -220,3 +220,728 @@ def test_align_rejects_incompatible_coord_units_with_clear_message():
     assert "s" in message
     assert "cm" in message
     assert "Convert the coordinates to compatible units before retrying." in message
+
+
+@pytest.mark.parametrize("method", ["first", "last"])
+@pytest.mark.parametrize("dim", ["x", "y"])
+def test_align_reference_join_uses_only_matching_points(method, dim):
+    coordinates = scp.Coord([0.0, 1.0])
+
+    def spectra(grid, values):
+        axis = scp.Coord(grid)
+        if dim == "x":
+            return scp.NDDataset(np.array(values).T, coordset=[coordinates, axis])
+        return scp.NDDataset(values, coordset=[axis, coordinates])
+
+    first = spectra([1.0, 2.0, 3.0], [[10.0, 11.0], [20.0, 21.0], [30.0, 31.0]])
+    second = spectra([2.0, 3.0, 4.0], [[40.0, 41.0], [50.0, 51.0], [60.0, 61.0]])
+
+    left, right = scp.align(first, second, dim=dim, method=method)
+
+    actual = right if method == "first" else left
+    data = actual.data if dim == "y" else actual.data.T
+    mask = actual.mask if dim == "y" else actual.mask.T
+    if method == "first":
+        np.testing.assert_array_equal(data[1:], [[40.0, 41.0], [50.0, 51.0]])
+        np.testing.assert_array_equal(mask[:, 0], [True, False, False])
+    else:
+        np.testing.assert_array_equal(data[:2], [[20.0, 21.0], [30.0, 31.0]])
+        np.testing.assert_array_equal(mask[:, 0], [False, False, True])
+
+
+def test_align_outer_preserves_complex_order_and_independent_labels():
+    first = scp.NDDataset(
+        [30.0 + 3j, 10.0 + 1j, 20.0 + 2j],
+        coordset=[scp.Coord([3.0, 1.0, 2.0], labels=np.array([300, 100, 200]))],
+    )
+    second = scp.NDDataset([40.0, 41.0], coordset=[scp.Coord([4.0, 5.0])])
+
+    left, right = scp.align(first, second, method="outer")
+
+    np.testing.assert_array_equal(left.x.data, [1.0, 2.0, 3.0, 4.0, 5.0])
+    np.testing.assert_array_equal(left.data[:3], [10.0 + 1j, 20.0 + 2j, 30.0 + 3j])
+    np.testing.assert_array_equal(left.mask, [False, False, False, True, True])
+    assert left.x.labels.tolist() == [100, 200, 300, "--", "--"]
+    assert right.x.labels is None
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+@pytest.mark.parametrize("dims", [["x", "y"], ["y", "x"]])
+def test_align_interpolation_masks_outside_range_on_both_axes(method, dims):
+    reference = scp.NDDataset(
+        np.ones((3, 3)),
+        coordset=[scp.Coord([1.0, 2.0, 3.0]), scp.Coord([1.0, 2.0, 3.0])],
+    )
+    source = scp.NDDataset(
+        np.ones((3, 3)),
+        coordset=[scp.Coord([2.0, 3.0, 4.0]), scp.Coord([2.0, 3.0, 4.0])],
+    )
+
+    _, aligned = scp.align(
+        reference, source, dims=dims, method="interpolate", interpolate_method=method
+    )
+
+    np.testing.assert_array_equal(
+        aligned.mask, [[True, True, True], [True, False, False], [True, False, False]]
+    )
+    np.testing.assert_allclose(aligned.masked_data.compressed(), np.ones(4))
+
+
+@pytest.mark.parametrize("method", ["first", "last"])
+def test_align_reference_join_masks_entirely_disjoint_spectrum(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([2.0, 1.0])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([4.0, 3.0])])
+
+    left, right = scp.align(first, second, method=method)
+
+    reference, other = (left, right) if method == "first" else (right, left)
+    expected_grid = [2.0, 1.0] if method == "first" else [4.0, 3.0]
+    np.testing.assert_array_equal(reference.x.data, expected_grid)
+    np.testing.assert_array_equal(other.x.data, expected_grid)
+    assert other.mask.all()
+
+
+@pytest.mark.parametrize("single_input", [False, True])
+def test_align_interpolate_uses_explicit_target_for_each_input(single_input):
+    first = scp.NDDataset(
+        [10.0, 20.0, 30.0], coordset=[scp.Coord([1.0, 2.0, 3.0], units="cm")]
+    )
+    second = scp.NDDataset(
+        [20.0, 40.0, 60.0], coordset=[scp.Coord([1.0, 2.0, 3.0], units="cm")]
+    )
+    target = scp.Coord([15.0, 25.0], units="mm")
+
+    inputs = (first,) if single_input else (first, second)
+    outputs = scp.align(*inputs, coord=target, method="interpolate")
+
+    assert len(outputs) == len(inputs)
+    for factor, output in enumerate(outputs, start=1):
+        np.testing.assert_allclose(output.x.data, [1.5, 2.5])
+        np.testing.assert_allclose(output.data, np.array([15.0, 25.0]) * factor)
+    np.testing.assert_array_equal(target.data, [15.0, 25.0])
+
+
+@pytest.mark.parametrize("coords", [None, [1.0, np.nan, 3.0], [1.0, np.inf, 3.0]])
+def test_align_rejects_missing_or_nonfinite_coordinates(coords):
+    first = scp.NDDataset([10.0, 20.0, 30.0])
+    if coords is not None:
+        first.x = scp.Coord(coords)
+    second = scp.NDDataset([10.0, 20.0, 30.0], coordset=[scp.Coord([1.0, 2.0, 3.0])])
+
+    with pytest.raises(ValueError, match="numeric coordinates along dimension 'x'"):
+        scp.align(first, second, method="outer")
+
+
+def test_align_outer_retains_small_coordinates_when_union_expands_the_range():
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([0.00014, 0.00116])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([1.0, 2.0])])
+    third = scp.NDDataset([50.0, 60.0], coordset=[scp.Coord([2.0, 3.0])])
+
+    left, _, _ = scp.align(first, second, third, method="outer")
+
+    np.testing.assert_array_equal(left.x.data, [0.00014, 0.00116, 1.0, 2.0, 3.0])
+    np.testing.assert_array_equal(left.mask, [False, False, True, True, True])
+    np.testing.assert_array_equal(left.masked_data.compressed(), [10.0, 20.0])
+
+
+def test_align_interpolate_rejects_nonadjacent_duplicate_source_coordinates():
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([1.0, 2.0])])
+    second = scp.NDDataset([30.0, 40.0, 50.0], coordset=[scp.Coord([1.0, 2.0, 1.0])])
+
+    with pytest.raises(ValueError, match="Duplicate or near-duplicate"):
+        scp.align(first, second, method="interpolate")
+
+
+def test_align_linear_interpolation_keeps_exact_singleton_row():
+    x = scp.Coord([1.0, 2.0, 3.0])
+    reference = scp.NDDataset(np.ones((2, 3)), coordset=[scp.Coord([2.0, 3.0]), x])
+    source = scp.NDDataset([[3.0, 4.0, 5.0]], coordset=[scp.Coord([2.0]), x])
+
+    _, aligned = scp.align(reference, source, dim="y", method="interpolate")
+
+    np.testing.assert_array_equal(aligned.mask, [[False] * 3, [True] * 3])
+    np.testing.assert_array_equal(aligned.masked_data.compressed(), [3.0, 4.0, 5.0])
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_keeps_distinct_coordinates_on_wide_grids(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([1.0, 1e5])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([2.0, 1e5])])
+
+    left, right = scp.align(first, second, method=method)
+
+    if method == "outer":
+        np.testing.assert_array_equal(left.x.data, [1.0, 2.0, 1e5])
+        np.testing.assert_array_equal(left.mask, [False, True, False])
+        np.testing.assert_array_equal(right.mask, [True, False, False])
+    else:
+        target, aligned = (left, right) if method == "first" else (right, left)
+        np.testing.assert_array_equal(
+            target.x.data, [1.0 if method == "first" else 2.0, 1e5]
+        )
+        np.testing.assert_array_equal(aligned.mask, [True, False])
+        assert aligned.data[-1] == (40.0 if method == "first" else 20.0)
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_matches_converted_units_with_rounding_disabled(method):
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([0.007, 0.01], units="m", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([0.7, 1.0], units="cm", rounding=False)],
+    )
+
+    left, right = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(left.x.data, right.x.data)
+    np.testing.assert_array_equal(left.data, [10.0, 20.0])
+    np.testing.assert_array_equal(right.data, [30.0, 40.0])
+    assert not left.is_masked and not right.is_masked
+
+
+def test_align_mixed_units_preserves_distinct_unrounded_points():
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([1e5, 1e5 + 1e-10], units="m", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0], coordset=[scp.Coord([5.0, 6.0], units="cm", rounding=False)]
+    )
+
+    left, _ = scp.align(first, second, method="outer")
+
+    np.testing.assert_array_equal(left.x.data, [0.05, 0.06, 1e5, 1e5 + 1e-10])
+    np.testing.assert_array_equal(left.masked_data.compressed(), [10.0, 20.0])
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_rounded_slices_match_small_spectroscopic_coordinate_drift(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([3500.685, 3502.685])])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([3500.686, 3502.686])])
+
+    left, right = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(left.x.data, right.x.data)
+    np.testing.assert_array_equal(left.data, [10.0, 20.0])
+    np.testing.assert_array_equal(right.data, [30.0, 40.0])
+    assert not left.is_masked and not right.is_masked
+
+
+def test_align_does_not_merge_unrounded_neighbors_after_unit_conversion():
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([1e5, 1e6], units="m", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([(1e5 + 1e-10) * 100, 2e8], units="cm", rounding=False)],
+    )
+
+    left, right = scp.align(first, second, method="outer")
+
+    assert len(left.x.data) == 4
+    np.testing.assert_array_equal(left.mask, [False, True, False, True])
+    np.testing.assert_array_equal(right.mask, [True, False, True, False])
+
+
+def test_align_rejects_coordinate_overflow_after_unit_conversion():
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([1.0, 2.0], units="nm", rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([1e290, 1e308], units="m", rounding=False)],
+    )
+
+    with pytest.raises(ValueError, match="non-finite coordinates"):
+        scp.align(first, second, method="outer")
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+@pytest.mark.parametrize(
+    ("first_grid", "first_unit", "second_grid", "second_unit"),
+    [
+        ([1000.0, 2000.0], "cm^-1", [10000.0, 5000.0], "nm"),
+        ([1.0, 2.0], "absorbance", [0.1, 0.01], "absolute_transmittance"),
+    ],
+)
+def test_align_matches_unrounded_coordinates_with_contextual_units(
+    method, first_grid, first_unit, second_grid, second_unit
+):
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord(first_grid, units=first_unit, rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord(second_grid, units=second_unit, rounding=False)],
+    )
+
+    left, right = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(left.x.data, right.x.data)
+    np.testing.assert_array_equal(right.data - left.data, [20.0, 20.0])
+    assert not left.is_masked and not right.is_masked
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last", "interpolate"])
+def test_align_matches_unrounded_feet_and_meters_on_either_reference(method):
+    metric = scp.NDDataset(
+        [10.0, 20.0], coordset=[scp.Coord([0.3048, 0.6096], units="m", rounding=False)]
+    )
+    imperial = scp.NDDataset(
+        [30.0, 40.0], coordset=[scp.Coord([1.0, 2.0], units="ft", rounding=False)]
+    )
+    for inputs in [(metric, imperial), (imperial, metric)]:
+        left, right = scp.align(*inputs, method=method)
+        np.testing.assert_array_equal(left.x.data, right.x.data)
+        np.testing.assert_array_equal(left.data, inputs[0].data)
+        np.testing.assert_array_equal(right.data, inputs[1].data)
+        assert not left.is_masked and not right.is_masked
+
+
+def test_align_preserves_distinct_unrounded_neighbors_across_spectral_units():
+    first = scp.NDDataset(
+        [10.0], coordset=[scp.Coord([1000.0], units="cm^-1", rounding=False)]
+    )
+    second = scp.NDDataset(
+        [20.0],
+        coordset=[
+            scp.Coord([np.nextafter(10000.0, np.inf)], units="nm", rounding=False)
+        ],
+    )
+
+    left, right = scp.align(first, second, method="outer")
+
+    assert left.x.size == right.x.size == 2
+    assert np.count_nonzero(left.mask) == np.count_nonzero(right.mask) == 1
+    assert not np.any(left.mask == right.mask)
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "interpolate"])
+def test_align_does_not_round_converted_coordinates_again(method):
+    first = scp.NDDataset([10.0, 20.0], coordset=[scp.Coord([0.0, 1000.0], units="m")])
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([1.0, 1e12], units="nm")])
+
+    left, right = scp.align(first, second, method=method)
+
+    if method == "outer":
+        np.testing.assert_allclose(left.x.data, [0.0, 1e-9, 1000.0], atol=0.0)
+        np.testing.assert_array_equal(right.mask, [True, False, False])
+        np.testing.assert_array_equal(right.masked_data.compressed(), [30.0, 40.0])
+    else:
+        np.testing.assert_array_equal(right.x.data, [0.0, 1000.0])
+        np.testing.assert_array_equal(right.mask, [True, False])
+        np.testing.assert_array_equal(right.masked_data.compressed(), [40.0])
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+@pytest.mark.parametrize("explicit_target", [False, True])
+def test_align_interpolate_keeps_converted_endpoints_with_default_rounding(
+    method, explicit_target
+):
+    reference = scp.NDDataset(
+        [10.0, 20.0], coordset=[scp.Coord([0.3048, 0.6096], units="m")]
+    )
+    source = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([1.0, 2.0], units="ft")])
+    target = scp.Coord([1.0, 2.0], units="ft") if explicit_target else None
+
+    left, right = scp.align(
+        reference, source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(right.x.data, reference.x.data)
+    np.testing.assert_array_equal(left.data, reference.data)
+    np.testing.assert_array_equal(right.data, source.data)
+    assert not left.is_masked and not right.is_masked
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_preserves_extended_precision_complex_intensities(method):
+    first = scp.NDDataset(
+        np.array([1.0 + 3.0j, 2.0 + 4.0j], dtype=np.clongdouble),
+        dtype=np.clongdouble,
+        coordset=[scp.Coord([0.0, 1.0])],
+    )
+    second = scp.NDDataset([30.0, 40.0], coordset=[scp.Coord([0.0, 1.0])])
+
+    left, _ = scp.align(first, second, method=method)
+
+    assert left.data.dtype == first.data.dtype
+    np.testing.assert_array_equal(left.data, first.data)
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_matches_mixed_coordinate_dtypes_without_losing_integer_precision(method):
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord([2**53, 2**53 + 1], dtype=np.int64, rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0], coordset=[scp.Coord([1e18, 2e18], rounding=False)]
+    )
+    if (
+        method == "outer"
+        and np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant
+    ):
+        with pytest.raises(ValueError, match="losing coordinate precision"):
+            scp.align(first, second, method=method)
+        return
+
+    left, right = scp.align(first, second, method=method)
+
+    if method == "outer":
+        assert [int(point) for point in left.x.data[:2]] == [2**53, 2**53 + 1]
+        np.testing.assert_array_equal(left.mask, [False, False, True, True])
+        np.testing.assert_array_equal(right.mask, [True, True, False, False])
+    elif method == "first":
+        assert [int(point) for point in left.x.data] == [2**53, 2**53 + 1]
+        assert right.mask.all()
+    else:
+        np.testing.assert_array_equal(right.x.data, [1e18, 2e18])
+        assert left.mask.all()
+    if method != "last":
+        np.testing.assert_array_equal(
+            np.ma.asarray(left.masked_data).compressed(), [10.0, 20.0]
+        )
+    if method != "first":
+        np.testing.assert_array_equal(
+            np.ma.asarray(right.masked_data).compressed(), [30.0, 40.0]
+        )
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_converts_large_integer_coordinates_exactly(method):
+    meters = [2**53, 2**53 + 1]
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord(meters, units="m", dtype=np.int64, rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[
+            scp.Coord(
+                [100 * point for point in meters],
+                units="cm",
+                dtype=np.int64,
+                rounding=False,
+            )
+        ],
+    )
+
+    left, right = scp.align(first, second, method=method)
+
+    expected = second.x.data if method == "last" else first.x.data
+    np.testing.assert_array_equal(left.x.data, expected)
+    np.testing.assert_array_equal(right.x.data, expected)
+    np.testing.assert_array_equal(left.data, first.data)
+    np.testing.assert_array_equal(right.data, second.data)
+    assert not left.is_masked and not right.is_masked
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+def test_align_rounds_large_integer_keys_without_coercing_to_double(method):
+    points = [2**53, 2**53 + 1]
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord(points, dtype=np.int64, sigdigits=17)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord([2.0, 3.0], sigdigits=17)],
+    )
+    if (
+        method == "outer"
+        and np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant
+    ):
+        with pytest.raises(ValueError, match="losing coordinate precision"):
+            scp.align(first, second, method=method)
+        return
+
+    left, right = scp.align(first, second, method=method)
+
+    if method != "last":
+        assert [int(point) for point in left.x.data[-2:]] == points
+        np.testing.assert_array_equal(
+            np.ma.asarray(left.masked_data).compressed(), first.data
+        )
+    if method != "first":
+        np.testing.assert_array_equal(
+            np.ma.asarray(right.masked_data).compressed(), second.data
+        )
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+@pytest.mark.parametrize("dtype", [np.int64, np.longdouble])
+def test_align_preserves_wide_intensities_when_inserting_missing_points(method, dtype):
+    points = (
+        [2**53 + 1, 2**53 + 3]
+        if dtype is np.int64
+        else [np.nextafter(np.longdouble(1), np.longdouble(2)), np.longdouble(2)]
+    )
+    source = scp.NDDataset(points, dtype=dtype, coordset=[scp.Coord([0.0, 1.0])])
+    reference = scp.NDDataset([30.0, 40.0, 50.0], coordset=[scp.Coord([0.0, 1.0, 2.0])])
+    inputs = [source, reference] if method == "last" else [reference, source]
+
+    result = scp.align(*inputs, method=method)[0 if method == "last" else 1]
+
+    assert result.data.dtype == source.data.dtype
+    np.testing.assert_array_equal(result.data[:2], source.data)
+    np.testing.assert_array_equal(result.mask, [False, False, True])
+    assert result.data[2] == 99999999999999
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+@pytest.mark.parametrize("dim", ["x", "y"])
+def test_align_interpolate_does_not_expose_sentinel_from_outer_join(method, dim):
+    unchanged = scp.Coord([0.0, 1.0])
+
+    def spectrum(data, points):
+        sampled = scp.Coord(points)
+        if dim == "y":
+            return scp.NDDataset(np.asarray(data).T, coordset=[sampled, unchanged])
+        return scp.NDDataset(data, coordset=[unchanged, sampled])
+
+    source = spectrum([[1.0, 3.0], [2.0, 6.0]], [1.0, 3.0])
+    other = spectrum([[2.0, 3.0], [4.0, 6.0]], [2.0, 3.0])
+    joined, _ = scp.align(source, other, dim=dim, method="outer")
+    target = scp.Coord([1.0, 1.25, 2.0, 2.75, 3.0])
+
+    (result,) = scp.align(
+        joined, dim=dim, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    if dim == "y":
+        result = result.T
+    np.testing.assert_array_equal(result.mask, [[False, True, True, True, False]] * 2)
+    np.testing.assert_array_equal(result.masked_data.compressed(), [1.0, 3.0, 2.0, 6.0])
+    assert np.all(result.data[result.mask] == 99999999999999)
+
+
+def test_align_pchip_masks_intervals_adjacent_to_a_masked_sample():
+    source = scp.NDDataset(
+        [0.0, 1.0, np.nan, 9.0, 16.0, 25.0],
+        mask=[False, False, True, False, False, False],
+        coordset=[scp.Coord([0.0, 1.0, 2.0, 3.0, 4.0, 5.0])],
+    )
+    target = scp.Coord([0.5, 1.0, 3.5, 4.0, 4.5])
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method="pchip", coord=target
+    )
+
+    np.testing.assert_array_equal(result.mask, [True, False, True, False, False])
+    np.testing.assert_array_equal(result.data[[1, 3]], [1.0, 16.0])
+    assert 16.0 < result.data[-1] < 25.0
+
+
+@pytest.mark.parametrize("method", ["inner", "outer", "first", "last"])
+def test_align_masks_a_nan_that_is_replaced_by_the_sentinel(method):
+    coord = scp.Coord([1.0, 2.0, 3.0])
+    first = scp.NDDataset([1.0, np.nan, 3.0], coordset=[coord])
+    second = scp.NDDataset([4.0, 5.0, 6.0], coordset=[coord])
+
+    aligned, _ = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(aligned.mask, [False, True, False])
+    assert aligned.data[1] == 99999999999999
+    (result,) = scp.align(
+        aligned, method="interpolate", coord=scp.Coord([1.0, 1.5, 2.0, 2.5, 3.0])
+    )
+    np.testing.assert_array_equal(result.mask, [False, True, True, True, False])
+    np.testing.assert_array_equal(result.masked_data.compressed(), [1.0, 3.0])
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_sorts_unsigned_source_without_wrapping(method):
+    coords = scp.Coord([1, 4, 2, 8], dtype=np.uint8, rounding=False, linearize_below=0)
+    source = scp.NDDataset([10.0, np.nan, 20.0, 80.0], coordset=[coords])
+    reference = scp.NDDataset([10.0, 40.0, 20.0, 80.0], coordset=[coords])
+    joined, _ = scp.align(source, reference, method="first")
+    target = scp.Coord([1.0, 4.0, 8.0], rounding=False)
+
+    (result,) = scp.align(
+        joined, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.mask, [False, True, False])
+    np.testing.assert_array_equal(result.masked_data.compressed(), [10.0, 80.0])
+    assert result.data[1] == 99999999999999
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_distinguishes_large_integer_targets_from_float_nodes(method):
+    origin = 2**53
+    x = scp.Coord(
+        [origin, origin + 4, origin + 8, origin + 12],
+        dtype=np.float64,
+        rounding=False,
+        linearize_below=0,
+    )
+    source = scp.NDDataset([np.nan, 40.0, 80.0, 120.0], coordset=[x])
+    reference = scp.NDDataset([0.0, 40.0, 80.0, 120.0], coordset=[x])
+    joined, _ = scp.align(source, reference, method="first")
+    target = scp.Coord(
+        [origin + 3, origin + 4, origin + 8],
+        dtype=np.int64,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        joined, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_array_equal(result.mask, [True, False, False])
+    np.testing.assert_array_equal(result.masked_data.compressed(), [40.0, 80.0])
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="requires a coordinate dtype wider than float64",
+)
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_preserves_extended_precision_target_positions(method):
+    origin = 2**53
+    x = scp.Coord(
+        [origin, origin + 4, origin + 8, origin + 12],
+        rounding=False,
+        linearize_below=0,
+    )
+    source = scp.NDDataset([0.0, 40.0, 80.0, 120.0], coordset=[x])
+    target = scp.Coord(
+        [np.longdouble(origin + offset) for offset in (3, 4, 8)],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [30.0, 40.0, 80.0])
+    assert not result.is_masked
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_keeps_losslessly_castable_wide_grid_without_centering(
+    method,
+):
+    points = [-1e20, 0.0, 1.0, 2.0]
+    x = scp.Coord(points, dtype=np.longdouble, rounding=False, linearize_below=0)
+    source = scp.NDDataset(points, coordset=[x])
+    target = scp.Coord(
+        [0.5, 1.0, 1.5], dtype=np.longdouble, rounding=False, linearize_below=0
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [0.5, 1.0, 1.5])
+    assert not result.is_masked
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_chooses_the_most_accurate_wide_grid_conversion(method):
+    points = [-1e18, 0.0, 1024.0, 2048.0]
+    x = scp.Coord(points, dtype=np.longdouble, rounding=False, linearize_below=0)
+    source = scp.NDDataset(points, coordset=[x])
+    target = scp.Coord(
+        [np.longdouble(value) for value in ("300.01", "500.01", "1500.01")],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [300.01, 500.01, 1500.01])
+    assert not result.is_masked
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_preserves_exact_unmasked_samples_at_high_dynamic_range(
+    method,
+):
+    coordinates = scp.Coord([0.0, 1.0])
+    source = scp.NDDataset(
+        [[1e16, 1.0], [1e17, 2.0]], coordset=[coordinates, coordinates]
+    )
+    target = scp.Coord([0.0, 0.5, 1.0])
+
+    (result,) = scp.align(
+        source, dim="x", method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.data[:, [0, 2]], source.data)
+    assert not result.is_masked
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="requires a coordinate dtype wider than float64",
+)
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_centers_near_a_distant_cluster_in_wide_grid(method):
+    x = scp.Coord(
+        [
+            np.longdouble(value)
+            for value in ("-1e18", "1e18", "1000000000000000001", "1000000000000000002")
+        ],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+    source = scp.NDDataset([-2e18, 0.0, 1.0, 2.0], coordset=[x])
+    target = scp.Coord(
+        [
+            np.longdouble(value)
+            for value in ("1000000000000000000.5", "1000000000000000001.5")
+        ],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [0.5, 1.5])
+    assert not result.is_masked
+
+
+@pytest.mark.skipif(
+    np.finfo(np.longdouble).nmant <= np.finfo(np.float64).nmant,
+    reason="requires a coordinate dtype wider than float64",
+)
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_masks_distant_targets_without_collapsing_output_grid(method):
+    source = scp.NDDataset([0.0, 1.0, 2.0], coordset=[scp.Coord([0.0, 1.0, 2.0])])
+    target = scp.Coord(
+        [np.longdouble(value) for value in ("0.5", "1e18", "1000000000000000001")],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_array_equal(result.mask, [False, True, True])
+    np.testing.assert_array_equal(result.data, [0.5, 99999999999999, 99999999999999])
