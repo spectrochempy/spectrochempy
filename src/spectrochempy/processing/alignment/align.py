@@ -9,16 +9,52 @@ __all__ = ["align"]
 __dataset_methods__ = __all__
 
 from decimal import Decimal
+from functools import lru_cache
 
 import numpy as np
+from pint import UnitRegistry
+from pint.errors import PintError
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.units import ur
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
+
+
+@lru_cache(maxsize=1)
+def _decimal_registry():
+    """Use exact decimal definitions for standard Pint units."""
+    registry = UnitRegistry(non_int_type=Decimal)
+    registry.enable_contexts("spectroscopy", "boltzmann", "chemistry")
+    return registry
+
+
+def _convert_coordinate(coord, reference, *, precise):
+    original = coord.data
+    source_unit = coord.units
+    target_unit = reference.units
+    coord.ito(reference)
+    if not precise or source_unit is None or target_unit is None:
+        return
+
+    registry = _decimal_registry()
+    try:
+        source = registry.Unit(str(source_unit._units))
+        target = registry.Unit(str(target_unit._units))
+        values = np.fromiter(
+            (
+                str(registry.Quantity(Decimal(str(point)), source).to(target).magnitude)
+                for point in original
+            ),
+            dtype=coord.data.dtype,
+            count=original.size,
+        )
+    except (PintError, ArithmeticError, TypeError, ValueError):
+        return
+    if np.allclose(values, coord.data, rtol=1e-14, atol=0):
+        coord._data = values
 
 
 def can_merge_or_align(coord1, coord2):
@@ -262,7 +298,6 @@ def align(dataset, *others, **kwargs):
         rounded = all(coord._rounding for coord in input_coords)
         precision = max(5, *(coord.sigdigits for coord in input_coords))
         source_grids = {}
-        contextual_grids = []
 
         # loop on all object
         for _index, object in _objects.items():
@@ -282,37 +317,11 @@ def align(dataset, *others, **kwargs):
                     ),
                 )
 
-            values = coord.data
-            reconcile_roundoff = False
             if coord.units != ref_coord.units:
-                source_unit = coord.units or ur.dimensionless
-                target_unit = ref_coord.units or ur.dimensionless
-                coord.ito(ref_coord)
-                converted = coord.data
-                if reference_join and not rounded:
-                    if (
-                        source_unit.dimensionality == target_unit.dimensionality
-                        and source_unit.dimensionality
-                    ):
-                        decimal_values = np.fromiter(
-                            (
-                                float(
-                                    ur.Quantity(Decimal(str(point)), source_unit)
-                                    .to(target_unit)
-                                    .magnitude
-                                )
-                                for point in values
-                            ),
-                            dtype=np.float64,
-                            count=coord.size,
-                        )
-                        if np.allclose(decimal_values, converted, rtol=1e-14, atol=0):
-                            converted = decimal_values
-                        else:
-                            reconcile_roundoff = True
-                    else:
-                        reconcile_roundoff = True
-                values = converted
+                _convert_coordinate(
+                    coord, ref_coord, precise=ndec is None and not rounded
+                )
+            values = coord.data
 
             keys = values
             if ndec is not None:
@@ -338,49 +347,6 @@ def align(dataset, *others, **kwargs):
                     f"{reason} {method} alignment ambiguous along dimension {dim!r}."
                 )
             source_grids[_index] = keys, values
-            if reconcile_roundoff:
-                contextual_grids.append(_index)
-
-        if contextual_grids:
-            if method == "outer":
-                anchors = {
-                    point
-                    for index, (keys, _) in source_grids.items()
-                    if index not in contextual_grids
-                    for point in keys
-                }
-            else:
-                anchors = set(source_grids[ref_obj_index][0])
-            for index in contextual_grids:
-                keys, values = source_grids[index]
-                ordered = np.asarray(sorted(anchors))
-                if ordered.size:
-                    pos = np.searchsorted(ordered, keys)
-                    left = ordered[np.maximum(pos - 1, 0)]
-                    right = ordered[np.minimum(pos, ordered.size - 1)]
-                    tolerance = 4 * np.abs(np.spacing(keys))
-                    near_left = np.abs(keys - left) <= tolerance
-                    near_right = np.abs(keys - right) <= tolerance
-                    ambiguous = near_left & near_right & (left != right)
-                    if np.any(ambiguous & (keys != left) & (keys != right)):
-                        raise ValueError(
-                            f"Unit conversion makes {method} alignment ambiguous "
-                            f"along dimension {dim!r}."
-                        )
-                    keys = np.where(
-                        (keys == left) | (near_left & ~near_right),
-                        left,
-                        np.where(near_right, right, keys),
-                    )
-                    if np.unique(keys).size != keys.size:
-                        raise ValueError(
-                            f"Unit conversion makes {method} alignment ambiguous "
-                            f"along dimension {dim!r}."
-                        )
-                source_grids[index] = keys, values
-                if method == "outer":
-                    anchors.update(keys)
-
         join_grid = source_grids[ref_obj_index][0]
         if method == "inner":
             join_keys = set(join_grid)
@@ -393,9 +359,7 @@ def align(dataset, *others, **kwargs):
             new_coord._rounding = False
         elif method == "outer":
             representatives = {}
-            for index, (keys, values) in source_grids.items():
-                if index in contextual_grids:
-                    values = keys
+            for keys, values in source_grids.values():
                 for key, value in zip(keys, values, strict=True):
                     representatives.setdefault(key, value)
             join_grid = np.asarray(sorted(representatives))
@@ -423,7 +387,11 @@ def align(dataset, *others, **kwargs):
                         ),
                     )
                 elif target_coord.units != ref_coord.units:
-                    target_coord.ito(ref_coord.units)
+                    _convert_coordinate(
+                        target_coord,
+                        ref_coord,
+                        precise=not (target_coord._rounding and ref_coord._rounding),
+                    )
                 if not np.isfinite(target_coord.data).all():
                     raise ValueError(
                         f"Alignment target produced non-finite coordinates "

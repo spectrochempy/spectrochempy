@@ -486,3 +486,37 @@ def test_align_matches_unrounded_coordinates_with_contextual_units(
     np.testing.assert_array_equal(left.x.data, right.x.data)
     np.testing.assert_array_equal(right.data - left.data, [20.0, 20.0])
     assert not left.is_masked and not right.is_masked
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last", "interpolate"])
+def test_align_matches_unrounded_feet_and_meters_on_either_reference(method):
+    metric = scp.NDDataset(
+        [10.0, 20.0], coordset=[scp.Coord([0.3048, 0.6096], units="m", rounding=False)]
+    )
+    imperial = scp.NDDataset(
+        [30.0, 40.0], coordset=[scp.Coord([1.0, 2.0], units="ft", rounding=False)]
+    )
+    for inputs in [(metric, imperial), (imperial, metric)]:
+        left, right = scp.align(*inputs, method=method)
+        np.testing.assert_array_equal(left.x.data, right.x.data)
+        np.testing.assert_array_equal(left.data, inputs[0].data)
+        np.testing.assert_array_equal(right.data, inputs[1].data)
+        assert not left.is_masked and not right.is_masked
+
+
+def test_align_preserves_distinct_unrounded_neighbors_across_spectral_units():
+    first = scp.NDDataset(
+        [10.0], coordset=[scp.Coord([1000.0], units="cm^-1", rounding=False)]
+    )
+    second = scp.NDDataset(
+        [20.0],
+        coordset=[
+            scp.Coord([np.nextafter(10000.0, np.inf)], units="nm", rounding=False)
+        ],
+    )
+
+    left, right = scp.align(first, second, method="outer")
+
+    assert left.x.size == right.x.size == 2
+    assert np.count_nonzero(left.mask) == np.count_nonzero(right.mask) == 1
+    assert not np.any(left.mask == right.mask)
