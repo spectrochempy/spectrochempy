@@ -125,6 +125,19 @@ def test_align_inner_preserves_each_spectrum_mask():
     np.testing.assert_array_equal(aligned_second.mask, [True, False])
 
 
+def test_align_inner_preserves_complex_values():
+    first = scp.NDDataset(
+        [10.0 + 1.0j, 20.0 + 2.0j, 30.0 + 3.0j],
+        coordset=[scp.Coord([1.0, 2.0, 3.0])],
+    )
+    second = scp.NDDataset([2.0, 3.0, 4.0], coordset=[scp.Coord([2.0, 3.0, 4.0])])
+
+    aligned_first, aligned_second = scp.align(first, second, method="inner")
+
+    np.testing.assert_array_equal(aligned_first.data, [20.0 + 2.0j, 30.0 + 3.0j])
+    np.testing.assert_array_equal(aligned_second.data, [2.0, 3.0])
+
+
 def test_align_rejects_incompatible_coord_units_with_clear_message():
     ds1 = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([100.0, 200.0], units="cm^-1")])
     ds2 = scp.NDDataset([3.0, 4.0], coordset=[scp.Coord([1.0, 2.0], units="s")])

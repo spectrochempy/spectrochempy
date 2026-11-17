@@ -303,7 +303,10 @@ def align(dataset, *others, **kwargs):
                 # change the data shape
                 new_obj_shape = list(obj.shape)
                 new_obj_shape[dim_index] = len(new_coord)
-                new_obj_data = np.full(new_obj_shape, np.nan)
+                dtype = np.result_type(obj.data.dtype, np.float64)
+                if method != "inner":
+                    dtype = np.float64
+                new_obj_data = np.full(new_obj_shape, np.nan, dtype=dtype)
 
                 # create new dataset for obj and ref_objects
                 new_obj = obj.copy() if copy else obj
