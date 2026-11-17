@@ -459,3 +459,30 @@ def test_align_rejects_coordinate_overflow_after_unit_conversion():
 
     with pytest.raises(ValueError, match="non-finite coordinates"):
         scp.align(first, second, method="outer")
+
+
+@pytest.mark.parametrize("method", ["outer", "first", "last"])
+@pytest.mark.parametrize(
+    ("first_grid", "first_unit", "second_grid", "second_unit"),
+    [
+        ([1000.0, 2000.0], "cm^-1", [10000.0, 5000.0], "nm"),
+        ([1.0, 2.0], "absorbance", [0.1, 0.01], "absolute_transmittance"),
+    ],
+)
+def test_align_matches_unrounded_coordinates_with_contextual_units(
+    method, first_grid, first_unit, second_grid, second_unit
+):
+    first = scp.NDDataset(
+        [10.0, 20.0],
+        coordset=[scp.Coord(first_grid, units=first_unit, rounding=False)],
+    )
+    second = scp.NDDataset(
+        [30.0, 40.0],
+        coordset=[scp.Coord(second_grid, units=second_unit, rounding=False)],
+    )
+
+    left, right = scp.align(first, second, method=method)
+
+    np.testing.assert_array_equal(left.x.data, right.x.data)
+    np.testing.assert_array_equal(right.data - left.data, [20.0, 20.0])
+    assert not left.is_masked and not right.is_masked
