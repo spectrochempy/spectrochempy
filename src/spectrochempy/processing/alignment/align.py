@@ -176,7 +176,11 @@ def align(dataset, *others, **kwargs):
                 return None
 
             working = object.copy()
-            if method == "inner" and working.data.dtype != object.data.dtype:
+            if (
+                method == "inner"
+                and object.data.dtype.kind in "biufc"
+                and working.data.dtype != object.data.dtype
+            ):
                 working._dtype = object.data.dtype
                 working._data = object.data
             _objects[_nobj] = {
@@ -314,7 +318,7 @@ def align(dataset, *others, **kwargs):
                         else NOMASK
                     )
                     values = np.take(obj.data, source_indices, axis=dim_index)
-                    if values.dtype.kind == "O":
+                    if values.dtype.kind not in "biufc":
                         values = values.astype(np.float64)
                         new_obj._dtype = None
                     new_obj._data = values

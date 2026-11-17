@@ -172,17 +172,24 @@ def test_align_inner_keeps_exact_sentinel_for_narrow_dtypes(dtype):
     np.testing.assert_array_equal(aligned_first.data[~missing], [10.0])
 
 
-def test_align_inner_accepts_numeric_object_arrays():
+@pytest.mark.parametrize("dtype", [object, "U3", "S3"])
+@pytest.mark.parametrize(
+    ("other_grid", "expected"),
+    [([2.0, 3.0, 4.0], [20.0, 30.0]), ([1.0, 2.0, 3.0], [10.0, 20.0, 30.0])],
+)
+def test_align_inner_accepts_numeric_arrays_convertible_to_float(
+    dtype, other_grid, expected
+):
     first = scp.NDDataset(
-        np.array([10, 20, 30], dtype=object),
-        dtype=object,
+        np.array([10, 20, 30], dtype=dtype),
+        dtype=dtype,
         coordset=[scp.Coord([1.0, 2.0, 3.0])],
     )
-    second = scp.NDDataset([2.0, 3.0, 4.0], coordset=[scp.Coord([2.0, 3.0, 4.0])])
+    second = scp.NDDataset([2.0, 3.0, 4.0], coordset=[scp.Coord(other_grid)])
 
     aligned_first, _ = scp.align(first, second, method="inner")
 
-    np.testing.assert_array_equal(aligned_first.data, [20.0, 30.0])
+    np.testing.assert_array_equal(aligned_first.data, expected)
 
 
 def test_align_rejects_incompatible_coord_units_with_clear_message():
