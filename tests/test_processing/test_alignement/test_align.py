@@ -848,3 +848,24 @@ def test_align_interpolate_keeps_losslessly_castable_wide_grid_without_centering
     np.testing.assert_array_equal(result.x.data, target.data)
     np.testing.assert_allclose(result.data, [0.5, 1.0, 1.5])
     assert not result.is_masked
+
+
+@pytest.mark.parametrize("method", ["linear", "pchip"])
+def test_align_interpolate_chooses_the_most_accurate_wide_grid_conversion(method):
+    points = [-1e18, 0.0, 1024.0, 2048.0]
+    x = scp.Coord(points, dtype=np.longdouble, rounding=False, linearize_below=0)
+    source = scp.NDDataset(points, coordset=[x])
+    target = scp.Coord(
+        [np.longdouble(value) for value in ("300.01", "500.01", "1500.01")],
+        dtype=np.longdouble,
+        rounding=False,
+        linearize_below=0,
+    )
+
+    (result,) = scp.align(
+        source, method="interpolate", interpolate_method=method, coord=target
+    )
+
+    np.testing.assert_array_equal(result.x.data, target.data)
+    np.testing.assert_allclose(result.data, [300.01, 500.01, 1500.01])
+    assert not result.is_masked

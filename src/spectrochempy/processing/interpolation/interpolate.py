@@ -145,35 +145,49 @@ def _center_wide_grids(old_x, new_x):
         return Fraction(*point.as_integer_ratio())
 
     exact_grids = [[exact(point) for point in grid] for grid in grids]
-    unique_values = set().union(*exact_grids)
+    unique_values = sorted(set().union(*exact_grids))
+    gaps = [
+        right - left
+        for left, right in zip(unique_values[:-1], unique_values[1:], strict=True)
+    ]
 
     def convert(origin):
         try:
-            mapping = {value: float(value - origin) for value in unique_values}
+            positions = [float(value - origin) for value in unique_values]
         except OverflowError:
-            return None, False
-        if len(set(mapping.values())) != len(mapping):
-            return None, False
-        converted = tuple(
-            np.asarray([mapping[value] for value in grid]) for grid in exact_grids
+            return None
+        if len(set(positions)) != len(positions):
+            return None
+        # Interpolation depends on relative distances. Compare the distortion
+        # of adjacent gaps, including gaps between source and target points.
+        binary_values = [Fraction(position) for position in positions]
+        error = max(
+            (
+                abs((right - left) / gap - 1)
+                for left, right, gap in zip(
+                    binary_values[:-1], binary_values[1:], gaps, strict=True
+                )
+            ),
+            default=0,
         )
-        return converted, all(
-            delta == value - origin for value, delta in mapping.items()
-        )
+        return error, positions
 
-    # Preserve grids that can already be represented exactly, even when
-    # subtracting the origin would collapse nearby points in a wide span.
-    narrowed, lossless = convert(Fraction(0))
-    if lossless:
-        return narrowed
-    centered, _ = convert(exact_grids[0][0])
-    if centered is not None:
-        return centered
-    if narrowed is not None:
-        return narrowed
-    raise ValueError(
-        "Interpolation coordinates cannot be represented as distinct float64 points."
-    )
+    narrowed = convert(Fraction(0))
+    if narrowed is not None and narrowed[0] == 0:
+        positions = narrowed[1]
+    else:
+        centered = convert(exact_grids[0][0])
+        candidates = [
+            candidate for candidate in (narrowed, centered) if candidate is not None
+        ]
+        if not candidates:
+            raise ValueError(
+                "Interpolation coordinates cannot be represented as distinct float64 points."
+            )
+        _, positions = min(candidates, key=lambda candidate: candidate[0])
+
+    mapping = dict(zip(unique_values, positions, strict=True))
+    return tuple(np.asarray([mapping[value] for value in grid]) for grid in exact_grids)
 
 
 def _match_indices(old_data, new_data):
