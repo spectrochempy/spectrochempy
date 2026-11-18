@@ -155,8 +155,9 @@ Full changelog guide:
 For long-running projects implemented across multiple pull requests, avoid
 adding one changelog entry per intermediate refactoring step.
 
-Detailed implementation history belongs in audit notes, not in the release
-changelog.
+Keep implementation details in task records and PR discussions. Use a shared
+audit or design document for conclusions that other maintainers need beyond
+the individual task. A separate audit file is not required for each PR.
 
 Developer changelog entries should summarize meaningful release-level outcomes
 rather than individual implementation steps.
@@ -192,7 +193,8 @@ developers, contributors, or maintainers.
 
 As a rule of thumb:
 
-* audit files record implementation history;
+* task records and PR discussions record implementation history;
+* shared audits and design documents preserve reusable conclusions;
 * changelog entries record release-level outcomes.
 
 ---

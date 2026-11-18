@@ -141,6 +141,11 @@ If tests are missing or insufficient, report what should be added — but do
 
 ## Deliverable
 
+Return the report to the parent session for the task record. A review does not
+require a separate maintainer file. Preserve the findings, validation, verdict
+and exact reviewed revision; promote reusable conclusions into an existing
+shared document only when they warrant it.
+
 Produce a review report with the following structure:
 
 ### Summary

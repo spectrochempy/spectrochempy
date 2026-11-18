@@ -105,9 +105,10 @@ hardcoded.
   (`tempfile.TemporaryDirectory()`) or the pytest `tmp_path` fixture.
 * Remove scratch space in the task that created it, and report what was left
   behind.
-* Keeping a result and committing it are different acts: a report or a note
-  worth keeping belongs in a repository, while a build tree, an environment or
-  a dataset may stay in a persistent non-versioned location.
+* Keep execution records in the task's working record. Shared decisions and
+  reusable audit evidence belong in maintained documents; retaining a result
+  does not by itself require a repository file or a commit. A build tree,
+  environment or dataset may stay in a persistent non-versioned location.
 
 ---
 
