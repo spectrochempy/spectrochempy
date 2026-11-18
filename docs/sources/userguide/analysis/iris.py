@@ -50,13 +50,14 @@
 # distributed over $q$.
 #
 # Note that this model, and therefore any inversion of it, assumes that
-# every contribution follows the same monotonic law. Indeed, without a
-# priori or external knowledge, the spectra only reveal the net change: when
-# some species appear while others disappear in the same spectral region,
-# only the balance is accessible, much like judging inflow and outflow from
-# the water level alone. Intermediates that rise and fall cannot be
-# described either. IRIS further constrains the distribution to be
-# non-negative.
+# every contribution follows the same law $k(p, q)$. With a monotonic law,
+# such as the built-in kernels, and without a priori or external knowledge,
+# the spectra only reveal the net change: when some species appear while
+# others disappear in the same spectral region, only the balance is
+# accessible, much like judging inflow and outflow from the water level
+# alone. Intermediates that rise and fall cannot be described by such a law
+# either; describing them requires a user-supplied kernel. IRIS further
+# constrains the distribution to be non-negative.
 
 # %% [markdown]
 # ## Response laws
@@ -66,9 +67,10 @@
 # * **First-order kinetics** (`"reactant-first-order"`,
 #   `"product-first-order"`): $p$ is the time and $q = \ln k$, the logarithm
 #   of the rate constant.
-# * **Adsorption equilibrium** (`"langmuir"`, `"ca"` for the condensation
-#   approximation): $p$ is the pressure and $q$ the reduced adsorption free
-#   energy $\Delta_{ads}G^0/RT$.
+# * **Adsorption equilibrium**: $p$ is the pressure. For the Langmuir
+#   isotherm (`"langmuir"`), $q$ is the reduced adsorption free energy
+#   $\Delta_{ads}G^0/RT$; for the condensation approximation (`"ca"`), $q$
+#   is the threshold pressure above which a site is filled.
 # * **Diffusion uptake** (`"diffusion"`): $p$ is the time and $q$ the
 #   diffusion rate constant $\tau^{-1}$.
 # * **Pulsed-field-gradient NMR** (`"stejskal-tanner"`): $p$ is the
@@ -383,9 +385,10 @@ _ = adaptive.plot_merit(index=selected_index)
 # * repeat the fit for neighboring values of $\lambda$ and grids: features
 #   that change with these choices come from the inversion, not from the
 #   sample;
-# * look at the shape: a spot elongated or curved along $q$, like the arc of
-#   the aluminum sites, means that the band shifts as the concentration
-#   changes;
+# * look at the shape: a spot elongated along $q$ at a fixed wavenumber
+#   reflects a distribution of affinities, whereas a tilted or curved spot,
+#   like the arc of the aluminum sites, means that the band shifts as the
+#   concentration changes;
 # * use chemical knowledge and complementary experiments to decide between
 #   heterogeneity and non-ideality.
 #
