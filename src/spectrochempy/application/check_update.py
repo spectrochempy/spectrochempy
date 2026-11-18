@@ -3,217 +3,291 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Check SpectroChemPy updates."""
+"""Check Core and installed plugin releases and deliver a consolidated notice."""
 
+import argparse
+import hashlib
+import json
+import math
+import sys
+import tempfile
 import time
 from contextlib import suppress
 from datetime import date
-from datetime import timedelta
+from importlib import metadata
 from os import environ
 from pathlib import Path
 from warnings import warn
 
 import requests
-from IPython import get_ipython
-from IPython.display import Javascript
-from IPython.display import display
+from packaging.specifiers import InvalidSpecifier
+from packaging.specifiers import SpecifierSet
+from packaging.utils import InvalidName
+from packaging.utils import InvalidSdistFilename
+from packaging.utils import InvalidWheelFilename
+from packaging.utils import canonicalize_name
+from packaging.utils import parse_sdist_filename
+from packaging.utils import parse_wheel_filename
 from packaging.version import InvalidVersion
 from packaging.version import Version
 
+from spectrochempy.application._notifications import _notify_desktop
+
 __all__ = ["check_update"]
 
-PYPI_JSON_URL = "https://pypi.org/pypi/spectrochempy/json"
+PYPI_INDEX_URL = "https://pypi.org/simple/{package}/"
+_PERIODS = {"day": 86400, "week": 7 * 86400, "month": 30 * 86400}
 
 
-# --------------------------------------------------------------------------------------
-# Exception for this module
-# --------------------------------------------------------------------------------------
 class NeedsUpdateWarning(UserWarning):
-    """Warning raised when Spectrochempy needs update."""
+    """Warning emitted when desktop notification delivery is unavailable."""
 
 
-# --------------------------------------------------------------------------------------
-# Pypi version checking
-# --------------------------------------------------------------------------------------
 def _select_latest_release(releases, current_version):
-    """Select the newest usable PyPI release for the installed version channel."""
+    """Select the latest non-yanked release for the current channel and Python."""
     current = Version(str(current_version))
+    python = ".".join(map(str, sys.version_info[:3]))
     candidates = []
-
     for raw_version, files in releases.items():
         try:
             candidate = Version(raw_version)
         except InvalidVersion:
             continue
-
-        usable_files = [item for item in files if not item.get("yanked", False)]
-        if not usable_files or candidate.is_devrelease:
+        if candidate.is_devrelease or (
+            candidate.is_prerelease and not current.is_prerelease
+        ):
             continue
-        if not current.is_prerelease and candidate.is_prerelease:
-            continue
-
-        candidates.append((candidate, usable_files))
-
+        usable = []
+        for item in files:
+            if item.get("yanked", False):
+                continue
+            try:
+                if not SpecifierSet(item.get("requires-python") or "").contains(python):
+                    continue
+            except InvalidSpecifier:
+                continue
+            usable.append(item)
+        if usable:
+            candidates.append((candidate, usable))
     if not candidates:
         return None
-
     version, files = max(candidates, key=lambda item: item[0])
-    release_date = min(
-        date.fromisoformat(item["upload_time_iso_8601"].split("T")[0]) for item in files
-    )
-    return version, release_date
+    dates = [
+        date.fromisoformat(item["upload_time_iso_8601"].split("T")[0])
+        for item in files
+        if item.get("upload_time_iso_8601")
+    ]
+    return version, min(dates) if dates else None
 
 
-def _get_pypi_version(current_version):
-    """Get the newest applicable PyPI version for the installed channel."""
-
-    connection_timeout = 120  # seconds
-    start_time = time.time()
-    while True:
-        try:
-            response = requests.get(PYPI_JSON_URL, timeout=connection_timeout)
-            if response.status_code != 200:  # pragma: no cover
-                return None
-            break  # exit the while loop in case of success
-
-        except (
-            ConnectionError,
-            requests.exceptions.RequestException,
-        ):  # pragma: no cover
-            if time.time() > start_time + connection_timeout:
-                # 'Unable to get updates after {} seconds of ConnectionErrors'
-                return None
-            time.sleep(1)  # attempting once every second
-
-    return _select_latest_release(response.json()["releases"], current_version)
-
-
-# --------------------------------------------------------------------------------------
-# Display update message
-# --------------------------------------------------------------------------------------
-def _display_needs_update_message(frequency):
-    fil = Path.home() / ".scpy_needs_update"
-    message = None
-    if fil.exists():
-        with suppress(Exception) as e:
+def _get_pypi_version(current_version, package="spectrochempy", timeout=5):
+    """Read the public PyPI Simple JSON API with one bounded request."""
+    try:
+        name = canonicalize_name(package, validate=True)
+        response = requests.get(
+            PYPI_INDEX_URL.format(package=name),
+            headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            timeout=timeout,
+        )
+        if response.status_code != 200:
+            return None
+        releases = {}
+        for item in response.json()["files"]:
+            filename = item["filename"]
             try:
-                msg = fil.read_text()
-                check_date, status, message = msg.split("%%")
-                if status == "NOT_YET_DISPLAYED":  # pragma: no cover
-                    fil.write_text(
-                        f"{date.isoformat(date.today())}%%DISPLAYED%%{message}",
-                    )
+                if filename.endswith(".whl"):
+                    file_package, version, _, _ = parse_wheel_filename(filename)
                 else:
-                    # don't notice again if the message was already displayed
-                    # in the n last days
-                    n_days = {"day": 1, "week": 7, "month": 30}[frequency]
-                    last_view_delay = date.today() - date.fromisoformat(check_date)
-                    if last_view_delay < timedelta(days=n_days):
-                        message = None
-            except Exception as e:
-                warn(
-                    f"An error occurred while reading the update message: {e}",
-                    category=NeedsUpdateWarning,
-                    stacklevel=2,
-                )
-
-    if message:  # pragma: no cover
-        # Clean message for JavaScript
-        clean_message = message.replace("\n", "<br>").replace("'", "\\'")
-        if (
-            get_ipython().__class__.__name__ == "ZMQInteractiveShell"
-        ):  # Jupyter notebook or qtconsole
-            js_code = f"""
-                (() => {{
-                    // Remove existing notification if any
-                    const existing = document.getElementById('scp-update-notification');
-                    if (existing) existing.remove();
-                    // Create new notification
-                    const notification = document.createElement('div');
-                    notification.id = 'scp-update-notification';
-                    notification.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: white;
-                        padding: 15px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                        z-index: 9999;
-                        max-width: 400px;
-                        font-family: -apple-system, system-ui, sans-serif;
-                    `;
-                    notification.innerHTML = `
-                        <div style="margin-bottom: 10px;">
-                            <strong style="color: #1a73e8;">SpectroChemPy Update</strong>
-                        </div>
-                        <div style="margin-bottom: 15px; color: #333;">
-                            {clean_message}
-                        </div>
-                        <button onclick="this.parentElement.remove()"
-                                style="
-                                    background: #1a73e8;
-                                    color: white;
-                                    border: none;
-                                    padding: 6px 12px;
-                                    border-radius: 4px;
-                                    cursor: pointer;
-                                    float: right;
-                                "
-                        >Dismiss</button>
-                    `;
-                    document.body.appendChild(notification);
-                    // Auto-hide after 10 seconds
-                    setTimeout(() => {{
-                        if (notification.parentElement) {{
-                            notification.remove();
-                        }}
-                    }}, 10000);
-                }})();
-            """
-            try:
-                display(Javascript(js_code))
-            except Exception as e:
-                warn(f"Failed to display notification: {e}", stacklevel=2)
-        else:
-            warn(message, category=NeedsUpdateWarning, stacklevel=2)
-
-
-# ======================================================================================
-# Update checking
-# ======================================================================================
-def check_update(version, frequency):
-    old = Version(version)
-    res = _get_pypi_version(old)
-    if res is not None:
-        version, _ = res
-    else:  # pragma: no cover
-        # probably a ConnectionError
-        return
-
-    new_release = None
-    if version > old:  # pragma: no cover
-        new_version = version.public
-        if not version.is_devrelease:
-            new_release = new_version
-
-    fil = Path.home() / ".scpy_needs_update"
-    if new_release and environ.get("DOC_BUILDING") is None:  # pragma: no cover
-        if not fil.exists():  # This new version is checked for the first time
-            # write the information: date of writing, status, message
-            fil.write_text(
-                f"{date.isoformat(date.today())}%%NOT_YET_DISPLAYED%%"
-                f"SpectroChemPy v{new_release} is available.\n"
-                f"{' ' * 11}Please consider updating, using pip or conda, for bug fixes "
-                f"and new features!\n",
+                    file_package, version = parse_sdist_filename(filename)
+            except (InvalidWheelFilename, InvalidSdistFilename):
+                continue
+            if file_package != name:
+                continue
+            releases.setdefault(str(version), []).append(
+                {**item, "upload_time_iso_8601": item.get("upload-time")}
             )
-    elif fil.exists():
-        fil.unlink()
+        return _select_latest_release(releases, current_version)
+    except (
+        requests.exceptions.RequestException,
+        ValueError,
+        KeyError,
+        TypeError,
+        AttributeError,
+    ):
+        return None
 
-    # finally display the message if necessary every day, week or month
-    _display_needs_update_message(frequency)
+
+def _installed_packages(version):
+    packages = {"spectrochempy": str(Version(version))}
+    for ep in metadata.entry_points(group="spectrochempy.plugins"):
+        dist = ep.dist
+        if dist is None:
+            continue
+        try:
+            if dist.read_text("direct_url.json"):
+                continue
+            name = canonicalize_name(dist.metadata["Name"], validate=True)
+            installed = Version(dist.version)
+        except (OSError, ValueError, TypeError, KeyError, InvalidName):
+            continue
+        if name != "spectrochempy":
+            packages[name] = str(installed)
+    return packages
 
 
-# ======================================================================================
+def _cache_path():
+    config = Path(environ.get("SCP_CONFIG_HOME", Path.home() / ".spectrochempy/config"))
+    environment = f"{sys.prefix}\n{sys.executable}"
+    key = hashlib.sha256(environment.encode()).hexdigest()[:16]
+    return config / "updates" / f"{key}.json"
+
+
+def _load_cache(path, now):
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if document["schema"] != 1:
+            return {}
+        packages = document["packages"]
+        valid = {}
+        for name, record in packages.items():
+            try:
+                Version(record["installed"])
+                if record.get("latest") is not None:
+                    Version(record["latest"])
+                if record["status"] not in ("current", "update", "unavailable"):
+                    continue
+                if record["status"] != "unavailable":
+                    latest = Version(record["latest"])
+                    record["status"] = (
+                        "update" if latest > Version(record["installed"]) else "current"
+                    )
+                for key in ("last_attempt", "last_checked", "last_notified"):
+                    value = record.get(key, 0)
+                    if not isinstance(value, (float, int)) or not math.isfinite(value):
+                        raise ValueError
+                    if not 0 <= value <= now:
+                        raise ValueError
+                valid[name] = record
+            except (KeyError, TypeError, ValueError):
+                continue
+        return valid
+    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+        return {}
+
+
+def _save_cache(path, packages):
+    temporary = None
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, delete=False
+        ) as stream:
+            temporary = Path(stream.name)
+            json.dump({"schema": 1, "packages": packages}, stream)
+        temporary.replace(path)
+    except OSError:
+        pass
+    finally:
+        if temporary is not None:
+            with suppress(OSError):
+                temporary.unlink(missing_ok=True)
+
+
+def _announce(message, mode):
+    if mode == "system" and _notify_desktop(message):
+        return
+    warn(message, category=NeedsUpdateWarning, stacklevel=3)
+
+
+def _check_packages(version, frequency, mode="system", *, force=False, notify=True):
+    if (
+        environ.get("DOC_BUILDING") is not None
+        or environ.get("SCP_CHECK_UPDATES", "1").lower() in ("0", "false", "off", "no")
+        or frequency == "never"
+        or mode == "off"
+    ):
+        return {}
+    period = _PERIODS[frequency]
+    now = time.time()
+    path = _cache_path()
+    previous = _load_cache(path, now)
+    packages = _installed_packages(version)
+    records = {}
+    pending = []
+    deadline = time.monotonic() + 15
+    for name, installed in packages.items():
+        record = previous.get(name, {})
+        delay = 3600 if record.get("status") == "unavailable" else period
+        due = (
+            force
+            or record.get("installed") != installed
+            or now - record.get("last_attempt", 0) >= delay
+        )
+        if due:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                records[name] = {"installed": installed, "status": "deferred"}
+                continue
+            result = _get_pypi_version(installed, name, timeout=min(5, remaining))
+            record = {
+                **record,
+                "installed": installed,
+                "last_attempt": now,
+                "status": "unavailable",
+            }
+            if result is not None:
+                latest, _ = result
+                record.update(
+                    latest=str(latest),
+                    last_checked=now,
+                    status="update" if latest > Version(installed) else "current",
+                )
+        records[name] = record
+        if record.get("status") != "update":
+            continue
+        if (
+            record.get("notified_version") != record["latest"]
+            or now - record.get("last_notified", 0) >= period
+        ):
+            pending.append(name)
+    if pending and notify:
+        lines = ["Updates available:"]
+        lines.extend(
+            f"{name}: {records[name]['installed']} → {records[name]['latest']}"
+            for name in pending
+        )
+        lines.append("Use your package manager to review and install updates.")
+        _announce("\n".join(lines), mode)
+        for name in pending:
+            records[name].update(
+                last_notified=now, notified_version=records[name]["latest"]
+            )
+    _save_cache(path, records)
+    return records
+
+
+def check_update(version, frequency, notification_mode="system"):
+    """Check Core and installed plugins, respecting the configured interval."""
+    _check_packages(version, frequency, notification_mode)
+
+
+def _main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--notify", action="store_true", help="Also send a desktop notification"
+    )
+    arguments = parser.parse_args()
+    from spectrochempy.application.info import version
+
+    records = _check_packages(version, "week", force=True, notify=arguments.notify)
+    for name, record in records.items():
+        latest = (
+            record.get("latest") if record["status"] in ("current", "update") else "?"
+        )
+        sys.stdout.write(
+            f"{name}: {record['installed']} -> {latest} ({record['status']})\n"
+        )
+
+
 if __name__ == "__main__":
-    """ """
+    _main()

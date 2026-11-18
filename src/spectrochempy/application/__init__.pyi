@@ -8,6 +8,7 @@
 # ruff: noqa
 
 __all__ = [
+    "_notifications",
     "_preferences",
     "application",
     "check_update",
@@ -21,6 +22,7 @@ __all__ = [
     "testdata",
 ]
 
+from . import _notifications
 from . import _preferences
 from . import application
 from . import check_update
