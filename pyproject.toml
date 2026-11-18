@@ -197,6 +197,8 @@ select = [
 exclude = ["~*"] # Exclude files and directories. "tests/**"
 
 [tool.ruff.lint.per-file-ignores]
+"src/spectrochempy/application/_notifications.py" = ["S603"]
+"src/spectrochempy/application/check_update.py" = ["PLC0415"]
 "docs/sources/gettingstarted/*" = [
   "B018",
 ] # accept "useless expression" in *.ipynb or py:percent files.

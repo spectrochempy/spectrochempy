@@ -625,9 +625,12 @@ def _start_update_check():
     from .info import version
 
     check_update_frequency = app.general_preferences.check_update_frequency
+    notification_mode = app.general_preferences.update_notifications
+    if check_update_frequency == "never" or notification_mode == "off":
+        return
     DISPLAY_UPDATE = threading.Thread(
         target=check_update,
-        args=(version, check_update_frequency),
+        args=(version, check_update_frequency, notification_mode),
         name="spectrochempy-update-check",
         daemon=True,
     )
