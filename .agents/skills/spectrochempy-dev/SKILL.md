@@ -2,7 +2,7 @@
 name: spectrochempy-dev
 description: >-
   Develop, refactor, or fix bugs in SpectroChemPy. Use for any code change:
-  conventions, testing, pre-commit, audit notes, and behavior preservation.
+  conventions, testing, pre-commit, shared decisions, and behavior preservation.
 metadata:
   audience: maintainer
   workflow: development
@@ -112,10 +112,10 @@ with tempfile.TemporaryDirectory(prefix="opencode-validation-") as tmp:
   free space, and pass `dir=` to place the work on a local disk.
 * Never hardcode a temporary path in repository code: use
   `tempfile.TemporaryDirectory()` or the pytest `tmp_path` fixture.
-* Keeping a result and committing it are different acts. A report or a note
-  worth keeping belongs in a repository; a build tree, an environment or a
-  dataset may stay in a persistent non-versioned location. Say which is which
-  when reporting, and where you left anything.
+* Keep execution records in the task's working record. Shared decisions and
+  reusable audit evidence belong in maintained documents; retaining a result
+  does not by itself require a repository file or a commit. Say where retained
+  results, build trees, environments or datasets are available.
 
 ---
 
@@ -283,61 +283,38 @@ Avoid combining multiple migration phases in a single PR.
 
 ---
 
-## Audit Notes
+## Task Records and Shared Maintainer Documents
 
-Create or update an audit note in `../spectrochempy_maintainer/notes/audits/`
-when the task involves multi-PR coordination, architectural decisions, or
-durable knowledge worth preserving.
+Keep investigation, commands, validation results and limits, review findings,
+and delivery status in the task's working record under the workspace workflow.
+For a standalone checkout, use the local handoff or PR discussion. A routine
+PR, review round, push, or merge does not require a maintainer Markdown file.
 
-A small diff or narrowly scoped PR is **not** by itself a reason to skip the
-maintainer note. Durable decisions include, for example:
+Consult existing maintainer decisions before substantial work when the private
+repository is available. Update its shared corpus only for information another
+maintainer needs to understand, decide, or resume a topic: a durable API or
+architecture decision, an important scientific qualification, or a reusable
+campaign synthesis. Prefer the existing RFC, architecture reference, or topic
+audit over a new report. Multi-PR coordination alone does not require a note.
 
-* retaining, deprecating, or deliberately not changing a public API;
-* reader relationships, format routing, or serialization policy;
-* architectural or compatibility boundaries;
-* known limitations deliberately deferred out of scope;
-* rationale that a future maintainer would otherwise have to reconstruct from
-  closed issues or PR discussions.
+Shared conclusions must include the evidence and limitations needed to assess
+them without access to local task tracking. Keep product changes and their
+validation understandable from the public code, tests, documentation and PR.
+If a needed shared update cannot be made, record that pending work explicitly.
 
-Skip the audit note only when the change is both locally scoped **and**
-introduces no durable project decision worth recovering later.
+### Delivery Reconciliation
 
-For multi-PR work, or whenever such a durable decision is made, update or
-create the relevant audit note before considering the task complete.
+After an authorized push, verify the remote branch and PR head, CI-relevant
+labels, and local worktree status; update the task record. After a merge,
+verify it on GitHub, fetch the official product `master`, and record the
+delivered outcome and any explicit successors before closing the task.
 
-If `../spectrochempy_maintainer` is not cloned, skip audit notes and report it.
-
-Hygiene rules:
-* Prefer editing an existing document over creating a new one.
-* Before creating a new note, check for existing audit, roadmap, RFC, or
-  architecture note on the same topic.
-* Keep `roadmap/current-roadmap.md` short.
-* Archive notes in `../spectrochempy_maintainer/archive/audits/` once they become
-  primarily historical.
-
-### Maintainer Reconciliation After Push or Merge
-
-For maintainer-directed work, reconciliation is mandatory after every push that
-updates a PR and again after its merge. Do not treat a product PR as complete
-while its maintainer records are only local, staged, or on an unrelated branch.
-
-After a push, verify the remote branch, PR head, CI-relevant labels, and local
-worktree status. Update the associated Bead and run
-`bd -C ../spectrochempy_maintainer backup sync` when Beads data changed.
-
-After a merge, verify the merge on GitHub, fetch the official product `master`,
-then reconcile `spectrochempy_maintainer` against the merged result:
-
-1. update and publish the relevant audit, plan, or decision note on maintainer
-   `master` (unless the maintainer explicitly defers it);
-2. review the applicable README/index, task status, roadmap, and archive
-   placement so active, completed, and deferred work agree;
-3. update/close the associated Bead and synchronize its backup;
-4. inspect every task-owned worktree and remove clean merged worktrees;
-5. leave no task-owned notes staged locally or only pushed to a side branch.
-
-If a reconciliation item is intentionally deferred, record the reason in the
-maintainer note or Bead before reporting the merge as complete.
+Update maintainer documents and their indexes only when shared content changes.
+Do not create a reconciliation report or duplicate task statuses in an index.
+Report any required shared update still awaiting authorized publication.
+Inspect task-owned worktrees before removing clean merged ones. Preserve
+unrelated work and existing audit history. Commits and publication still
+require the applicable authorization.
 
 ---
 
@@ -432,7 +409,8 @@ Before reporting completion:
 
 1. Execute targeted tests and report their results.
 2. No broken imports or circular dependencies.
-3. Audit note updated if applicable (see Audit Notes section).
+3. Task record updated; shared documents updated when warranted (see Task
+   Records and Shared Maintainer Documents).
 4. Self-review performed and issues fixed.
 5. If review was requested or merge delegated, complete the independent review
    loop and record the verdict for the exact revision. If blocked, report the

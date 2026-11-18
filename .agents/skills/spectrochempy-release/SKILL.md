@@ -30,7 +30,7 @@ Read `docs/sources/whatsnew/changelog.rst`:
 
 * All entries since the last release are present.
 * Entries explain what changed and why it matters.
-* No implementation-journal style entries (those belong in audit notes).
+* No implementation-journal style entries (those belong in task records).
 * No duplicate or near-duplicate entries for related work.
 
 If `latest.rst` is stale, regenerate it by running the project's changelog
