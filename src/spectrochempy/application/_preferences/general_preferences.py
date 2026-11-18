@@ -85,9 +85,15 @@ class GeneralPreferences(MetaConfigurable):
     # check_update_frequency -------------------------------------------------------------
     # by default set it to week
     check_update_frequency = tr.Enum(
-        ["day", "week", "month"],
+        ["day", "week", "month", "never"],
         default_value="week",
-        help="Frequency of checking for update",
+        help="Interval between update checks and reminders; choose never to disable checks",
+    ).tag(config=True)
+
+    update_notifications = tr.Enum(
+        ["system", "terminal", "off"],
+        default_value="system",
+        help="Update notification delivery: native desktop, text warning, or disabled",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------

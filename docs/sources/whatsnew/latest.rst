@@ -15,6 +15,10 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Group update announcements for SpectroChemPy and installed plugins into native
+  desktop notifications, with a text fallback and configurable delivery. Cache
+  checks per Python environment and offer a manual version-status command. (:pr:`1900`)
+
 - Add an IRIS tutorial covering the Langmuir kernel, regularization and
   interpretation of the CO adsorption example. (:pr:`1892`)
 
@@ -32,6 +36,11 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+
+- Renew update-notification reminder dates, refresh obsolete announcements,
+  tolerate unavailable PyPI responses and unwritable caches, and skip checks
+  during documentation builds. Use the PyPI Simple JSON API and filter releases
+  by Python requirements, release channel and yanked status. (:pr:`1900`)
 
 - Reject ambiguous inner alignment when coordinate rounding would merge
   samples within one dataset. (:pr:`1894`)
