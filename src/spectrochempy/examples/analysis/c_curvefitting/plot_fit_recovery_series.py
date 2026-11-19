@@ -53,4 +53,11 @@ _ = scp.plot_multiple(
 _ = result.residuals.plot(
     method="lines", colorbar=True, title="Residuals across all delays"
 )
-scp.show()
+
+# %%
+# Uncomment the following line to display all figures when running the script
+# directly with Python.
+
+# %%
+
+# scp.show()
