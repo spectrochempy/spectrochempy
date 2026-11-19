@@ -244,8 +244,8 @@ class Baseline(AnalysisConfigurable):
         "belong to the baseline. Feature ranges are defined as a list of 2 "
         "numerical values (start, end). Single values are internally converted to "
         "a pair (start=value, end=start). The limits of the spectra are "
-        "automatically added during the fit process unless the `remove_limit` "
-        "parameter is `True`.",
+        "automatically added during the fit process unless the `include_limits` "
+        "parameter is `False`.",
     ).tag(config=True)
 
     include_limits = tr.Bool(
@@ -1111,10 +1111,16 @@ def _resolve_baseline_ranges(ranges, kwargs):
 def _fitted_baseline(dataset, ranges, kwargs):
     """Return one fitted `Baseline` processor for a public wrapper call."""
     ranges = _resolve_baseline_ranges(ranges, kwargs)
-    blc = Baseline()
+    constructor = {
+        key: kwargs.pop(key) for key in ("log_level", "warm_start") if key in kwargs
+    }
+    blc = Baseline(**constructor)
     # by default, model is 'polynomial' and order is 1.
     # kwargs can overwrite these default values
+    configurable = set(blc.traits(config=True)) | {"breakpoints"}
     for key, value in kwargs.items():
+        if key not in configurable:
+            raise TypeError(f"Unexpected baseline keyword argument {key!r}")
         setattr(blc, key, value)
 
     # if model is 'polynomial' and no ranges is provided, we use the features limits
