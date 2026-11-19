@@ -27,7 +27,14 @@ channels:
     - defaults
 
 dependencies:
+    - pip
 {{ dependencies }}
 {%- if optional_dependencies %}
 {{ optional_dependencies }}
+{%- endif %}
+{%- if pip_dependencies %}
+    - pip:
+{%- for dependency in pip_dependencies %}
+        - {{ dependency }}
+{%- endfor %}
 {%- endif %}
