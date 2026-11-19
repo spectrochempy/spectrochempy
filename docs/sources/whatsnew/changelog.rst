@@ -21,7 +21,7 @@ New Features
 
 - Fit spectral series globally with Voigt, pseudo-Voigt, recovery and decay
   profiles or user-provided axis functions. Share bounded or fixed parameters
-  between components and axes with ``Optimize(shared_parameters=...)``.
+  between components and axes with ``Optimize(shared_parameters=...)``. (:pr:`1905`)
 
 - Group update announcements for SpectroChemPy and installed plugins into native
   desktop notifications, with a text fallback and configurable delivery. Cache
