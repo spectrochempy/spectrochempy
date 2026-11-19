@@ -170,6 +170,12 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
         The despike dataset
 
     """
+    if method not in ("katsumoto", "whitaker", "neighbors"):
+        raise ValueError(
+            f"Unknown despike method {method!r}. "
+            "Expected one of: katsumoto, whitaker, neighbors."
+        )
+
     if method == "neighbors":
         return _despike_neighbors(dataset, delta, dim)
 

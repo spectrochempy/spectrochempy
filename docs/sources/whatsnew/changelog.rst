@@ -23,6 +23,9 @@ New Features
   profiles or user-provided axis functions. Share bounded or fixed parameters
   between components and axes with ``Optimize(shared_parameters=...)``. (:pr:`1905`)
 
+- Accept string color normalizations (``linear``, ``log``, ``symlog``,
+  ``power`` and ``centered``) and their parameters in 2D plots. (:pr:`1902`)
+
 - Group update announcements for SpectroChemPy and installed plugins into native
   desktop notifications, with a text fallback and configurable delivery. Cache
   checks per Python environment and offer a manual version-status command. (:pr:`1900`)
@@ -47,6 +50,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
+- Reject unknown despike methods and baseline wrapper keywords instead of
+  silently ignoring them; correct filter defaults and baseline range help. (:pr:`1904`)
+
+- Round nonlinear coordinates per value so small logarithmically spaced
+  coordinates remain nonzero, while preserving linear-axis rounding. (:pr:`1903`)
 
 - Renew update-notification reminder dates, refresh obsolete announcements,
   tolerate unavailable PyPI responses and unwritable caches, and skip checks

@@ -39,6 +39,7 @@ from spectrochempy.plotting._projections import _panel_axes
 from spectrochempy.plotting._projections import _prepare_projections
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_2d_colormap
+from spectrochempy.plotting._style import resolve_2d_norm
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.plotting.dispatcher import plot_dataset as _plot_dataset
@@ -1210,6 +1211,18 @@ def plot_image(dataset, **kwargs):
         If false, hold the current figure and ax until a new plot is performed.
     color or c : color, optional, default: auto
         color of the line.
+    norm : str or matplotlib.colors.Normalize, optional
+        Color normalization: 'linear', 'log', 'symlog', 'power' or 'centered',
+        or a Matplotlib Normalize instance. Named norms retain automatic
+        sequential/diverging colormap selection. Normalize instances retain
+        their existing behavior. Log normalization masks nonpositive data.
+        Also accepted by contour and surface plots.
+    gamma, linthresh, vcenter, halfrange : float, optional
+        Parameters for named norms: 'power' uses gamma (default 1), 'symlog'
+        uses linthresh (default 1), and 'centered' uses vcenter (default 0)
+        and halfrange (default inferred from data). Other names reject these
+        parameters. Use vmin/vmax for 'linear', 'log', 'symlog' and 'power';
+        'centered' requires halfrange instead of vmin/vmax.
     colorbar : bool, optional, default: True
         Show colorbar (2D plots only).
     commands : str,
@@ -1923,12 +1936,23 @@ def plot_2D(dataset, method=None, **kwargs):
                 method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
             )
             # Style context is already active from the outer wrapper - no need for nested context
+            named_norm = isinstance(norm, str)
+            normalization = resolve_2d_norm(
+                norm,
+                vmin=vmin,
+                vmax=vmax,
+                **{
+                    key: kwargs[key]
+                    for key in ("gamma", "linthresh", "vcenter", "halfrange")
+                    if key in kwargs
+                },
+            )
             cmap, norm = resolve_2d_colormap(
                 zdata,
                 cmap=cmap,
                 cmap_mode=cmap_mode,
                 center=center,
-                norm=norm,
+                norm=None if named_norm else normalization,
                 vmin=vmin,
                 vmax=vmax,
                 contrast_safe=contrast_safe,
@@ -1938,6 +1962,9 @@ def plot_2D(dataset, method=None, **kwargs):
                 diverging_margin=diverging_margin,
                 prefs=prefs,
             )
+            if named_norm:
+                normalization.autoscale_None(np.ma.masked_invalid(zdata))
+                norm = normalization
             if percentile is not None:
                 norm = Normalize(vmin=vmin, vmax=vmax)
         else:

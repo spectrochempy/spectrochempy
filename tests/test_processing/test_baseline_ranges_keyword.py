@@ -69,3 +69,51 @@ def test_duplicate_ranges_specification_is_rejected(function):
             [3600.0, 3400.0],
             ranges=[[1400.0, 1100.0]],
         )
+
+
+@pytest.mark.parametrize("function", ["basc", "get_baseline"])
+@pytest.mark.parametrize("keyword", ["lambda_", "dim", "fit", "_fitted"])
+@pytest.mark.parametrize("entrypoint", ["function", "method"])
+def test_baseline_rejects_unknown_keywords(function, keyword, entrypoint):
+    dataset = _curved_dataset()
+    before = dataset.data.copy()
+    call = (
+        getattr(scp, function)
+        if entrypoint == "function"
+        else getattr(dataset, function)
+    )
+    args = (dataset,) if entrypoint == "function" else ()
+    with pytest.raises(TypeError, match=keyword):
+        call(*args, model="asls", **{keyword: 1e2})
+    np.testing.assert_array_equal(dataset.data, before)
+
+
+def test_baseline_accepts_documented_breakpoints():
+    dataset = _curved_dataset()
+    processor = scp.Baseline(model="detrend", order=1)
+    processor.breakpoints = [60]
+    processor.fit(dataset)
+    result = dataset.get_baseline(model="detrend", order=1, breakpoints=[60])
+    np.testing.assert_allclose(result.data, processor.baseline.data)
+
+
+@pytest.mark.parametrize("function", ["basc", "get_baseline"])
+@pytest.mark.parametrize("parameters", [{"log_level": "ERROR"}, {"warm_start": True}])
+@pytest.mark.parametrize("entrypoint", ["function", "method"])
+def test_baseline_accepts_constructor_settings(function, parameters, entrypoint):
+    dataset = _curved_dataset()
+    expected = getattr(scp, function)(dataset)
+    if entrypoint == "function":
+        result = getattr(scp, function)(dataset, **parameters)
+    else:
+        result = getattr(dataset, function)(**parameters)
+    np.testing.assert_allclose(result.data, expected.data)
+
+
+def test_baseline_passes_constructor_settings_to_processor():
+    from spectrochempy.processing.baselineprocessing.baselineprocessing import (
+        _fitted_baseline,
+    )
+
+    processor = _fitted_baseline(_curved_dataset(), (), {"warm_start": True})
+    assert processor._warm_start is True
