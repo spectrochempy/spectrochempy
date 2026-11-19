@@ -113,7 +113,9 @@ def profile_values(values, axis):
         if not 0 <= parameters["ratio"] <= 1:
             raise ValueError("Voigt ratio must lie between zero and one")
         width, ratio = parameters["width"], parameters["ratio"]
-        offsets = values - parameters["center"]
+        offsets = np.asarray(
+            values.astype(np.longdouble) - parameters["center"], dtype=float
+        )
         if model == "voigt":
             sigma = ratio * width / np.sqrt(8 * np.log(2))
             gamma = (1 - ratio) * width / 2

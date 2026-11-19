@@ -324,7 +324,8 @@ def test_failed_refit_invalidates_general_fit():
         _ = opt.result
 
 
-def test_shared_parameter_across_axes_with_different_units():
+@pytest.mark.parametrize("quantity", [False, True])
+def test_shared_parameter_across_axes_with_different_units(quantity):
     def decay(t, tau):
         return np.exp(-t / tau)
 
@@ -364,10 +365,15 @@ def test_shared_parameter_across_axes_with_different_units():
             },
         },
     }
+    time = (
+        {"value": 2 * scp.ur.s, "bounds": (0.1 * scp.ur.s, 10 * scp.ur.s)}
+        if quantity
+        else {"value": 2, "bounds": (0.1, 10), "unit": "s"}
+    )
     fit = scp.Optimize(
         peaks=[peak],
         shared_parameters={
-            "time": {"value": 2, "bounds": (0.1, 10), "unit": "s"},
+            "time": time,
         },
     ).fit(data)
     assert fit.result.diagnostics["n_varying_parameters"] == 1
@@ -431,3 +437,85 @@ def test_shared_dimensionful_coefficient_requires_intensity_units():
                 "amplitude": {"value": 1, "unit": "Hz"},
             },
         ).fit(grid)
+
+
+def test_shared_callback_quantity_infers_unit_without_declaration():
+    grid = _grid()
+    truth = 2 * _stretched_recovery(grid.y.data[:, None], 3, 1)
+    truth = truth * _gaussian(grid.x.data[None, :], 0, 2)
+    grid.data = truth
+    peak = {
+        "height": {"value": 2, "fixed": True},
+        "axes": {
+            "x": {
+                "model": "gaussian",
+                "center": {"value": 0, "fixed": True},
+                "width": {"value": 2, "fixed": True},
+            },
+            "y": {
+                "model": _stretched_recovery,
+                "parameters": {
+                    "tau": {"shared": "time"},
+                    "beta": {"value": 1, "fixed": True},
+                },
+            },
+        },
+    }
+    fit = scp.Optimize(
+        peaks=[peak],
+        shared_parameters={
+            "time": {"value": 2 * scp.ur.s, "bounds": (0.1 * scp.ur.s, 10 * scp.ur.s)},
+        },
+    ).fit(grid)
+    assert fit.result.parameter_units == (scp.ur.s,)
+    assert_allclose(fit.predict().data, truth, atol=1e-8)
+    assert_allclose(
+        fit.result.peaks[0]["axes"]["y"]["parameters"]["tau"].magnitude, 3, rtol=1e-7
+    )
+
+
+@pytest.mark.parametrize("bounded", [False, True])
+@pytest.mark.parametrize("shared_center", [False, True])
+def test_general_gaussian_center_is_independent_of_coordinate_origin(
+    bounded, shared_center
+):
+    origin = 1e9
+    x = origin + np.linspace(-2, 2, 21)
+    y = np.linspace(-2, 2, 21)
+    center = origin + 0.24
+    values = 2 * _gaussian(x[None, :], center, 0.9) * _gaussian(y[:, None], 0, 1.1)
+    grid = scp.NDDataset(
+        values,
+        coordset=[
+            scp.Coord(y, units="Hz", rounding=False),
+            scp.Coord(x, units="Hz", rounding=False),
+        ],
+    )
+    parameter = {"value": origin + 0.1}
+    if bounded:
+        parameter["bounds"] = (origin - 1, origin + 1)
+    peak = {
+        "height": {"value": 2, "fixed": True},
+        "axes": {
+            "x": {
+                "model": "gaussian",
+                "parameters": {
+                    "center": {"shared": "position"} if shared_center else parameter,
+                    "width": {"value": 0.9, "fixed": True},
+                },
+            },
+            "y": {
+                "model": "gaussian",
+                "center": {"value": 0, "fixed": True},
+                "width": {"value": 1.1, "fixed": True},
+            },
+        },
+    }
+    fit = scp.Optimize(
+        peaks=[peak], shared_parameters={"position": parameter} if shared_center else {}
+    ).fit(grid)
+    assert_allclose(fit.predict().data, values, atol=1e-8)
+    fitted = fit.result.peaks[0]["axes"]["x"]["parameters"]["center"]
+    assert abs(fitted - center) < 1e-8
+    jacobian = -values * 8 * np.log(2) * (x[None, :] - center) / 0.9**2
+    assert_allclose(fit.jacobian[:, 0], jacobian.ravel(), atol=2e-7, rtol=1e-5)

@@ -17,6 +17,7 @@ from spectrochempy.analysis.curvefitting._profile_models import profile_history
 from spectrochempy.analysis.curvefitting._profile_models import public_profiles
 from spectrochempy.analysis.curvefitting.simulation import _interval_unit
 from spectrochempy.analysis.curvefitting.simulation import _parameter_value
+from spectrochempy.analysis.curvefitting.simulation import _scaled_offsets
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 
@@ -58,7 +59,9 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
                 canonical = (
                     ur.Unit(shared_unit)
                     if shared_unit is not None
-                    else unit or ur.dimensionless
+                    else getattr(definition.get("value"), "units", None)
+                    or unit
+                    or ur.dimensionless
                 )
                 if interval and canonical is not None:
                     canonical = _interval_unit(canonical)
@@ -181,31 +184,112 @@ def fit_profiles(dataset, specs, max_calls, shared):
         raise ValueError("ND fitting requires observations for all free parameters")
     observed = data[valid]
     intensity_scale = np.max(np.abs(observed)) or 1.0
-    initial = np.array([group["parsed"][0] for group in groups], dtype=float)
-    limits = np.array([group["parsed"][1:3] for group in groups], dtype=float).T
-    scales = np.maximum(np.abs(initial), 1.0)
-    bounds = limits / scales if groups else None
+    initial = np.array([group["parsed"][0] for group in groups], dtype=np.longdouble)
+    limits = np.array([group["parsed"][1:3] for group in groups], dtype=np.longdouble).T
+    binding_groups = {
+        (id(target), key): group
+        for group in groups
+        for target, key, _ in group["bindings"]
+    }
+    for peak in peaks:
+        for axis in peak["axes"].values():
+            parameters = axis["parameters"]
+            group = binding_groups.get((id(parameters), "center"))
+            if callable(axis["model"]) or group is None:
+                continue
+            width = parameters["width"]
+            unit = target_units[(id(parameters), "width")]
+            if unit is not None:
+                width = _parameter_value(
+                    Quantity(width, unit), group["unit"], "center scale", interval=True
+                )
+            group["center_scale"] = min(group.get("center_scale", width), width)
+    origins = np.array(
+        [
+            value if "center_scale" in group else 0
+            for group, value in zip(groups, initial, strict=True)
+        ],
+        dtype=np.longdouble,
+    )
+    scales = np.array(
+        [
+            group.get("center_scale", max(abs(value), 1.0))
+            for group, value in zip(groups, initial, strict=True)
+        ],
+        dtype=np.longdouble,
+    )
+    bounds = np.asarray((limits - origins) / scales, dtype=float) if groups else None
+    start = np.asarray((initial - origins) / scales, dtype=float)
     names = tuple(group["name"] for group in groups)
     parameter_units = tuple(group["unit"] for group in groups)
+    group_indices = {id(group): index for index, group in enumerate(groups)}
+    solver_grids = []
+    centered_axes = {}
+    for peak in peaks:
+        grid = coordinates.copy()
+        for dim, axis in peak["axes"].items():
+            parameters = axis["parameters"]
+            group = binding_groups.get((id(parameters), "center"))
+            if callable(axis["model"]) or group is None:
+                continue
+            index = group_indices[id(group)]
+            center = parameters["center"]
+            grid[dim] = _scaled_offsets(coordinates[dim], center, 1.0)[0]
+            centered_axes[id(parameters)] = (index, units[dim])
+        solver_grids.append(grid)
+    offsets = initial - origins
 
     def update(vector):
+        nonlocal offsets
+        offsets = vector * scales
+        vector = origins + offsets
         for group, value in zip(groups, vector, strict=True):
+            if "center_scale" not in group:
+                value = float(value)
             for target, key, convert in group["bindings"]:
                 target[key] = convert(value)
 
-    def model(*, keep_components=False):
+    def model(*, keep_components=False, physical=False):
         total = np.zeros(dataset.shape)
         parts = []
         with np.errstate(over="ignore", invalid="ignore"):
-            for peak in peaks:
-                part = evaluate_profiles(dataset.shape, coordinates, peak)
+            for peak, grid in zip(peaks, solver_grids, strict=True):
+                if physical:
+                    resolved = peak
+                    grid = coordinates
+                else:
+                    axes = {}
+                    for dim, axis in peak["axes"].items():
+                        parameters = axis["parameters"]
+                        binding = centered_axes.get(id(parameters))
+                        if binding is None:
+                            axes[dim] = axis
+                            continue
+                        index, unit = binding
+                        value = offsets[index]
+                        if unit is not None:
+                            value = _parameter_value(
+                                Quantity(value, parameter_units[index]),
+                                unit,
+                                "center offset",
+                                interval=True,
+                            )
+                        axes[dim] = {
+                            "model": axis["model"],
+                            "parameters": {
+                                **parameters,
+                                "center": value,
+                            },
+                        }
+                    resolved = {"height": peak["height"], "axes": axes}
+                part = evaluate_profiles(dataset.shape, grid, resolved)
                 total += part
                 if keep_components:
                     parts.append(part)
         return total, parts
 
     def residuals(vector):
-        update(vector * scales)
+        update(vector)
         fitted, _ = model()
         with np.errstate(over="ignore", invalid="ignore"):
             residual = (observed - fitted[valid]) / intensity_scale
@@ -217,7 +301,7 @@ def fit_profiles(dataset, specs, max_calls, shared):
     if groups:
         solution = least_squares(
             residuals,
-            initial / scales,
+            start,
             bounds=bounds,
             method="trf",
             jac="3-point",
@@ -225,19 +309,23 @@ def fit_profiles(dataset, specs, max_calls, shared):
             max_nfev=max_calls,
             gtol=None,
         )
-        update(solution.x * scales)
-        jacobian = solution.jac * (intensity_scale / scales)
-    fitted, components = model(keep_components=True)
+        update(solution.x)
+        jacobian = np.asarray(
+            solution.jac.astype(np.longdouble) * (intensity_scale / scales), dtype=float
+        )
+    fitted, components = model(keep_components=True, physical=True)
     residual = np.zeros(dataset.shape)
     residual[valid] = observed - fitted[valid]
     if not np.isfinite(residual[valid]).all():
         raise ValueError("ND fitting produced non-finite residuals on the support")
+    if solution is not None:
+        solution.fun = residual[valid] / intensity_scale
     diagnostics = _fit_diagnostics(observed, residual[valid], len(groups))
     covariance, reason = _physical_covariance(
         solution, jacobian, scales, bounds, diagnostics
     )
     diagnostics["covariance_reason"] = reason
-    values = solution.x * scales if solution is not None else []
+    values = origins + solution.x * scales if solution is not None else []
     exported = public_profiles(peaks, target_units)
     return _fit_outputs(
         dataset,
