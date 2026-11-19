@@ -132,6 +132,27 @@ refresh the page in your browser. The URL works while the server is running.
 Documentation CI Artifacts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Trusted upstream master/tag builds use a private copy of the Eigenvector
+Corn dataset. Its source, size and SHA-256 are pinned in
+``.github/data/corn.json``. The read-only deploy key
+``SCPY_CORN_DATA_SSH_KEY`` grants access only to the private
+``spectrochempy/spectrochempy-ci-data`` repository; the repository variable
+``SCPY_CORN_DATA_REVISION`` pins its full commit SHA. Updating that revision
+or the checksum is an explicit maintainer operation.
+
+The staging action verifies the file before placing the raw MAT file and a
+ZIP containing it in the runner's temporary directory. It exports
+``SCPY_CORN_DATA`` and ``SCPY_CORN_ZIP`` for the examples, then removes the
+private checkout. The working copies are removed after execution and are
+outside the public test-data cache and documentation artifact inputs.
+Do not add these files to public caches, artifacts or data repositories.
+
+Pull request jobs and fork workflows do not run the private-data action and
+retain the public Eigenvector download. Local users may also point those
+two environment variables to their own Corn files. The scientific examples
+and readers otherwise use the same data and processing. External Read the
+Docs previews continue to use the public source, without a private key.
+
 The documentation artifact workflow runs on pushes to master and release
 tags. It can also be triggered manually. The tutorial and gallery jobs
 check out the workflow commit.

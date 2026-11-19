@@ -41,6 +41,8 @@
 # `scp.method(<method parameters>)` .
 
 # %%
+from os import getenv
+
 import spectrochempy as scp
 
 # %% [markdown]
@@ -427,5 +429,9 @@ scp.read_omnic(folder, recursive=True, pattern="*4.spa")  # equivalent
 
 # %%
 scp.read(
-    "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip", merge=False
+    getenv(
+        "SCPY_CORN_ZIP",
+        "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip",
+    ),
+    merge=False,
 )

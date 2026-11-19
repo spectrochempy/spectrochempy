@@ -1,0 +1,43 @@
+name: Stage private Corn data
+description: Fetch a pinned private fixture for trusted upstream CI only
+inputs:
+  ssh-key:
+    description: Read-only deploy key for spectrochempy-ci-data
+    required: true
+  revision:
+    description: Immutable commit SHA of the private data repository
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Verify trusted execution context
+      shell: bash
+      env:
+        DATA_REVISION: ${{ inputs.revision }}
+      run: |
+        set -eu
+        if [[ "$GITHUB_REPOSITORY" != spectrochempy/spectrochempy ||
+              "$GITHUB_EVENT_NAME" != push && "$GITHUB_EVENT_NAME" != workflow_dispatch ||
+              "$GITHUB_REF" != refs/heads/master && "$GITHUB_REF" != refs/tags/* ]]; then
+          echo "Private Corn data is restricted to trusted upstream master/tag builds" >&2
+          exit 1
+        fi
+        if [[ ! "$DATA_REVISION" =~ ^[a-f0-9]{40}$ ]]; then
+          echo "SCPY_CORN_DATA_REVISION must pin a full private repository commit SHA" >&2
+          exit 1
+        fi
+    - name: Check out the pinned private fixture
+      uses: actions/checkout@v7
+      with:
+        repository: spectrochempy/spectrochempy-ci-data
+        ref: ${{ inputs.revision }}
+        ssh-key: ${{ inputs.ssh-key }}
+        persist-credentials: false
+        path: .ci-private-corn
+    - name: Verify and stage Corn data
+      shell: bash
+      run: python .github/workflows/scripts/prepare_corn_data.py .ci-private-corn/corn.mat
+    - name: Remove the private checkout
+      if: always()
+      shell: bash
+      run: python -c "import shutil; shutil.rmtree('.ci-private-corn', ignore_errors=True)"

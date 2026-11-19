@@ -17,6 +17,8 @@ only, then reuses the fitted preprocessing when predicting validation spectra.
 
 # %%
 # Import the packages
+from os import getenv
+
 import spectrochempy as scp
 
 # %%
@@ -24,8 +26,13 @@ import spectrochempy as scp
 # -------------------------
 # The data is available from the Eigenvector archive:
 try:
-    ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    ds_list = scp.read(
+        getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat"),
+        merge=False,
+    )
 except FileNotFoundError:
+    if getenv("SCPY_CORN_DATA"):
+        raise
     ds_list = None
     print(
         "Eigenvector corn dataset not reachable; skipping the remote Pipeline example."

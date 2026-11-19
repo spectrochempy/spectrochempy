@@ -16,6 +16,8 @@ either from local or remote files.
 # First we need to import the spectrochempy API package
 from pathlib import Path
 
+from os import getenv
+
 import spectrochempy as scp
 
 # %%
@@ -54,8 +56,12 @@ print(dataset_list)
 # --------------------------------
 # To download and read file from remote server you can use urls.
 try:
-    dataset_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
+    dataset_list = scp.read(
+        getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat")
+    )
 except FileNotFoundError:
+    if getenv("SCPY_CORN_DATA"):
+        raise
     dataset_list = None
     print("Eigenvector corn dataset not reachable; skipping remote import examples.")
 else:
@@ -71,7 +77,10 @@ else:
     # `corn.mat_.zip <https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip>`__ .
     # This can also be used by the ``read`` method.
     dataset_list = scp.read(
-        "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
+        getenv(
+            "SCPY_CORN_ZIP",
+            "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip",
+        )
     )
     print(dataset_list)
 
