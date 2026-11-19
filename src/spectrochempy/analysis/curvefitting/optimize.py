@@ -9,7 +9,6 @@ __configurables__ = __all__
 import inspect
 import re
 import sys
-from copy import deepcopy
 
 import numpy as np
 import traitlets as tr
@@ -1011,6 +1010,7 @@ class Optimize(DecompositionAnalysis):
         log_level="WARNING",
         warm_start=False,
         peaks=None,
+        shared_parameters=None,
         **kwargs,
     ):
         """
@@ -1029,6 +1029,15 @@ class Optimize(DecompositionAnalysis):
             :func:`simulate_peaks`, replacing each numerical value with an
             optional mapping with keys ``value``, ``bounds`` and ``fixed``.
             A varying width requires a strictly positive lower bound.
+            General axes accept ``model`` and a ``parameters`` mapping.
+            A model can be a built-in name or a callable receiving numerical
+            axis coordinates and keyword parameters, returning a dimensionless
+            real vector. Custom parameters can declare a ``unit``.
+        shared_parameters : mapping, optional
+            Named parameter definitions used by ``{"shared": "name"}``
+            references in heights or axis parameters. Each shared value is
+            optimized once. Definitions accept ``value``, ``bounds``, ``fixed``
+            and ``unit``. This option requires ``peaks``.
         **kwargs : dict
             Additional keyword arguments.
         """
@@ -1036,6 +1045,9 @@ class Optimize(DecompositionAnalysis):
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
+        if shared_parameters is not None and peaks is None:
+            raise ValueError("shared_parameters requires peaks")
+        self._nd_shared_parameters = snapshot_peaks(shared_parameters)
         self._nd_peaks = snapshot_peaks(peaks)
         self._nd_fit = None
         if peaks is not None and "script" in kwargs:
@@ -1976,7 +1988,9 @@ class Optimize(DecompositionAnalysis):
             )
         max_calls = self.max_fun_calls or 4 * self.max_iter
 
-        fit, solution = fit_separable_peaks(X, self._nd_peaks, max_calls)
+        fit, solution = fit_separable_peaks(
+            X, self._nd_peaks, max_calls, self._nd_shared_parameters
+        )
         diagnostics = fit["diagnostics"]
         diagnostics.update(_normalize_solver_meta("trf", solution))
         if solution is None:
@@ -2093,7 +2107,7 @@ class Optimize(DecompositionAnalysis):
                     "fitted": fit["fitted"].copy(),
                     "components": self.components,
                     "residuals": fit["residuals"].copy(),
-                    "peaks": deepcopy(fit["peaks"]),
+                    "peaks": list(snapshot_peaks(fit["peaks"])),
                     "parameter_names": fit["names"],
                     "parameter_units": fit["units"],
                 },

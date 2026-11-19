@@ -7,9 +7,10 @@ from copy import deepcopy
 import numpy as np
 from scipy.optimize import least_squares
 
+from spectrochempy.analysis.curvefitting._profile_models import extended_profiles
+from spectrochempy.analysis.curvefitting._profile_models import profile_history
 from spectrochempy.analysis.curvefitting.simulation import _MODELS
 from spectrochempy.analysis.curvefitting.simulation import _evaluate_separable_peak
-from spectrochempy.analysis.curvefitting.simulation import _history_magnitude
 from spectrochempy.analysis.curvefitting.simulation import _interval_unit
 from spectrochempy.analysis.curvefitting.simulation import _parameter_value
 from spectrochempy.analysis.curvefitting.simulation import _scaled_offsets
@@ -287,8 +288,14 @@ def _bounded_jacobian(vector, residuals, bounds):
     return jacobian
 
 
-def fit_separable_peaks(dataset, specs, max_calls):
+def fit_separable_peaks(dataset, specs, max_calls, shared_parameters=None):
     """Fit and reconstruct on the input grid with a fixed observation support."""
+    if shared_parameters is not None or extended_profiles(specs):
+        from spectrochempy.analysis.curvefitting._optimize_profiles import (  # noqa: PLC0415
+            fit_profiles,
+        )
+
+        return fit_profiles(dataset, specs, max_calls, shared_parameters)
     coordinates, units = _grid(dataset)
     peaks, free, limits, names, parameter_units = _prepare_peaks(
         specs, dataset.units, units
@@ -496,16 +503,42 @@ def fit_separable_peaks(dataset, specs, max_calls):
         solution, jacobian, scales, bounds, diagnostics
     )
     diagnostics["covariance_reason"] = reason
-    history_peaks = [
-        {
-            "height": _history_magnitude(peak["height"]),
-            "axes": {
-                dim: {key: _history_magnitude(value) for key, value in axis.items()}
-                for dim, axis in peak["axes"].items()
-            },
-        }
-        for peak in peaks
-    ]
+    return _fit_outputs(
+        dataset,
+        data,
+        valid,
+        peaks,
+        fitted,
+        components,
+        residual,
+        values,
+        names,
+        parameter_units,
+        jacobian,
+        diagnostics,
+        covariance,
+    ), solution
+
+
+def _fit_outputs(
+    dataset,
+    data,
+    valid,
+    peaks,
+    fitted,
+    components,
+    residual,
+    values,
+    names,
+    parameter_units,
+    jacobian,
+    diagnostics,
+    covariance,
+    history_parameters=None,
+):
+    """Package fitted components and diagnostics without changing their grid."""
+    count = np.count_nonzero(valid)
+    history_peaks = profile_history(peaks)
 
     def output(array, title):
         result = NDDataset(
@@ -524,9 +557,10 @@ def fit_separable_peaks(dataset, specs, max_calls):
                 "dims": list(dataset.dims),
                 "method": "trf",
                 "n_observations": int(count),
-                "n_varying_parameters": len(free),
+                "n_varying_parameters": len(names),
                 "parameter_order": list(names),
                 "peaks": history_peaks,
+                **(history_parameters or {}),
             },
             message=title,
         )
@@ -547,7 +581,7 @@ def fit_separable_peaks(dataset, specs, max_calls):
         "jacobian": jacobian,
         "diagnostics": diagnostics,
         "covariance": covariance,
-    }, solution
+    }
 
 
 def _fit_diagnostics(observed, residuals, n_free):

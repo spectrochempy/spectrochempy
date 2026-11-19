@@ -633,8 +633,5 @@ _ = f1.plot_merit(
 
 
 # %% [markdown]
-# <div class='alert alert-warning'>
-# <b>Todo</b>
-#
-# Tutorial to be continued with other methods of optimization and fitting (2D...)
-# </div>
+# For joint spectral/kinetic fits, arbitrary axis profiles and shared
+# parameters, see [global fitting](global_fitting.ipynb).

@@ -16,6 +16,12 @@ from pint.errors import PintError
 from spectrochempy.analysis.curvefitting._models import _GAUSSIAN_WIDTH_PER_SIGMA
 from spectrochempy.analysis.curvefitting._models import gaussian
 from spectrochempy.analysis.curvefitting._models import lorentzian
+from spectrochempy.analysis.curvefitting._profile_models import evaluate_profiles
+from spectrochempy.analysis.curvefitting._profile_models import extended_profiles
+from spectrochempy.analysis.curvefitting._profile_models import profile_history
+from spectrochempy.analysis.curvefitting._profile_models import (
+    resolved_simulation_peaks,
+)
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -192,6 +198,12 @@ def simulate_peaks(template, peaks):
         (positive full width at half maximum). Scalars use the corresponding
         template units. Pint quantities are converted, with widths treated
         as intervals. An empty sequence gives a zero spectrum.
+        General profiles use ``{"model": model, "parameters": {...}}``.
+        Built-ins also include ``voigt``, ``pseudovoigt``,
+        ``saturation_recovery`` and ``exponential_decay``. A callable receives
+        numerical coordinates and keyword parameters and must return a
+        dimensionless real vector matching the coordinate. Custom parameter
+        quantities retain their declared numerical units.
 
     Returns
     -------
@@ -204,6 +216,11 @@ def simulate_peaks(template, peaks):
     profiles, summed in the supplied peak order. The height is defined at the
     continuous center and may differ from the sampled maximum. Masked locations
     are simulated as well and remain masked in the output.
+    For general profiles, ``height`` is the coefficient multiplying the
+    product of axis profiles; callable profiles are not normalized implicitly.
+    Voigt uses Gaussian sigma ``ratio * width / sqrt(8 * log(2))`` and
+    Lorentzian HWHM ``(1-ratio) * width / 2``, normalized at the continuous
+    center. This width parameter is not the convolved Voigt FWHM.
 
     Examples
     --------
@@ -239,39 +256,43 @@ def simulate_peaks(template, peaks):
         coordinates[dim] = values
         units[dim] = coord.units
 
-    parameters = []
-    for peak in peaks:
-        if not isinstance(peak, Mapping) or set(peak) != {"height", "axes"}:
-            raise ValueError("Each peak requires height and axes")
-        axes = peak["axes"]
-        if not isinstance(axes, Mapping) or set(axes) != set(coordinates):
-            raise ValueError("Each peak must specify every template dimension")
-        height = _parameter_value(peak["height"], template.units, "height")
-        resolved = {}
-        for dim in coordinates:
-            spec = axes[dim]
-            if not isinstance(spec, Mapping) or set(spec) != {
-                "model",
-                "center",
-                "width",
-            }:
-                raise ValueError(f"Axis {dim!r} requires model, center and width")
-            model = spec["model"]
-            if not isinstance(model, str) or model not in _MODELS:
-                raise ValueError(f"Unsupported model on axis {dim!r}: {model!r}")
-            center = _parameter_value(spec["center"], units[dim], f"{dim} center")
-            width = _parameter_value(
-                spec["width"], units[dim], f"{dim} width", interval=True
-            )
-            if width <= 0:
-                raise ValueError(f"{dim} width must be strictly positive")
-            resolved[dim] = {"model": model, "center": center, "width": width}
-        parameters.append({"height": height, "axes": resolved})
-
+    general = extended_profiles(peaks)
+    if general:
+        parameters = resolved_simulation_peaks(peaks, units, template.units)
+    else:
+        parameters = []
+        for peak in peaks:
+            if not isinstance(peak, Mapping) or set(peak) != {"height", "axes"}:
+                raise ValueError("Each peak requires height and axes")
+            axes = peak["axes"]
+            if not isinstance(axes, Mapping) or set(axes) != set(coordinates):
+                raise ValueError("Each peak must specify every template dimension")
+            height = _parameter_value(peak["height"], template.units, "height")
+            resolved = {}
+            for dim in coordinates:
+                spec = axes[dim]
+                if not isinstance(spec, Mapping) or set(spec) != {
+                    "model",
+                    "center",
+                    "width",
+                }:
+                    raise ValueError(f"Axis {dim!r} requires model, center and width")
+                model = spec["model"]
+                if not isinstance(model, str) or model not in _MODELS:
+                    raise ValueError(f"Unsupported model on axis {dim!r}: {model!r}")
+                center = _parameter_value(spec["center"], units[dim], f"{dim} center")
+                width = _parameter_value(
+                    spec["width"], units[dim], f"{dim} width", interval=True
+                )
+                if width <= 0:
+                    raise ValueError(f"{dim} width must be strictly positive")
+                resolved[dim] = {"model": model, "center": center, "width": width}
+            parameters.append({"height": height, "axes": resolved})
     data = np.zeros(template.shape)
     with np.errstate(over="ignore", invalid="ignore"):
         for peak in parameters:
-            data += _evaluate_separable_peak(template.shape, coordinates, peak)
+            evaluator = evaluate_profiles if general else _evaluate_separable_peak
+            data += evaluator(template.shape, coordinates, peak)
     if not np.isfinite(data).all():
         raise ValueError("Simulated intensity exceeds the finite floating-point range")
 
@@ -295,20 +316,10 @@ def simulate_peaks(template, peaks):
             "intensity_units": str(template.units)
             if template.units is not None
             else None,
-            "amplitude": "signed_height_at_continuous_center",
-            "peaks": [
-                {
-                    "height": _history_magnitude(peak["height"]),
-                    "axes": {
-                        dim: {
-                            key: _history_magnitude(value)
-                            for key, value in spec.items()
-                        }
-                        for dim, spec in peak["axes"].items()
-                    },
-                }
-                for peak in parameters
-            ],
+            "amplitude": "profile_coefficient"
+            if general
+            else "signed_height_at_continuous_center",
+            "peaks": profile_history(parameters),
         },
         message=f"Simulated {len(parameters)} separable peak(s)",
     )
