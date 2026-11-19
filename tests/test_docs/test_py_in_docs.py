@@ -12,6 +12,7 @@ To run it explicitly, use: pytest tests/test_docs/test_py_in_docs.py --override-
 import ast
 import subprocess
 import sys
+import tempfile
 from importlib.util import find_spec
 from os import environ
 from pathlib import Path
@@ -188,14 +189,32 @@ def nbsphinx_script_run(path):
 
         env = os.environ.copy()
         env["MPLBACKEND"] = "Agg"  # Set backend through environment as well
-        pipe = subprocess.Popen(  # noqa: S603
-            [sys.executable, str(path), "--nodisplay"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            encoding="utf8",
-            env=env,
-        )
-        (so, serr) = pipe.communicate()
+        with tempfile.TemporaryDirectory(prefix="scp-doc-script-") as directory:
+            env["SCP_CONFIG_HOME"] = str(Path(directory) / "config")
+            env["MPLCONFIGDIR"] = str(Path(directory) / "matplotlib")
+            Path(env["SCP_CONFIG_HOME"]).mkdir()
+            bootstrap = """
+import runpy
+import shutil
+import sys
+from pathlib import Path
+import spectrochempy as scp
+
+stylesheets = Path(sys.argv.pop(1)) / "stylesheets"
+shutil.copytree(scp.preferences.stylesheets, stylesheets)
+scp.preferences.stylesheets = str(stylesheets)
+sys.argv = sys.argv[1:]
+sys.path.insert(0, str(Path(sys.argv[0]).resolve().parent))
+runpy.run_path(sys.argv[0], run_name="__main__")
+"""
+            pipe = subprocess.Popen(  # noqa: S603
+                [sys.executable, "-c", bootstrap, directory, str(path), "--nodisplay"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding="utf8",
+                env=env,
+            )
+            (so, serr) = pipe.communicate()
     except Exception as e:
         print(f"An error occurred while running the script {path}: {e}")
 
@@ -356,3 +375,30 @@ def test_unit__looks_like_external_network_failure_none_text():
     """None error text does not crash and returns False."""
     assert not _looks_like_external_network_failure(None, "eigenvector.com")
     assert not _looks_like_external_network_failure(None, None)
+
+
+def test_doc_script_generated_styles_are_isolated(tmp_path):
+    script = tmp_path / "generate_style.py"
+    script.write_text(
+        "import sys\n"
+        "from pathlib import Path\n"
+        "import matplotlib as mpl\n"
+        "import spectrochempy as scp\n"
+        "assert sys.argv == [__file__, '--nodisplay']\n"
+        "scp.preferences.makestyle('runner_isolation', to_mpl=True)\n"
+        "generated = Path(scp.preferences.stylesheets) / 'runner_isolation.mplstyle'\n"
+        "assert generated.is_file()\n"
+        "assert (Path(mpl.get_configdir()) / 'stylelib' / generated.name).is_file()\n"
+        "print('GENERATED_STYLE=' + str(generated))\n"
+    )
+    original = Path(scp.preferences.stylesheets) / "runner_isolation.mplstyle"
+    assert not original.exists()
+    status, output, errors = nbsphinx_script_run(script)
+    assert status == 0, errors
+    generated = next(
+        line.removeprefix("GENERATED_STYLE=")
+        for line in output.splitlines()
+        if line.startswith("GENERATED_STYLE=")
+    )
+    assert not Path(generated).exists()
+    assert not original.exists()
