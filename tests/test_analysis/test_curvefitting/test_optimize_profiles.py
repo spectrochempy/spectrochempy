@@ -679,3 +679,41 @@ def test_general_physical_jacobian_survives_normalized_tail_underflow():
         rtol=1e-6,
         atol=0,
     )
+
+
+def test_callback_result_quantities_are_detached_without_copying_callable_state():
+    class Spectral:
+        def __deepcopy__(self, memo):
+            raise AssertionError("Callback identity must be preserved")
+
+        def __call__(self, x):
+            return np.ones_like(x)
+
+    def decay(t, tau):
+        return np.exp(-t / tau)
+
+    t = np.array([0.0, 1.0, 2.0])
+    grid = scp.NDDataset(
+        np.exp(-t[:, None] / 2) * np.ones((1, 3)),
+        coordset=[scp.Coord(t, units="s"), scp.Coord([0, 1, 2])],
+    )
+    spectral = Spectral()
+    peak = {
+        "height": {"value": 1, "fixed": True},
+        "axes": {
+            "x": {"model": spectral, "parameters": {}},
+            "y": {
+                "model": decay,
+                "parameters": {"tau": {"value": 2, "unit": "s", "fixed": True}},
+            },
+        },
+    }
+    fit = scp.Optimize(peaks=[peak]).fit(grid)
+    first, second = fit.result, fit.result
+    first.peaks[0]["axes"]["y"]["parameters"]["tau"].ito("ms")
+    for result in (second, fit.result):
+        tau = result.peaks[0]["axes"]["y"]["parameters"]["tau"]
+        assert tau.units == scp.ur.s
+        assert tau.magnitude == 2
+        assert result.peaks[0]["axes"]["x"]["model"] is spectral
+        assert_allclose(scp.simulate_peaks(grid, result.peaks).data, fit.predict().data)

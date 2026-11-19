@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from copy import deepcopy
 
 import numpy as np
+from pint import Quantity as PintQuantity
 from scipy.optimize import least_squares
 
 from spectrochempy.analysis.curvefitting._profile_models import extended_profiles
@@ -24,6 +25,8 @@ _GAUSSIAN_EXPONENT = 4 * np.log(2)
 
 def snapshot_peaks(spec):
     """Copy the peak specification without requiring pickleable mappings."""
+    if isinstance(spec, PintQuantity):
+        return deepcopy(spec)
     if isinstance(spec, Mapping):
         return {key: snapshot_peaks(value) for key, value in spec.items()}
     if isinstance(spec, Sequence) and not isinstance(spec, (str, bytes)):
