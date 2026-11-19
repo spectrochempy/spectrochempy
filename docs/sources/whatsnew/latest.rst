@@ -37,6 +37,9 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Reject unknown despike methods and baseline wrapper keywords instead of
+  silently ignoring them; correct filter defaults and baseline range help.
+
 - Renew update-notification reminder dates, refresh obsolete announcements,
   tolerate unavailable PyPI responses and unwritable caches, and skip checks
   during documentation builds. Use the PyPI Simple JSON API and filter releases

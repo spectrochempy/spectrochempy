@@ -6,6 +6,7 @@
 """History regression tests for denoising operations."""
 
 import numpy as np
+import pytest
 
 import spectrochempy as scp
 
@@ -60,3 +61,15 @@ def test_neighbors_removes_spike_in_flat_trace():
     dataset = scp.NDDataset([100, 100, 100, 100, 1000, 100, 100, 100, 100])
     result = dataset.despike(method="neighbors")
     np.testing.assert_array_equal(result.data, np.full(9, 100))
+
+
+@pytest.mark.parametrize("method", ["foo", "whittaker", "", None])
+@pytest.mark.parametrize("entrypoint", ["function", "method"])
+def test_despike_rejects_unknown_method(method, entrypoint):
+    dataset = scp.NDDataset(np.ones((2, 21)))
+    with pytest.raises(ValueError, match="katsumoto, whitaker, neighbors"):
+        if entrypoint == "function":
+            scp.despike(dataset, method=method)
+        else:
+            dataset.despike(method=method)
+    np.testing.assert_array_equal(dataset.data, 1.0)

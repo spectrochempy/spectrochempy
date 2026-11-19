@@ -157,7 +157,7 @@ class Filter(ProcessingConfigurable):
         For Butterworth, the positive filter order per pass.
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
-    lamb : `float`, optional, default: 10.0
+    lamb : `float`, optional, default: 1.0
         The smoothing parameter for the Whittaker-Eilers filter.
     cval : `float`, optional, default: 0.0
         The value to fill past the edges of the input if `mode` is ``'constant'``.
@@ -947,7 +947,7 @@ def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
         Input dataset to smooth.
     size : `int`, optional, default: 5
         The size of the smoothing window.
-    window : `str`, optional, default:'flat'
+    window : `str`, optional, default:'avg'
         The type of window from 'flat' or 'avg', 'han' or 'hanning', 'hamming',
         'bartlett', 'blackman'.
         `avg` window will produce a moving average smoothing.
@@ -964,8 +964,9 @@ def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
 
     Other Parameters
     ----------------
-    mode : `str`, optional, default: 'nearest'
+    mode : `str`, optional, default: 'interp'
         The mode parameter determines how the array borders are handled.
+        The default 'interp' is mapped to 'reflect' for window filters.
     cval : `float`, optional, default: 0.0
         Value to fill past edges of input if mode is 'constant'.
     log_level : `str`, optional, default: 'WARNING'
@@ -1150,7 +1151,7 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
     ----------------
     deriv : `int`, optional, default: 0
         The order of the derivative to compute.
-    mode : `str`, optional, default: 'nearest'
+    mode : `str`, optional, default: 'interp'
         The mode parameter determines how the array borders are handled.
     cval : `float`, optional, default: 0.0
         Value to fill past edges of input if mode is 'constant'.
