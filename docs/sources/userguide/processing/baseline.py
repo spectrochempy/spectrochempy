@@ -40,6 +40,8 @@
 # We first import spectrochempy
 
 # %%
+from os import getenv
+
 import spectrochempy as scp
 
 # %% [markdown]
@@ -314,7 +316,10 @@ blc.params()
 # spectrometer. This dataset (and others) can be loaded from http://www.eigenvector.com.
 
 # %%
-A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)[4]
+A = scp.read(
+    getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat"),
+    merge=False,
+)[4]
 
 # %% [markdown]
 # Add some labels for easier reading of the data axis.
