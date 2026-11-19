@@ -151,13 +151,45 @@ def profile_values(values, axis):
 
 def evaluate_profiles(shape, coordinates, peak):
     """Form a separable component on the native coordinate grid."""
-    result = np.full(shape, peak["height"], dtype=float)
+    from spectrochempy.analysis.curvefitting.simulation import (  # noqa: PLC0415
+        _profile_factors,
+    )
+    from spectrochempy.analysis.curvefitting.simulation import (  # noqa: PLC0415
+        _scaled_offsets,
+    )
+
+    height, height_exponent = np.frexp(float(peak["height"]))
+    mantissa = np.full(shape, height, dtype=float)
+    exponent = np.full(shape, height_exponent, dtype=np.int64)
     for index, (dim, values) in enumerate(coordinates.items()):
-        vector = profile_values(values, peak["axes"][dim])
+        axis = peak["axes"][dim]
+        vector = profile_values(values, axis)
+        factor, power = np.frexp(vector)
+        model, parameters = axis["model"], axis["parameters"]
+        if model in ("gaussian", "lorentzian"):
+            offsets, displacement, overflow = _scaled_offsets(
+                values, parameters["center"], parameters["width"]
+            )
+            with np.errstate(
+                over="ignore", under="ignore", invalid="ignore", divide="ignore"
+            ):
+                factor, power = _profile_factors(
+                    model, vector, offsets, displacement, overflow, parameters["width"]
+                )
+            if model == "gaussian":
+                tiny = vector < np.finfo(float).tiny
+                with np.errstate(over="ignore", invalid="ignore"):
+                    logarithm = np.maximum(
+                        -4 * offsets[tiny] ** 2, -1024 * (len(shape) + 2)
+                    )
+                power[tiny] = np.floor(logarithm).astype(int)
+                factor[tiny] = np.exp2(logarithm - power[tiny])
         broadcast = [1] * len(shape)
         broadcast[index] = values.size
-        result *= vector.reshape(broadcast)
-    return result
+        mantissa, shift = np.frexp(mantissa * factor.reshape(broadcast))
+        exponent += power.reshape(broadcast) + shift
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        return np.ldexp(mantissa, exponent)
 
 
 def resolved_simulation_peaks(peaks, units, intensity_unit):

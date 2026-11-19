@@ -213,7 +213,15 @@ def fit_profiles(dataset, specs, max_calls, shared):
     )
     scales = np.array(
         [
-            group.get("center_scale", max(abs(value), 1.0))
+            group.get(
+                "center_scale",
+                abs(value)
+                or (
+                    group["parsed"][2] - group["parsed"][1]
+                    if np.isfinite(group["parsed"][1:3]).all()
+                    else 1.0
+                ),
+            )
             for group, value in zip(groups, initial, strict=True)
         ],
         dtype=np.longdouble,

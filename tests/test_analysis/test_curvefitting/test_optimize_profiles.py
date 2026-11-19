@@ -519,3 +519,83 @@ def test_general_gaussian_center_is_independent_of_coordinate_origin(
     assert abs(fitted - center) < 1e-8
     jacobian = -values * 8 * np.log(2) * (x[None, :] - center) / 0.9**2
     assert_allclose(fit.jacobian[:, 0], jacobian.ravel(), atol=2e-7, rtol=1e-5)
+
+
+@pytest.mark.parametrize("scale", [1.0, 1e-6, 1e-9])
+def test_kinetic_jacobian_and_covariance_are_invariant_to_time_scale(scale):
+    t = np.linspace(0, 10, 41)
+    noise = np.random.default_rng(42).normal(0, 0.001, (41, 3))
+    values = np.exp(-t[:, None] / 3) * np.ones((1, 3)) + noise
+    grid = scp.NDDataset(
+        values,
+        coordset=[
+            scp.Coord(t * scale, units="s", rounding=False),
+            scp.Coord([0, 1, 2]),
+        ],
+    )
+    peak = {
+        "height": {"value": 1, "fixed": True},
+        "axes": {
+            "x": {"model": lambda x: np.ones_like(x), "parameters": {}},
+            "y": {
+                "model": "exponential_decay",
+                "parameters": {
+                    "tau": {"value": 2 * scale, "bounds": (0.1 * scale, 20 * scale)}
+                },
+            },
+        },
+    }
+    oracle = least_squares(
+        lambda p: (values - np.exp(-t[:, None] / p[0])).ravel(),
+        [2.0],
+        bounds=([0.1], [20]),
+        jac="3-point",
+        ftol=1e-12,
+        xtol=1e-12,
+        gtol=1e-12,
+    )
+    fit = scp.Optimize(peaks=[peak]).fit(grid)
+    tau = fit.result.peaks[0]["axes"]["y"]["parameters"]["tau"]
+    assert_allclose(tau, oracle.x[0] * scale, rtol=2e-7)
+    expected_jacobian = (-fit.predict().data * (t * scale)[:, None] / tau**2).ravel()
+    assert_allclose(fit.jacobian[:, 0], expected_jacobian, atol=3e-9 / scale, rtol=2e-6)
+    variance = (oracle.fun @ oracle.fun) / (values.size - 1)
+    covariance = variance / (oracle.jac[:, 0] @ oracle.jac[:, 0]) * scale**2
+    assert_allclose(fit.result.covariance[0, 0], covariance, rtol=2e-6)
+
+
+@pytest.mark.parametrize("mixed", [False, True])
+def test_general_profiles_preserve_representable_gaussian_tails(mixed):
+    grid = scp.NDDataset(
+        np.zeros((2, 3)),
+        coordset=[scp.Coord([0.0, 1.0]), scp.Coord([16.0, 17.0, 18.0])],
+    )
+    peak = {
+        "height": 1e300,
+        "axes": {
+            "x": {"model": "gaussian", "center": 0, "width": 1},
+            "y": {"model": "gaussian", "center": 0, "width": 100},
+        },
+    }
+    expected = scp.simulate_peaks(grid, [peak])
+    peak["axes"]["x"] = {"model": "gaussian", "parameters": {"center": 0, "width": 1}}
+    if mixed:
+        peak["axes"]["y"] = {"model": lambda y: _gaussian(y, 0, 100), "parameters": {}}
+    actual = scp.simulate_peaks(grid, [peak])
+    assert (actual.data > 0).all()
+    assert_allclose(actual.data, expected.data, rtol=3e-13, atol=0)
+    fixed = {
+        "height": {"value": 1e300, "fixed": True},
+        "axes": {
+            "x": {
+                "model": "gaussian",
+                "parameters": {
+                    "center": {"value": 0, "fixed": True},
+                    "width": {"value": 1, "fixed": True},
+                },
+            },
+            "y": {"model": lambda y: _gaussian(y, 0, 100), "parameters": {}},
+        },
+    }
+    fit = scp.Optimize(peaks=[fixed]).fit(expected)
+    assert_allclose(fit.predict().data, expected.data, rtol=3e-13, atol=0)
