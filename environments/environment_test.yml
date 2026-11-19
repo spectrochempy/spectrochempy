@@ -22,6 +22,7 @@ channels:
     - defaults
 
 dependencies:
+    - pip
 
     # CORE dependencies
     # -----------------
@@ -51,8 +52,9 @@ dependencies:
     - pytest
     - pytest-cov
     - pytest-doctestplus
-    - pytest-ruff
     - pytest-mock
     - pytest-xdist
     - numpydoc
     - xarray
+    - pip:
+        - pytest-ruff

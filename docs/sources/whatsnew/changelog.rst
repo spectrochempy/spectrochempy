@@ -51,6 +51,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Generate usable Conda development and test environments by installing
+  PyPI-only requirements through pip while preserving their version constraints.
+  Include pip in all generated environments. (:pr:`1906`)
+
 - Reject unknown despike methods and baseline wrapper keywords instead of
   silently ignoring them; correct filter defaults and baseline range help. (:pr:`1904`)
 
