@@ -10,8 +10,10 @@ __all__ = [
     "_models",
     "_modelspec",
     "_optimize_nd",
+    "_optimize_profiles",
     "_parameter_transform",
     "_parameters",
+    "_profile_models",
     "linearregression",
     "optimize",
     "simulation",
@@ -20,8 +22,10 @@ __all__ = [
 from . import _models
 from . import _modelspec
 from . import _optimize_nd
+from . import _optimize_profiles
 from . import _parameter_transform
 from . import _parameters
+from . import _profile_models
 from . import linearregression
 from . import optimize
 from . import simulation

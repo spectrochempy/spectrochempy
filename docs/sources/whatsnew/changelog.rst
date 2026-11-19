@@ -19,6 +19,10 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Fit spectral series globally with Voigt, pseudo-Voigt, recovery and decay
+  profiles or user-provided axis functions. Share bounded or fixed parameters
+  between components and axes with ``Optimize(shared_parameters=...)``. (:pr:`1905`)
+
 - Accept string color normalizations (``linear``, ``log``, ``symlog``,
   ``power`` and ``centered``) and their parameters in 2D plots. (:pr:`1902`)
 
