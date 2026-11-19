@@ -226,7 +226,10 @@ class Coord(NDMath, NDArray):
         Notes
         -----
         The data are always returned as a 1D array of float rounded to the number
-        of significant digits given by the `sigdigits` parameters.
+        of significant digits given by the `sigdigits` parameter. Nonlinear
+        coordinates are rounded independently per value, preserving small values
+        on axes spanning several decades. Linear coordinates retain a common
+        decimal precision (at least three decimal places).
         If the spacing between the data is constant with the accuracy given by the
         significant digits, the data are thus linearized
         and the `linear` attribute is set to True.
@@ -236,10 +239,21 @@ class Coord(NDMath, NDArray):
         # now eventually round the data to the number of significant digits
         # for displaying (internally _data as its full precision)
         if data is not None and len(data) > 0 and self._rounding:
-            maxval = np.max(np.abs(data))
-            rounding = 3
-            nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
-            data = np.around(data, max(nd, rounding))
+            if self.linear:
+                maxval = np.max(np.abs(data))
+                rounding = 3
+                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
+                data = np.around(data, max(nd, rounding))
+            elif data.dtype.kind == "f":
+                data = np.array(
+                    [
+                        np.format_float_scientific(
+                            value, precision=self.sigdigits - 1, unique=False
+                        )
+                        for value in data.flat
+                    ],
+                    dtype=data.dtype,
+                ).reshape(data.shape)
         return data
 
     @data.setter

@@ -643,3 +643,40 @@ def test_coord_set_laser_frequency_sample_spacing():
     c._zpd = 3
     c.set_laser_frequency(frequency=nu, sample_spacing=1.0)
     assert c._data[1] - c._data[0] == pytest.approx(0.5 * step, rel=1e-12)
+
+
+@pytest.mark.parametrize("descending", [False, True])
+@pytest.mark.parametrize("sign", [1, -1])
+def test_nonlinear_rounding_preserves_small_coordinates(descending, sign):
+    values = sign * np.geomspace(1e-10, 10.0, 12)
+    if descending:
+        values = values[::-1]
+    coord = Coord(values)
+    raw = coord._data.copy()
+    assert not coord.linear
+    np.testing.assert_allclose(coord.data, values, rtol=1e-12, atol=0)
+    np.testing.assert_array_equal(coord._data, raw)
+    np.testing.assert_array_equal(coord.copy().data, coord.data)
+
+
+def test_geomspace_rounding_preserves_small_coordinates():
+    coord = Coord.geomspace(1e-4, 10.0, 6)
+    np.testing.assert_allclose(coord.data, np.geomspace(1e-4, 10.0, 6), atol=0)
+
+
+def test_nonlinear_rounding_uses_significant_digits_per_value():
+    values = np.array([0.0, 1.234567e-8, -2.345678e-4, 1.234567e5])
+    coord = Coord(values, sigdigits=4)
+    np.testing.assert_array_equal(coord.data, [0.0, 1.235e-8, -2.346e-4, 1.235e5])
+    coord.sigdigits = 6
+    np.testing.assert_array_equal(coord.data, [0.0, 1.23457e-8, -2.34568e-4, 1.23457e5])
+    np.testing.assert_array_equal(Coord(values, rounding=False).data, values)
+
+
+def test_nonlinear_rounding_preserves_extreme_finite_values():
+    values = [np.nextafter(0.0, 1.0), 1e-300, 1.234567e300]
+    coord = Coord(values)
+    assert np.all(np.isfinite(coord.data))
+    np.testing.assert_allclose(
+        coord.data, [values[0], values[1], 1.235e300], rtol=1e-12, atol=0
+    )
