@@ -123,6 +123,9 @@ repository = "https://github.com/spectrochempy/spectrochempy"
 [project.scripts]
 show_versions = "spectrochempy.ci.show_versions:main"
 
+[tool.spectrochempy.conda]
+pip-only = ["pytest-ruff", "sphinx-tabs"]
+
 [tool.setuptools]
 include-package-data = true
 

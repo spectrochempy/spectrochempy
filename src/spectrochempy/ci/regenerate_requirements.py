@@ -118,7 +118,21 @@ def pip2conda(package):
     return package
 
 
-def generate_conda_environments(deps, opt_deps):
+def _split_conda_dependencies(deps, pip_only):
+    """Route configured package names to pip without changing their requirements."""
+    conda_deps = []
+    pip_deps = []
+    for dep in deps:
+        name = re.split(r"[<>=!~;\[\s]", dep, maxsplit=1)[0]
+        name = re.sub(r"[-_.]+", "-", name).lower()
+        if name in pip_only:
+            pip_deps.append(dep)
+        else:
+            conda_deps.append(pip2conda(dep))
+    return conda_deps, pip_deps
+
+
+def generate_conda_environments(deps, opt_deps, pip_only=()):
     """
     Generate conda environment file(s).
 
@@ -128,6 +142,8 @@ def generate_conda_environments(deps, opt_deps):
         List of core dependencies.
     opt_deps : dict
         Dictionary of optional dependencies.
+    pip_only : iterable of str, optional
+        Package names installed from PyPI in the generated Conda environments.
 
     """
     # Define template paths
@@ -137,28 +153,38 @@ def generate_conda_environments(deps, opt_deps):
         keep_trailing_newline=True,
     )
 
+    pip_only = {re.sub(r"[-_.]+", "-", name).lower() for name in pip_only}
+    conda_deps, core_pip_deps = _split_conda_dependencies(deps, pip_only)
     # CORE dependencies
-    deps_string = "\n" + underline("CORE dependencies", indent=4) + "    - "
-    deps_string += "\n    - ".join([pip2conda(dep) for dep in deps])
-    out = template.render(dependencies=deps_string)
+    deps_string = "\n" + underline("CORE dependencies", indent=4)
+    if conda_deps:
+        deps_string += "    - " + "\n    - ".join(conda_deps)
+    out = template.render(dependencies=deps_string, pip_dependencies=core_pip_deps)
     env_filename = repo_path / "environments" / "environment.yml"
     env_filename.write_text(out)
 
     # OPTIONAL dependencies
     for opt in opt_deps:
+        pip_deps = [] if opt == "build" else core_pip_deps.copy()
         opt_deps_string = (
             "\n" + underline(f"{opt.upper()} dependencies", indent=4)  # + "    - "
         )
         for dep in opt_deps[opt]:
             if "spectrochempy[" not in dep:
-                opt_deps_string += f"\n    - {pip2conda(dep)}"
+                conda_deps, optional_pip_deps = _split_conda_dependencies(
+                    [dep], pip_only
+                )
+                if conda_deps:
+                    opt_deps_string += f"\n    - {conda_deps[0]}"
             else:
                 subopt = dep.split("[")[1].split("]")[0]
-                subopt_string = "\n    - ".join(
-                    [pip2conda(dep) for dep in opt_deps[subopt]]
+                conda_deps, optional_pip_deps = _split_conda_dependencies(
+                    opt_deps[subopt], pip_only
                 )
-
-                opt_deps_string += f"\n    # {subopt}\n    - {subopt_string}"
+                if conda_deps:
+                    subopt_string = "\n    - ".join(conda_deps)
+                    opt_deps_string += f"\n    # {subopt}\n    - {subopt_string}"
+            pip_deps.extend(optional_pip_deps)
 
         out = template.render(
             dependencies=deps_string
@@ -168,6 +194,7 @@ def generate_conda_environments(deps, opt_deps):
             ]
             else "",
             optional_dependencies=opt_deps_string,
+            pip_dependencies=list(dict.fromkeys(pip_deps)),
         )
         env_filename = repo_path / "environments" / f"environment_{opt}.yml"
         env_filename.write_text(out)
@@ -235,7 +262,8 @@ def main():
     generate_pip_requirements(deps, opt_deps)
 
     # Generate environment files
-    generate_conda_environments(deps, opt_deps)
+    conda_config = pyproject.get("tool", {}).get("spectrochempy", {}).get("conda", {})
+    generate_conda_environments(deps, opt_deps, conda_config.get("pip-only", ()))
 
     # Return success
     return 0
