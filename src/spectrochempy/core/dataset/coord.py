@@ -227,9 +227,10 @@ class Coord(NDMath, NDArray):
         -----
         The data are always returned as a 1D array of float rounded to the number
         of significant digits given by the `sigdigits` parameter. Nonlinear
-        coordinates are rounded independently per value, preserving small values
-        on axes spanning several decades. Linear coordinates retain a common
-        decimal precision (at least three decimal places).
+        coordinates with at least three points are rounded independently per
+        value, preserving small values on axes spanning several decades. The
+        precision remains at least three decimal places. Linear coordinates and
+        one-/two-point coordinates retain a common decimal precision.
         If the spacing between the data is constant with the accuracy given by the
         significant digits, the data are thus linearized
         and the `linear` attribute is set to True.
@@ -239,7 +240,7 @@ class Coord(NDMath, NDArray):
         # now eventually round the data to the number of significant digits
         # for displaying (internally _data as its full precision)
         if data is not None and len(data) > 0 and self._rounding:
-            if self.linear:
+            if self.linear or data.size < 3:
                 maxval = np.max(np.abs(data))
                 rounding = 3
                 nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
@@ -247,8 +248,11 @@ class Coord(NDMath, NDArray):
             elif data.dtype.kind == "f":
                 data = np.array(
                     [
-                        np.format_float_scientific(
-                            value, precision=self.sigdigits - 1, unique=False
+                        np.format_float_positional(
+                            value,
+                            precision=max(3, get_n_decimals(value, self.sigdigits)),
+                            unique=False,
+                            fractional=True,
                         )
                         for value in data.flat
                     ],

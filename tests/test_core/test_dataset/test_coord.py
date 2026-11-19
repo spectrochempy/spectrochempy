@@ -667,9 +667,11 @@ def test_geomspace_rounding_preserves_small_coordinates():
 def test_nonlinear_rounding_uses_significant_digits_per_value():
     values = np.array([0.0, 1.234567e-8, -2.345678e-4, 1.234567e5])
     coord = Coord(values, sigdigits=4)
-    np.testing.assert_array_equal(coord.data, [0.0, 1.235e-8, -2.346e-4, 1.235e5])
+    np.testing.assert_array_equal(coord.data, [0.0, 1.235e-8, -2.346e-4, 1.234567e5])
     coord.sigdigits = 6
-    np.testing.assert_array_equal(coord.data, [0.0, 1.23457e-8, -2.34568e-4, 1.23457e5])
+    np.testing.assert_array_equal(
+        coord.data, [0.0, 1.23457e-8, -2.34568e-4, 1.234567e5]
+    )
     np.testing.assert_array_equal(Coord(values, rounding=False).data, values)
 
 
@@ -677,6 +679,16 @@ def test_nonlinear_rounding_preserves_extreme_finite_values():
     values = [np.nextafter(0.0, 1.0), 1e-300, 1.234567e300]
     coord = Coord(values)
     assert np.all(np.isfinite(coord.data))
-    np.testing.assert_allclose(
-        coord.data, [values[0], values[1], 1.235e300], rtol=1e-12, atol=0
-    )
+    np.testing.assert_allclose(coord.data, values, rtol=1e-12, atol=0)
+
+
+@pytest.mark.parametrize("values", [[1234.5678], [0.0014, 1.0014]])
+def test_short_coordinates_preserve_common_decimal_rounding(values):
+    coord = Coord(values)
+    np.testing.assert_array_equal(coord.data, np.around(values, 3))
+
+
+def test_nonlinear_rounding_retains_at_least_three_decimal_places():
+    coord = Coord([1000.0, 1001.0, 1002.01])
+    assert not coord.linear
+    np.testing.assert_array_equal(coord.data, [1000.0, 1001.0, 1002.01])
