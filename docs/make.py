@@ -67,7 +67,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import traceback
 import warnings
 import zipfile
 from contextlib import contextmanager
@@ -1616,11 +1615,14 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    try:
+    if __package__:
+        from .build_diagnostics import _diagnostics
+        from .build_diagnostics import _phase
+    else:
+        from build_diagnostics import _diagnostics
+        from build_diagnostics import _phase
+
+    with _diagnostics(), _phase("run documentation command"):
         exit_code = _main()
         _trace_ci(f"_main returned {exit_code!r}")
-    except BaseException:
-        if ON_GITHUB:
-            traceback.print_exc()
-        raise
-    sys.exit(exit_code)
+        sys.exit(exit_code)

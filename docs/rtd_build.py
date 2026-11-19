@@ -16,7 +16,14 @@ from urllib.request import Request
 from urllib.request import urlopen
 from zipfile import ZipFile
 
-from docs import ci_artifacts
+from docs.build_diagnostics import _diagnostics
+from docs.build_diagnostics import _phase
+
+if __name__ == "__main__":
+    with _diagnostics(), _phase("import artifact consumer dependencies"):
+        from docs import ci_artifacts
+else:
+    from docs import ci_artifacts
 
 API = "https://api.github.com/repos/spectrochempy/spectrochempy/actions"
 WORKFLOW = "docs-artifact-prototype.yml"
@@ -42,14 +49,16 @@ def _json(path, token):
 
 
 def _find_artifacts(commit, token, unavailable):
-    query = urlencode({"head_sha": commit, "status": "success", "per_page": 100})
+    query = urlencode({"head_sha": commit, "per_page": 100})
     runs = _json(f"workflows/{WORKFLOW}/runs?{query}", token)["workflow_runs"]
+    runs = [
+        run
+        for run in runs
+        if run["head_sha"] == commit and run["event"] in ("push", "workflow_dispatch")
+    ]
     names = {f"docs-{kind}-{commit}": kind for kind in ci_artifacts.KINDS}
     for run in runs:
-        if run["head_sha"] != commit or run["event"] not in (
-            "push",
-            "workflow_dispatch",
-        ):
+        if run["conclusion"] != "success":
             continue
         artifacts = _json(f"runs/{run['id']}/artifacts?per_page=100", token)[
             "artifacts"
@@ -63,6 +72,14 @@ def _find_artifacts(commit, token, unavailable):
         }
         if matches.keys() == set(ci_artifacts.KINDS):
             return run["id"], matches
+    if runs and all(run["status"] == "completed" for run in runs):
+        latest = max(runs, key=lambda run: run["id"])
+        if latest["conclusion"] != "success":
+            raise RuntimeError(
+                f"Documentation artifact production for {commit} ended with "
+                f"{latest['conclusion']}; no usable artifact pair is available. "
+                f"See https://github.com/spectrochempy/spectrochempy/actions/runs/{latest['id']}"
+            )
     return None
 
 
@@ -86,14 +103,18 @@ def _render_from_actions(token):
     deadline = time.monotonic() + 900
     unavailable = set()
     while True:
-        selection = _find_artifacts(commit, token, unavailable)
+        with _phase(f"find artifact pair for {commit}"):
+            selection = _find_artifacts(commit, token, unavailable)
         if selection is not None:
             run_id, artifacts = selection
             with tempfile.TemporaryDirectory(prefix="scp-rtd-artifacts-") as directory:
                 root = Path(directory)
                 for kind, artifact in artifacts.items():
                     try:
-                        _download(artifact, token, root / kind)
+                        with _phase(
+                            f"download and extract {kind} artifact {artifact['id']} from run {run_id}"
+                        ):
+                            _download(artifact, token, root / kind)
                     except HTTPError as error:
                         if error.code != 410:
                             raise
@@ -126,7 +147,8 @@ def main():
     token = os.environ.pop("SCPY_RTD_GITHUB_TOKEN", None)
     if not token:
         raise RuntimeError("SCPY_RTD_GITHUB_TOKEN is required in artifact mode")
-    _render_from_actions(token)
+    with _diagnostics(), _phase("RTD artifact build"):
+        _render_from_actions(token)
 
 
 if __name__ == "__main__":
