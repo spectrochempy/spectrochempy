@@ -988,7 +988,11 @@ def resolve_2d_colormap(
         cmap = plt.get_cmap(prefs.colormap_diverging)
         # Use symmetric normalization around 0 for scientific standard
         maxabs = max(abs(data_min), abs(data_max))
-        norm = TwoSlopeNorm(vmin=-maxabs, vcenter=0.0, vmax=+maxabs)
+        norm = (
+            TwoSlopeNorm(vmin=-maxabs, vcenter=0.0, vmax=+maxabs)
+            if maxabs > 0
+            else Normalize(vmin=0, vmax=0)
+        )
     else:
         cmap = plt.get_cmap(prefs.colormap_sequential)
         norm = Normalize(vmin=data_min, vmax=data_max)

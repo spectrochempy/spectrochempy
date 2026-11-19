@@ -281,3 +281,25 @@ def test_named_norm_autoscales_from_data(method, name, parameters, classname, li
     assert norm.vmin == expected.vmin
     assert norm.vmax == expected.vmax
     np.testing.assert_allclose(norm(data), expected(data))
+
+
+@pytest.mark.parametrize("method", ["image", "contour", "surface"])
+@pytest.mark.parametrize("bipolar", [False, True])
+def test_named_linear_norm_accepts_zero_limits(method, bipolar):
+    from matplotlib.colors import Normalize
+
+    import spectrochempy as scp
+
+    data = np.linspace(-1, 1, 100).reshape(10, 10) if bipolar else np.zeros((10, 10))
+    dataset = scp.NDDataset(data, coords=[np.arange(10), np.arange(10)])
+    ax = dataset.plot(
+        method=method,
+        norm="linear",
+        vmin=0,
+        vmax=0,
+        cmap_mode="diverging",
+        levels=[-1, 0, 1],
+        colorbar=False,
+        show=False,
+    )
+    np.testing.assert_array_equal(ax.collections[0].norm(data), Normalize(0, 0)(data))
