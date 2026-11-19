@@ -185,3 +185,69 @@ def test_plot2d_default_equal_aspect_does_not_collapse_moderately_anisotropic_pp
     ax = dataset.plot(method="map", show=False)
 
     assert ax.get_aspect() == "auto"
+
+
+@pytest.mark.parametrize("method", ["image", "contour", "contourf", "surface"])
+@pytest.mark.parametrize(
+    "name, parameters, classname",
+    [
+        ("linear", {}, "Normalize"),
+        ("log", {}, "LogNorm"),
+        ("symlog", {"linthresh": 0.2}, "SymLogNorm"),
+        ("power", {"gamma": 0.5}, "PowerNorm"),
+        ("centered", {"vcenter": 0.3, "halfrange": 0.7}, "CenteredNorm"),
+    ],
+)
+def test_named_color_normalizations(synthetic_2d, method, name, parameters, classname):
+    from matplotlib import colors
+
+    dataset = synthetic_2d
+    limits = {} if name == "centered" else {"vmin": 0.01, "vmax": 1.0}
+    ax = dataset.plot(
+        method=method, norm=name, colorbar=True, show=False, **parameters, **limits
+    )
+    mappable = ax.collections[0]
+    assert isinstance(mappable.norm, getattr(colors, classname))
+    for key, value in parameters.items():
+        assert getattr(mappable.norm, key) == value
+    expected = getattr(colors, classname)(**parameters, **limits)
+    expected.autoscale_None(dataset.data)
+    np.testing.assert_allclose(mappable.norm(dataset.data), expected(dataset.data))
+
+
+@pytest.mark.parametrize("name", ["linear", "log", "symlog", "power"])
+def test_named_normalization_limits(synthetic_2d, name):
+    ax = synthetic_2d.plot_image(norm=name, vmin=0.1, vmax=0.8, show=False)
+    assert ax.collections[0].norm.vmin == 0.1
+    assert ax.collections[0].norm.vmax == 0.8
+
+
+@pytest.mark.parametrize(
+    "parameters, message",
+    [
+        ({"norm": "unknown"}, "Unknown color normalization"),
+        ({"norm": "log", "gamma": 0.5}, "Unsupported parameters"),
+        ({"gamma": 0.5}, "require a string norm"),
+        ({"norm": "centered", "vmin": 0}, "uses vcenter and halfrange"),
+    ],
+)
+def test_invalid_named_normalization(synthetic_2d, parameters, message):
+    with pytest.raises(ValueError, match=message):
+        synthetic_2d.plot_image(show=False, **parameters)
+
+
+def test_named_normalization_preserves_auto_colormap(synthetic_2d):
+    dataset = synthetic_2d - 0.5
+    default = dataset.plot_image(show=False).collections[0]
+    named = dataset.plot_image(norm="symlog", show=False).collections[0]
+    np.testing.assert_allclose(
+        default.cmap(np.linspace(0, 1, 10)), named.cmap(np.linspace(0, 1, 10))
+    )
+
+
+def test_normalization_instance_is_preserved(synthetic_2d):
+    from matplotlib.colors import LogNorm
+
+    norm = LogNorm(vmin=0.1, vmax=0.8)
+    ax = synthetic_2d.plot_image(norm=norm, show=False)
+    assert ax.collections[0].norm is norm

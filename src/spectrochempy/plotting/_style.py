@@ -774,6 +774,44 @@ def resolve_colormap(
     return cmap, norm
 
 
+def resolve_2d_norm(norm, *, vmin=None, vmax=None, **parameters):
+    """Resolve a named color normalization while preserving Normalize instances."""
+    from matplotlib import colors
+
+    if not isinstance(norm, str):
+        if parameters:
+            raise ValueError("Normalization parameters require a string norm name")
+        return norm
+
+    definitions = {
+        "linear": (colors.Normalize, {}),
+        "log": (colors.LogNorm, {}),
+        "symlog": (colors.SymLogNorm, {"linthresh": 1.0}),
+        "power": (colors.PowerNorm, {"gamma": 1.0}),
+        "centered": (colors.CenteredNorm, {"vcenter": 0.0, "halfrange": None}),
+    }
+    if norm not in definitions:
+        raise ValueError(
+            f"Unknown color normalization {norm!r}. Expected one of: "
+            + ", ".join(definitions)
+        )
+    constructor, defaults = definitions[norm]
+    unexpected = parameters.keys() - defaults.keys()
+    if unexpected:
+        raise ValueError(
+            f"Unsupported parameters for norm={norm!r}: {sorted(unexpected)}"
+        )
+    options = {**defaults, **parameters}
+    if norm == "centered":
+        if vmin is not None or vmax is not None:
+            raise ValueError(
+                "norm='centered' uses vcenter and halfrange, not vmin/vmax"
+            )
+    else:
+        options.update(vmin=vmin, vmax=vmax)
+    return constructor(**options)
+
+
 def resolve_2d_colormap(
     data,
     cmap=None,
