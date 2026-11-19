@@ -41,7 +41,7 @@ Bug Fixes
   silently ignoring them; correct filter defaults and baseline range help. (:pr:`1904`)
 
 - Round nonlinear coordinates per value so small logarithmically spaced
-  coordinates remain nonzero, while preserving linear-axis rounding.
+  coordinates remain nonzero, while preserving linear-axis rounding. (:pr:`1903`)
 
 - Renew update-notification reminder dates, refresh obsolete announcements,
   tolerate unavailable PyPI responses and unwritable caches, and skip checks
