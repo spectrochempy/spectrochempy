@@ -251,3 +251,33 @@ def test_normalization_instance_is_preserved(synthetic_2d):
     norm = LogNorm(vmin=0.1, vmax=0.8)
     ax = synthetic_2d.plot_image(norm=norm, show=False)
     assert ax.collections[0].norm is norm
+
+
+@pytest.mark.parametrize("method", ["image", "contour", "contourf", "surface"])
+@pytest.mark.parametrize(
+    "name, parameters, classname",
+    [
+        ("linear", {}, "Normalize"),
+        ("log", {}, "LogNorm"),
+        ("symlog", {"linthresh": 0.1}, "SymLogNorm"),
+        ("power", {"gamma": 0.5}, "PowerNorm"),
+        ("centered", {"vcenter": 1.0}, "CenteredNorm"),
+    ],
+)
+@pytest.mark.parametrize("limits", [{}, {"vmin": 0.0001}, {"vmax": 200.0}])
+def test_named_norm_autoscales_from_data(method, name, parameters, classname, limits):
+    from matplotlib import colors
+
+    import spectrochempy as scp
+
+    if name == "centered" and limits:
+        pytest.skip("CenteredNorm uses halfrange rather than vmin/vmax")
+    data = np.geomspace(0.001, 100, 100).reshape(10, 10)
+    dataset = scp.NDDataset(data, coords=[np.arange(10), np.arange(10)])
+    expected = getattr(colors, classname)(**parameters, **limits)
+    expected.autoscale_None(data)
+    ax = dataset.plot(method=method, norm=name, show=False, **parameters, **limits)
+    norm = ax.collections[0].norm
+    assert norm.vmin == expected.vmin
+    assert norm.vmax == expected.vmax
+    np.testing.assert_allclose(norm(data), expected(data))

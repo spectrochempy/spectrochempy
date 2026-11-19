@@ -1963,6 +1963,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 prefs=prefs,
             )
             if named_norm:
+                normalization.autoscale_None(np.ma.masked_invalid(zdata))
                 norm = normalization
             if percentile is not None:
                 norm = Normalize(vmin=vmin, vmax=vmax)
