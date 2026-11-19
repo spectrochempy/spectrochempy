@@ -38,7 +38,7 @@ Bug Fixes
 ~~~~~~~~~
 
 - Reject unknown despike methods and baseline wrapper keywords instead of
-  silently ignoring them; correct filter defaults and baseline range help.
+  silently ignoring them; correct filter defaults and baseline range help. (:pr:`1904`)
 
 - Renew update-notification reminder dates, refresh obsolete announcements,
   tolerate unavailable PyPI responses and unwritable caches, and skip checks
