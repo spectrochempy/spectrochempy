@@ -242,8 +242,10 @@ def fit_profiles(dataset, specs, max_calls, shared):
                 continue
             index = group_indices[id(group)]
             center = parameters["center"]
-            grid[dim] = _scaled_offsets(coordinates[dim], center, 1.0)[0]
-            centered_axes[id(parameters)] = (index, units[dim])
+            width = parameters["width"]
+            with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+                grid[dim] = _scaled_offsets(coordinates[dim], center, width)[0]
+            centered_axes[id(parameters)] = (index, units[dim], width)
         solver_grids.append(grid)
     offsets = initial - origins
 
@@ -273,7 +275,7 @@ def fit_profiles(dataset, specs, max_calls, shared):
                         if binding is None:
                             axes[dim] = axis
                             continue
-                        index, unit = binding
+                        index, unit, reference_width = binding
                         value = offsets[index]
                         if unit is not None:
                             value = _parameter_value(
@@ -286,7 +288,8 @@ def fit_profiles(dataset, specs, max_calls, shared):
                             "model": axis["model"],
                             "parameters": {
                                 **parameters,
-                                "center": value,
+                                "center": value / reference_width,
+                                "width": parameters["width"] / reference_width,
                             },
                         }
                     resolved = {"height": peak["height"], "axes": axes}
@@ -318,9 +321,14 @@ def fit_profiles(dataset, specs, max_calls, shared):
             gtol=None,
         )
         update(solution.x)
-        jacobian = np.asarray(
-            solution.jac.astype(np.longdouble) * (intensity_scale / scales), dtype=float
-        )
+
+        def fitted_at(vector):
+            update(vector)
+            fitted, _ = model()
+            return fitted[valid]
+
+        jacobian = _physical_profile_jacobian(solution.x, fitted_at, bounds, scales)
+        update(solution.x)
     fitted, components = model(keep_components=True, physical=True)
     residual = np.zeros(dataset.shape)
     residual[valid] = observed - fitted[valid]
@@ -354,3 +362,34 @@ def fit_profiles(dataset, specs, max_calls, shared):
             "shared_parameters": profile_history(shared or {}),
         },
     ), solution
+
+
+def _physical_profile_jacobian(vector, evaluate, bounds, scales):
+    """Differentiate model values before residual normalization loses small tails."""
+    jacobian = None
+    step_factor = np.cbrt(np.finfo(float).eps)
+    for index, value in enumerate(vector):
+        step = step_factor * max(1.0, abs(value))
+        left = max(bounds[0, index], value - step)
+        right = min(bounds[1, index], value + step)
+        if left == right:
+            return None
+        first, second = vector.copy(), vector.copy()
+        first[index], second[index] = left, right
+        a, b = evaluate(first), evaluate(second)
+        if not np.isfinite(a).all() or not np.isfinite(b).all():
+            return None
+        if jacobian is None:
+            jacobian = np.empty((a.size, vector.size))
+        magnitude = np.maximum(np.abs(a), np.abs(b))
+        reference = np.where(magnitude == 0, 1.0, magnitude)
+        slope = (a / reference - b / reference) / (right - left)
+        numerator, numerator_power = np.frexp(slope)
+        factor, factor_power = np.frexp(magnitude)
+        scale, scale_power = np.frexp(scales[index])
+        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+            jacobian[:, index] = np.ldexp(
+                numerator * factor / scale,
+                numerator_power + factor_power - scale_power,
+            )
+    return jacobian

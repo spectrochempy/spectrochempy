@@ -599,3 +599,83 @@ def test_general_profiles_preserve_representable_gaussian_tails(mixed):
     }
     fit = scp.Optimize(peaks=[fixed]).fit(expected)
     assert_allclose(fit.predict().data, expected.data, rtol=3e-13, atol=0)
+
+
+@pytest.mark.parametrize("noise", [0, 0.01])
+def test_general_solver_scales_grid_before_center_subtraction(noise):
+    x = scp.Coord([-1e308, 1, 2, 1e308], linearize_below=-1)
+    y = scp.Coord(np.arange(-2, 3))
+    grid = scp.NDDataset(np.zeros((5, 4)), coordset=[y, x])
+    truth = {
+        "height": 1,
+        "axes": {
+            "x": {"model": "lorentzian", "center": 1e308, "width": 1e308},
+            "y": {"model": "gaussian", "center": 0, "width": 2},
+        },
+    }
+    spectrum = scp.simulate_peaks(grid, [truth])
+    spectrum.data[:, 0] += noise
+    peak = {
+        "height": {"value": 1, "fixed": True},
+        "axes": {
+            "x": {
+                "model": "lorentzian",
+                "center": 1e308,
+                "width": {"value": 1e308, "fixed": True},
+            },
+            "y": {
+                "model": "gaussian",
+                "center": {"value": 0, "fixed": True},
+                "width": {"value": 2, "fixed": True},
+            },
+        },
+    }
+    legacy = scp.Optimize(peaks=[peak]).fit(spectrum)
+    fit = scp.Optimize(peaks=[peak], shared_parameters={}).fit(spectrum)
+    assert fit.result.diagnostics["success"]
+    assert_allclose(fit.predict().data, legacy.predict().data, rtol=1e-6, atol=1e-8)
+    assert_allclose(
+        fit.jacobian, legacy.jacobian, rtol=1e-4, atol=np.nextafter(0.0, 1.0)
+    )
+    if not noise:
+        assert_allclose(fit.jacobian[8, 0] * 1e308, 16 / 289, rtol=1e-6)
+
+
+def test_general_physical_jacobian_survives_normalized_tail_underflow():
+    from spectrochempy.analysis.curvefitting import _optimize_nd
+
+    grid = scp.NDDataset(
+        np.zeros((3, 3)),
+        coordset=[
+            scp.Coord([-1, 0, 1]),
+            scp.Coord([-1e170, 0, 1e170], linearize_below=-1),
+        ],
+    )
+    height = 1e300
+    tail = 0.25 * (height / 1e170) / 1e170
+    grid.data = np.array([0.0625, 1, 0.0625])[:, None] * [tail, height, tail]
+    peak = {
+        "height": {"value": height, "fixed": True},
+        "axes": {
+            "x": {
+                "model": "lorentzian",
+                "center": {"value": 0, "fixed": True},
+                "width": {"value": 1, "bounds": (0.5, 2)},
+            },
+            "y": {
+                "model": "gaussian",
+                "center": {"value": 0, "fixed": True},
+                "width": {"value": 1, "fixed": True},
+            },
+        },
+    }
+    result, solution = _optimize_nd.fit_separable_peaks(
+        grid, [peak], max_calls=1, shared_parameters={}
+    )
+    assert_array_equal(solution.jac[[3, 5], 0], 0)
+    assert_allclose(
+        result["jacobian"][[3, 5], 0],
+        -0.5 * (height / 1e170) / 1e170,
+        rtol=1e-6,
+        atol=0,
+    )

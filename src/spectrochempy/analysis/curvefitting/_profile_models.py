@@ -167,9 +167,10 @@ def evaluate_profiles(shape, coordinates, peak):
         factor, power = np.frexp(vector)
         model, parameters = axis["model"], axis["parameters"]
         if model in ("gaussian", "lorentzian"):
-            offsets, displacement, overflow = _scaled_offsets(
-                values, parameters["center"], parameters["width"]
-            )
+            with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+                offsets, displacement, overflow = _scaled_offsets(
+                    values, parameters["center"], parameters["width"]
+                )
             with np.errstate(
                 over="ignore", under="ignore", invalid="ignore", divide="ignore"
             ):
