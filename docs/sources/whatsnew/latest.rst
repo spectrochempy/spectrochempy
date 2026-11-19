@@ -16,7 +16,7 @@ New Features
 ~~~~~~~~~~~~
 
 - Accept string color normalizations (``linear``, ``log``, ``symlog``,
-  ``power`` and ``centered``) and their parameters in 2D plots.
+  ``power`` and ``centered``) and their parameters in 2D plots. (:pr:`1902`)
 
 - Group update announcements for SpectroChemPy and installed plugins into native
   desktop notifications, with a text fallback and configurable delivery. Cache
