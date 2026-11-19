@@ -56,6 +56,7 @@ scripts = [
             "apigen.py",
             "preexecute_notebooks.py",
             "ci_artifacts.py",
+            "build_diagnostics.py",
             "rtd_build.py",
             "gallery",
             # Command-line utilities require arguments and are not runnable

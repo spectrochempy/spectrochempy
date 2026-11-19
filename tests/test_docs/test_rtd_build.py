@@ -2,7 +2,9 @@
 
 import hashlib
 import importlib
+from contextlib import redirect_stderr
 from io import BytesIO
+from io import StringIO
 from urllib.error import HTTPError
 from zipfile import ZipFile
 
@@ -24,6 +26,8 @@ def test_selects_both_artifacts_from_one_successful_run(monkeypatch):
         {"id": 3, "head_sha": commit, "event": "push"},
         {"id": 4, "head_sha": commit, "event": "workflow_dispatch"},
     ]
+    for run in runs:
+        run.update(status="completed", conclusion="success")
 
     def artifact(kind, artifact_id, expired=False):
         return {"name": f"docs-{kind}-{commit}", "id": artifact_id, "expired": expired}
@@ -37,7 +41,7 @@ def test_selects_both_artifacts_from_one_successful_run(monkeypatch):
     def github(path, token):
         assert token == "test-token"  # noqa: S105
         if path.startswith("workflows/"):
-            assert f"head_sha={commit}" in path and "status=success" in path
+            assert f"head_sha={commit}" in path and "status=" not in path
             return {"workflow_runs": runs}
         return {"artifacts": responses[int(path.split("/")[1])]}
 
@@ -115,3 +119,135 @@ def test_same_commit_with_different_installed_version_is_rejected(tmp_path):
     )
     with pytest.raises(rtd_build.ci_artifacts.ArtifactVersionMismatchError):
         rtd_build.ci_artifacts._verified_files(tmp_path, "tutorials", commit)
+
+
+@pytest.mark.parametrize("conclusion", ["failure", "cancelled", "timed_out"])
+def test_failed_producer_stops_waiting_with_run_link(monkeypatch, conclusion):
+    monkeypatch.setattr(
+        rtd_build,
+        "_json",
+        lambda *_: {
+            "workflow_runs": [
+                {
+                    "id": 42,
+                    "head_sha": "commit",
+                    "event": "push",
+                    "status": "completed",
+                    "conclusion": conclusion,
+                }
+            ]
+        },
+    )
+    with pytest.raises(RuntimeError, match=r"actions/runs/42") as error:
+        rtd_build._find_artifacts("commit", "token", set())
+    assert conclusion in str(error.value)
+
+
+def test_active_retry_keeps_waiting_after_failed_run(monkeypatch):
+    monkeypatch.setattr(
+        rtd_build,
+        "_json",
+        lambda *_: {
+            "workflow_runs": [
+                {
+                    "id": 43,
+                    "head_sha": "commit",
+                    "event": "workflow_dispatch",
+                    "status": "in_progress",
+                    "conclusion": None,
+                },
+                {
+                    "id": 42,
+                    "head_sha": "commit",
+                    "event": "push",
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+                {
+                    "id": 44,
+                    "head_sha": "other",
+                    "event": "push",
+                    "status": "completed",
+                    "conclusion": "failure",
+                },
+            ]
+        },
+    )
+    assert rtd_build._find_artifacts("commit", "token", set()) is None
+
+
+def test_older_complete_pair_is_used_despite_newer_failure(monkeypatch):
+    def github(path, _token):
+        if path.startswith("workflows/"):
+            return {
+                "workflow_runs": [
+                    {
+                        "id": 43,
+                        "head_sha": "commit",
+                        "event": "push",
+                        "status": "completed",
+                        "conclusion": "failure",
+                    },
+                    {
+                        "id": 42,
+                        "head_sha": "commit",
+                        "event": "push",
+                        "status": "completed",
+                        "conclusion": "success",
+                    },
+                ]
+            }
+        return {
+            "artifacts": [
+                {"id": i, "name": f"docs-{kind}-commit", "expired": False}
+                for i, kind in enumerate(("gallery", "tutorials"))
+            ]
+        }
+
+    monkeypatch.setattr(rtd_build, "_json", github)
+    assert rtd_build._find_artifacts("commit", "token", set())[0] == 42
+
+
+def test_gallery_failure_traceback_escapes_captured_stderr(
+    monkeypatch, tmp_path, capfd
+):
+    ci = rtd_build.ci_artifacts
+    monkeypatch.setattr(ci, "_files", lambda *_: [])
+
+    def fail(**_kwargs):
+        raise RuntimeError("gallery diagnostic sentinel")
+
+    monkeypatch.setattr(ci, "_produce_gallery", fail)
+    captured = StringIO()
+    with (
+        redirect_stderr(captured),
+        pytest.raises(RuntimeError, match="gallery diagnostic sentinel"),
+    ):
+        ci.produce("gallery", tmp_path / "bundle")
+    stderr = capfd.readouterr().err
+    assert "Traceback (most recent call last)" in stderr
+    assert "RuntimeError: gallery diagnostic sentinel" in stderr
+    assert "FAILED execute gallery" in stderr
+    assert captured.getvalue() == ""
+
+
+def test_watchdog_is_cancelled_after_failure(monkeypatch):
+    from docs import build_diagnostics as diagnostics
+
+    calls = []
+    monkeypatch.setattr(
+        diagnostics.faulthandler,
+        "dump_traceback_later",
+        lambda delay, **kwargs: calls.append((delay, kwargs)),
+    )
+    monkeypatch.setattr(
+        diagnostics.faulthandler,
+        "cancel_dump_traceback_later",
+        lambda: calls.append("cancel"),
+    )
+    with pytest.raises(RuntimeError), diagnostics._diagnostics():
+        raise RuntimeError("test")
+    assert calls == [
+        (120, {"repeat": True, "file": diagnostics.sys.__stderr__}),
+        "cancel",
+    ]

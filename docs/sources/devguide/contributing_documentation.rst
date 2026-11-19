@@ -161,6 +161,21 @@ the corresponding RTD version of the temporary branch. To retry the original
 RTD version instead, generate artifacts for its current SHA. To restore
 execution inside RTD, unset ``SCPY_RTD_DOCS_ARTIFACTS``.
 
+If all artifact-production runs for the checkout have completed and the
+most recent run failed, RTD stops with a link to that run rather than
+waiting for the full timeout. An active retry can still complete, and an
+existing usable pair from a successful run for the same SHA is preferred.
+
+The documentation commands emit ``[docs-build]`` start/end markers and
+elapsed times for dependency imports, gallery execution, artifact lookup,
+download/extraction, manifest verification and HTML rendering. Exceptions
+are also written to the original standard-error stream so gallery output
+capture does not hide their traceback. During command execution, Python
+thread stacks are dumped every two minutes until the command finishes.
+Use the last phase marker and stacks to distinguish a slow or blocked
+operation from a missing artifact. These diagnostics do not establish the
+cause of a timeout on their own.
+
 Writing Tips
 ------------
 

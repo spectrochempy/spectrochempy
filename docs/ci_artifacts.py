@@ -11,14 +11,24 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import nullcontext
 from importlib.metadata import version
 from pathlib import Path
 
-import nbformat
-from sphinx.application import Sphinx
+from docs.build_diagnostics import _diagnostics
+from docs.build_diagnostics import _phase
 
-from docs import preexecute_notebooks as notebooks
-from docs.make import BuildDocumentation
+with (
+    _diagnostics() if __name__ == "__main__" else nullcontext(),
+    _phase("import documentation dependencies")
+    if __name__ == "__main__"
+    else nullcontext(),
+):
+    import nbformat
+    from sphinx.application import Sphinx
+
+    from docs import preexecute_notebooks as notebooks
+    from docs.make import BuildDocumentation
 
 SOURCES = notebooks.SOURCES
 GALLERY = Path("gettingstarted/examples/gallery")
@@ -91,7 +101,8 @@ def produce(kind, bundle, *, no_data=False):
             )
         notebooks.verify()
     else:
-        _produce_gallery(no_data=no_data)
+        with _phase("execute gallery"):
+            _produce_gallery(no_data=no_data)
         path = SOURCES / BACKREFERENCES
         backreferences = json.loads(path.read_text(encoding="utf-8"))
         for examples in backreferences.values():
@@ -155,7 +166,8 @@ def _verified_files(bundle, kind, commit):
 
 def render(artifacts):
     commit = _commit()
-    inputs = [_verified_files(artifacts / kind, kind, commit) for kind in KINDS]
+    with _phase("verify artifact manifests and files"):
+        inputs = [_verified_files(artifacts / kind, kind, commit) for kind in KINDS]
     for kind in KINDS:
         if any(path.exists() for path in _files(SOURCES, kind)):
             raise RuntimeError("Final render requires a clean source tree")
@@ -174,7 +186,8 @@ def render(artifacts):
                     raise RuntimeError(f"Invalid gallery backreference: {target}")
                 example[1] = example[2] = str(target)
         path.write_text(json.dumps(backreferences), encoding="utf-8")
-    render_html(gallery_from_artifact=True)
+    with _phase("render HTML from verified artifacts"):
+        render_html(gallery_from_artifact=True)
 
 
 def render_html(*, gallery_from_artifact):
@@ -209,10 +222,11 @@ def main():
     consumer = commands.add_parser("render")
     consumer.add_argument("artifacts", type=Path)
     args = parser.parse_args()
-    if args.command == "produce":
-        produce(args.kind, args.bundle, no_data=args.no_data)
-    else:
-        render(args.artifacts)
+    with _diagnostics(), _phase(f"{args.command} documentation artifacts"):
+        if args.command == "produce":
+            produce(args.kind, args.bundle, no_data=args.no_data)
+        else:
+            render(args.artifacts)
 
 
 if __name__ == "__main__":
