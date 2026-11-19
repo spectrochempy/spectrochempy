@@ -266,7 +266,7 @@ class Coord(NDMath, NDArray):
         self._set_data(data)
 
         # check if data is 1D
-        if self.has_data and len(self.shape) > 1:
+        if self.has_data and self._data.ndim > 1:
             squeezed = np.squeeze(self._data)
             if squeezed.ndim == 1:
                 self._data = squeezed
@@ -926,7 +926,7 @@ class Coord(NDMath, NDArray):
             The number of significant digit for coordinates values.
 
         """
-        if not self.has_data or self.data.size < 3:
+        if not self.has_data or self._data.size < 3:
             return
 
         data = self._data.squeeze()

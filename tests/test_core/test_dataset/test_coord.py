@@ -692,3 +692,14 @@ def test_nonlinear_rounding_retains_at_least_three_decimal_places():
     coord = Coord([1000.0, 1001.0, 1002.01])
     assert not coord.linear
     np.testing.assert_array_equal(coord.data, [1000.0, 1001.0, 1002.01])
+
+
+def test_linear_construction_does_not_round_values_individually(monkeypatch):
+    def unexpected_format(*args, **kwargs):
+        pytest.fail("Linear construction should not format each coordinate value")
+
+    monkeypatch.setattr(np, "format_float_positional", unexpected_format)
+    values = np.linspace(0.0, 100.0, 1000)
+    coord = Coord(values)
+    assert coord.linear
+    np.testing.assert_allclose(coord.data, np.around(values, 3))
