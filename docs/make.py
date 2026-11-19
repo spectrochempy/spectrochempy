@@ -89,12 +89,8 @@ except ImportError:  # pragma: no cover
 # name when the file is executed directly. Import it by package when this module
 # is loaded as ``docs.make`` and by directory entry otherwise.
 if __package__:
-    from .build_diagnostics import _diagnostics
-    from .build_diagnostics import _phase
     from .tools.helpers import sh
 else:
-    from build_diagnostics import _diagnostics
-    from build_diagnostics import _phase
     from tools.helpers import sh
 
 # Suppress other specific warnings
@@ -1619,6 +1615,13 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
+    if __package__:
+        from .build_diagnostics import _diagnostics
+        from .build_diagnostics import _phase
+    else:
+        from build_diagnostics import _diagnostics
+        from build_diagnostics import _phase
+
     with _diagnostics(), _phase("run documentation command"):
         exit_code = _main()
         _trace_ci(f"_main returned {exit_code!r}")
