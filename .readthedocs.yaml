@@ -53,6 +53,9 @@ build:
           python -u -m docs.preexecute_notebooks execute userguide/analysis/fitting.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
+          python -u -m docs.preexecute_notebooks execute userguide/analysis/global_fitting.ipynb; fi
+        - >-
+          if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
           python -u -m docs.preexecute_notebooks execute userguide/analysis/iris.ipynb; fi
         - >-
           if [ "${SCPY_RTD_DOCS_ARTIFACTS:-}" != 1 ] || [ "${READTHEDOCS_VERSION_TYPE:-}" = external ]; then
