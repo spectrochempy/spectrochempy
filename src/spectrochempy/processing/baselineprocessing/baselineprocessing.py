@@ -1111,7 +1111,10 @@ def _resolve_baseline_ranges(ranges, kwargs):
 def _fitted_baseline(dataset, ranges, kwargs):
     """Return one fitted `Baseline` processor for a public wrapper call."""
     ranges = _resolve_baseline_ranges(ranges, kwargs)
-    blc = Baseline()
+    constructor = {
+        key: kwargs.pop(key) for key in ("log_level", "warm_start") if key in kwargs
+    }
+    blc = Baseline(**constructor)
     # by default, model is 'polynomial' and order is 1.
     # kwargs can overwrite these default values
     configurable = set(blc.traits(config=True)) | {"breakpoints"}
