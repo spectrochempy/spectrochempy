@@ -11,8 +11,15 @@ ROOT = Path(__file__).parents[3]
 SCRIPT = ROOT / "src/spectrochempy/ci/regenerate_requirements.py"
 
 
-@pytest.fixture
-def generator(tmp_path, monkeypatch):
+@pytest.fixture(params=["\n", "\r\n"], ids=["lf", "crlf"])
+def generator(tmp_path, monkeypatch, request):
+    write_text = Path.write_text
+
+    def write_with_newline(path, data, *args, **kwargs):
+        kwargs["newline"] = request.param
+        return write_text(path, data, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", write_with_newline)
     spec = importlib.util.spec_from_file_location("regenerate_requirements", SCRIPT)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -63,7 +70,9 @@ def test_unavailable_conda_requirements_are_installed_with_pip(
 def test_pip_requirements_are_preserved(generator):
     generator.main()
     for path in (generator.repo_path / "requirements").glob("*.txt"):
-        assert path.read_bytes() == (ROOT / "requirements" / path.name).read_bytes()
+        assert path.read_text(encoding="utf-8") == (
+            ROOT / "requirements" / path.name
+        ).read_text(encoding="utf-8")
 
 
 def test_regeneration_is_reproducible_and_generated_files_are_current(generator):
@@ -73,7 +82,9 @@ def test_regeneration_is_reproducible_and_generated_files_are_current(generator)
     generator.main()
     assert {path.name: path.read_bytes() for path in paths} == first
     for path in paths:
-        assert path.read_bytes() == (ROOT / "environments" / path.name).read_bytes()
+        assert path.read_text(encoding="utf-8") == (
+            ROOT / "environments" / path.name
+        ).read_text(encoding="utf-8")
         assert (
             _dependencies(generator, path.stem.removeprefix("environment")).count("pip")
             == 1
