@@ -226,7 +226,11 @@ class Coord(NDMath, NDArray):
         Notes
         -----
         The data are always returned as a 1D array of float rounded to the number
-        of significant digits given by the `sigdigits` parameters.
+        of significant digits given by the `sigdigits` parameter. Nonlinear
+        coordinates with at least three points are rounded independently per
+        value, preserving small values on axes spanning several decades. The
+        precision remains at least three decimal places. Linear coordinates and
+        one-/two-point coordinates retain a common decimal precision.
         If the spacing between the data is constant with the accuracy given by the
         significant digits, the data are thus linearized
         and the `linear` attribute is set to True.
@@ -236,10 +240,24 @@ class Coord(NDMath, NDArray):
         # now eventually round the data to the number of significant digits
         # for displaying (internally _data as its full precision)
         if data is not None and len(data) > 0 and self._rounding:
-            maxval = np.max(np.abs(data))
-            rounding = 3
-            nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
-            data = np.around(data, max(nd, rounding))
+            if self.linear or data.size < 3:
+                maxval = np.max(np.abs(data))
+                rounding = 3
+                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
+                data = np.around(data, max(nd, rounding))
+            elif data.dtype.kind == "f":
+                data = np.array(
+                    [
+                        np.format_float_positional(
+                            value,
+                            precision=max(3, get_n_decimals(value, self.sigdigits)),
+                            unique=False,
+                            fractional=True,
+                        )
+                        for value in data.flat
+                    ],
+                    dtype=data.dtype,
+                ).reshape(data.shape)
         return data
 
     @data.setter
@@ -248,7 +266,7 @@ class Coord(NDMath, NDArray):
         self._set_data(data)
 
         # check if data is 1D
-        if self.has_data and len(self.shape) > 1:
+        if self.has_data and self._data.ndim > 1:
             squeezed = np.squeeze(self._data)
             if squeezed.ndim == 1:
                 self._data = squeezed
@@ -908,7 +926,7 @@ class Coord(NDMath, NDArray):
             The number of significant digit for coordinates values.
 
         """
-        if not self.has_data or self.data.size < 3:
+        if not self.has_data or self._data.size < 3:
             return
 
         data = self._data.squeeze()
