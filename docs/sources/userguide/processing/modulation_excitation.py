@@ -249,10 +249,10 @@ _ = fundamental.phase_lag.plot()
 
 # %% [markdown]
 # The amplitude spectrum shows the bands of A and C, while the weaker band of
-# B is hidden between them. The phase lag reveals it: close to 115° on the
-# band of A and to 280° on the band of C, it passes through about 45° at
-# 1640 cm⁻¹, where the almost opposite contributions of A and C cancel and
-# that of B remains.
+# B only appears as a shoulder between them. The phase lag reveals it: close
+# to 115° on the band of A and to 280° on the band of C, it passes through
+# about 45° at 1640 cm⁻¹, where the almost opposite contributions of A and C
+# cancel and that of B remains.
 # The jump from 360° to 0° near 1650 cm⁻¹ only reflects the wrapping of the
 # angle. Outside the bands, where the amplitude is close to the noise level,
 # the phase lag is meaningless.
@@ -271,9 +271,10 @@ _ = second.prs.plot(colorbar=True)
 
 # %% [markdown]
 # Here, at $k = 2$, the band of C (1670 cm⁻¹) almost vanishes, while the
-# bands of B (1640 cm⁻¹) and A (1610 cm⁻¹) have opposite signs. The rise and
-# decay of B within each X pulse make its response strongly non-sinusoidal:
-# the intermediate, the weakest band at the fundamental, is now the strongest.
+# bands of B (1640 cm⁻¹) and A (1610 cm⁻¹) have opposite signs. B rises and
+# decays within each X pulse but only recovers during the Y pulse: the two
+# half-periods are not mirror images, so the intermediate, the weakest band
+# at the fundamental, is now the strongest.
 
 # %% [markdown]
 # ## Explore experimental data
