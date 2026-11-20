@@ -11,3 +11,15 @@ What's New in Revision 1.4.1.dev
 
 These are the changes in SpectroChemPy-1.4.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
+
+Bug Fixes
+~~~~~~~~~
+
+- ``ActionMassKinetics``: the analytical Jacobian (``use_jac=True``) is now correct
+  for stoichiometric coefficients greater than one; ``fit_to_concentrations``
+  honors ``method`` in ``optimizer_kwargs`` (it was silently ignored, and
+  Nelder-Mead was always used); the optimizer ``left_op`` is applied
+  once per evaluation instead of accumulating, and the model holds the optimal
+  parameters after the fit. With a temperature profile ``T(t)``, ``k_dt`` is now
+  optional (rate constants are then computed at each step), a single gas constant
+  is used, and plain rate constants raise a clear error.
