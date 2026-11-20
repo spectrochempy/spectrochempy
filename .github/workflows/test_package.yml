@@ -13,8 +13,6 @@ on:
     branches:
       - master
       - develop
-      - feature/*
-      - chore/*
     paths-ignore:
       - 'docs/**'
 
@@ -317,12 +315,13 @@ jobs:
           echo "pytest targets: ${SCPY_TEST_TARGETS:-${{ matrix.test_targets || 'tests' }}}"
           targets="${SCPY_TEST_TARGETS:-${{ matrix.test_targets || 'tests' }}}"
           pytest_extra_args=()
+          profile_markers=""
           if [[ "${{ matrix.docs_examples }}" != "true" ]]; then
             pytest_extra_args+=(--ignore=tests/test_docs/test_py_in_docs.py)
             echo "documentation scripts: omitted in this job"
           fi
           if [[ "${{ matrix.core_only }}" == "true" ]]; then
-            pytest_extra_args+=(-m "not network and not data")
+            profile_markers="not network and not data"
             echo "core-only markers: excluding network and data tests"
           fi
           if [[ "${{ matrix.docs_examples }}" != "true" && "$targets" == "tests/test_docs" ]]; then
@@ -335,10 +334,18 @@ jobs:
           pytest_capture_args=(-s)
           serial_pytest_args=("${pytest_extra_args[@]}")
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            pytest_xdist_args+=(-n auto -m "not serial")
-            serial_pytest_args+=(-m serial)
+            parallel_markers="not serial"
+            serial_markers="serial"
+            if [[ -n "$profile_markers" ]]; then
+              parallel_markers="($profile_markers) and ($parallel_markers)"
+              serial_markers="($profile_markers) and ($serial_markers)"
+            fi
+            pytest_xdist_args+=(-n auto -m "$parallel_markers")
+            serial_pytest_args+=(-m "$serial_markers")
             pytest_capture_args=()
             echo "pytest-xdist: enabled for pull request validation"
+          elif [[ -n "$profile_markers" ]]; then
+            pytest_xdist_args+=(-m "$profile_markers")
           fi
           run_tests() {
             local pytest_args=("$@")

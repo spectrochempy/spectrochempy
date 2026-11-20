@@ -237,32 +237,6 @@ def isolate_scp_preferences():
     prefs.update(snapshot)
 
 
-# ----------------------------
-# Cleaning when exiting pytest
-# ----------------------------
-def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
-    """Whole test run finishes."""
-
-    # cleaning
-    cwd = Path(__file__).parent.parent
-
-    for f in list(cwd.glob("**/*.?scp")):
-        f.unlink()
-    for f in list(cwd.glob("**/*.jdx")):
-        f.unlink()
-    for f in list(cwd.glob("**/*.json")):
-        if (  # important: add any parts to exclude from deleting json files
-            f.name
-            not in ["zenodo.json", "versions.json", "preferences.json", "opencode.json"]
-            and ".vscode" not in f.parts
-            and ".venv" not in f.parts
-            and ".git" not in f.parts
-        ):
-            f.unlink()
-    for f in list(cwd.glob("**/*.log")):
-        f.unlink()
-
-
 # ======================================================================================
 # FIXTURES
 # ======================================================================================
