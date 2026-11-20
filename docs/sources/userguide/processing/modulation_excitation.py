@@ -30,7 +30,7 @@
 # same period. Species that do not respond, such as spectators or the
 # support, contribute a constant signal.
 #
-# Recording many identical cycles brings three advantages
+# Modulating periodically and averaging many cycles brings three advantages
 # `baurecht:2001,urakawa:2008`{.interpreted-text role="cite:p"}:
 #
 # - **sensitivity**: averaging over cycles reduces the noise;
@@ -166,7 +166,7 @@ pure_spectra = scp.stack(
         for pos in (1610, 1640, 1670)
     ]
 )
-background = 20 * scp.gaussian(wavenumber.data, pos=1650, width=150, normalized=False)
+background = 20 * scp.gaussian(wavenumber, pos=1650, width=150, normalized=False)
 
 spectra = scp.dot(concentration_profiles, pure_spectra) + background + 2
 spectra += scp.normal(scale=0.01, size=spectra.shape, seed=42)
