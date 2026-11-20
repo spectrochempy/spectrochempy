@@ -52,6 +52,13 @@ Cantera (experimental)
     **EXPERIMENTAL** — The ``spectrochempy-cantera`` plugin is not officially
     supported. Its API is subject to change without notice.
 
+.. deprecated:: 1.4.1
+
+    The ``spectrochempy-cantera`` plugin and ``PFR`` (``scp.cantera.PFR`` and the
+    alias ``scp.PFR``) will be removed in the next minor release. ``PFR`` cannot be
+    built with Cantera 3.0 or later. Use Cantera directly and load its results
+    into an ``NDDataset`` if needed.
+
 The ``spectrochempy-cantera`` plugin provides a plug-flow reactor (PFR) model
 based on Cantera. It is kept as an experimental plugin because the simulation
 APIs are still evolving and have not yet reached the stability required for
