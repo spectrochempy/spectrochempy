@@ -104,7 +104,7 @@ import spectrochempy as scp
 # %% [raw] raw_mimetype="text/restructuredtext"
 # .. raw:: html
 #
-#    <details><summary>Show code for the concentration profiles</summary>
+#    <details><summary>Show code for generating the concentration profiles</summary>
 
 # %%
 period, n_spectra_per_cycle, n_cycles = 60.0, 60, 30
@@ -149,14 +149,14 @@ _ = concentration_profiles[: 10 * n_spectra_per_cycle].T.plot(
 #
 # ### Simulate the spectra
 #
-# Each species has one Gaussian band. The spectra add a broad static
+# Each species has one Gaussian band. We add a broad static
 # background, about a hundred times larger than the variations of the
 # active species, and noise.
 
 # %% [raw] raw_mimetype="text/restructuredtext"
 # .. raw:: html
 #
-#    <details><summary>Show code for the spectra</summary>
+#    <details><summary>Show code for generating the spectra</summary>
 
 # %%
 wavenumber = scp.Coord.linspace(1500, 1800, 301, title="wavenumber", units="cm^-1")
