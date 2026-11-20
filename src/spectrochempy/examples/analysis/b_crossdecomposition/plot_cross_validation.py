@@ -21,6 +21,8 @@ by Eigenvector with permission. Here we use only the M5 spectra and moisture.
 
 # %%
 # Import package
+from os import getenv
+
 import spectrochempy as scp
 
 # %%
@@ -29,7 +31,10 @@ import spectrochempy as scp
 # The remote archive is an existing SpectroChemPy example dependency. A failed
 # download raises normally, so a documentation build cannot silently publish a
 # partially executed analysis.
-datasets = scp.read("https://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+datasets = scp.read(
+    getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat"),
+    merge=False,
+)
 X = next(dataset for dataset in datasets if dataset.name == "m5spec").copy()
 properties = next(dataset for dataset in datasets if dataset.name == "propvals").copy()
 y = properties[:, "Moisture"].squeeze()

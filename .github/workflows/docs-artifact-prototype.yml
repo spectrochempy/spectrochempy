@@ -47,8 +47,18 @@ jobs:
           done
           python -m pip install "spectrochempy-nmr>=0.2,<0.5" osqp scipy tensorly
           python -c 'from importlib.metadata import version; import spectrochempy as scp; assert callable(scp.nmr.read); print("NMR plugin", version("spectrochempy-nmr"))'
+      - name: Prepare private Corn data
+        if: ${{ github.repository == 'spectrochempy/spectrochempy' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')) }}
+        uses: ./.github/actions/private-corn-data
+        with:
+          ssh-key: ${{ secrets.SCPY_CORN_DATA_SSH_KEY }}
+          revision: ${{ vars.SCPY_CORN_DATA_REVISION }}
       - name: Generate source artifact
-        run: python -m docs.ci_artifacts produce ${{ matrix.kind }} "${{ runner.temp }}/bundle"
+        run: python -u -m docs.ci_artifacts produce ${{ matrix.kind }} "${{ runner.temp }}/bundle"
+      - name: Remove private Corn working copies
+        if: always()
+        shell: bash
+        run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True)"
       - uses: actions/upload-artifact@v7
         with:
           name: docs-${{ matrix.kind }}-${{ github.sha }}
@@ -82,7 +92,7 @@ jobs:
           name: docs-gallery-${{ github.sha }}
           path: ${{ runner.temp }}/docs-inputs/gallery
       - name: Verify source artifacts and build HTML
-        run: python -m docs.ci_artifacts render "${{ runner.temp }}/docs-inputs"
+        run: python -u -m docs.ci_artifacts render "${{ runner.temp }}/docs-inputs"
       - name: Check integrated site entry points
         run: |
           test -s "$READTHEDOCS_OUTPUT/html/index.html"

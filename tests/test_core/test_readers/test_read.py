@@ -5,6 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
+from os import getenv
 from pathlib import Path
 
 import pytest
@@ -119,17 +120,22 @@ def test_read_invalid_url_type():
 
 @pytest.mark.network
 def test_read_eigenvector_corn():
-    """Read corn.mat from eigenvector.com."""
+    """Read the trusted Corn fixture, or the public source when not supplied."""
+    source = getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat")
     try:
-        ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+        ds1 = scp.read(source, merge=False)
         assert len(ds1) == 7
     except Exception as exc:  # noqa: BLE001
+        if getenv("SCPY_CORN_DATA"):
+            raise
         _skip_if_eigenvector_unreachable(exc)
 
     try:
-        ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+        ds2 = scp.read_mat(source, merge=False)
         assert len(ds2) == 7
     except Exception as exc:  # noqa: BLE001
+        if getenv("SCPY_CORN_DATA"):
+            raise
         _skip_if_eigenvector_unreachable(exc)
 
 
@@ -138,11 +144,16 @@ def test_read_eigenvector_corn_zip():
     """Read corn.mat_.zip from eigenvector.com."""
     try:
         ds3 = scp.read(
-            "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip",
+            getenv(
+                "SCPY_CORN_ZIP",
+                "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip",
+            ),
             merge=False,
         )
         assert len(ds3) == 7
     except Exception as exc:  # noqa: BLE001
+        if getenv("SCPY_CORN_ZIP"):
+            raise
         _skip_if_eigenvector_unreachable(exc)
 
 
