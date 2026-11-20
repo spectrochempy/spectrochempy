@@ -133,8 +133,7 @@ _ = C[: 10 * n_spectra_per_cycle].T.plot(labels=kinetics.species, legend="best")
 #
 # Each species has one Gaussian band. The spectra add a broad static
 # background, about a hundred times larger than the variations of the
-# active species, and noise. `plot_multiple` draws markers by default;
-# `method="pen"` draws the spectra as lines.
+# active species, and noise.
 
 # %%
 wavenumber = scp.Coord.linspace(1500, 1800, 301, title="wavenumber", units="cm^-1")
@@ -152,18 +151,10 @@ spectra = scp.dot(C, pure) + background + 2
 spectra += scp.normal(scale=0.01, size=spectra.shape, seed=42)
 spectra.title = "absorbance"
 
-last_cycle = spectra[-n_spectra_per_cycle:]
-_ = scp.plot_multiple(
-    [last_cycle[i] for i in (0, 15, 30, 45)],
-    method="pen",
-    labels=[
-        f"{last_cycle.y.data[i] - last_cycle.y.data[0]:g} s" for i in (0, 15, 30, 45)
-    ],
-    legend="best",
-)
+_ = spectra[-n_spectra_per_cycle:].plot(colorbar=True)
 
 # %% [markdown]
-# The four spectra of the last cycle are almost superimposed: the background
+# The spectra of the last cycle are almost superimposed: the background
 # dominates and the bands of A, B and C cannot be distinguished.
 #
 # ## Demodulate at the fundamental
@@ -186,7 +177,8 @@ _ = fundamental.prs.plot(colorbar=True)
 # bands at 1610, 1640 and 1670 cm⁻¹ do not grow and decay together.
 #
 # To find the in-phase angle of each band, follow its intensity as a function
-# of the demodulation angle.
+# of the demodulation angle. `plot_multiple` draws markers by default;
+# `method="pen"` draws lines.
 
 # %%
 bands = (1610.0, 1640.0, 1670.0)
