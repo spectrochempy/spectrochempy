@@ -79,7 +79,7 @@ class IrisPlugin(SpectroChemPyPlugin):
     """
 
     name = "iris"
-    version = "0.1.10"
+    version = "0.2.0"
     description = "Extended IRIS analysis: custom kernels, batch analysis, model comparison, enhanced plots"
     spectrochempy_min_version = "1.1.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
