@@ -18,6 +18,85 @@ pytest.importorskip("sphinx")
 rtd_build = importlib.import_module("docs.rtd_build")
 
 
+def test_gallery_local_class_backreferences_are_portable(tmp_path, monkeypatch):
+    pytest.importorskip("sphinx_gallery")
+    from sphinx.application import Sphinx
+
+    ci = rtd_build.ci_artifacts
+    sources = tmp_path / "docs" / "sources"
+    examples = tmp_path / "examples"
+    sources.mkdir(parents=True)
+    examples.mkdir()
+    (examples / "README.rst").write_text("Examples\n========\n")
+    (examples / "plot_local_class.py").write_text(
+        '''"""Local axes\n==========\n"""
+import spectrochempy as scp
+
+dataset = scp.NDDataset([1., 2., 3.])
+
+def make_axes():
+    class Axes:
+        def plot(self):
+            return None
+    Axes.__module__ = "spectrochempy"
+    return Axes()
+
+axes = make_axes()
+axes.plot()
+'''
+    )
+    (sources / "conf.py").write_text(
+        f"""extensions = ["sphinx_gallery.gen_gallery"]
+master_doc = "index"
+sphinx_gallery_conf = {{
+    "examples_dirs": {str(examples)!r},
+    "gallery_dirs": {ci.GALLERY.as_posix()!r},
+    "backreferences_dir": {(ci.GALLERY / "backreferences").as_posix()!r},
+    "doc_module": ("spectrochempy",),
+    "download_all_examples": False,
+}}
+"""
+    )
+    (sources / "index.rst").write_text(
+        f"Gallery\n=======\n\n.. toctree::\n\n   {ci.GALLERY.as_posix()}/index\n"
+        "\n.. minigallery:: spectrochempy.NDDataset\n"
+    )
+
+    def generate(**_kwargs):
+        app = Sphinx(
+            str(sources),
+            str(sources),
+            str(tmp_path / "html"),
+            str(tmp_path / "doctrees"),
+            "html",
+            status=StringIO(),
+            warning=StringIO(),
+            freshenv=True,
+        )
+        app.build()
+        assert app.statuscode == 0
+
+    monkeypatch.setattr(ci, "SOURCES", sources)
+    monkeypatch.setattr(ci, "_produce_gallery", generate)
+    monkeypatch.setattr(ci, "_commit", lambda: "commit")
+    bundle = tmp_path / "bundle"
+    ci.produce("gallery", bundle)
+    root, files = ci._verified_files(bundle, "gallery", "commit")
+    assert all(
+        not set('<>:"\\|?*').intersection(path.relative_to(root).as_posix())
+        for path in files
+    )
+    backreferences = (root / ci.BACKREFERENCES).read_text()
+    assert "spectrochempy.make_axes.<locals>.Axes" in backreferences
+    assert "spectrochempy.NDDataset" in backreferences
+    assert any("_locals_" in path.name for path in files)
+    assert "plot_local_class.html" in (tmp_path / "html" / "index.html").read_text()
+    example = next(path for path in files if path.name == "plot_local_class.rst")
+    example.write_text(example.read_text() + "altered")
+    with pytest.raises(RuntimeError, match="Missing or altered files"):
+        ci._verified_files(bundle, "gallery", "commit")
+
+
 def test_selects_both_artifacts_from_one_successful_run(monkeypatch):
     commit = "a" * 40
     runs = [
