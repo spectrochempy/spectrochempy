@@ -92,7 +92,7 @@ Dependency Updates
   extras and installation workflows. Plugins in the ``0.x`` series can
   receive minor updates without a new core release solely to widen their
   version range. Each plugin still declares the core versions it requires;
-  check its release notes for migrations between ``0.x`` minor versions.
+  check its release notes for migrations between ``0.x`` minor versions. (:pr:`1909`)
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
