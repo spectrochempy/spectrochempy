@@ -356,9 +356,9 @@ jobs:
               target_index=$((target_index + 1))
               echo "pytest target: $target"
               if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
-                SCPY_CI_TEST_COUNTS="$ci_reports/primary-${target_index}.json" coverage run --append --source=spectrochempy -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+                SCPY_CI_TEST_COUNTS="$ci_reports/primary-${target_index}.json" coverage run --append --source=spectrochempy -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" --junitxml="$ci_reports/primary-${target_index}.xml" -ra --durations=10
               else
-                SCPY_CI_TEST_COUNTS="$ci_reports/primary-${target_index}.json" python -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+                SCPY_CI_TEST_COUNTS="$ci_reports/primary-${target_index}.json" python -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" --junitxml="$ci_reports/primary-${target_index}.xml" -ra --durations=10
               fi
               target_status=$?
               if [[ "$target_status" != "0" && "$target_status" != "5" ]]; then
@@ -373,7 +373,7 @@ jobs:
           status=${PIPESTATUS[0]}
           if [[ "$status" == "0" && "${{ github.event_name }}" == "pull_request" ]]; then
             echo "pytest serial tests: enabled for tests marked serial" | tee -a pytest.log
-            SCPY_CI_TEST_COUNTS="$ci_reports/serial.json" python -m pytest $targets "${serial_pytest_args[@]}" -p tests._ci_execution_counts -s -ra --durations=10 | tee -a pytest.log
+            SCPY_CI_TEST_COUNTS="$ci_reports/serial.json" python -m pytest $targets "${serial_pytest_args[@]}" -p tests._ci_execution_counts --junitxml="$ci_reports/serial.xml" -s -ra --durations=10 | tee -a pytest.log
             serial_status=${PIPESTATUS[0]}
             if [[ "$serial_status" != "0" && "$serial_status" != "5" ]]; then
               status=$serial_status
@@ -392,7 +392,8 @@ jobs:
         run: |
           python .github/workflows/scripts/ci_diagnostics.py summary \
             --pytest-log pytest.log \
-            --timings "$CI_TIMING_FILE"
+            --timings "$CI_TIMING_FILE" \
+            --pytest-reports "${SCPY_CI_REPORT_DIR:-}"
 
       - name: Debug info coverage content
         if: ${{ always() && matrix.coverage && github.event_name != 'pull_request' && !(env.ACT && matrix.pythonVersion == '3.14') }}
@@ -425,6 +426,18 @@ jobs:
         if: always()
         shell: bash
         run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True)"
+
+      - name: Retain failed test diagnostics
+        if: ${{ failure() && env.SCPY_CI_REPORT_DIR != '' && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pytest-${{ runner.os }}-py${{ matrix.pythonVersion }}-${{ matrix.validation }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.SCPY_CI_REPORT_DIR }}
+            pytest.log
+            ${{ env.CI_TIMING_FILE }}
+          retention-days: 7
+          if-no-files-found: warn
 
       - name: Remove temporary pytest reports
         if: ${{ always() && env.SCPY_CI_REPORT_DIR != '' }}

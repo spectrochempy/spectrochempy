@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import importlib.metadata as metadata
 import importlib.util
+import json
 import os
 import platform
 import re
@@ -186,13 +187,42 @@ def _read_timings(path: Path | None) -> list[str]:
     ]
 
 
-def print_job_summary(pytest_log: Path | None, timings: Path | None) -> None:
+def read_execution_reports(directory: Path | None) -> list[dict]:
+    if directory is None:
+        return []
+    reports = []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+            for key in ("collected", "executed", "exitstatus"):
+                value = report[key]
+                if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                    raise ValueError(f"Invalid {key}")
+        except (ValueError, KeyError, OSError, TypeError) as error:
+            print(f"Warning: could not read {path.name}: {error}", file=sys.stderr)
+            continue
+        reports.append({**report, "invocation": path.stem})
+    return reports
+
+
+def print_job_summary(
+    pytest_log: Path | None, timings: Path | None, pytest_reports: Path | None = None
+) -> None:
     print("::group::CI job summary")
     print(f"Python: {platform.python_version()}")
     print(f"Platform: {platform.platform()}")
 
     summary = parse_pytest_summary(pytest_log) if pytest_log else {}
-    if summary:
+    reports = read_execution_reports(pytest_reports)
+    if reports:
+        print("Pytest invocations:")
+        for report in reports:
+            print(
+                f"  {report['invocation']}: collected={report['collected']} "
+                f"executed={report['executed']} exitstatus={report['exitstatus']}"
+            )
+        print(f"Total test executions: {sum(r['executed'] for r in reports)}")
+    elif summary:
         print("Pytest summary:")
         for status in PYTEST_STATUSES:
             print(f"  {status}: {summary.get(status, '0')}")
@@ -225,7 +255,19 @@ def print_job_summary(pytest_log: Path | None, timings: Path | None) -> None:
         stream.write("## CI diagnostics\n\n")
         stream.write(f"- Python: `{platform.python_version()}`\n")
         stream.write(f"- Platform: `{platform.platform()}`\n")
-        if summary:
+        if reports:
+            stream.write("\n### Pytest invocations\n\n")
+            stream.write("| Invocation | Collected | Executed | Exit status |\n")
+            stream.write("|---|---:|---:|---:|\n")
+            for report in reports:
+                stream.write(
+                    f"| {report['invocation']} | {report['collected']} | "
+                    f"{report['executed']} | {report['exitstatus']} |\n"
+                )
+            stream.write(
+                f"\nTotal test executions: **{sum(r['executed'] for r in reports)}**\n\n"
+            )
+        elif summary:
             stream.write("- Pytest:\n")
             for status in PYTEST_STATUSES:
                 stream.write(f"  - {status}: `{summary.get(status, '0')}`\n")
@@ -247,6 +289,7 @@ def main() -> int:
     summary = subparsers.add_parser("summary")
     summary.add_argument("--pytest-log")
     summary.add_argument("--timings")
+    summary.add_argument("--pytest-reports")
     args = parser.parse_args()
 
     if args.command == "environment":
@@ -254,7 +297,8 @@ def main() -> int:
     elif args.command == "summary":
         pytest_log = Path(args.pytest_log) if args.pytest_log else None
         timings = Path(args.timings) if args.timings else None
-        print_job_summary(pytest_log, timings)
+        pytest_reports = Path(args.pytest_reports) if args.pytest_reports else None
+        print_job_summary(pytest_log, timings, pytest_reports)
     return 0
 
 

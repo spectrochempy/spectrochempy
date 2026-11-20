@@ -83,3 +83,9 @@ def test_workflow_exit_status(tmp_path, body, event, expected, windows_newlines)
         timeout=90,
     )
     assert result.returncode == expected, result.stdout + result.stderr
+    reports = next(tmp_path.glob("scpy-pytest-*"))
+    assert {p.stem for p in reports.glob("*.xml")} == {
+        p.stem for p in reports.glob("*.json")
+    }
+    for path in reports.glob("*.xml"):
+        assert "<testsuite" in path.read_text(encoding="utf-8")
