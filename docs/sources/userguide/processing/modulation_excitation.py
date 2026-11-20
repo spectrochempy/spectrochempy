@@ -18,168 +18,247 @@
 # .. _modulation-excitation:
 
 # %% [markdown]
-# # Phase-sensitive detection for modulation excitation
-
-# %% [raw] raw_mimetype="text/restructuredtext"
-# Phase-sensitive detection (PSD) extracts spectral changes synchronized with
-# a periodic stimulus. At a given harmonic, every phase-resolved spectrum is a
-# linear combination of two quadrature spectra. The amplitude locates the
-# strongest response, and the phase describes its timing relative to a chosen
-# origin. A synchronized feature can arise from the sample, the gas phase or
-# the measurement setup :cite:p:`baurecht:2001,urakawa:2008`.
-
-# %% [markdown]
-# ## Choose and prepare data
+# # Modulation excitation and phase-sensitive detection
 #
-# One complete cycle of time-resolved spectra is enough to calculate a PSD.
-# Keep individual cycles to assess reproducibility. Export the spectral axis,
-# coordinate and intensity units, acquisition timestamps and exposure duration,
-# and stimulus and switching times on a common clock. Preserve the identity of
-# startup cycles, interruptions and missing acquisitions.
-
-# %% [raw] raw_mimetype="text/restructuredtext"
-# Choose a cadence and exposure time that resolve the fastest response of
-# interest. With 24 evenly spaced spectra per period, harmonics below order
-# 12 have two independent quadratures. Exposure averaging, gas dispersion
-# and noise can make the usable range smaller. Align the cycles to the same
-# reference and check early and late blocks for drift before averaging.
-# Reshaping by a fixed number of spectra per cycle assumes complete,
-# already aligned cycles. The stimulus waveform also determines which
-# harmonics are excited :cite:p:`decoster:2023`.
-
-# %% [markdown]
-# For gas modulation, record the valve command and, if possible, the gas
-# composition near the sample. A blank run can help characterize the delay
-# and broadening of the stimulus. To estimate gain and phase, divide the
-# complex response coefficient by the complex stimulus coefficient at each
-# harmonic where the measured stimulus has adequate signal. Use a common
-# time origin and report phases relative to the nominal switch when that is
-# the only available reference.
+# ## Modulation excitation spectroscopy
 #
-# ## Run PSD on a known signal
+# In a modulation excitation (ME) experiment, an external parameter is varied
+# periodically while spectra are recorded: the concentration of a reactant,
+# the temperature, an electrode potential or the intensity of a light source.
+# After a few periods, the system reaches a periodic steady state in which
+# every species that responds reversibly to the stimulus oscillates with the
+# same period. Species that do not respond, such as spectators or the
+# support, contribute a constant signal.
 #
-# Two overlapping bands vary over time. Follow their time profiles into the
-# simulated spectra, then demodulate at each harmonic.
+# Recording many identical cycles brings three advantages
+# `baurecht:2001,urakawa:2008`{.interpreted-text role="cite:p"}:
 #
-# ### Define the modulation profiles
+# - **sensitivity**: averaging over cycles reduces the noise;
+# - **selectivity**: the periodic response can be separated from the large
+#   static contributions;
+# - **kinetic information**: each species follows the stimulus with its own
+#   delay, which depends on the reaction pathway.
 #
-# Over one period of 40 seconds, the weight of band A oscillates once and the
-# weight of band B oscillates twice. These are prescribed responses in the
-# simulation. The samples are taken at the right endpoints of 32 equal time bins per
-# cycle, matching the PSD Riemann convention.
+# ## Phase-sensitive detection
+#
+# Phase-sensitive detection (PSD) is the most widely used method to process
+# ME spectra. It converts the time-resolved spectra $A(t, \epsilon)$ of one
+# period $T$ into phase-resolved spectra:
+#
+# $$
+# A_k(\varphi, \epsilon) = \frac{2}{T} \int_0^T A(t, \epsilon)
+#     \sin\left(k \omega t + \varphi\right) \mathrm{d}t,
+#     \qquad \omega = \frac{2 \pi}{T},
+# $$
+#
+# where $k$ is the harmonic order and $\varphi$ the demodulation phase angle.
+# The integral of a constant over a full period vanishes, so the static
+# contributions disappear, and the noise, not correlated with the stimulus,
+# is strongly decreased.
+#
+# PSD is usually calculated at a series of demodulation angles, for example
+# every 15° over a full turn. The spectrum at $\varphi + 180°$ is the same as
+# at $\varphi$ with the opposite sign. The intensity of each band varies with $\varphi$
+# and reaches its maximum at the in-phase angle, which reflects the delay of
+# the band with respect to the stimulus
+# `urakawa:2023`{.interpreted-text role="cite:p"}. The bands of a given
+# species rise and fall together, so they share the same in-phase angle.
+# Bands with different in-phase angles belong to species with different
+# kinetics, even when they overlap. At the angle where the bands of one
+# species cross zero, the phase-resolved spectrum only shows the others.
+#
+# The rest of this tutorial simulates a modulation experiment with a known
+# reaction mechanism, then applies PSD to recover what the raw spectra hide.
 
 # %%
-from math import pi
+import numpy as np
 
 import spectrochempy as scp
 
-n_cycles, n_times, period = 6, 32, 40.0
-time = scp.Coord.linspace(
-    period / n_times, period, n_times, title="time within cycle", units="s"
-)
-theta = 2 * pi * scp.linspace(1 / n_times, 1, n_times, dims=["y"])
-profile_a = 1 + 0.25 * scp.sin(theta)
-profile_b = 0.4 + 0.10 * scp.sin(2 * theta - 0.6)
-profiles = [
-    scp.NDDataset(profile.data, title="band weight", coordset=[time])
-    for profile in (profile_a, profile_b)
+# %% [markdown]
+# ## Simulate a modulation experiment
+#
+# ### Reaction mechanism
+#
+# Consider two successive surface reactions, induced by rectangular
+# concentration pulses of two spectroscopically silent species X and Y in
+# large excess:
+#
+# $$
+# \mathrm{A} \underset{k_{-1} c_\mathrm{Y}}{\overset{k_1 c_\mathrm{X}}{\rightleftharpoons}}
+# \mathrm{B} \underset{k_{-2} c_\mathrm{Y}}{\overset{k_2 c_\mathrm{X}}{\rightleftharpoons}}
+# \mathrm{C}
+# $$
+#
+# For example, X oxidizes A to C through the intermediate B, and Y reduces
+# them back. X flows during the first half of each period and Y during the
+# second, so the forward steps only occur in the first half-period and the
+# reverse steps in the second. The pseudo-first-order constants are given in
+# units of the inverse period.
+#
+# `ActionMassKinetics` integrates each half-period, starting from the
+# concentrations reached at the end of the previous one.
+
+# %%
+period, n_spectra_per_cycle, n_cycles = 60.0, 60, 30
+pulses = [
+    (["A -> B", "B -> C"], [5 / period, 2 / period]),  # X pulse
+    (["B -> A", "C -> B"], [2 / period, 1 / period]),  # Y pulse
 ]
-modulation_ax = scp.plot_multiple(
-    profiles,
-    method="pen",
-    labels=["Band A", "Band B"],
-    legend="best",
-    show=False,
-)
+
+dt = period / n_spectra_per_cycle
+concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
+blocks, times, t0 = [], [], 0.0
+for _ in range(n_cycles):
+    for reactions, rate_constants in pulses:
+        kinetics = scp.ActionMassKinetics(reactions, concentrations, rate_constants)
+        t = t0 + dt * np.arange(n_spectra_per_cycle // 2 + 1)
+        profile = kinetics.integrate(t)[1:]
+        blocks.append(profile)
+        times.append(t[1:])
+        concentrations = dict(zip(kinetics.species, profile.data[-1], strict=True))
+        t0 = t[-1]
+
+C = scp.concatenate(blocks, dim="y")
+C.y = scp.Coord(np.concatenate(times), title="time", units="s", rounding=False)
+C.title = "concentration"
+_ = C[: 10 * n_spectra_per_cycle].T.plot(labels=kinetics.species, legend="best")
 
 # %% [markdown]
-# The two curves give the weights applied to the Gaussian bands at each
-# acquisition time.
+# Starting from pure A, the concentrations settle into a periodic steady
+# state after a few cycles. The intermediate B rises at the beginning of
+# each X pulse, then is converted into C.
 #
-# ### Simulate the time-resolved spectra
+# ### Simulate the spectra
 #
-# Multiply each Gaussian band by its time-dependent weight and add the
-# contributions. Both Gaussians have unit height and a width at half maximum
-# of 33 inverse centimetres. Repeat the cycle six times and add independently
-# generated noise to each spectrum.
+# Each species has one Gaussian band. The spectra add a broad static
+# background, about a hundred times larger than the variations of the
+# active species, and noise. `plot_multiple` draws markers by default;
+# `method="pen"` draws the spectra as lines.
 
 # %%
-spectral_grid = scp.linspace(1550, 1750, 201)
-wavenumber = scp.Coord(spectral_grid, title="wavenumber", units="cm^-1")
-band_a = scp.gaussian(spectral_grid, pos=1630, width=33, normalized=False)
-band_b = scp.gaussian(spectral_grid, pos=1650, width=33, normalized=False)
-cycle = (
-    profile_a.reshape((n_times, 1), dims=("y", "x")) * band_a
-    + profile_b.reshape((n_times, 1), dims=("y", "x")) * band_b
+wavenumber = scp.Coord.linspace(1500, 1800, 301, title="wavenumber", units="cm^-1")
+pure = scp.NDDataset(
+    [
+        scp.gaussian(wavenumber.data, pos=pos, width=30, normalized=False).data
+        for pos in (1610, 1640, 1670)
+    ],
+    units="absorbance",
 )
-noise = scp.normal(scale=0.01, size=(n_cycles, n_times, wavenumber.size), seed=42)
-spectra = noise + cycle
-spectra.units = "absorbance"
-spectra.set_coordset(
-    z=scp.Coord.arange(1, n_cycles + 1, title="cycle"),
-    y=time,
-    x=wavenumber,
-)
+pure.x = wavenumber
+background = 20 * scp.gaussian(wavenumber.data, pos=1650, width=150, normalized=False)
 
-spectra_ax = scp.plot_multiple(
-    [spectra[0, step] for step in (3, 11, 19, 27)],
+spectra = scp.dot(C, pure) + background + 2
+spectra += scp.normal(scale=0.01, size=spectra.shape, seed=42)
+spectra.title = "absorbance"
+
+last_cycle = spectra[-n_spectra_per_cycle:]
+_ = scp.plot_multiple(
+    [last_cycle[i] for i in (0, 15, 30, 45)],
     method="pen",
-    labels=[f"{time.data[step]:g} s" for step in (3, 11, 19, 27)],
+    labels=[
+        f"{last_cycle.y.data[i] - last_cycle.y.data[0]:g} s" for i in (0, 15, 30, 45)
+    ],
     legend="best",
-    show=False,
 )
 
 # %% [markdown]
-# Four spectra from the first cycle show how changing the weights alters
-# the shape of the overlapping bands.
+# The four spectra of the last cycle are almost superimposed: the background
+# dominates and the bands of A, B and C cannot be distinguished.
 #
-# ### Demodulate at the two harmonics
+# ## Demodulate at the fundamental
 #
-# Apply PSD at each harmonic and compare the amplitudes from the first
-# three cycles with those from the last three.
+# PSD averages the spectra over complete cycles. Discard the first ten
+# cycles, before the periodic steady state, and give the number of spectra
+# per cycle: PSD splits the series into cycles and averages them. By default,
+# PSD demodulates at the fundamental frequency (harmonic $k = 1$), every 15°
+# from 0° to 345° (`phi`).
 
 # %%
-amplitudes = []
-for harmonic in (1, 2):
-    psd = scp.PSD(harmonic=harmonic, integration_rule="riemann")
-    result = psd.transform(spectra)
-    amplitudes.append(result.amplitude)
-    peak = wavenumber.data[result.amplitude.argmax()]
-    first = psd.transform(spectra[:3]).amplitude
-    last = psd.transform(spectra[3:]).amplitude
-    print(harmonic, peak, abs(first - last).max())
+n_skipped_cycles = 10
+steady_state = spectra[n_skipped_cycles * n_spectra_per_cycle :]
+fundamental = scp.PSD(n_spectra_per_cycle=n_spectra_per_cycle).transform(steady_state)
+_ = fundamental.prs.plot(colorbar=True)
 
-psd_ax = scp.plot_multiple(
-    amplitudes,
+# %% [markdown]
+# The phase-resolved spectra no longer contain the background, and the noise
+# is strongly decreased. Their shape changes with the demodulation angle: the
+# bands at 1610, 1640 and 1670 cm⁻¹ do not grow and decay together.
+#
+# To find the in-phase angle of each band, follow its intensity as a function
+# of the demodulation angle.
+
+# %%
+bands = (1610.0, 1640.0, 1670.0)
+_ = scp.plot_multiple(
+    [fundamental.prs[:, position].squeeze() for position in bands],
     method="pen",
-    labels=["PSD k=1", "PSD k=2"],
+    labels=[f"{position:g} cm⁻¹" for position in bands],
     legend="best",
-    show=False,
 )
 
 # %% [markdown]
-# The two PSD amplitude spectra share the same vertical scale. Each
-# harmonic highlights the band whose weight oscillates at that frequency.
+# The band of A, at 1610 cm⁻¹, is maximal near 115°, and that of C, at
+# 1670 cm⁻¹, near 280°. They are almost in antiphase: C forms when A is
+# consumed. The band of B, at 1640 cm⁻¹, is maximal near 45°. This distinct
+# in-phase angle identifies the intermediate, even though its band overlaps
+# those of A and C.
 #
-# The raw spectrum includes the average contributions from both bands. PSD
-# removes those constant contributions and measures only the oscillation at
-# the selected harmonic. Here the mean weights are 1.0 and 0.4, while the
-# oscillation amplitudes are 0.25 and 0.10. The PSD peaks therefore show about
-# 0.25 and 0.10 absorbance units, respectively, apart from noise.
+# To evidence the spectral features of a given species, select the angles
+# where the bands of the other species cross zero. At 15°, close to the zero
+# crossings of A and C, the band of B dominates. At 135°, the band of B
+# crosses zero and the spectrum only shows A and C, with opposite signs.
 
-# %% [raw] raw_mimetype="text/restructuredtext"
-# The maxima should be near 1630 and 1650 inverse centimetres for orders one
-# and two respectively. This example assigns the two responses by construction.
-# In experimental data, compare both quadratures across blocks. Phase becomes
-# unstable where the amplitude approaches the noise floor. For an experimental
-# comparison of PSD and Fourier analysis, see :cite:t:`kust:2025`.
+# %%
+_ = scp.plot_multiple(
+    [fundamental.prs[15.0], fundamental.prs[135.0]],
+    method="pen",
+    labels=["15°", "135°"],
+    legend="best",
+)
+
+# %% [markdown]
+# PSD also gives, at each wavenumber, the amplitude of the response and its
+# phase lag, which is the in-phase angle.
+
+# %%
+_ = fundamental.amplitude.plot()
+
+# %%
+_ = fundamental.phase_lag.plot()
+
+# %% [markdown]
+# The amplitude spectrum shows the bands of A and C, while the weaker band of
+# B is hidden between them. The phase lag reveals it: close to 115° on the
+# band of A and to 280° on the band of C, it is about 45° at 1640 cm⁻¹, where
+# the almost opposite contributions of A and C cancel and that of B remains.
+# The jump from 360° to 0° near 1650 cm⁻¹ only reflects the wrapping of the
+# angle. Outside the bands, where the amplitude is close to the noise level,
+# the phase lag is meaningless.
+
+# %% [markdown]
+# ## Demodulate at the second harmonic
+#
+# Even if the stimulus is a square wave and has no even harmonics, the
+# response can have some.
+
+# %%
+second = scp.PSD(harmonic=2, n_spectra_per_cycle=n_spectra_per_cycle).transform(
+    steady_state
+)
+_ = second.prs.plot(colorbar=True)
+
+# %% [markdown]
+# Here, at $k = 2$, the band of C (1670 cm⁻¹) almost vanishes, while the
+# bands of B (1640 cm⁻¹) and A (1610 cm⁻¹) have opposite signs. The rise and
+# decay of B within each X pulse make its response strongly non-sinusoidal:
+# the intermediate, the weakest band at the fundamental, is now the strongest.
 
 # %% [markdown]
 # ## Explore experimental data
-
 #
 # The [Raman modulation gallery example](../../gettingstarted/examples/gallery/auto_examples_processing/modulation_excitation/plot_raman_modulation.rst)
-# shows the same experimental spectra in the time and phase domains.
+# shows experimental spectra in the time and phase domains.
 
 # %% [raw] raw_mimetype="text/restructuredtext"
 # The `MES demo notebook by Arnaud Travert
@@ -189,12 +268,3 @@ psd_ax = scp.plot_multiple(
 # and accompanying files in a `Zenodo dataset <https://doi.org/10.5281/zenodo.7780501>`_.
 # For an application combining PSD and multivariate curve resolution to
 # separate overlapping IR signals, see :cite:t:`alcaraz:2019`.
-
-# %% [markdown]
-# To try CP, pass the aligned cycle × time × spectral coordinate array to
-# `scp.tensor.CP` from the [Tensor plugin](../plugins/tensor.rst).
-# The cycle factor shows how the amplitude of each component varies between
-# cycles, assuming a shared temporal profile for that component.
-
-# %% [raw] raw_mimetype="text/restructuredtext"
-# See :cite:t:`bro:2003` for the PARAFAC model and a diagnostic for choosing its rank.
