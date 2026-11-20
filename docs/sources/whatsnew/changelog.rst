@@ -26,6 +26,17 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``ActionMassKinetics``: the analytical Jacobian (``use_jac=True``) is now correct
+  for stoichiometric coefficients greater than one; ``fit_to_concentrations``
+  honors ``method`` in ``optimizer_kwargs`` (it was silently ignored, and
+  Nelder-Mead was always used); the optimizer ``left_op`` is applied
+  once per evaluation instead of accumulating, and the model holds the optimal
+  parameters (and returns the matching concentrations) after the fit. With a
+  temperature profile ``T(t)``, ``k_dt`` is now optional (rate constants are then
+  computed at each step), the gas constant matches the isothermal path
+  (8.314462618 instead of 8.314, a relative change of about 1e-3 on rate
+  constants), and plain rate constants raise a clear error (:pr:`1923`).
+
 
 .. section
 

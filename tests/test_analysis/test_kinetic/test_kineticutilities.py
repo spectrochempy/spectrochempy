@@ -256,3 +256,134 @@ class TestActionMassKinetics:
         assert isinstance(C_opt, list) and len(C_opt) == 2
         for c in C_opt:
             assert np.all(np.isfinite(c.data))
+
+
+# ---------------------------------------------------------------------------
+# Regression tests
+# ---------------------------------------------------------------------------
+
+
+def test_jacobian_with_stoichiometric_coefficient_above_one():
+    """The analytical jacobian should match finite differences of the rates."""
+    kin = ku.ActionMassKinetics(
+        ["B -> C", "A -> 2B", "2C -> D"],
+        {"A": 1.0, "B": 0.0, "C": 0.0, "D": 0.0},
+        [5.0, 0.1, 0.7],
+    )
+    k = kin._arrhenius
+    C0 = np.array([0.6, 0.3, 0.2, 0.1])
+
+    def rates(C):
+        return np.array(
+            eval(kin._write_production_rates(), {"k": k, "C": C}), dtype=float
+        )
+
+    jac = np.array(eval(kin._write_jacobian(), {"k": k, "C": C0}), dtype=float)
+    eps = 1e-7
+    numerical = np.empty_like(jac)
+    for j in range(len(C0)):
+        dC = np.zeros_like(C0)
+        dC[j] = eps
+        numerical[:, j] = (rates(C0 + dC) - rates(C0 - dC)) / (2 * eps)
+    np.testing.assert_allclose(jac, numerical, rtol=1e-6, atol=1e-9)
+
+
+def test_fit_uses_lowercase_method(monkeypatch):
+    """`method` in optimizer_kwargs should select the optimizer."""
+    used = []
+    real_minimize = ku.minimize
+
+    def spy(*args, **kwargs):
+        used.append(kwargs["method"])
+        return real_minimize(*args, **kwargs)
+
+    monkeypatch.setattr(ku, "minimize", spy)
+    time = np.arange(0, 10)
+    C_exp = ku.ActionMassKinetics(
+        _reactions(), _species_concentrations(), [1.0, 0.3]
+    ).integrate(time)
+    kin = ku.ActionMassKinetics(_reactions(), _species_concentrations(), [0.5, 0.5])
+    kin.fit_to_concentrations(
+        C_exp,
+        [0, 1, 2],
+        [0, 1, 2],
+        {"k[0]": 0.5, "k[1]": 0.5},
+        optimizer_kwargs={"method": "L-BFGS-B", "options": {"disp": False}},
+    )
+    kin.fit_to_concentrations(
+        C_exp,
+        [0, 1, 2],
+        [0, 1, 2],
+        {"k[0]": 0.5, "k[1]": 0.5},
+        optimizer_kwargs={"Method": "Powell", "options": {"disp": False}},
+    )
+    assert used == ["L-BFGS-B", "Powell"]
+
+
+def test_fit_left_op_ties_parameters_and_sets_optimum():
+    """left_op should tie parameters and the model should hold the optimum."""
+    reactions = ["A -> B", "B -> C", "C -> D"]
+    conc = {"A": 1.0, "B": 0.0, "C": 0.0, "D": 0.0}
+    time = np.linspace(0, 10, 41)
+    C_exp = ku.ActionMassKinetics(reactions, conc, [1.0, 0.3, 0.3]).integrate(time)
+    kin = ku.ActionMassKinetics(reactions, conc, [0.5, 0.1, 0.9])
+    left_op = np.array([[1.0, 0, 0], [0, 1, 0], [0, 1, 0]])  # k[2] := k[1]
+    Ckin, _, res = kin.fit_to_concentrations(
+        C_exp,
+        [0, 1, 2, 3],
+        [0, 1, 2, 3],
+        {"k[0]": 0.5, "k[1]": 0.1},
+        optimizer_kwargs={"left_op": left_op, "options": {"disp": False}},
+    )
+    np.testing.assert_allclose(res.x, [1.0, 0.3], rtol=1e-3)
+    np.testing.assert_allclose(kin._arrhenius, [res.x[0], res.x[1], res.x[1]])
+    np.testing.assert_allclose(np.sum((C_exp.data - Ckin) ** 2), res.fun)
+
+
+def test_fit_non_idempotent_left_op_is_not_applied_cumulatively():
+    """left_op should be applied once per evaluation, not accumulated."""
+    reactions = ["A -> B", "B -> C"]
+    conc = {"A": 1.0, "B": 0.0, "C": 0.0}
+    time = np.linspace(0, 10, 21)
+    C_exp = ku.ActionMassKinetics(reactions, conc, [1.0, 0.6]).integrate(time)
+    kin = ku.ActionMassKinetics(reactions, conc, [0.5, 0.2])
+    left_op = np.array([[1.0, 0.0], [0.5, 0.5]])  # k[1] := 0.5 k[0] + 0.1
+    _, _, res = kin.fit_to_concentrations(
+        C_exp,
+        [0, 1, 2],
+        [0, 1, 2],
+        {"k[0]": 0.5},
+        optimizer_kwargs={
+            "left_op": left_op,
+            "method": "Powell",
+            "options": {"disp": False},
+        },
+    )
+    np.testing.assert_allclose(res.x, [1.0], rtol=1e-3)
+    np.testing.assert_allclose(kin._arrhenius, [res.x[0], 0.5 * res.x[0] + 0.1])
+
+
+def test_callable_temperature_without_k_dt():
+    """k(T(t)) should be evaluated at each step when k_dt is not given."""
+    arrhenius = [[1.0e8, 52.0e3], [1.0e8, 50.0e3]]
+    time = np.linspace(0, 10, 21)
+
+    def T(t):
+        return 298.0 + 2.0 * t
+
+    kin = ku.ActionMassKinetics(_reactions(), _species_concentrations(), arrhenius, T=T)
+    C = kin.integrate(time, rtol=1e-8, atol=1e-10)
+    C_jac = kin.integrate(time, rtol=1e-8, atol=1e-10, use_jac=True, method="BDF")
+    C_grid = kin.integrate(time, k_dt=1e-3, rtol=1e-8, atol=1e-10)
+    np.testing.assert_allclose(C.data, C_jac.data, atol=1e-6)
+    np.testing.assert_allclose(C.data, C_grid.data, atol=1e-3)
+    np.testing.assert_allclose(C.data.sum(axis=1), 1.0, atol=1e-6)
+
+
+def test_callable_temperature_requires_arrhenius_parameters():
+    """Plain rate constants cannot be combined with T(t)."""
+    kin = ku.ActionMassKinetics(
+        _reactions(), _species_concentrations(), [1.0, 0.3], T=lambda t: 300.0 + t
+    )
+    with pytest.raises(ValueError, match="requires Arrhenius parameters"):
+        kin.integrate(np.arange(0, 5))

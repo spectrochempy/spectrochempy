@@ -399,9 +399,9 @@ class ActionMassKinetics(tr.HasTraits):
                         elif n == -1:
                             jac += f" - k[{k}]"
                         elif n > 1:
-                            jac += f" + {n} * k[{j}]"
+                            jac += f" + {n} * k[{k}]"
                         elif n < -1:
-                            jac += f" {n} * k[{j}]"
+                            jac += f" {n} * k[{k}]"
 
                         for jj, nu in enumerate(self.A[k]):
                             if nu == 1:
@@ -448,9 +448,11 @@ class ActionMassKinetics(tr.HasTraits):
             Iterable with time values or sets of timle values at which the
             concentrations are computed.
 
-        k_dt : `float` or `None'
+        k_dt : `float` or `None`, optional, default: `None`
             Resolution of the time grid used to compute `k(T(t))`. Used only for non
-            isothermal reaction.
+            isothermal reaction. If `None`, the rate constants are computed from
+            `T(t)` at each evaluation of the rate equations. `T` is then called
+            with a one-element array.
 
         method : `str` or `~scipy.integrate.OdeSolver`, optional, default: ``'LSODA'``
             Integration method to use:
@@ -566,21 +568,35 @@ class ActionMassKinetics(tr.HasTraits):
         C = []
         for i, (T, C0, t) in enumerate(conditions):
             if callable(T):
-                # non-isothermal: a grid of k_i values spaced by k_dt time intervals
-                # is computed
-                t_grid = np.arange(0, t[-1] + k_dt, k_dt)
-                T_grid = np.expand_dims(T(t_grid), axis=1)
-                k_grid = (
-                    self._arrhenius[:, 0]
-                    * np.power(T_grid, self._arrhenius[:, 1])
-                    * np.exp(-self._arrhenius[:, 2] / 8.314 / T_grid)
-                )
+                if self._arrhenius.ndim == 1:
+                    raise ValueError(
+                        "A temperature profile T(t) requires Arrhenius parameters "
+                        "((A, Ea) or (A, b, Ea) for each reaction), not rate "
+                        "constants.",
+                    )
+                A_, b_, Ea_ = self._arrhenius.T
+                if k_dt is None:
+                    # non-isothermal: k_i are computed from T(t) at each call
+
+                    def k_at(t, T=T, A_=A_, b_=b_, Ea_=Ea_):
+                        Tt = float(np.ravel(T(np.atleast_1d(t)))[0])
+                        return A_ * np.power(Tt, b_) * np.exp(-Ea_ / R / Tt)
+
+                else:
+                    # non-isothermal: a grid of k_i values spaced by k_dt time
+                    # intervals is computed
+                    t_grid = np.arange(0, t[-1] + k_dt, k_dt)
+                    T_grid = np.expand_dims(T(t_grid), axis=1)
+                    k_grid = A_ * np.power(T_grid, b_) * np.exp(-Ea_ / R / T_grid)
+
+                    def k_at(t, k_grid=k_grid, k_dt=k_dt):
+                        return k_grid[int(t / k_dt)]
 
                 # uncomment for debugging and optimization
                 # t1 = time.time()
 
                 exec(  # noqa: S102
-                    f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return self._BmAt @ {self._reaction_rates}",
+                    f"def f_(self, k_at, t, C): k = k_at(t) ; return self._BmAt @ {self._reaction_rates}",
                     global_env,
                     locals_env,
                 )
@@ -588,11 +604,11 @@ class ActionMassKinetics(tr.HasTraits):
                 if use_jac:
                     # define jac_ = d[dC/dt]/dCi
                     exec(  # noqa: S102
-                        f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
+                        f"def jac_(self, k_at, t, C): k = k_at(t) ; return{self._jacobian}",
                         global_env,
                         locals_env,
                     )
-                    jac = partial(locals_env["jac_"], self, k_grid, k_dt)
+                    jac = partial(locals_env["jac_"], self, k_at)
                 else:
                     jac = None
 
@@ -600,7 +616,7 @@ class ActionMassKinetics(tr.HasTraits):
                 # t2 = time.time()
 
                 bunch = solve_ivp(
-                    partial(locals_env["f_"], self, k_grid, k_dt),
+                    partial(locals_env["f_"], self, k_at),
                     (t[0], t[-1]),
                     list(C0.values()),
                     t_eval=t,
@@ -774,7 +790,11 @@ class ActionMassKinetics(tr.HasTraits):
             keyword arguments for the ode solver. Defaults are the same as for
             `~scipy.integrate.solve_ivp`, except for `method=LSDOA`
         optimizer_kwargs: `dict`
-            keyword arguments the optimization (see `~scipy.optimize.minimize`).
+            keyword arguments the optimization (see `~scipy.optimize.minimize`):
+            ``method`` (``Method`` is also accepted), ``bounds``, ``tol`` and
+            ``options``. ``left_op`` is a (n_reactions x n_reactions) matrix
+            applied to the rate parameters after each update, e.g. to impose
+            equal parameters for several reactions.
 
         Returns
         -------
@@ -786,6 +806,8 @@ class ActionMassKinetics(tr.HasTraits):
             optimizer_kwargs = {}
         if ivp_solver_kwargs is None:
             ivp_solver_kwargs = {}
+
+        initial_arrhenius = self._arrhenius.copy()
 
         def objective(
             params,
@@ -802,6 +824,7 @@ class ActionMassKinetics(tr.HasTraits):
             for param, item in zip(params, dict_param_to_optimize, strict=False):
                 dict_param_to_optimize[item] = param
 
+            self._arrhenius[...] = initial_arrhenius
             self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
 
             if self._nset == 1:
@@ -826,7 +849,9 @@ class ActionMassKinetics(tr.HasTraits):
 
         # optimizer (kw)arguments:
         # ... parameters for scipy.minimize
-        optimizer_method = optimizer_kwargs.get("Method", "Nelder-Mead")
+        optimizer_method = optimizer_kwargs.get(
+            "method", optimizer_kwargs.get("Method", "Nelder-Mead")
+        )
         optimizer_bounds = optimizer_kwargs.get("bounds")
         optimizer_tol = optimizer_kwargs.get("tol")
         optimizer_options = optimizer_kwargs.get("options", {"disp": True})
@@ -887,7 +912,12 @@ class ActionMassKinetics(tr.HasTraits):
             info_(f"         Optimization time: {toc - tic}")
             info_(f"         Final parameters: {optim_res['x']}")
 
-        # compute the final concentration profiles
+        for i, param in enumerate(dict_param_to_optimize):
+            dict_param_to_optimize[param] = optim_res["x"][i]
+
+        # set the optimal parameters and compute the final concentration profiles
+        self._arrhenius[...] = initial_arrhenius
+        self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
         t = Cexp.y.data if self._nset == 1 else [C.y.data for C in Cexp]
 
         Ckin = self.integrate(
@@ -897,9 +927,6 @@ class ActionMassKinetics(tr.HasTraits):
             k_dt=ivp_solver_k_dt,
             left_op=ivp_solver_left_op,
         )
-
-        for i, param in enumerate(dict_param_to_optimize):
-            dict_param_to_optimize[param] = optim_res["x"][i]
 
         return Ckin, (iexp, i2iexp, dict_param_to_optimize), optim_res
 
