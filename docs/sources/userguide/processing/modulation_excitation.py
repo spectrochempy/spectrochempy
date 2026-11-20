@@ -250,8 +250,9 @@ _ = fundamental.phase_lag.plot()
 # %% [markdown]
 # The amplitude spectrum shows the bands of A and C, while the weaker band of
 # B is hidden between them. The phase lag reveals it: close to 115° on the
-# band of A and to 280° on the band of C, it is about 45° at 1640 cm⁻¹, where
-# the almost opposite contributions of A and C cancel and that of B remains.
+# band of A and to 280° on the band of C, it passes through about 45° at
+# 1640 cm⁻¹, where the almost opposite contributions of A and C cancel and
+# that of B remains.
 # The jump from 360° to 0° near 1650 cm⁻¹ only reflects the wrapping of the
 # angle. Outside the bands, where the amplitude is close to the noise level,
 # the phase lag is meaningless.
