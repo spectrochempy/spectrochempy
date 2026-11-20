@@ -47,9 +47,9 @@ scp.show()
 ![Synthetic spectrum before and after smoothing](https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/docs/_static/images/readme-quickstart.png)
 
 For measured data, start with `dataset = scp.read("path/to/spectrum.spa")`.
-See the [reader catalog](https://www.spectrochempy.fr/userguide/importexport/readers.html)
+See the [reader catalog](https://www.spectrochempy.fr/latest/userguide/importexport/readers.html)
 for supported formats and required plugins, and the
-[quickstart tutorial](https://www.spectrochempy.fr/gettingstarted/quickstart.html)
+[quickstart tutorial](https://www.spectrochempy.fr/latest/gettingstarted/quickstart.html)
 for a complete workflow.
 
 ## Key Features
@@ -110,7 +110,7 @@ Or with `pip`:
 python -m pip install spectrochempy
 ```
 
-See the [full installation guide](https://www.spectrochempy.fr/gettingstarted/install/index.html) for platform-specific instructions, optional dependencies, and development setup.
+See the [full installation guide](https://www.spectrochempy.fr/latest/gettingstarted/install/index.html) for platform-specific instructions, optional dependencies, and development setup.
 
 ## Official Plugins
 
@@ -156,11 +156,11 @@ python -m pip install spectrochempy-cantera
 ## Quick Links
 
 * 📚 [Documentation](https://www.spectrochempy.fr)
-* 🔌 [Plugins](https://www.spectrochempy.fr/userguide/plugins/index.html)
-* 🚀 [Installation Guide](https://www.spectrochempy.fr/gettingstarted/install/index.html)
-* 📓 [Example Notebooks](https://www.spectrochempy.fr/gettingstarted/examples/index.html)
+* 🔌 [Plugins](https://www.spectrochempy.fr/latest/userguide/plugins/index.html)
+* 🚀 [Installation Guide](https://www.spectrochempy.fr/latest/gettingstarted/install/index.html)
+* 📓 [Example Notebooks](https://www.spectrochempy.fr/latest/gettingstarted/examples/index.html)
 * 🐛 [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues)
-* 📝 [How to Cite](https://www.spectrochempy.fr/credits/citing.html)
+* 📝 [How to Cite](https://www.spectrochempy.fr/latest/credits/citing.html)
 * 💻 [Source Code](https://github.com/spectrochempy/spectrochempy)
 
 ## For contributors
