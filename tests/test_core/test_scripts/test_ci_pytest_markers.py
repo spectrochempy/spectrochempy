@@ -11,26 +11,21 @@ from pathlib import Path
 import pytest
 import yaml
 
-
-def _bash_path():
-    if sys.platform == "win32":
-        git = shutil.which("git")
-        if git:
-            bash = Path(git).resolve().parents[1] / "bin" / "bash.exe"
-            if bash.is_file():
-                return str(bash)
-        return None
-    return shutil.which("bash")
+from tests._ci_bash import resolve_bash as _bash_path
 
 
 @pytest.mark.parametrize("available", [True, False])
-def test_windows_bash_comes_from_git_installation(tmp_path, monkeypatch, available):
-    git = tmp_path / "Git" / "cmd" / "git.exe"
+@pytest.mark.parametrize("subdir", ["cmd", "bin", "mingw64/bin"])
+def test_windows_bash_comes_from_git_installation(
+    tmp_path, monkeypatch, available, subdir
+):
+    git_root = tmp_path / "Git"
+    git = git_root / subdir / "git.exe"
     git.parent.mkdir(parents=True)
     git.touch()
-    bash = git.parents[1] / "bin" / "bash.exe"
+    bash = git_root / "bin" / "bash.exe"
     if available:
-        bash.parent.mkdir()
+        bash.parent.mkdir(exist_ok=True)
         bash.touch()
 
     def which(name):
