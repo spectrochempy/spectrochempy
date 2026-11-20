@@ -348,15 +348,17 @@ jobs:
             pytest_xdist_args+=(-m "$profile_markers")
           fi
           run_tests() {
-            local pytest_args=("$@")
+            local pytest_args=("$@" -p tests._ci_execution_counts)
             local target
+            local target_index=0
             local target_status=0
             for target in $targets; do
+              target_index=$((target_index + 1))
               echo "pytest target: $target"
               if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
-                coverage run --append --source=spectrochempy -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+                SCPY_CI_TEST_COUNTS="$ci_reports/primary-${target_index}.json" coverage run --append --source=spectrochempy -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
               else
-                python -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+                SCPY_CI_TEST_COUNTS="$ci_reports/primary-${target_index}.json" python -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
               fi
               target_status=$?
               if [[ "$target_status" != "0" && "$target_status" != "5" ]]; then
@@ -365,15 +367,21 @@ jobs:
             done
             return 0
           }
+          ci_reports=$(python -c "import os, tempfile; from pathlib import Path; print(Path(tempfile.mkdtemp(prefix='scpy-pytest-', dir=os.environ['RUNNER_TEMP'])).as_posix())")
+          echo "SCPY_CI_REPORT_DIR=$ci_reports" >> "$GITHUB_ENV"
           run_tests "${pytest_xdist_args[@]}" | tee pytest.log
           status=${PIPESTATUS[0]}
           if [[ "$status" == "0" && "${{ github.event_name }}" == "pull_request" ]]; then
             echo "pytest serial tests: enabled for tests marked serial" | tee -a pytest.log
-            python -m pytest $targets "${serial_pytest_args[@]}" -s -ra --durations=10 | tee -a pytest.log
+            SCPY_CI_TEST_COUNTS="$ci_reports/serial.json" python -m pytest $targets "${serial_pytest_args[@]}" -p tests._ci_execution_counts -s -ra --durations=10 | tee -a pytest.log
             serial_status=${PIPESTATUS[0]}
             if [[ "$serial_status" != "0" && "$serial_status" != "5" ]]; then
               status=$serial_status
             fi
+          fi
+          if [[ "$status" == "0" ]]; then
+            python tests/_ci_execution_counts.py "$ci_reports" | tee -a pytest.log
+            status=${PIPESTATUS[0]}
           fi
           duration=$((SECONDS - start))
           echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
@@ -417,3 +425,7 @@ jobs:
         if: always()
         shell: bash
         run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True)"
+
+      - name: Remove temporary pytest reports
+        if: ${{ always() && env.SCPY_CI_REPORT_DIR != '' }}
+        run: python -c "import os, shutil; shutil.rmtree(os.environ['SCPY_CI_REPORT_DIR'], ignore_errors=True)"
