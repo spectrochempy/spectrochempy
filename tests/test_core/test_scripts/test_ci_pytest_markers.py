@@ -12,7 +12,37 @@ import pytest
 import yaml
 
 
-@pytest.mark.skipif(shutil.which("bash") is None, reason="CI uses bash")
+def _bash_path():
+    if sys.platform == "win32":
+        git = shutil.which("git")
+        if git:
+            bash = Path(git).resolve().parents[1] / "bin" / "bash.exe"
+            if bash.is_file():
+                return str(bash)
+        return None
+    return shutil.which("bash")
+
+
+@pytest.mark.parametrize("available", [True, False])
+def test_windows_bash_comes_from_git_installation(tmp_path, monkeypatch, available):
+    git = tmp_path / "Git" / "cmd" / "git.exe"
+    git.parent.mkdir(parents=True)
+    git.touch()
+    bash = git.parents[1] / "bin" / "bash.exe"
+    if available:
+        bash.parent.mkdir()
+        bash.touch()
+
+    def which(name):
+        assert name == "git"
+        return str(git)
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(shutil, "which", which)
+    assert _bash_path() == (str(bash) if available else None)
+
+
+@pytest.mark.skipif(_bash_path() is None, reason="CI needs native bash or Git Bash")
 @pytest.mark.parametrize("event", ["pull_request", "push"])
 @pytest.mark.parametrize("core_only", [True, False])
 def test_ci_pytest_marker_partitions(tmp_path, core_only, event):
@@ -45,7 +75,7 @@ def test_ci_pytest_marker_partitions(tmp_path, core_only, event):
         env.pop(name, None)
     env["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
     result = subprocess.run(
-        ["bash", "-c", setup],
+        [_bash_path(), "-c", setup],
         cwd=tmp_path,
         env=env,
         capture_output=True,
