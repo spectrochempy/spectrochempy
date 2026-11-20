@@ -153,9 +153,11 @@ two environment variables to their own Corn files. The scientific examples
 and readers otherwise use the same data and processing. External Read the
 Docs previews continue to use the public source, without a private key.
 
-The documentation artifact workflow runs on pushes to master and release
-tags. It can also be triggered manually. The tutorial and gallery jobs
-check out the workflow commit.
+Production uses native RTD execution: notebooks are preexecuted on RTD before
+the HTML render. The documentation artifact workflow is disabled in GitHub,
+and its source only accepts manual dispatch for future experiments. It is
+not a prerequisite for publishing the documentation. If explicitly re-enabled,
+its tutorial and gallery jobs check out the workflow commit.
 The tutorial job saves executed notebooks. The gallery job saves generated
 reStructuredText, figures, thumbnails, downloads, and API backreferences.
 The final job checks the commit and file hashes of both artifacts before

@@ -149,6 +149,49 @@ services externes.
 
 ---
 
+## Conservation des versions Read the Docs
+
+À la publication effective d'une release stable du core, l'événement GitHub
+`release: published` déclenche `sync_rtd_versions.yml`. Le brouillon ne déclenche
+pas cette étape : son tag n'existe pas encore. Si la publication est automatisée
+dans GitHub Actions, utiliser un jeton GitHub App ou PAT pour propager cet
+événement aux autres workflows, plutôt que le seul `GITHUB_TOKEN`. Cette étape
+conserve les dix dernières releases, triées par version, et une seule URL
+par release. Les URL déjà actives et construites sont privilégiées. Les alias
+`latest` et `stable`, la version par défaut et la cible de `stable` sont protégés.
+Les préversions, les versions de PR et les tags de plugins ne participent pas
+à cette fenêtre. Une cible protégée hors fenêtre arrête la synchronisation.
+
+Configurer le secret GitHub Actions **`SCPY_RTD_API_TOKEN`** sur
+`spectrochempy/spectrochempy` avec un jeton de l'API Read the Docs autorisé à
+modifier les versions du projet `spectrochempy`. Ce n'est pas le jeton GitHub
+`SCPY_RTD_GITHUB_TOKEN` de l'ancien consommateur d'artefacts. Un jeton personnel
+RTD possède les permissions de son utilisateur : sa création et son stockage
+dans GitHub demandent une configuration explicite du mainteneur.
+
+Le script demande la resynchronisation des références RTD, active et rend
+visibles les versions retenues, puis vérifie cette activation avant de rendre
+les anciennes versions et doublons inactifs. Une désactivation retire leur
+HTML publié ; les sources, les tags et les noms d'URL sont conservés. Une
+réactivation ultérieure déclenche une reconstruction. Le script ne patiente
+pas jusqu'à la fin des compilations RTD.
+
+Pour vérifier ou reprendre la synchronisation sans relancer une release :
+
+```bash
+gh workflow run sync_rtd_versions.yml -R spectrochempy/spectrochempy -f apply=false
+```
+
+Examiner le plan JSON, puis appliquer la politique avec `-f apply=true`.
+Le lancement manuel utilise la simulation par défaut. Une absence de jeton,
+un inventaire incomplet ou un échec d'activation arrête le job sans commencer
+la désactivation des anciennes versions. Une relance reprend les changements
+restants sans reconstruire les versions déjà actives et visibles.
+
+La production documentaire reste en mode natif sur RTD : préexécution des
+notebooks, puis rendu HTML. Le workflow d'artefacts documentaires est désactivé
+dans GitHub et n'a plus de déclencheur automatique dans ses sources.
+
 ## Validation des artefacts de release (workflow de validation)
 
 Un workflow dédié **valide les artefacts localement construits** sans rien
