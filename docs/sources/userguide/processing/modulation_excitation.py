@@ -52,7 +52,7 @@
 # $$
 #
 # where $k$ is the harmonic order and $\varphi$ the demodulation phase angle.
-# The integral of a constant over a full period vanishes, so the static
+# The sine averages to zero over a full period, so the static
 # contributions disappear, and the noise, not correlated with the stimulus,
 # is strongly decreased.
 #
@@ -119,10 +119,14 @@ for _ in range(n_cycles):
         concentrations = dict(zip(kinetics.species, profile.data[-1], strict=True))
         t0 = t[-1]
 
-C = scp.concatenate(blocks, dim="y")
-C.y = scp.Coord(np.concatenate(times), title="time", units="s", rounding=False)
-C.title = "concentration"
-_ = C[: 10 * n_spectra_per_cycle].T.plot(labels=kinetics.species, legend="best")
+concentration_profiles = scp.concatenate(blocks, dim="y")
+concentration_profiles.y = scp.Coord(
+    np.concatenate(times), title="time", units="s", rounding=False
+)
+concentration_profiles.title = "concentration"
+_ = concentration_profiles[: 10 * n_spectra_per_cycle].T.plot(
+    labels=kinetics.species, legend="best"
+)
 
 # %% [markdown]
 # Starting from pure A, the concentrations settle into a periodic steady
@@ -137,19 +141,18 @@ _ = C[: 10 * n_spectra_per_cycle].T.plot(labels=kinetics.species, legend="best")
 
 # %%
 wavenumber = scp.Coord.linspace(1500, 1800, 301, title="wavenumber", units="cm^-1")
-pure = scp.NDDataset(
+pure_spectra = scp.stack(
     [
-        scp.gaussian(wavenumber.data, pos=pos, width=30, normalized=False).data
+        scp.gaussian(wavenumber, pos=pos, width=30, normalized=False)
         for pos in (1610, 1640, 1670)
-    ],
-    units="absorbance",
+    ]
 )
-pure.x = wavenumber
 background = 20 * scp.gaussian(wavenumber.data, pos=1650, width=150, normalized=False)
 
-spectra = scp.dot(C, pure) + background + 2
+spectra = scp.dot(concentration_profiles, pure_spectra) + background + 2
 spectra += scp.normal(scale=0.01, size=spectra.shape, seed=42)
 spectra.title = "absorbance"
+spectra.units = "absorbance"
 
 _ = spectra[-n_spectra_per_cycle:].plot(colorbar=True)
 
@@ -159,9 +162,9 @@ _ = spectra[-n_spectra_per_cycle:].plot(colorbar=True)
 #
 # ## Demodulate at the fundamental
 #
-# PSD averages the spectra over complete cycles. Discard the first ten
-# cycles, before the periodic steady state, and give the number of spectra
-# per cycle: PSD splits the series into cycles and averages them. By default,
+# Discard the first ten cycles, before the periodic steady state, and give
+# the number of spectra per cycle: PSD splits the series into cycles and
+# averages them. By default,
 # PSD demodulates at the fundamental frequency (harmonic $k = 1$), every 15°
 # from 0° to 345° (`phi`).
 
@@ -198,7 +201,7 @@ _ = scp.plot_multiple(
 #
 # To evidence the spectral features of a given species, select the angles
 # where the bands of the other species cross zero. At 15°, close to the zero
-# crossings of A and C, the band of B dominates. At 135°, the band of B
+# crossings of A and C, the band of B stands out. At 135°, the band of B
 # crosses zero and the spectrum only shows A and C, with opposite signs.
 
 # %%
