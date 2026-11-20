@@ -9,6 +9,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from tests._ci_bash import resolve_bash
+
 
 @pytest.mark.parametrize(
     ("body", "event", "expected"),
@@ -23,10 +25,7 @@ import yaml
     ],
 )
 def test_workflow_exit_status(tmp_path, body, event, expected):
-    bash = shutil.which("bash")
-    if sys.platform == "win32":
-        git = shutil.which("git")
-        bash = str(Path(git).resolve().parents[1] / "bin/bash.exe") if git else None
+    bash = resolve_bash()
     if bash is None:
         pytest.skip("CI needs native bash or Git Bash")
     root = Path(__file__).resolve().parents[3]
