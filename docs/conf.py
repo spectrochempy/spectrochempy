@@ -51,7 +51,14 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
 _SCP_DOCS_CONFIG = tempfile.TemporaryDirectory(prefix="scp-docs-config-")
 os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
+from data_setup import DATA as DOCS_DATA
+from data_setup import configure_data
+from data_setup import verify_data
+
 import spectrochempy
+
+verify_data()
+configure_data()
 
 
 def _compact_version_label(value):
@@ -852,6 +859,10 @@ suppress_warnings = [
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'jpg', 'png'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
+    "--IPKernelApp.exec_lines="
+    + repr(
+        [f"import spectrochempy as _scp; _scp.preferences.datadir = {str(DOCS_DATA)!r}"]
+    ),
 ]
 
 nbsphinx_exclude_patterns = [

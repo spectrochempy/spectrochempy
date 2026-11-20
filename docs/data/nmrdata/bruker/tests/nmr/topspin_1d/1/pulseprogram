@@ -1,0 +1,209 @@
+# 1 "/home/nmr/prog/pp/zg.lcs"
+;zg.lcs
+;======================================================
+; zg (with RAPT, DFS, WURST or HS)
+; 1D acquisition
+;======================================================
+; Author: C.FERNANDEZ  
+; created: 2007.11.11
+; modified: 
+;        CF 2013.04.20 adapted to Avance III
+;        CF 2013.05.28 include fslg
+;        CF 2013 06 04 Trapdor
+;======================================================
+
+
+# 1 "/home/nmr/prog/pp/Avance.incl" 1
+;Avance3.incl
+;   for AV III
+;
+;avance-version (07/12/14)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+# 165 "/home/nmr/prog/pp/Avance.incl"
+;$Id: Avance3.incl,v 1.9.8.1 2012/01/31 17:56:17 ber Exp $
+# 15 "/home/nmr/prog/pp/zg.lcs" 2
+
+# 1 "/home/nmr/prog/pp/def.lcs.incl" 1
+;==============
+; DEFINITIONS
+;==============
+
+;--------------------------------------------------------------------- General definitions
+# 10 "/home/nmr/prog/pp/def.lcs.incl"
+;-------------------------------------------------------------------------- Recycling time
+;d1: recycling time in second, ideally 5*T1 (optimized expt 1.3*T1, if NS*1.8)         [1]
+;cnst63: reduction factor for the recycling time (optimized to .26 assuming D1=5*T1) [.26]
+
+define delay WAIT_T1
+	"WAIT_T1 = d1*cnst63"
+
+;-------------------------------------------------------------------------Excitation pulse
+;p1: 90deg f1 pulse
+;p90_X: excitation pulse (may be selective)
+;cnst1: flip angle in degree [90]
+define pulse p90_X
+  "p90_X = p1*cnst1/90"
+  
+# 35 "/home/nmr/prog/pp/def.lcs.incl"
+;-------------------------------------------------------------------------------decoupling
+
+
+# 95 "/home/nmr/prog/pp/def.lcs.incl"
+# 96 "/home/nmr/prog/pp/def.lcs.incl"
+
+
+# 111 "/home/nmr/prog/pp/def.lcs.incl"
+# 112 "/home/nmr/prog/pp/def.lcs.incl"
+
+
+# 133 "/home/nmr/prog/pp/def.lcs.incl"
+# 134 "/home/nmr/prog/pp/def.lcs.incl"
+
+
+;--------------------------------------------------------------------------------- Acquire
+# 140 "/home/nmr/prog/pp/def.lcs.incl"
+   ;ns: number of scans ns = n*4 -  ns = NS*TD0
+
+
+# 144 "/home/nmr/prog/pp/def.lcs.incl"
+;------------------------------------------------------------------------------------acqt0
+;cnst11: to adjust t=0 for acquisition, if digmod = baseopt.
+
+  "cnst11 = -(2u*p1*cnst1/PI)/90"
+
+"acqt0=1u*cnst11"
+# 16 "/home/nmr/prog/pp/zg.lcs" 2
+
+
+define delay Dummy
+"Dummy=1u"
+# 29 "/home/nmr/prog/pp/zg.lcs"
+# 30 "/home/nmr/prog/pp/zg.lcs"
+
+
+# 51 "/home/nmr/prog/pp/zg.lcs"
+# 52 "/home/nmr/prog/pp/zg.lcs"
+
+"acqt0=-p1*2/3.1416"
+
+# 56 "/home/nmr/prog/pp/zg.lcs"
+;------------------------------------------------------------------------------
+# 1 "mc_line 57 file /home/nmr/prog/pp/zg.lcs exp. def. part of mc cmd. before ze"
+define delay MCWRK
+define delay MCREST
+"MCREST = d1 - 30m"
+"MCWRK = 0.333333*30m"
+
+    dccorr
+# 57 "/home/nmr/prog/pp/zg.lcs"
+1 ze
+# 1 "mc_line 57 file /home/nmr/prog/pp/zg.lcs exp. def. of mc cmd. after ze"
+# 58 "/home/nmr/prog/pp/zg.lcs"
+# 1 "mc_line 58 file /home/nmr/prog/pp/zg.lcs exp. start label for mc cmd."
+2 MCWRK  * 2 do:f2  do:f3
+LBLF0, MCWRK 
+  MCREST
+# 59 "/home/nmr/prog/pp/zg.lcs"
+
+
+# 62 "/home/nmr/prog/pp/zg.lcs"
+;----------------------------------------------------------------Power protect
+
+
+# 88 "/home/nmr/prog/pp/zg.lcs"
+  
+; -------------------------------------------------------- preexcitation period
+; here we can perform DFS, RAPT, WURST, HS, , etc...
+
+
+# 96 "/home/nmr/prog/pp/zg.lcs"
+; ------------------------------------- Single pulse with ernst angle if needed
+
+
+ ; non selective single pulse
+# 104 "/home/nmr/prog/pp/zg.lcs"
+  (p1 ph1):f1       ; conventional single pulse (pi/2)
+
+
+# 113 "/home/nmr/prog/pp/zg.lcs"
+; ------------------------------------------------------------echo or full echo
+# 157 "/home/nmr/prog/pp/zg.lcs"
+
+
+# 202 "/home/nmr/prog/pp/zg.lcs"
+# 204 "/home/nmr/prog/pp/zg.lcs"
+; Aquisition 
+;============
+
+; Decoupling only on F2
+
+# 223 "/home/nmr/prog/pp/zg.lcs"
+; or no decoupling
+
+
+	go=2 ph31
+# 230 "/home/nmr/prog/pp/zg.lcs"
+;------------------------------------------------------------write fid---------
+# 1 "mc_line 231 file /home/nmr/prog/pp/zg.lcs exp. mc cmd. in line"
+  MCWRK do:f2 do:f3 wr #0
+  MCWRK zd
+  lo to LBLF0 times td0
+
+  MCWRK
+# 232 "/home/nmr/prog/pp/zg.lcs"
+;------------------------------------------------------------------------------
+
+HaltAcqu, 1m ;jump address for protection files
+exit
+
+# 238 "/home/nmr/prog/pp/zg.lcs"
+ph10= 0
+ph1= 0 2 1 3 
+ph31= 0 2 1 3
+
+
+# 258 "/home/nmr/prog/pp/zg.lcs"
+# 260 "/home/nmr/prog/pp/zg.lcs"
+;=====================================================================parameters
+;pl1: power level for f1 pulse (default)
+;pl12: decoupling power
+;pl2: f2 power (not used) 
+;cpd2: CW, TPPM, SPINAL...
+;cpd3: CW, TPPM, SPINAL...
+
+;p1: pulse length for a 90 deg flip-angle
+;p2: =p1*2, 180 degree pulse
+;p3: 90 deg (used to calculate the magic pulse)
+;sp10: power of the shaped preparation pulse
+;p10: shape pulse length
+
+;d1: relaxation delay; 1-5 * T1
+;d6: echo delay (calculated)
+;d10: delay after shaped pulse (ca. 20u)
+;d7: acquisition delay (neg)
+;d8: acquisition delay (pos)
+;l1: # of rotor cycles
+# 280 "/home/nmr/prog/pp/zg.lcs"
+;cnst1: for shaped pulse definition
+;cnst2: for shaped pulse definition
+;cnst3: shaped pulse resolution in ns
+;cnst10: for shaped pulse definition
+
+;cnst31: MAS spinning speed (or =1e6 for static)
+
+;ns: 4 * n, total number of scans: NS * TD0
+# 289 "/home/nmr/prog/pp/zg.lcs"
+;======================================================================
+
+;zgoptns: -Dpreshape -Dernst -Ddecouple -Ddecouple3 -Dselective -Decho -Dfull -Dtrapdor -Dfslg -Dlacq
+
+;         -Dpreshape for the preexcitation rapt type pulse (shape sp10)
+;         -Dernst for ernst pulse (30deg)
+;         -Ddecouple for decoupling
+;         -Ddecouple3 for double decoupling in F2 and F3
+;         -Dselective for selective excitation pulse
+;         -Decho for hahn echo
+;         -Dfull
+;         -Dfslg

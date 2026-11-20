@@ -7,3 +7,4 @@ recursive-include requirements *.txt
 recursive-include environments *.yml
 recursive-include src/spectrochempy *.py *.pyi *.tmpl *.css *.csv *.ttf *.txt *.rst *.md *.mplstyle
 recursive-include LICENCES *.rst
+prune docs/data
