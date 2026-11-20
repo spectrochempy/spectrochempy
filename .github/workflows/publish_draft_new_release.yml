@@ -15,6 +15,8 @@ jobs:
   release:
     name: Publish new release
     runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.vsem.outputs.prerelease }}
     if: |
       github.event.pull_request.merged == true
       && startsWith(github.event.pull_request.head.ref, 'release/')
@@ -31,8 +33,10 @@ jobs:
         uses: ./.github/actions/verified-pip
       - name: Extract version from branch name (for release branches)
         if: startsWith(github.event.pull_request.head.ref, 'release/')
+        env:
+          RELEASE_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          BRANCH_NAME="$RELEASE_BRANCH"
           VERSION=${BRANCH_NAME#release/}
           echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
@@ -115,3 +119,12 @@ jobs:
             echo "- \`$archive_branch\` → \`$RELEASE_COMMIT\`"
             echo "- \`stable\` → \`$RELEASE_COMMIT\` (was \`$stable_sha\`)"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  synchronize-rtd:
+    needs: release
+    if: needs.release.outputs.prerelease == 'false'
+    uses: ./.github/workflows/sync_rtd_versions.yml
+    with:
+      apply: true
+    secrets:
+      SCPY_RTD_API_TOKEN: ${{ secrets.SCPY_RTD_API_TOKEN }}

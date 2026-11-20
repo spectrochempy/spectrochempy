@@ -2,9 +2,6 @@ name: Documentation artifact prototype
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    tags: ["spectrochempy-v*", "v[0-9]*", "[0-9]*"]
 
 permissions:
   contents: read
