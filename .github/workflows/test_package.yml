@@ -367,7 +367,7 @@ jobs:
             done
             return 0
           }
-          ci_reports=$(python -c "import os, tempfile; from pathlib import Path; print(Path(tempfile.mkdtemp(prefix='scpy-pytest-', dir=os.environ['RUNNER_TEMP'])).as_posix())")
+          ci_reports=$(python -c "import os, tempfile; from pathlib import Path; print(Path(tempfile.mkdtemp(prefix='scpy-pytest-', dir=os.environ['RUNNER_TEMP'])).as_posix(), end='')")
           echo "SCPY_CI_REPORT_DIR=$ci_reports" >> "$GITHUB_ENV"
           run_tests "${pytest_xdist_args[@]}" | tee pytest.log
           status=${PIPESTATUS[0]}

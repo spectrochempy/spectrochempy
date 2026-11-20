@@ -24,7 +24,8 @@ from tests._ci_bash import resolve_bash
         ("def test_ok():\n    pass\n", "push", 0),
     ],
 )
-def test_workflow_exit_status(tmp_path, body, event, expected):
+@pytest.mark.parametrize("windows_newlines", [False, True])
+def test_workflow_exit_status(tmp_path, body, event, expected, windows_newlines):
     bash = resolve_bash()
     if bash is None:
         pytest.skip("CI needs native bash or Git Bash")
@@ -34,6 +35,11 @@ def test_workflow_exit_status(tmp_path, body, event, expected):
     )
     steps = workflow["jobs"]["test-package"]["steps"]
     script = next(s["run"] for s in steps if s.get("name") == "Test package")
+    if windows_newlines:
+        script = script.replace(
+            'python -c "import os, tempfile;',
+            "python -c \"import sys; sys.stdout.reconfigure(newline='\\r\\n'); import os, tempfile;",
+        )
     for expression, value in {
         "matrix.test_targets || 'tests'": "test_cases.py",
         "matrix.docs_examples": "true",
