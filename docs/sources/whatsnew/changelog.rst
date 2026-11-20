@@ -19,72 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Fit spectral series globally with Voigt, pseudo-Voigt, recovery and decay
-  profiles or user-provided axis functions. Share bounded or fixed parameters
-  between components and axes with ``Optimize(shared_parameters=...)``. (:pr:`1905`)
-
-- Add a modulation excitation tutorial and experimental Raman examples for
-  despiking, phase-sensitive detection and harmonic analysis. (:pr:`1880`)
-- Accept string color normalizations (``linear``, ``log``, ``symlog``,
-  ``power`` and ``centered``) and their parameters in 2D plots. (:pr:`1902`)
-
-- Group update announcements for SpectroChemPy and installed plugins into native
-  desktop notifications, with a text fallback and configurable delivery. Cache
-  checks per Python environment and offer a manual version-status command. (:pr:`1900`)
-
-- Extend IRIS with regularized NNLS fits and optional OSQP fixed-grid
-  parallelism through ``workers``. The tutorial explains kernel selection,
-  the L-curve and interpretation of the CO adsorption example.
-  (:pr:`1887`, :pr:`1892`, :pr:`1898`)
-
-- Split one dataset axis into blocks with ``reshape(coord_policy='split')``
-  and compute or invert one-sided Fourier transforms with ``rfft`` and
-  ``irfft``. (:pr:`1888`)
-- ``NDDataset.to_markdown_report()`` now renders a deterministic Markdown
-  summary of one explicitly supplied dataset, selected metadata, structured
-  history and explicit figure references. It does not capture Matplotlib state
-  or claim exhaustive provenance. Every recorded history operation is included
-  in order; only individual values are explicitly truncated. Paths are rendered
-  as supplied, and figure references accept relative paths and HTTP(S) URLs. (:pr:`1775`)
 
 .. section
 
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-
-- Generate usable Conda development and test environments by installing
-  PyPI-only requirements through pip while preserving their version constraints.
-  Include pip in all generated environments. (:pr:`1906`)
-
-- Reject unknown despike methods and baseline wrapper keywords instead of
-  silently ignoring them; correct filter defaults and baseline range help. (:pr:`1904`)
-
-- Round nonlinear coordinates per value so small logarithmically spaced
-  coordinates remain nonzero, while preserving linear-axis rounding. (:pr:`1903`)
-
-- Renew update-notification reminder dates, refresh obsolete announcements,
-  tolerate unavailable PyPI responses and unwritable caches, and skip checks
-  during documentation builds. Use the PyPI Simple JSON API and filter releases
-  by Python requirements, release channel and yanked status. (:pr:`1900`)
-
-- Preserve measurement-to-coordinate associations, complex intensities and
-  per-input labels in ``align()``, including inner joins on single spectra.
-  Reject coordinate-rounding collisions and mask interpolation outside the
-  source range or across masked samples. One-dimensional interpolation can
-  use an explicit target coordinate. (:pr:`1893`, :pr:`1894`, :pr:`1895`)
-
-- Preserve IRIS quadrature weights and regularization when the kernel grid
-  is supplied in descending order. (:pr:`1892`)
-
-- Correct the association of residual sums of squares (RSS) and sharpness
-  values (SM) with their evaluated regularization strengths in adaptive IRIS
-  fits. Keep valid curvature points during the search, restart each fit
-  from the configured bounds, and allow switching off regularization between
-  fits. (:pr:`1892`)
-
-- Preserve metadata lists whose length differs from the number of dataset
-  dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
 
 
 .. section
@@ -93,22 +33,12 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
-- Allow official plugin releases up to their next major version in core
-  extras and installation workflows. Plugins in the ``0.x`` series can
-  receive minor updates without a new core release solely to widen their
-  version range. Each plugin still declares the core versions it requires;
-  check its release notes for migrations between ``0.x`` minor versions. (:pr:`1909`)
-
 
 .. section
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
-
-- IRIS 0.2.0 uses SciPy NNLS by default for regularized fits. Install OSQP
-  separately and pass ``qpsolver="osqp"`` to keep using the previous solver.
-  Quadprog also requires a separate installation. (:pr:`1892`)
 
 
 .. section
@@ -123,12 +53,3 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
-
-- PERF: Reduce overhead in one-dimensional peak fits and automatic baseline
-  fitting. Use analytic Jacobians for supported separable Gaussian and
-  Lorentzian fits on two- and three-dimensional grids, with numerical
-  fallback when required. (:pr:`1890`, :pr:`1891`)
-
-- PERF: Speed up IRIS fits by preparing the OSQP matrix once per regularization
-  parameter, resolving the backend once per fit, and reducing the size of the
-  sharpness calculation for wide datasets. (:pr:`1887`)
