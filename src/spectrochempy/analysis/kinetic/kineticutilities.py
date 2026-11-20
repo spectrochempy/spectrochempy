@@ -824,7 +824,7 @@ class ActionMassKinetics(tr.HasTraits):
             for param, item in zip(params, dict_param_to_optimize, strict=False):
                 dict_param_to_optimize[item] = param
 
-            self._arrhenius = initial_arrhenius.copy()
+            self._arrhenius[...] = initial_arrhenius
             self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
 
             if self._nset == 1:
@@ -916,7 +916,7 @@ class ActionMassKinetics(tr.HasTraits):
             dict_param_to_optimize[param] = optim_res["x"][i]
 
         # set the optimal parameters and compute the final concentration profiles
-        self._arrhenius = initial_arrhenius.copy()
+        self._arrhenius[...] = initial_arrhenius
         self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
         t = Cexp.y.data if self._nset == 1 else [C.y.data for C in Cexp]
 

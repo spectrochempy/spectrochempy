@@ -346,8 +346,8 @@ def test_fit_non_idempotent_left_op_is_not_applied_cumulatively():
     conc = {"A": 1.0, "B": 0.0, "C": 0.0}
     time = np.linspace(0, 10, 21)
     C_exp = ku.ActionMassKinetics(reactions, conc, [1.0, 0.6]).integrate(time)
-    kin = ku.ActionMassKinetics(reactions, conc, [0.5, 0.5])
-    left_op = np.array([[1.0, 0.0], [0.6, 0.0]])  # k[1] := 0.6 k[0]
+    kin = ku.ActionMassKinetics(reactions, conc, [0.5, 0.2])
+    left_op = np.array([[1.0, 0.0], [0.5, 0.5]])  # k[1] := 0.5 k[0] + 0.1
     _, _, res = kin.fit_to_concentrations(
         C_exp,
         [0, 1, 2],
@@ -360,7 +360,7 @@ def test_fit_non_idempotent_left_op_is_not_applied_cumulatively():
         },
     )
     np.testing.assert_allclose(res.x, [1.0], rtol=1e-3)
-    np.testing.assert_allclose(kin._arrhenius, [res.x[0], 0.6 * res.x[0]])
+    np.testing.assert_allclose(kin._arrhenius, [res.x[0], 0.5 * res.x[0] + 0.1])
 
 
 def test_callable_temperature_without_k_dt():
