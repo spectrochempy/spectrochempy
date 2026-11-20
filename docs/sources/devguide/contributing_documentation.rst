@@ -183,7 +183,7 @@ For example, inspect a fixture's manifest values from the repository root:
 See ``docs/data/README.md`` for the current selection's provenance.
 
 Reading Data in Examples and Notebooks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Use paths relative to ``scp.preferences.datadir`` in both gallery scripts
 and Jupytext notebooks. The documentation builder sets this preference to
