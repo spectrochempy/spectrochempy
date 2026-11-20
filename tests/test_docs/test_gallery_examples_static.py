@@ -55,6 +55,61 @@ def _module_docstring_end(source: str) -> int | None:
     return None
 
 
+def _uses_datadir(node, names):
+    return any(
+        (
+            isinstance(child, ast.Attribute)
+            and child.attr == "datadir"
+            and isinstance(child.value, ast.Attribute)
+            and child.value.attr == "preferences"
+            and isinstance(child.value.value, ast.Name)
+            and child.value.value.id == "scp"
+        )
+        or (isinstance(child, ast.Name) and child.id in names)
+        for child in ast.walk(node)
+    )
+
+
+def _is_scp_reader(func):
+    if not isinstance(func, ast.Attribute) or not func.attr.startswith("read"):
+        return False
+    receiver = func.value
+    while isinstance(receiver, ast.Attribute):
+        receiver = receiver.value
+    return isinstance(receiver, ast.Name) and receiver.id == "scp"
+
+
+def _datadir_reader_calls(tree):
+    assignments = [
+        (node.value, node.targets if isinstance(node, ast.Assign) else [node.target])
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None
+    ]
+    names = set()
+    while True:
+        derived = {
+            target.id
+            for value, targets in assignments
+            if _uses_datadir(value, names)
+            for assignment in targets
+            for target in ast.walk(assignment)
+            if isinstance(target, ast.Name)
+        }
+        if derived <= names:
+            break
+        names.update(derived)
+    return [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and _is_scp_reader(node.func)
+        and any(
+            _uses_datadir(arg, names)
+            for arg in [*node.args, *(keyword.value for keyword in node.keywords)]
+        )
+    ]
+
+
 def test_thumbnail_directives_follow_module_docstring():
     misplaced = []
     for path in _example_files():
@@ -105,16 +160,10 @@ def test_gallery_examples_use_datadir_relative_paths():
     for path in _example_files():
         source = path.read_text(encoding="utf-8")
         tree = ast.parse(source)
+        if _datadir_reader_calls(tree):
+            offenders.append(path.relative_to(REPO_ROOT).as_posix())
 
         for node in ast.walk(tree):
-            uses_scp_datadir = (
-                isinstance(node, ast.Attribute)
-                and node.attr == "datadir"
-                and isinstance(node.value, ast.Attribute)
-                and node.value.attr == "preferences"
-                and isinstance(node.value.value, ast.Name)
-                and node.value.value.id == "scp"
-            )
             uses_os_path_join = (
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
@@ -127,10 +176,39 @@ def test_gallery_examples_use_datadir_relative_paths():
             uses_test_variable = (
                 isinstance(node, ast.Name) and node.id in DATADIR_TEST_VARIABLES
             )
-            if uses_scp_datadir or uses_os_path_join or uses_test_variable:
+            if uses_os_path_join or uses_test_variable:
                 offenders.append(path.relative_to(REPO_ROOT).as_posix())
 
     assert sorted(set(offenders)) == []
+
+
+@pytest.mark.parametrize(
+    ("source", "invalid"),
+    [
+        ('scp.read("irdata/input.spg")', False),
+        ('scp.read(scp.preferences.datadir / "irdata/input.spg")', True),
+        ('scp.read(filename=scp.preferences.datadir / "irdata/input.spg")', True),
+        ('scp.NDDataset.read(scp.preferences.datadir / "irdata/input.spg")', True),
+        (
+            'filename = scp.preferences.datadir / "irdata/input.spg"\n'
+            "scp.read_omnic(filename)",
+            True,
+        ),
+        (
+            "folder: Path = scp.preferences.datadir\n"
+            'filename = folder / "irdata/input.spg"\n'
+            "scp.read_omnic(filename)",
+            True,
+        ),
+        (
+            'filename = scp.preferences.datadir / "raw.txt"\n'
+            "with filename.open('rb') as stream: table = np.loadtxt(stream)",
+            False,
+        ),
+    ],
+)
+def test_relative_path_check_distinguishes_readers_from_raw_file_io(source, invalid):
+    assert bool(_datadir_reader_calls(ast.parse(source))) is invalid
 
 
 def test_thumbnail_configuration_is_recognized_by_sphinx_gallery():
