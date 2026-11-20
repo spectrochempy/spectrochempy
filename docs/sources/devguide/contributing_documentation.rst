@@ -162,6 +162,13 @@ The final job checks the commit and file hashes of both artifacts before
 rendering one Sphinx site with the usual configuration and document paths.
 Download the HTML artifact from the workflow run to inspect the result.
 
+Use the pinned Sphinx-Gallery version from the documentation dependencies.
+Version 0.22.1 includes portable backreference filenames: local Python classes
+may have ``<locals>`` in their qualified names, but ``<`` and ``>`` are rejected
+by GitHub's artifact uploader. The qualified names remain available in the
+backreference JSON, including the API mini-galleries. The source artifact
+format and its commit, package-version and file-hash checks are unchanged.
+
 Before enabling artifact mode in production, validate it on a separate Read
 the Docs test project with the same build time limit. Configure
 ``SCPY_RTD_DOCS_ARTIFACTS=1`` and set ``SCPY_RTD_GITHUB_TOKEN`` as a private
@@ -181,6 +188,15 @@ ref has moved and you need the old SHA, dispatch CI on a temporary branch at tha
 the corresponding RTD version of the temporary branch. To retry the original
 RTD version instead, generate artifacts for its current SHA. To restore
 execution inside RTD, unset ``SCPY_RTD_DOCS_ARTIFACTS``.
+
+An immutable release checkout keeps its own dependency pins. Re-running the
+artifact workflow for an older release does not apply a dependency fix from
+``master``. In particular, the 1.4.0 checkout pins Sphinx-Gallery 0.19.0 and
+must keep native RTD execution while no compatible artifact pair exists for
+its exact commit and package version. Do not move its Git tag or substitute
+artifacts from a newer commit. Keep the project-wide artifact flag unset
+until every affected RTD version has a qualified artifact path; use a separate
+test project to qualify the corrected checkout first.
 
 If all artifact-production runs for the checkout have completed and the
 most recent run failed, RTD stops with a link to that run rather than

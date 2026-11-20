@@ -9,7 +9,11 @@ The independently released ``spectrochempy-nmr`` plugin reads vendor
 and exchange formats and processes 1D and supported 2D acquisitions.
 SpectroChemPy provides the dataset, units, plotting and generic processing API.
 
-.. _installation:
+.. raw:: html
+
+    <span id="installation"></span>
+
+.. _nmr-installation:
 
 Install or upgrade the plugin explicitly:
 
