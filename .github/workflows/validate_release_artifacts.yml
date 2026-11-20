@@ -23,7 +23,6 @@ on:
   push:
     branches:
       - master
-      - 'fix/*'
     paths-ignore:
       - 'docs/**'
       - 'maintainers/**'
