@@ -98,13 +98,14 @@ jobs:
           python - <<'PY'
           import os
           from importlib.metadata import version
+          from packaging.specifiers import SpecifierSet
 
           core = version("spectrochempy")
           nmr = version("spectrochempy-nmr")
           print(f"SpectroChemPy: {core}")
           print(f"spectrochempy-nmr: {nmr}")
           assert core == os.environ["RELEASE_VERSION"]
-          assert nmr.startswith(("0.3.", "0.4.")), nmr
+          assert SpecifierSet(">=0.3,<1").contains(nmr, prereleases=False), nmr
           PY
 
       - name: Run core-side plugin consumption contracts

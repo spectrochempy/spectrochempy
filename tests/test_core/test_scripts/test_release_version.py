@@ -304,6 +304,54 @@ def test_prepare_release_validates_version_before_proceeding():
     assert "packaging" in content
 
 
+@pytest.mark.parametrize(
+    ("nmr_version", "allowed"),
+    [
+        ("0.3.0", True),
+        ("0.4.2", True),
+        ("0.5.0", True),
+        ("0.9.9", True),
+        ("0.2.9", False),
+        ("0.5.0rc1", False),
+        ("1.0.0rc1", False),
+        ("1.0.0", False),
+    ],
+)
+def test_prepare_release_checks_installed_nmr_range(
+    monkeypatch, tmp_path, nmr_version, allowed
+):
+    import yaml
+
+    workflow = yaml.safe_load(
+        (WORKFLOWS / "prepare_new_release.yml").read_text(encoding="utf-8")
+    )
+    steps = workflow["jobs"]["validate_published_plugins"]["steps"]
+    step = next(
+        item
+        for item in steps
+        if item.get("name") == "Confirm installed distribution versions"
+    )
+    script = step["run"].split("python - <<'PY'\n", 1)[1].rsplit("\nPY", 1)[0]
+    monkeypatch.setenv("RELEASE_VERSION", "1.4.0")
+    for package, version in [
+        ("spectrochempy", "1.4.0"),
+        ("spectrochempy-nmr", nmr_version),
+    ]:
+        metadata_dir = tmp_path / f"{package.replace('-', '_')}-{version}.dist-info"
+        metadata_dir.mkdir()
+        (metadata_dir / "METADATA").write_text(
+            f"Metadata-Version: 2.1\nName: {package}\nVersion: {version}\n"
+        )
+    script_path = tmp_path / "confirm_versions.py"
+    script_path.write_text(script)
+    result = subprocess.run(
+        [sys.executable, str(script_path)], capture_output=True, text=True, check=False
+    )
+    assert (result.returncode == 0) is allowed, result.stderr
+    if not allowed:
+        assert f"AssertionError: {nmr_version}" in result.stderr
+
+
 def test_build_package_uses_helper_next_dev():
     content = (WORKFLOWS / "build_package.yml").read_text(encoding="utf-8")
     assert "release_version.py next-dev" in content
