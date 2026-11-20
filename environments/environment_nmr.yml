@@ -44,4 +44,4 @@ dependencies:
     # NMR dependencies
     # ----------------
 
-    - spectrochempy-nmr>=0.1,<0.5
+    - spectrochempy-nmr>=0.1,<1

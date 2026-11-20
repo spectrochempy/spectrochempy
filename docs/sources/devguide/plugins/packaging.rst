@@ -43,7 +43,7 @@ to discover your plugin automatically:
     description = "My SpectroChemPy plugin"
     requires-python = ">=3.11"
     dependencies = [
-        "spectrochempy>=0.9,<0.10",
+        "spectrochempy>=1.1.0,<2",
     ]
 
     [project.entry-points."spectrochempy.plugins"]
@@ -60,7 +60,8 @@ Key points:
 * The **entry point name** (``myplugin``) must match your plugin's
   ``name`` attribute.
 * ``spectrochempy`` must be listed as a dependency with a compatibility
-   range, e.g. ``spectrochempy>=0.12,<0.13``.
+  range, e.g. ``spectrochempy>=1.1.0,<2``. Raise the minimum when using
+  core APIs introduced in a later version.
 * Use ``requires-python = ">=3.11"`` to match SpectroChemPy's minimum.
 * Official plugins in the monorepo use a static ``version`` field.
   ``setuptools_scm`` is not used because plugin and core tags share the
@@ -124,6 +125,31 @@ The ``nmr`` extra installs the NMR plugin and its dependencies. See the
 :doc:`reader catalog </userguide/importexport/readers>` for its registered
 formats. The ``plugins`` extra installs the current official plugin set.
 
+Official plugin version ranges
+------------------------------
+
+Core extras accept official plugin releases up to the next major version,
+for example ``spectrochempy-nmr>=0.1,<1`` for a plugin in the ``0.x`` series
+or ``>=1.0,<2`` for a plugin in the ``1.x`` series. A new plugin minor release
+does not require a core release solely to widen this range. The lower bound
+identifies the oldest supported plugin release and is raised only when needed.
+Apply the same ranges to generated environments and installation workflows.
+
+Each plugin declares and tests the core versions it supports. If it needs a
+new core API, raise its ``spectrochempy`` dependency minimum in both Python
+and Conda metadata, and align its runtime minimum-version declaration.
+For example, a plugin requiring a core 1.4 API declares
+``spectrochempy>=1.4,<2``. Dependency resolution can then select a compatible
+combination without changing an older core's extras.
+
+.. note::
+
+   Plugin ``0.x`` minor releases may include breaking changes. Accepting
+   them through a broad dependency range does not promise compatibility of
+   user scripts. Document migrations and qualify each release against its
+   declared core range. Exact version or commit pins used as validation
+   references remain separate from these installation ranges.
+
 Experimental plugins such as ``spectrochempy-cantera`` are **not** included
 in aggregate extras and must be installed directly::
 
@@ -147,7 +173,7 @@ Your plugin class must implement the
         name = "myplugin"
         version = "0.1.0"
         description = "My SpectroChemPy plugin"
-        spectrochempy_min_version = "0.9.0"
+        spectrochempy_min_version = "1.1.0"
         PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
 
         def register_readers(self) -> list[dict]:

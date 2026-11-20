@@ -45,10 +45,10 @@ dependencies:
     # --------------------
 
     # nmr
-    - spectrochempy-nmr>=0.1,<0.5
+    - spectrochempy-nmr>=0.1,<1
     # iris
-    - spectrochempy-iris>=0.1,<0.2
+    - spectrochempy-iris>=0.1,<1
     # tensor
-    - spectrochempy-tensor>=0.1,<0.2
-    - spectrochempy-carroucell>=0.1,<0.2
-    - spectrochempy-perkinelmer>=0.1,<0.2
+    - spectrochempy-tensor>=0.1,<1
+    - spectrochempy-carroucell>=0.1,<1
+    - spectrochempy-perkinelmer>=0.1,<1

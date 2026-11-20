@@ -45,7 +45,7 @@ jobs:
           for name in $names; do
             python -m pip install --no-deps -e "plugins/$name"
           done
-          python -m pip install "spectrochempy-nmr>=0.2,<0.5" osqp scipy tensorly
+          python -m pip install "spectrochempy-nmr>=0.2,<1" osqp scipy tensorly
           python -c 'from importlib.metadata import version; import spectrochempy as scp; assert callable(scp.nmr.read); print("NMR plugin", version("spectrochempy-nmr"))'
       - name: Prepare private Corn data
         if: ${{ github.repository == 'spectrochempy/spectrochempy' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')) }}

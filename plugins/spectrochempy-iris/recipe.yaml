@@ -36,6 +36,7 @@ about:
     IRIS processing.
   homepage: https://www.spectrochempy.fr
   license: LicenseRef-CeCILL-B
+  license_file: LICENSE
   repository: https://github.com/spectrochempy/spectrochempy
 
 extra:
