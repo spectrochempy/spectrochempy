@@ -25,3 +25,12 @@ Bug Fixes
   computed at each step), the gas constant matches the isothermal path
   (8.314462618 instead of 8.314, a relative change of about 1e-3 on rate
   constants), and plain rate constants raise a clear error (:pr:`1923`).
+
+Deprecations
+~~~~~~~~~~~~
+
+- The experimental ``spectrochempy-cantera`` plugin and its ``PFR`` model
+  (``scp.cantera.PFR`` and the deprecated alias ``scp.PFR``) will be removed in
+  the next minor release. ``PFR`` cannot be built with any Cantera version 3.0 or
+  later and has no known users. Cases that need Cantera can use it directly and
+  load the results into an ``NDDataset``.

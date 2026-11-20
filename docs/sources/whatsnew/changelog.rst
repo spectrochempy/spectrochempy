@@ -58,6 +58,12 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 
+- The experimental ``spectrochempy-cantera`` plugin and its ``PFR`` model
+  (``scp.cantera.PFR`` and the deprecated alias ``scp.PFR``) will be removed in
+  the next minor release. ``PFR`` cannot be built with any Cantera version 3.0 or
+  later and has no known users. Cases that need Cantera can use it directly and
+  load the results into an ``NDDataset``.
+
 
 .. section
 
