@@ -23,9 +23,34 @@ Its central object, `NDDataset`, provides numerical data together with
 coordinates, units, masks, labels, history, and metadata, making it easier
 to build reproducible spectroscopy workflows in Python.
 
-The history records participating operations on a dataset. It is inspectable,
-but it is not a complete provenance record; reproducibility also requires the
-originating script or notebook, inputs, environment, and parameters.
+## Quick Start
+
+Create and smooth a synthetic spectrum using only the core package; no plugin
+or data download is needed. Run this in a Python script or Jupyter notebook:
+
+```python
+import spectrochempy as scp
+
+wavenumbers = scp.Coord.linspace(1800, 1400, 401, units="cm^-1", title="wavenumber")
+profile = scp.gaussian(wavenumbers, pos=1650, width=30, normalized=False)
+spectrum = scp.NDDataset(profile, coordset=[wavenumbers], title="absorbance")
+spectrum += 0.03 * scp.random(spectrum.shape, seed=42)
+smoothed = spectrum.smooth(size=11)
+
+_ = scp.plot_multiple(
+    [spectrum, smoothed], method="pen", labels=["Original", "Smoothed"],
+    legend="upper right", ylabel="absorbance", figsize=(7, 3.5),
+)
+scp.show()
+```
+
+![Synthetic spectrum before and after smoothing](https://raw.githubusercontent.com/spectrochempy/spectrochempy/master/docs/_static/images/readme-quickstart.png)
+
+For measured data, start with `dataset = scp.read("path/to/spectrum.spa")`.
+See the [reader catalog](https://www.spectrochempy.fr/userguide/importexport/readers.html)
+for supported formats and required plugins, and the
+[quickstart tutorial](https://www.spectrochempy.fr/gettingstarted/quickstart.html)
+for a complete workflow.
 
 ## Key Features
 
@@ -35,7 +60,8 @@ originating script or notebook, inputs, environment, and parameters.
   `Project`
 * **Data Processing**:
   * Unit-aware mathematical operations
-  * Baseline correction, automatic subtraction, interpolation, FFT workflows
+  * Baseline correction, automatic subtraction, smoothing, denoising, despiking
+  * Coordinate alignment, interpolation, integration, peak finding, FFT workflows
   * Core processing with plugin-specific extensions where appropriate
 * **Analysis Tools**:
   * SVD, PCA, MCR-ALS, EFA, PLS, fitting, and related result objects
@@ -44,7 +70,7 @@ originating script or notebook, inputs, environment, and parameters.
   * Export to lightweight interchange formats such as CSV, JCAMP-DX, and
     minimal MATLAB `.mat` exchange files
   * Portable `NDDataset ↔ xarray.Dataset ↔ NetCDF` round-trips for the
-    maintained portable subset
+    maintained portable subset (requires optional `xarray` and a NetCDF backend)
   * Safe native `.scp` / `.pscp` persistence by default, with explicit legacy
     opt-in only for historical trusted archives
 * **Plugin System**:
@@ -52,27 +78,36 @@ originating script or notebook, inputs, environment, and parameters.
   * Namespaced APIs: `scp.nmr.read_topspin(...)`, `scp.iris.IRIS()`
   * Dataset accessors for plugin-bound operations
 
+The history records participating operations on a dataset. It is inspectable,
+but it is not a complete provenance record; reproducibility also requires the
+originating script or notebook, inputs, environment, and parameters.
+
 ## Installation
 
-The recommended way to install SpectroChemPy is with `uv`:
+SpectroChemPy requires **Python 3.11 or newer**.
+
+The recommended way to install SpectroChemPy is with
+[`uv`](https://docs.astral.sh/uv/getting-started/installation/). Once `uv` is installed:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh   # if uv is not installed
 uv venv scpy --python 3.13
+# Linux / macOS:
 source scpy/bin/activate
+# Windows PowerShell:
+# .\scpy\Scripts\Activate.ps1
 uv pip install spectrochempy
 ```
 
 Alternatively, with `mamba` / `conda`:
 
 ```bash
-mamba install -c spectrocat -c conda-forge spectrochempy
+mamba install -c conda-forge -c spectrocat spectrochempy
 ```
 
 Or with `pip`:
 
 ```bash
-pip install spectrochempy
+python -m pip install spectrochempy
 ```
 
 See the [full installation guide](https://www.spectrochempy.fr/gettingstarted/install/index.html) for platform-specific instructions, optional dependencies, and development setup.
@@ -84,17 +119,26 @@ Extend SpectroChemPy with official plugins (installed separately):
 | Plugin | Install | What it provides |
 |--------|---------|------------------|
 | `spectrochempy-carroucell` | `uv pip install spectrochempy-carroucell` | Carroucell experiment reader |
-| `spectrochempy-iris` | `uv pip install spectrochempy-iris` | 2D-IRIS analysis tools |
-| `spectrochempy-nmr` | `uv pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
-| `spectrochempy-perkinelmer` | `uv pip install spectrochempy-perkinelmer` | PerkinElmer ``.sp`` IR file reader |
-| `spectrochempy-tensor` | `uv pip install spectrochempy-tensor` | Tensor learning tools |
+| `spectrochempy-iris` | `uv pip install spectrochempy-iris` | Regularized inversion for adsorption and diffusion studies |
+| `spectrochempy-nmr` | `uv pip install spectrochempy-nmr` | NMR readers (Bruker, Agilent/Varian, JEOL, SIMPSON) and processing |
+| `spectrochempy-perkinelmer` | `uv pip install spectrochempy-perkinelmer` | PerkinElmer `.sp` IR file reader |
+| `spectrochempy-tensor` | `uv pip install spectrochempy-tensor` | TensorLy-backed tensor decompositions, including CP/PARAFAC |
 
-`pip install` works as well if you are not using `uv`.
+`python -m pip install` works as well if you are not using `uv`.
+You can also install the core and selected plugins together using extras:
+
+```bash
+uv pip install "spectrochempy[nmr]"       # or [iris], [tensor]
+uv pip install "spectrochempy[plugins]"   # all official plugins
+```
+
+For optional xarray/NetCDF interoperability, install `xarray` and a NetCDF
+backend such as `netCDF4` in the same environment.
 
 Plugins are also available via conda from the `spectrocat` channel:
 
 ```bash
-mamba install -c spectrocat -c conda-forge spectrochempy-nmr
+mamba install -c conda-forge -c spectrocat spectrochempy-nmr
 ```
 
 Plugins are discovered automatically once installed — no manual loading step required.
