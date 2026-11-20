@@ -96,8 +96,15 @@ import spectrochempy as scp
 # reverse steps in the second. The pseudo-first-order constants are given in
 # units of the inverse period.
 #
-# `ActionMassKinetics` integrates each half-period, starting from the
-# concentrations reached at the end of the previous one.
+# `ActionMassKinetics` integrates the rate equations over each half-period,
+# starting from the concentrations reached at the end of the previous one.
+# The result is the matrix of the concentrations of A, B and C as a function
+# of time, `concentration_profiles`.
+
+# %% [raw] raw_mimetype="text/restructuredtext"
+# .. raw:: html
+#
+#    <details><summary>Show code for the concentration profiles</summary>
 
 # %%
 period, n_spectra_per_cycle, n_cycles = 60.0, 60, 30
@@ -124,6 +131,13 @@ concentration_profiles.y = scp.Coord(
     np.concatenate(times), title="time", units="s", rounding=False
 )
 concentration_profiles.title = "concentration"
+
+# %% [raw] raw_mimetype="text/restructuredtext"
+# .. raw:: html
+#
+#    </details>
+
+# %%
 _ = concentration_profiles[: 10 * n_spectra_per_cycle].T.plot(
     labels=kinetics.species, legend="best"
 )
@@ -138,6 +152,11 @@ _ = concentration_profiles[: 10 * n_spectra_per_cycle].T.plot(
 # Each species has one Gaussian band. The spectra add a broad static
 # background, about a hundred times larger than the variations of the
 # active species, and noise.
+
+# %% [raw] raw_mimetype="text/restructuredtext"
+# .. raw:: html
+#
+#    <details><summary>Show code for the spectra</summary>
 
 # %%
 wavenumber = scp.Coord.linspace(1500, 1800, 301, title="wavenumber", units="cm^-1")
@@ -154,6 +173,12 @@ spectra += scp.normal(scale=0.01, size=spectra.shape, seed=42)
 spectra.title = "absorbance"
 spectra.units = "absorbance"
 
+# %% [raw] raw_mimetype="text/restructuredtext"
+# .. raw:: html
+#
+#    </details>
+
+# %%
 _ = spectra[-n_spectra_per_cycle:].plot(colorbar=True)
 
 # %% [markdown]
