@@ -85,6 +85,15 @@ Bug Fixes
 - Preserve metadata lists whose length differs from the number of dataset
   dimensions when transposing or swapping axes after loading an SCP file. (:pr:`1885`)
 
+Dependency Updates
+~~~~~~~~~~~~~~~~~~
+
+- Allow official plugin releases up to their next major version in core
+  extras and installation workflows. Plugins in the ``0.x`` series can
+  receive minor updates without a new core release solely to widen their
+  version range. Each plugin still declares the core versions it requires;
+  check its release notes for migrations between ``0.x`` minor versions.
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 

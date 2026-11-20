@@ -45,4 +45,4 @@ dependencies:
     # ---------------
 
     # tensor
-    - spectrochempy-tensor>=0.1,<0.2
+    - spectrochempy-tensor>=0.1,<1

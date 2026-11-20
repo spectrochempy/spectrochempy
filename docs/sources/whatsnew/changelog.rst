@@ -99,6 +99,12 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Allow official plugin releases up to their next major version in core
+  extras and installation workflows. Plugins in the ``0.x`` series can
+  receive minor updates without a new core release solely to widen their
+  version range. Each plugin still declares the core versions it requires;
+  check its release notes for migrations between ``0.x`` minor versions.
+
 
 .. section
 

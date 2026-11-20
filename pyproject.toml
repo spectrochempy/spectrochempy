@@ -87,15 +87,15 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-nmr = ["spectrochempy-nmr>=0.1,<0.5"]
-iris = ["spectrochempy-iris>=0.1,<0.2"]
-tensor = ["spectrochempy-tensor>=0.1,<0.2"]
+nmr = ["spectrochempy-nmr>=0.1,<1"]
+iris = ["spectrochempy-iris>=0.1,<1"]
+tensor = ["spectrochempy-tensor>=0.1,<1"]
 plugins = [
     "spectrochempy[nmr]",
     "spectrochempy[iris]",
     "spectrochempy[tensor]",
-    "spectrochempy-carroucell>=0.1,<0.2",
-    "spectrochempy-perkinelmer>=0.1,<0.2",
+    "spectrochempy-carroucell>=0.1,<1",
+    "spectrochempy-perkinelmer>=0.1,<1",
 ]
 test = [
   "setuptools_scm>=8",

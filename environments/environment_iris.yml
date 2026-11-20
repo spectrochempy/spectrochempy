@@ -44,4 +44,4 @@ dependencies:
     # IRIS dependencies
     # -----------------
 
-    - spectrochempy-iris>=0.1,<0.2
+    - spectrochempy-iris>=0.1,<1
