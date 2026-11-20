@@ -54,6 +54,15 @@ def test_semantic_order_and_core_release_filter():
     }
 
 
+def test_draft_to_published_transition_requires_the_new_tag():
+    items = [version(n) for n in ("1.8.0", "1.9.0", "1.10.0", "1.11.0")]
+    with pytest.raises(ValueError, match="newer release"):
+        rtd.retention_plan(items, TAGS, PROJECT, 2)
+    plan = rtd.retention_plan(items, [*TAGS, "spectrochempy-v1.11.0"], PROJECT, 2)
+    assert plan["keep"] == ["1.11.0", "1.10.0"]
+    assert plan["deactivate"] == ["1.8.0", "1.9.0"]
+
+
 def test_existing_active_tag_url_is_kept_instead_of_inactive_archive():
     items = [
         version("1.8.0"),

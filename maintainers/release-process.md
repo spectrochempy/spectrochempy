@@ -151,8 +151,11 @@ services externes.
 
 ## Conservation des versions Read the Docs
 
-Après la création des branches d'archive d'une release stable du core,
-`publish_draft_new_release.yml` appelle `sync_rtd_versions.yml`. Cette étape
+À la publication effective d'une release stable du core, l'événement GitHub
+`release: published` déclenche `sync_rtd_versions.yml`. Le brouillon ne déclenche
+pas cette étape : son tag n'existe pas encore. Si la publication est automatisée
+dans GitHub Actions, utiliser un jeton GitHub App ou PAT pour propager cet
+événement aux autres workflows, plutôt que le seul `GITHUB_TOKEN`. Cette étape
 conserve les dix dernières releases, triées par version, et une seule URL
 par release. Les URL déjà actives et construites sont privilégiées. Les alias
 `latest` et `stable`, la version par défaut et la cible de `stable` sont protégés.

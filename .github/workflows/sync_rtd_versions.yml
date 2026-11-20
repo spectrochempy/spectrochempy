@@ -1,20 +1,14 @@
 name: Synchronize RTD release versions
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       apply:
         description: Apply the ten-release retention policy (otherwise dry run)
         type: boolean
         default: false
-  workflow_call:
-    inputs:
-      apply:
-        type: boolean
-        default: true
-    secrets:
-      SCPY_RTD_API_TOKEN:
-        required: true
 
 permissions:
   contents: read
@@ -25,7 +19,11 @@ concurrency:
 
 jobs:
   synchronize:
-    if: github.repository == 'spectrochempy/spectrochempy'
+    if: >-
+      github.repository == 'spectrochempy/spectrochempy'
+      && (github.event_name != 'release'
+          || (startsWith(github.event.release.tag_name, 'spectrochempy-v')
+              && github.event.release.prerelease == false))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -40,10 +38,15 @@ jobs:
       - uses: ./.github/actions/verified-pip
       - name: Install version parser
         run: python -m pip install packaging
+      - name: Validate published Core tag
+        if: github.event_name == 'release'
+        env:
+          PUBLISHED_TAG: ${{ github.event.release.tag_name }}
+        run: python .github/workflows/scripts/release_version.py stable-tag-version "$PUBLISHED_TAG"
       - name: Synchronize release versions
         env:
           SCPY_RTD_API_TOKEN: ${{ secrets.SCPY_RTD_API_TOKEN }}
-          APPLY: ${{ inputs.apply }}
+          APPLY: ${{ github.event_name == 'release' || inputs.apply }}
         shell: bash
         run: |
           args=()
