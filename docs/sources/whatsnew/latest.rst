@@ -22,4 +22,5 @@ Bug Fixes
   once per evaluation instead of accumulating, and the model holds the optimal
   parameters after the fit. With a temperature profile ``T(t)``, ``k_dt`` is now
   optional (rate constants are then computed at each step), a single gas constant
-  is used, and plain rate constants raise a clear error.
+  is used, and plain rate constants raise a clear error
+  (:pr:`1923`).
