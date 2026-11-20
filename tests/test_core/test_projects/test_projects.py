@@ -21,6 +21,11 @@ from spectrochempy.utils.exceptions import SpectroChemPyError
 prefs = preferences
 
 
+@pytest.fixture(autouse=True)
+def project_working_directory(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+
 def _rewrite_project_dataset_payload_as_legacy_pickle(filename):
     current = Project.load(filename)
 
