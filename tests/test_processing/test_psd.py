@@ -507,3 +507,27 @@ class TestPSD:
         psd_b = PSD()
         psd_a.phi = [0.0, 90.0]
         np.testing.assert_allclose(psd_b._get_phi(), expected_default)
+
+
+def test_riemann_psd_matches_forward_fft_with_right_endpoint_phase():
+    n_times = 16
+    harmonic = 2
+    angle = 2 * np.pi * np.arange(n_times) / n_times
+    phase = np.array([0.2, -0.7])
+    signal = 3 + 2 * np.cos(harmonic * angle + phase[:, None])
+    grouped = NDDataset(signal[:, :, None] * np.array([1.0, 2.0]))
+    grouped.set_coordset(
+        z=Coord([4, 5], title="cycle"),
+        y=Coord(500 * np.arange(n_times), units="ms"),
+        x=Coord([1630, 1650], units="cm^-1"),
+    )
+
+    fourier = grouped.rfft(dim="y", norm="forward")
+    demodulated = PSD(harmonic=harmonic, integration_rule="riemann").transform(grouped)
+    complex_psd = demodulated.quadrature.data - 1j * demodulated.in_phase.data
+    np.testing.assert_allclose(
+        complex_psd,
+        2
+        * fourier.data[:, harmonic].mean(axis=0)
+        * np.exp(-2j * np.pi * harmonic / n_times),
+    )

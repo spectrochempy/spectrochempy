@@ -19,6 +19,8 @@ New Features
   profiles or user-provided axis functions. Share bounded or fixed parameters
   between components and axes with ``Optimize(shared_parameters=...)``. (:pr:`1905`)
 
+- Add a modulation excitation tutorial and experimental Raman examples for
+  despiking, phase-sensitive detection and harmonic analysis. (:pr:`1880`)
 - Accept string color normalizations (``linear``, ``log``, ``symlog``,
   ``power`` and ``centered``) and their parameters in 2D plots. (:pr:`1902`)
 
