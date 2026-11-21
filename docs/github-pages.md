@@ -52,6 +52,11 @@ The build and publication logs remain available in Actions.
 
 ## Configure and qualify
 
+Before landing these workflows, apply the `docs-pages-qualify` label to their
+pull request to run the read-only build and inspect the `pages-html` artifact.
+The label does not enable publication or private Corn access. Removing it
+prevents subsequent qualification builds while `DOCS_PAGES_ENABLED` is unset.
+
 1. Land the reviewed workflows and helpers on `master` in both repositories.
    Do not activate an unreviewed publisher. Its files must exist on the default
    branch for `workflow_run` and closed-PR cleanup to work.

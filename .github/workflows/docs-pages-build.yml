@@ -9,6 +9,7 @@ on:
     tags: ['spectrochempy-v*', 'v*']
   pull_request:
     branches: [master]
+    types: [opened, synchronize, reopened, labeled]
 
 concurrency:
   group: docs-pages-build-${{ github.event.pull_request.number || github.ref }}
@@ -24,7 +25,7 @@ permissions:
 
 jobs:
   helpers:
-    if: vars.DOCS_PAGES_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    if: vars.DOCS_PAGES_ENABLED == 'true' || github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'docs-pages-qualify')
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -40,7 +41,7 @@ jobs:
       - run: node --test .github/pages/test_resolve.cjs
   execute:
     needs: helpers
-    if: vars.DOCS_PAGES_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    if: vars.DOCS_PAGES_ENABLED == 'true' || github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'docs-pages-qualify')
     name: Execute ${{ matrix.kind }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
