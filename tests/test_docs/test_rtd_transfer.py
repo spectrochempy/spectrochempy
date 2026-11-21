@@ -222,3 +222,12 @@ def test_failed_or_wrong_revision_rtd_build_is_not_accepted(
     )
     with pytest.raises(RuntimeError, match="expected revision"):
         driver.transfer(12, PROJECT, "github-test", "rtd-test")
+
+
+def test_ready_hook_runs_after_python_is_available():
+    import yaml
+
+    root = Path(__file__).resolve().parents[2]
+    jobs = yaml.safe_load((root / ".readthedocs.yaml").read_text())["build"]["jobs"]
+    assert all("python" not in command for command in jobs["post_checkout"])
+    assert jobs["pre_install"][0] == "python -m docs.rtd_transfer ready"

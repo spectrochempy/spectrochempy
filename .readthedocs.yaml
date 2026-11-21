@@ -11,12 +11,13 @@ build:
     - pandoc
   jobs:
     post_checkout:
-      - python -m docs.rtd_transfer ready
       # The build needs the release tags, both for the version and for the
       # setuptools_scm version of the editable install below. Read the Docs
       # clones shallowly.
       - git fetch --unshallow || true
       - git fetch --all --tags || true
+    pre_install:
+      - python -m docs.rtd_transfer ready
     install:
       - python .github/actions/verified-pip/verified_pip.py
       # The ``plugins`` extra is deliberately NOT requested here: the
