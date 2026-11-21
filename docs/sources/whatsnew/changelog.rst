@@ -24,7 +24,8 @@ New Features
   unmasked 1D or row-wise 2D spectra on regular grids.
   ``distribution_width`` is a half-width in samples. Inspect the fitted
   baseline and peak areas: broad weak signals can be removed as background.
-  Existing models and defaults are unchanged; no NMR dependency is added.
+  Existing models and defaults are unchanged; no NMR dependency is added
+  (:pr:`1932`).
 
 
 
