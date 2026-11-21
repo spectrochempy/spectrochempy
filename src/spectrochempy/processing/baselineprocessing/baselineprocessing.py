@@ -326,6 +326,10 @@ baseline/trends for different segments of the data.
             raise ValueError(
                 "distribution baseline does not support multivariate, lls or breakpoints"
             )
+        if not isinstance(X, NDDataset):
+            raise ValueError(
+                "distribution baseline requires a dataset with regular coordinates"
+            )
         data = np.asarray(X.data)
         if (
             data.ndim not in (1, 2)
@@ -336,8 +340,13 @@ baseline/trends for different segments of the data.
             raise ValueError("distribution baseline requires finite real 1D or 2D data")
         if np.any(X.mask):
             raise ValueError("distribution baseline does not support masked input")
-        coordinate = X.coordset[X.dims[-1]]
-        if coordinate.size > 2 and not coordinate.linear:
+        try:
+            coordinate = X.coordset[X.dims[-1]]
+        except (AttributeError, TypeError, KeyError) as exc:
+            raise ValueError(
+                "distribution baseline requires regular coordinates"
+            ) from exc
+        if coordinate.data is None or (coordinate.size > 2 and not coordinate.linear):
             raise ValueError(
                 "distribution baseline requires regularly spaced coordinates"
             )

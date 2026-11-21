@@ -155,3 +155,9 @@ def test_distribution_promotes_integer_input_for_fractional_baselines(dtype):
     assert_allclose(processor.baseline.data, np.full(4, 2.75))
     assert_allclose(processor.corrected.data, source.data - 2.75)
     assert source.dtype == dtype
+
+
+@pytest.mark.parametrize("source", [np.arange(8.0), scp.NDDataset(np.arange(8.0))])
+def test_distribution_requires_dataset_coordinates(source):
+    with pytest.raises(ValueError, match="distribution baseline.*coordinates"):
+        scp.Baseline(model="distribution").fit(source)
