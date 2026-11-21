@@ -15,10 +15,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   select.add(new Option(current, current, true, true));
   label.append(select);
   nav.append(label);
+  let stableVersion = null;
   try {
     const response = await fetch(new URL("versions.json", root), {cache: "no-cache"});
     if (!response.ok) throw new Error("Manifest unavailable");
     const data = await response.json();
+    stableVersion = data.stable;
     for (const version of data.versions) {
       if (version.path !== current) select.add(new Option(version.name, version.path));
     }
@@ -40,7 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.warn("Documentation navigation unavailable", error);
   }
   select.addEventListener("change", async () => {
-    const fallback = new URL(`${select.value}/`, root);
+    const version = select.value === "stable" && stableVersion ? stableVersion : select.value;
+    const fallback = new URL(`${version}/`, root);
     let destination = new URL(parts.join("/"), fallback);
     try {
       if (!(await fetch(destination, {method: "HEAD"})).ok) destination = fallback;

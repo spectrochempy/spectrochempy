@@ -78,3 +78,52 @@ test('GitHub prerelease metadata and rc tags permit archival only', async () => 
   }
   assert.equal((await route('workflow_run', run, {tag: 'v9.0.0'})).archive_only, undefined);
 });
+
+test('version navigation resolves stable pages and preserves preview paths', async () => {
+  const source = fs.readFileSync(path.join(__dirname, 'navigation.js'), 'utf8');
+  async function navigate(pathname, selected, available) {
+    const handlers = {};
+    let select, destination;
+    const document = {
+      scripts: [{src: 'https://example.test/spectrochempy/pages-navigation.js'}],
+      addEventListener: (name, handler) => { handlers[name] = handler; },
+      querySelectorAll: () => [],
+      body: {prepend() {}},
+      createElement: tag => {
+        const element = {
+          style: {},
+          setAttribute() {}, append() {},
+          add(option) { if (option.selected) this.value = option.value; },
+          addEventListener(name, handler) { this[name] = handler; },
+        };
+        if (tag === 'select') select = element;
+        return element;
+      },
+    };
+    const requested = [];
+    const fetch = async (url, options = {}) => {
+      if (url.pathname.endsWith('/versions.json')) return {
+        ok: true, json: async () => ({stable: 'v1.0.0', versions: [{name: 'Stable', path: 'stable'}]}),
+      };
+      if (url.pathname.endsWith('/projects.json')) return {ok: true, json: async () => []};
+      requested.push([url.pathname, options.method]);
+      return {ok: available.includes(url.pathname)};
+    };
+    const location = {pathname, hash: '#example', search: '?q=1', assign: url => { destination = url; }};
+    class Option {
+      constructor(text, value, _default, selected) { this.text = text; this.value = value; this.selected = selected; }
+    }
+    vm.runInNewContext(source, {document, location, fetch, Option, URL, console});
+    await handlers.DOMContentLoaded();
+    select.value = selected;
+    await select.change();
+    return {destination, requested};
+  }
+  const existing = await navigate('/spectrochempy/latest/guide/page.html', 'stable', ['/spectrochempy/v1.0.0/guide/page.html']);
+  assert.equal(existing.destination, 'https://example.test/spectrochempy/v1.0.0/guide/page.html?q=1#example');
+  assert.deepEqual(existing.requested, [['/spectrochempy/v1.0.0/guide/page.html', 'HEAD']]);
+  const missing = await navigate('/spectrochempy/latest/guide/page.html', 'stable', []);
+  assert.equal(missing.destination, 'https://example.test/spectrochempy/v1.0.0/?q=1#example');
+  const preview = await navigate('/spectrochempy/previews/pr-42/guide/page.html', 'latest', ['/spectrochempy/latest/guide/page.html']);
+  assert.equal(preview.destination, 'https://example.test/spectrochempy/latest/guide/page.html?q=1#example');
+});
