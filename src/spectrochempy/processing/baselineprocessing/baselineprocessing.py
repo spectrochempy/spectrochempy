@@ -18,6 +18,9 @@ from spectrochempy.analysis._base._analysisbase import AnalysisSourceMetadata
 from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.processing.baselineprocessing._distribution import (
+    _distribution_baseline,
+)
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.utils.constants import TYPE_FLOAT
@@ -97,6 +100,17 @@ class Baseline(AnalysisConfigurable):
       is based on the work of Eilers and Boelens (:cite:`eilers:2005`).
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
       (:cite:`ryan:1988`).
+    - ``'distribution'`` : Experimental automatic signal/noise classification,
+      segment interpolation and mean smoothing (Wang et al., 2013,
+      DOI 10.1021/ac303233c, Supporting Information S5-S7). The half-width
+      ``distribution_width`` is in sample points, not coordinate units. Only
+      finite real unmasked 1D or row-wise 2D data on a regular grid are supported;
+      multivariate, LLS and breakpoints are unsupported. Broad weak peaks can
+      be mistaken for baseline and removed. Inspect ``baseline`` and peak areas;
+      this model is not a general replacement for manual support regions.
+      Uses locally averaged endpoints (the published Y/R formula is ambiguous),
+      population SD and positive noise estimates; no diffusion-edited/resampling
+      extension. NumPy/SciPy implementation without an NMR package dependency.
     - ``'rubberband'`` : Rubberband baseline correction.
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
       the polynomial is defined by the ``order`` parameter. The baseline is then
@@ -108,7 +122,8 @@ class Baseline(AnalysisConfigurable):
 
     The last axis of the input dataset must have finite coordinates that are
     strictly increasing or strictly decreasing. Irregularly spaced coordinates
-    are accepted as long as they are strictly monotonic. Duplicated coordinate
+    are accepted by the other models as long as they are strictly monotonic.
+    The experimental distribution model requires a regular grid. Duplicated coordinate
     values, direction changes, and non-finite values (``NaN`` or infinities)
     are rejected with a ``ValueError`` when ``fit`` is called.
 
@@ -162,7 +177,7 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
-        ["polynomial", "detrend", "asls", "snip", "rubberband"],
+        ["polynomial", "detrend", "asls", "snip", "rubberband", "distribution"],
         default_value="polynomial",
         help="""The model used to determine the baseline.
 
@@ -175,8 +190,17 @@ class Baseline(AnalysisConfigurable):
 * `snip`: the baseline is determined by a simple non-iterative peak detection
   algorithm.
 * `rubberband`: the baseline is determined by a rubberband algorithm.
+* `distribution`: experimental distribution classification; see class notes and
+  ``distribution_width``. Broad weak signals can be removed as baseline.
 """,
     ).tag(config=True)
+
+    distribution_width = tr.Int(
+        default_value=20,
+        help="Half-width in samples of the experimental distribution model's "
+        "centered noise windows (up to 2*width+1 points). Broad weak peaks can "
+        "be removed as baseline; inspect the fitted baseline and peak areas.",
+    ).tag(config=True, min=1)
 
     lls = tr.Bool(
         default_value=False,
@@ -290,6 +314,34 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+    @tr.validate("distribution_width")
+    def _validate_distribution_width(self, proposal):
+        value = proposal.value
+        if isinstance(value, (bool, np.bool_)) or value < 1:
+            raise ValueError("distribution_width must be a positive integer")
+        return value
+
+    def _validate_distribution_input(self, X):
+        if self.multivariate or self.lls or self.breakpoints:
+            raise ValueError(
+                "distribution baseline does not support multivariate, lls or breakpoints"
+            )
+        data = np.asarray(X.data)
+        if (
+            data.ndim not in (1, 2)
+            or data.size == 0
+            or data.dtype.kind not in "fiu"
+            or not np.isfinite(data).all()
+        ):
+            raise ValueError("distribution baseline requires finite real 1D or 2D data")
+        if np.any(X.mask):
+            raise ValueError("distribution baseline does not support masked input")
+        coordinate = X.coordset[X.dims[-1]]
+        if coordinate.size > 2 and not coordinate.linear:
+            raise ValueError(
+                "distribution baseline requires regularly spaced coordinates"
+            )
+
     @tr.validate("breakpoints")
     def _validate_breakpoints(self, proposal):
         if proposal.value is None:
@@ -725,6 +777,11 @@ baseline/trends for different segments of the data.
                 z += mi
                 _store[i] = z[::-1] if self._X.x.is_descendant else z
 
+        elif self.model == "distribution":
+            for i in range(M):
+                fitted = _distribution_baseline(Y[i], self.distribution_width)
+                _store[i] = fitted[::-1] if lastcoord.is_descendant else fitted
+
         elif self.model == "rubberband":
             # Rubberband baseline correction
             # (do not work with multivariate approach)
@@ -799,6 +856,8 @@ baseline/trends for different segments of the data.
         # Reject invalid last-axis coordinates before any copy, range
         # construction, mask removal, sort or numerical work.
         self._validate_last_axis_coordinates(X)
+        if self.model == "distribution":
+            self._validate_distribution_input(X)
 
         self._fitted = False  # reinit this flag
 
@@ -960,6 +1019,10 @@ baseline/trends for different segments of the data.
                 asymmetry=self.asymmetry,
                 tol=self.tol,
                 max_iter=self.max_iter,
+            )
+        if self.model == "distribution":
+            parameters.update(
+                distribution_width=self.distribution_width, experimental=True
             )
         if self.model == "snip":
             parameters["width"] = self.snip_width

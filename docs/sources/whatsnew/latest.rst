@@ -12,6 +12,16 @@ What's New in Revision 1.4.1.dev
 These are the changes in SpectroChemPy-1.4.1.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+
+- ``Baseline(model="distribution")`` adds experimental automatic signal/noise
+  classification, local interpolation and mean smoothing for finite real
+  unmasked 1D or row-wise 2D spectra on regular grids.
+  ``distribution_width`` is a half-width in samples. Inspect the fitted
+  baseline and peak areas: broad weak signals can be removed as background.
+  Existing models and defaults are unchanged; no NMR dependency is added.
+
 Bug Fixes
 ~~~~~~~~~
 

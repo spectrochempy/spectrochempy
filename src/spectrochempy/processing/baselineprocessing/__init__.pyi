@@ -7,9 +7,11 @@
 # ruff: noqa
 
 __all__ = [
+    "_distribution",
     "baselineprocessing",
     "baselineutils",
 ]
 
+from . import _distribution
 from . import baselineprocessing
 from . import baselineutils
