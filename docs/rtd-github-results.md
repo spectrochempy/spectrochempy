@@ -80,9 +80,13 @@ No raw Corn input is included in public artifacts.
 
 The main flag selects `latest`; the additional PR flag selects external versions.
 Release tags, `stable`
-and older immutable checkouts keep their native RTD build. Automatic producer
-runs are gated by `RTD_RESULTS_PROJECT`; manual producer dispatch remains
-available. Manual transfer dispatch accepts only the official and test projects.
+and older immutable checkouts keep their native RTD build. Automatic preparation
+on master is gated by `RTD_RESULTS_PROJECT`. PR preparation runs
+on the official repository without relying on configuration variables in the
+fork context. The separate `RTD_RESULTS_PREVIEWS` gate controls the trusted
+transfer after preparation; removing it leaves RTD previews native when the
+RTD PR flag is also removed. Manual producer dispatch remains available.
+Manual transfer dispatch accepts only the official and test projects.
 A transfer for a superseded commit is skipped. The transfer fails if RTD fails,
 exceeds its budget or publishes a different commit.
 
