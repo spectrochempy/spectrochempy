@@ -16,6 +16,11 @@ NOTICE = (
     "were not executed in this preview. Their source remains available; "
     "other examples are executed normally."
 )
+NOTICE_RST = (
+    ".. admonition:: Corn unavailable\n"
+    "   :class: important scpy-corn-unavailable\n\n"
+    f"   {NOTICE}\n\n"
+)
 
 
 def unavailable():
@@ -67,7 +72,7 @@ def annotate_gallery(root):
             raise RuntimeError(f"Expected one unexecuted Corn gallery page: {stem}")
         page = matches[0]
         page.write_text(
-            f".. warning::\n\n   {NOTICE}\n\n" + page.read_text(encoding="utf-8"),
+            NOTICE_RST + page.read_text(encoding="utf-8"),
             encoding="utf-8",
         )
         omitted.append(page.relative_to(root).as_posix())
@@ -85,4 +90,24 @@ def source_notice(app, docname, source):
         return
     omitted = json.loads(marker.read_text(encoding="utf-8"))
     if page.relative_to(gallery).as_posix() in omitted and NOTICE not in source[0]:
-        source[0] = f".. warning::\n\n   {NOTICE}\n\n" + source[0]
+        source[0] = NOTICE_RST + source[0]
+
+
+def check_gallery_notices(app, exception):
+    if exception is not None or app.builder.format != "html":
+        return
+    if not unavailable() and os.environ.get("SCPY_DOCS_GALLERY_ARTIFACT") != "1":
+        return
+    gallery = Path("gettingstarted/examples/gallery")
+    marker = Path(app.srcdir) / gallery / "corn-unavailable.json"
+    if not marker.is_file():
+        return
+    output = (Path(app.outdir) / gallery).resolve()
+    for name in json.loads(marker.read_text(encoding="utf-8")):
+        page = (output / Path(name).with_suffix(".html")).resolve()
+        if not page.is_relative_to(output):
+            raise RuntimeError(f"Invalid Corn gallery page: {name}")
+        if not page.is_file() or NOTICE not in " ".join(
+            page.read_text(encoding="utf-8").split()
+        ):
+            raise RuntimeError(f"Missing Corn availability notice in {page}")

@@ -23,7 +23,7 @@ permissions:
   checks: write
 
 concurrency:
-  group: rtd-transfer-${{ inputs.project || vars.RTD_RESULTS_PROJECT }}-${{ github.event.workflow_run.head_branch || inputs.run_id }}
+  group: rtd-transfer-${{ inputs.project || vars.RTD_RESULTS_PROJECT }}-${{ github.event.workflow_run.head_repository.id || github.repository_id }}-${{ github.event.workflow_run.head_branch || inputs.run_id }}
   cancel-in-progress: false
 
 jobs:

@@ -19,6 +19,11 @@ and publishes them in a GitHub check for that RTD project. It starts the RTD
 build using the existing `SCPY_RTD_API_TOKEN` Actions secret and refreshes the
 links every 20 seconds until the build finishes, for at most 25 minutes.
 
+Automatic transfers are serialized per RTD project, source repository and
+branch. Two forks with the same branch name have independent queues. A queued
+transfer checks the current PR head before starting RTD and skips superseded
+commits.
+
 RTD uses the public check and public GitHub metadata to verify the source run,
 commit, artifact IDs and archive digests. The existing source manifests also
 verify the package version and each restored file. RTD receives no GitHub token.
@@ -64,18 +69,26 @@ changed download fails the job. A network failure marks Corn as unavailable:
 only the four Corn gallery examples and notebook cells tagged `requires-corn`
 are left unexecuted. Their source remains visible, with an explicit notice.
 The artifact manifests and Actions summary list the omitted results.
+Each affected gallery page displays a named **Corn unavailable** notice.
+The HTML build checks that these notices are present before publication.
 
 Trusted master builds still require their separately verified private Corn
 fixture. They never silently fall back to incomplete scientific documentation.
-The PR gates remain disabled until an actual fork preview has validated both
-the successful-download and unavailable-data paths. No raw Corn input is
-included in public artifacts.
+Enable the PR gates only after an actual fork preview has validated both the
+successful-download and unavailable-data paths. PRs opened from older branches
+should incorporate the current `master` before using the prepared results;
+in particular they need the public Corn preparation and omission handling.
+No raw Corn input is included in public artifacts.
 
 The main flag selects `latest`; the additional PR flag selects external versions.
 Release tags, `stable`
-and older immutable checkouts keep their native RTD build. Automatic producer
-runs are gated by `RTD_RESULTS_PROJECT`; manual producer dispatch remains
-available. Manual transfer dispatch accepts only the official and test projects.
+and older immutable checkouts keep their native RTD build. Automatic preparation
+on master is gated by `RTD_RESULTS_PROJECT`. PR preparation runs
+on the official repository without relying on configuration variables in the
+fork context. The separate `RTD_RESULTS_PREVIEWS` gate controls the trusted
+transfer after preparation; removing it leaves RTD previews native when the
+RTD PR flag is also removed. Manual producer dispatch remains available.
+Manual transfer dispatch accepts only the official and test projects.
 A transfer for a superseded commit is skipped. The transfer fails if RTD fails,
 exceeds its budget or publishes a different commit.
 

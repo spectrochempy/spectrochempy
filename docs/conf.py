@@ -51,6 +51,7 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
 _SCP_DOCS_CONFIG = tempfile.TemporaryDirectory(prefix="scp-docs-config-")
 os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
+from corn_data import check_gallery_notices
 from corn_data import gallery_pattern
 from corn_data import source_notice
 from data_setup import DATA as DOCS_DATA
@@ -1409,6 +1410,7 @@ def show_plotting_example_title(app, env, node, contnode):
 
 def setup(app):
     app.connect("source-read", source_notice)
+    app.connect("build-finished", check_gallery_notices)
     if gallery_from_artifact:
         from sphinx_gallery.gen_gallery import generate_gallery_rst
 
