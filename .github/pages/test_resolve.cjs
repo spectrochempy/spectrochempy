@@ -54,7 +54,7 @@ test('closing a PR routes only removal', async () => {
 
 
 test('closed cleanup never executes the published-preview check step', () => {
-  const workflow = fs.readFileSync(path.join(__dirname, '../workflows/docs-pages-publish.yml'), 'utf8');
+  const workflow = fs.readFileSync(path.join(__dirname, '../disabled-workflows/docs-pages-publish.yml'), 'utf8');
   const step = workflow.split('- name: Link published documentation from the PR checks')[1];
   const expression = step.match(/if: (.+)/)[1];
   const evaluate = (event, remove) => vm.runInNewContext(expression, {

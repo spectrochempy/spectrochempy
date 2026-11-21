@@ -117,7 +117,10 @@ def test_private_checkout_requires_trusted_context(repository, event, ref, allow
     ["test_package.yml", "docs-artifact-prototype.yml", "docs-pages-build.yml"],
 )
 def test_private_fixture_is_outside_cache_and_artifact_paths(workflow):
-    config = yaml.safe_load((ROOT / ".github/workflows" / workflow).read_text())
+    directory = (
+        "disabled-workflows" if workflow == "docs-pages-build.yml" else "workflows"
+    )
+    config = yaml.safe_load((ROOT / ".github" / directory / workflow).read_text())
     jobs = config["jobs"].values()
     steps = [step for job in jobs for step in job.get("steps", [])]
     private = next(

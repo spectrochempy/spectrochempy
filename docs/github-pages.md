@@ -1,10 +1,22 @@
 # GitHub Pages migration
 
-Status: prepared, disabled until qualification. Read the Docs remains available
-for comparison and rollback. No DNS change is part of installing these files.
+Status: on hold. Read the Docs remains the documentation host. The Pages
+workflow files are preserved in `.github/disabled-workflows/`, outside the
+GitHub Actions discovery directory. They cannot run from pushes, pull requests,
+labels, releases or manual dispatch while stored there. The Pages helpers and
+qualification tests remain available. RTD configuration and its GitHub
+preparation workflows are unchanged.
 
-This is a fallback option while native Read the Docs build optimizations are
-evaluated. These workflows do not change RTD execution or decide a cutover.
+Reactivation requires an explicit maintainer decision and a reviewed PR moving
+both YAML files back into `.github/workflows/`. Re-enable the corresponding
+workflows in GitHub Actions settings if they were disabled there, then follow
+the qualification procedure below before setting `DOCS_PAGES_ENABLED=true`.
+Keep this variable unset while Pages is on hold. For any historical Pages site,
+use the GitHub Actions publishing source to prevent automatic builds from
+`gh-pages`; do not restore branch-based publishing during the pause.
+
+The publication model and qualification steps below describe the preserved
+fallback, after its workflow files have been restored.
 
 ## Publication model
 
