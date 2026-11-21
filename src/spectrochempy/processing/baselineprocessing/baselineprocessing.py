@@ -346,7 +346,11 @@ baseline/trends for different segments of the data.
             raise ValueError(
                 "distribution baseline requires regular coordinates"
             ) from exc
-        if coordinate.data is None or (coordinate.size > 2 and not coordinate.linear):
+        if (
+            coordinate.data is None
+            or not np.isfinite(coordinate.data).all()
+            or (coordinate.size > 2 and not coordinate.linear)
+        ):
             raise ValueError(
                 "distribution baseline requires regularly spaced coordinates"
             )

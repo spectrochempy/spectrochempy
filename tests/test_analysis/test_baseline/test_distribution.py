@@ -122,6 +122,19 @@ def test_distribution_rejection_is_nonmutating_and_invalidates_refit(invalid):
     assert_array_equal(bad.mask, mask)
 
 
+@pytest.mark.parametrize("coordinate", [np.nan, np.inf, -np.inf])
+def test_distribution_rejects_nonfinite_singleton_coordinates(coordinate):
+    processor = scp.Baseline(model="distribution")
+    processor.fit(scp.NDDataset([2.0], coordset=[scp.Coord([0.0])]))
+    bad = scp.NDDataset([2.0], coordset=[scp.Coord([coordinate])])
+    with pytest.raises(ValueError, match="distribution baseline.*coordinates"):
+        processor.fit(bad)
+    with pytest.raises(NotFittedError):
+        _ = processor.baseline
+    assert_array_equal(bad.data, [2.0])
+    assert_array_equal(bad.x.data, [coordinate])
+
+
 def test_distribution_is_available_through_existing_dataset_helpers():
     source, *_ = spectrum()
     baseline = source.get_baseline(model="distribution", distribution_width=20)
