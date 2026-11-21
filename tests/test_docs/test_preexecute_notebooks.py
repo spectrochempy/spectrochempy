@@ -254,12 +254,21 @@ def test_rtd_commands_select_the_build_mode(enabled, version_type, use_artifacts
         **os.environ,
         "SCPY_RTD_DOCS_ARTIFACTS": enabled,
         "READTHEDOCS_VERSION_TYPE": version_type,
+        "SCPY_RTD_GITHUB_RESULTS": "",
     }
     if os.name == "nt":
         pytest.skip("Read the Docs uses a POSIX shell")
     selected = [
         subprocess.check_output(
-            ["sh", "-c", f'python() {{ echo "$*"; }}; {command}'],
+            [
+                "sh",
+                "-c",
+                (
+                    'python() { if [ "$*" = "-m docs.rtd_transfer selected" ]; '
+                    f"then return {0 if use_artifacts else 1}; "
+                    'else echo "$*"; fi; }; ' + command
+                ),
+            ],
             env=env,
             text=True,
         ).strip()

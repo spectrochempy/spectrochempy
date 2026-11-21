@@ -58,6 +58,7 @@ scripts = [
             "ci_artifacts.py",
             "build_diagnostics.py",
             "rtd_build.py",
+            "rtd_transfer.py",
             "gallery",
             # Command-line utilities require arguments and are not runnable
             # example scripts.

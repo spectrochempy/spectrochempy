@@ -2,12 +2,18 @@ name: Documentation artifact prototype
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
 
 jobs:
   execute:
+    if: github.event_name == 'workflow_dispatch' || vars.RTD_RESULTS_PROJECT != ''
     name: Execute ${{ matrix.kind }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -19,7 +25,7 @@ jobs:
       - &checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - &python
@@ -58,7 +64,7 @@ jobs:
         run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True)"
       - uses: actions/upload-artifact@v7
         with:
-          name: docs-${{ matrix.kind }}-${{ github.sha }}
+          name: docs-${{ matrix.kind }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/bundle
           if-no-files-found: error
           retention-days: 90
@@ -77,16 +83,17 @@ jobs:
           python -m pip install pytest
           python -m pytest --noconftest -o addopts= \
             tests/test_docs/test_rtd_build.py \
+            tests/test_docs/test_rtd_transfer.py \
             tests/test_docs/test_preexecute_notebooks.py::test_rtd_commands_select_the_build_mode
       - name: Set output directory
         run: echo "READTHEDOCS_OUTPUT=$RUNNER_TEMP/docs-output" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v8
         with:
-          name: docs-tutorials-${{ github.sha }}
+          name: docs-tutorials-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/docs-inputs/tutorials
       - uses: actions/download-artifact@v8
         with:
-          name: docs-gallery-${{ github.sha }}
+          name: docs-gallery-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/docs-inputs/gallery
       - name: Verify source artifacts and build HTML
         run: python -u -m docs.ci_artifacts render "${{ runner.temp }}/docs-inputs"
@@ -100,7 +107,7 @@ jobs:
           test -s "$READTHEDOCS_OUTPUT/html/objects.inv"
       - uses: actions/upload-artifact@v7
         with:
-          name: docs-html-${{ github.sha }}
+          name: docs-html-${{ github.event.pull_request.head.sha || github.sha }}
           path: ${{ runner.temp }}/docs-output/html
           if-no-files-found: error
           retention-days: 90

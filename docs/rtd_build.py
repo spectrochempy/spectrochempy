@@ -16,6 +16,7 @@ from urllib.request import Request
 from urllib.request import urlopen
 from zipfile import ZipFile
 
+from docs import rtd_transfer
 from docs.build_diagnostics import _diagnostics
 from docs.build_diagnostics import _phase
 
@@ -86,7 +87,9 @@ def _find_artifacts(commit, token, unavailable):
 def _download(artifact, token, destination):
     archive = destination.with_suffix(".zip")
     with (
-        _request(f"artifacts/{int(artifact['id'])}/zip", token) as response,
+        urlopen(rtd_transfer.storage_url(artifact["transfer_url"]), timeout=60)
+        if "transfer_url" in artifact
+        else _request(f"artifacts/{int(artifact['id'])}/zip", token) as response,
         archive.open("wb") as output,
     ):
         shutil.copyfileobj(response, output)
@@ -143,7 +146,29 @@ def _render_from_actions(token):
             time.sleep(30)
 
 
+def _render_public_results():
+    commit = ci_artifacts._commit()
+    selection = rtd_transfer.verified_inputs(commit)
+    if selection is None:
+        raise RuntimeError(
+            "No fresh GitHub download links are available for this revision"
+        )
+    run_id, artifacts = selection
+    with tempfile.TemporaryDirectory(prefix="scp-rtd-results-") as directory:
+        root = Path(directory)
+        for kind, artifact in artifacts.items():
+            with _phase(f"download and verify {kind} from GitHub run {run_id}"):
+                _download(artifact, None, root / kind)
+        with _phase(f"render prepared GitHub results from run {run_id}"):
+            ci_artifacts.render(root)
+
+
 def main():
+    if rtd_transfer.public_mode():
+        os.environ.pop("SCPY_RTD_GITHUB_TOKEN", None)
+        with _diagnostics(), _phase("RTD build using prepared GitHub results"):
+            _render_public_results()
+        return
     token = os.environ.pop("SCPY_RTD_GITHUB_TOKEN", None)
     if not token:
         raise RuntimeError("SCPY_RTD_GITHUB_TOKEN is required in artifact mode")

@@ -1,0 +1,50 @@
+name: Publish prepared documentation on RTD
+
+on:
+  workflow_run:
+    workflows: [Documentation artifact prototype]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful documentation workflow run ID
+        required: true
+        type: string
+      project:
+        description: RTD project
+        type: choice
+        default: spectrochempy-artifacts-test
+        options: [spectrochempy-artifacts-test, spectrochempy]
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+concurrency:
+  group: rtd-transfer-${{ inputs.project || vars.RTD_RESULTS_PROJECT }}-${{ github.event.workflow_run.head_branch || inputs.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  transfer:
+    if: >-
+      github.repository == 'spectrochempy/spectrochempy' &&
+      (github.event_name == 'workflow_dispatch' ||
+      (vars.RTD_RESULTS_PROJECT != '' && github.event.workflow_run.conclusion == 'success'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Transfer verified results and wait for RTD
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SCPY_RTD_API_TOKEN: ${{ secrets.SCPY_RTD_API_TOKEN }}
+          SOURCE_RUN: ${{ inputs.run_id || github.event.workflow_run.id }}
+          RTD_PROJECT: ${{ inputs.project || vars.RTD_RESULTS_PROJECT }}
+        run: python -u .github/workflows/scripts/transfer_rtd_results.py --run-id "$SOURCE_RUN" --project "$RTD_PROJECT"

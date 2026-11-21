@@ -330,3 +330,18 @@ def test_watchdog_is_cancelled_after_failure(monkeypatch):
         (120, {"repeat": True, "file": diagnostics.sys.__stderr__}),
         "cancel",
     ]
+
+
+def test_public_mode_does_not_require_or_retain_github_credentials(monkeypatch):
+    monkeypatch.setenv("SCPY_RTD_GITHUB_RESULTS", "1")
+    monkeypatch.setenv("READTHEDOCS_VERSION", "latest")
+    monkeypatch.setenv("SCPY_RTD_GITHUB_TOKEN", "test-token")
+    called = []
+
+    def render():
+        assert "SCPY_RTD_GITHUB_TOKEN" not in rtd_build.os.environ
+        called.append(True)
+
+    monkeypatch.setattr(rtd_build, "_render_public_results", render)
+    rtd_build.main()
+    assert called == [True]
