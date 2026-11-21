@@ -59,6 +59,7 @@ scripts = [
             "build_diagnostics.py",
             "rtd_build.py",
             "rtd_transfer.py",
+            "corn_data.py",
             "gallery",
             # Command-line utilities require arguments and are not runnable
             # example scripts.

@@ -319,3 +319,20 @@ Writing Tips
 
 See the `Sphinx reStructuredText primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_
 for detailed syntax guide.
+
+Optional Corn input in documentation previews
+---------------------------------------------
+
+Corn remains separate from ``docs/data``. Documentation preparation uses the
+verified local Corn input when available. If its public download is unavailable
+for a preview, Corn gallery examples are shown as source without executing them;
+the generated pages and build summary say which results were omitted.
+
+For a notebook section that depends on Corn, mark every dependent code cell
+with ``# %% tags=["requires-corn"]`` in its Jupytext Python source. Keep
+independent cells untagged, including cells after the Corn section. The build
+skips only the tagged cells when Corn is unavailable, adds an explanatory note,
+and keeps the code runnable in the downloaded notebook. When Corn is available,
+all cells execute normally. A broken configured local fixture or a failed
+checksum remains an error. Trusted ``latest`` builds require the private input
+and retain complete executed results.

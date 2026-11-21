@@ -15,6 +15,7 @@ import jupytext
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
+from docs import corn_data
 from docs.make import BUILDDIR
 from docs.make import DOCS
 from docs.make import BuildDocumentation
@@ -111,6 +112,7 @@ def execute(name):
     if "output_sha256" in entry or _digest(path) != entry["input_sha256"]:
         raise RuntimeError(f"Notebook changed or already processed: {name}")
     notebook = nbformat.read(path, as_version=4)
+    skipped_corn = corn_data.skip_notebook_cells(notebook)
     settings = manifest["settings"]
     metadata = notebook.metadata.get("nbsphinx", {})
     start = time.monotonic()
@@ -143,6 +145,9 @@ def execute(name):
                     os.environ.pop("SCP_CONFIG_HOME", None)
                 else:
                     os.environ["SCP_CONFIG_HOME"] = previous_config_home
+    for cell, original_tags in skipped_corn:
+        cell.metadata.tags = original_tags
+    entry["skipped_corn_cells"] = len(skipped_corn)
     notebook.metadata.setdefault("nbsphinx", {})["execute"] = "never"
     nbformat.write(notebook, path)
     entry["output_sha256"] = _digest(path)
@@ -156,7 +161,7 @@ def execute(name):
     _save(manifest)
     _report(
         f"END {name} duration={entry['duration']:.3f}s "
-        f"error_outputs={entry['error_outputs']}"
+        f"error_outputs={entry['error_outputs']} skipped_corn_cells={len(skipped_corn)}"
     )
 
 

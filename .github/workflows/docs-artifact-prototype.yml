@@ -59,6 +59,9 @@ jobs:
         with:
           ssh-key: ${{ secrets.SCPY_CORN_DATA_SSH_KEY }}
           revision: ${{ vars.SCPY_CORN_DATA_REVISION }}
+      - name: Prepare public Corn data or declare omitted sections
+        if: env.SCPY_CORN_DATA == ''
+        run: python .github/workflows/scripts/prepare_corn_data.py --public
       - name: Generate source artifact
         run: python -u -m docs.ci_artifacts produce ${{ matrix.kind }} "${{ runner.temp }}/bundle"
       - name: Remove private Corn working copies
@@ -86,8 +89,10 @@ jobs:
           python -m pip install pytest
           python -m pytest --noconftest -o addopts= \
             tests/test_docs/test_rtd_build.py \
+            tests/test_docs/test_corn_data.py \
+            tests/test_core/test_scripts/test_prepare_corn_data.py \
             tests/test_docs/test_rtd_transfer.py \
-            tests/test_docs/test_preexecute_notebooks.py::test_rtd_commands_select_the_build_mode
+            tests/test_docs/test_preexecute_notebooks.py
       - name: Set output directory
         run: echo "READTHEDOCS_OUTPUT=$RUNNER_TEMP/docs-output" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v8

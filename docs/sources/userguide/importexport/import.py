@@ -427,7 +427,7 @@ scp.read_omnic(folder, recursive=True, pattern="*4.spa")  # equivalent
 # default all files are merged. The `merge` keyword can be used to read the
 # files separately.
 
-# %%
+# %% tags=["requires-corn"]
 scp.read(
     getenv(
         "SCPY_CORN_ZIP",
