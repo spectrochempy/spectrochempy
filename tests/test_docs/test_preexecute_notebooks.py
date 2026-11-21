@@ -303,3 +303,54 @@ def test_documentation_clis_are_not_collected_as_notebook_examples():
         Path(runner.__file__).with_name("rtd_build.py").resolve()
         not in examples.scripts
     )
+
+
+@pytest.mark.parametrize("missing", [True, False])
+def test_corn_skip_executes_other_cells_and_keeps_download_runnable(
+    workspace, monkeypatch, missing
+):
+    sources, manifest = workspace
+    notebook = _notebook("print('before Corn')")
+    notebook.cells.extend(
+        [
+            nbformat.v4.new_code_cell(
+                "raise RuntimeError('must not execute')"
+                if missing
+                else "print('Corn present')",
+                metadata={"tags": ["requires-corn"]},
+            ),
+            nbformat.v4.new_code_cell("print('after Corn')"),
+        ]
+    )
+    _write_manifest(sources, {"sample.ipynb": notebook})
+    monkeypatch.setenv("SCPY_DOCS_CORN_UNAVAILABLE", "1" if missing else "0")
+    monkeypatch.delenv("SCPY_CORN_DATA", raising=False)
+    monkeypatch.delenv("SCPY_CORN_ZIP", raising=False)
+    runner.execute("sample.ipynb")
+    result = nbformat.read(sources / "sample.ipynb", as_version=4)
+    code = [cell for cell in result.cells if cell.cell_type == "code"]
+    assert code[0].outputs[0].text == "before Corn\n"
+    assert code[-1].outputs[0].text == "after Corn\n"
+    if missing:
+        assert code[1].outputs == []
+    else:
+        assert code[1].outputs[0].text == "Corn present\n"
+    assert code[1].metadata.tags == ["requires-corn"]
+    entry = json.loads(manifest.read_text())["notebooks"]["sample.ipynb"]
+    assert entry["skipped_corn_cells"] == int(missing)
+    assert entry["error_outputs"] == 0
+    runner.verify()
+
+
+def test_corn_omission_does_not_catch_an_unrelated_cell_error(workspace, monkeypatch):
+    from nbclient.exceptions import CellExecutionError
+
+    sources, _manifest = workspace
+    notebook = _notebook("raise ValueError('independent failure')")
+    notebook.metadata.setdefault("nbsphinx", {})["allow_errors"] = False
+    _write_manifest(sources, {"sample.ipynb": notebook})
+    monkeypatch.setenv("SCPY_DOCS_CORN_UNAVAILABLE", "1")
+    monkeypatch.delenv("SCPY_CORN_DATA", raising=False)
+    monkeypatch.delenv("SCPY_CORN_ZIP", raising=False)
+    with pytest.raises(CellExecutionError, match="independent failure"):
+        runner.execute("sample.ipynb")

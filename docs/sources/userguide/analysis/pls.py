@@ -59,7 +59,7 @@ import spectrochempy as scp
 # on 3 different NIR spectrometers, together with moisture, oil,
 # protein and starch values for each of the samples. This dataset (and others) can be loaded from
 # [http://www.eigenvector.com](http://www.eigenvector.com/data/).
-# %%
+# %% tags=["requires-corn"]
 A = scp.read(
     getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat"),
     merge=False,
@@ -68,7 +68,7 @@ A = scp.read(
 # %% [markdown]
 # The .mat file contains 7 eigenvectors's datasets which are thus returned in A as a list of 7
 # NDDatasets. We print the names and dimensions of these datasets:
-# %%
+# %% tags=["requires-corn"]
 for a in A:
     print(f"{a.name} : {a.shape}")
 
@@ -81,27 +81,27 @@ for a in A:
 # or as ``log(1/R)`` absorbance, so the series is labeled with the neutral title "NIR spectra" and no
 # intensity unit is imposed:
 
-# %%
+# %% tags=["requires-corn"]
 X = A[-3]
 X.title = "NIR spectra"
 X.x.title = "Wavelength"
 X.x.units = "nm"
 _ = X.plot(cmap=None)
 
-# %%
+# %% tags=["requires-corn"]
 X_ = X.detrend()
 _ = X_.plot(cmap=None)
 # %% [markdown]
 # Let's plot the properties of the sample:
 
-# %%
+# %% tags=["requires-corn"]
 Y = A[3]
 _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
 # Standardization of the values allows better visualization:
 
-# %%
+# %% tags=["requires-corn"]
 Y_std = Y.autoscale(dim="y")
 _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
@@ -110,7 +110,7 @@ _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 # First we select the first 57 samples (out of the 80 total) to train/calibrate the model and the remaining ones
 # to test/validate the model, and we restrict first our analysis to the moisture content:
 
-# %%
+# %% tags=["requires-corn"]
 X_train = X[:57]
 X_test = X[57:]
 y_train = Y[:57, "Moisture"]
@@ -119,7 +119,7 @@ y_test = Y[57:, "Moisture"]
 # %% [markdown]
 # Then we create a PLSRegression object with 5 components and fit the train datasets:
 
-# %%
+# %% tags=["requires-corn"]
 pls = scp.PLSRegression(n_components=5)
 _ = pls.fit(X_train, y_train)
 
@@ -132,13 +132,13 @@ _ = pls.fit(X_train, y_train)
 # because it depends on the evaluation data. Let's for instance plot the
 # $X$ loading matrix $L_X$ (the ``x_loadings`` output):
 
-# %%
+# %% tags=["requires-corn"]
 _ = pls.x_loadings.plot()
 
 # %% [markdown]
 # Once fitted, the PLS model can be used to predict the property values of another dataset, for instance:
 
-# %%
+# %% tags=["requires-corn"]
 y_test_hat = pls.predict(X_test)
 _ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 
@@ -146,7 +146,7 @@ _ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 # We can generate a parity plot to compare the predicted and actual values, for
 # both train set and test set.
 
-# %%
+# %% tags=["requires-corn"]
 ax = pls.plot_parity(label="calibration")
 pls.plot_parity(
     y_test,
@@ -163,7 +163,7 @@ _ = ax.legend(loc="lower right")
 # it is obtained by passing no arguments, while for validation datasets, $X$ and $Y$ must be
 # passed.
 
-# %%
+# %% tags=["requires-corn"]
 print(f"R-squared training dataset: {pls.score():.3}")
 print(f"R-squared test dataset: {pls.score(X_test, y_test):.3}")
 

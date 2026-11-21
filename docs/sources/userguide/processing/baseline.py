@@ -315,7 +315,7 @@ blc.params()
 # As an example, we can now use a dataset consisting of 80 samples of corn measured on a NIR
 # spectrometer. This dataset (and others) can be loaded from http://www.eigenvector.com.
 
-# %%
+# %% tags=["requires-corn"]
 A = scp.read(
     getenv("SCPY_CORN_DATA", "https://www.eigenvector.com/data/Corn/corn.mat"),
     merge=False,
@@ -324,7 +324,7 @@ A = scp.read(
 # %% [markdown]
 # Add some labels for easier reading of the data axis.
 
-# %%
+# %% tags=["requires-corn"]
 A.title = "absorbance"
 A.units = "a.u."
 A.x.title = "Wavelength"
@@ -333,7 +333,7 @@ A.x.units = "nm"
 # %% [markdown]
 # Now plot the original dataset A:
 
-# %%
+# %% tags=["requires-corn"]
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 prefs.colormap = "tab20"
@@ -354,7 +354,7 @@ _ = A.plot()
 #
 # When the trend is simply a shift, one can subtract the mean absorbance from each spectrum.
 
-# %%
+# %% tags=["requires-corn"]
 A1 = A.detrend(order="constant")  # Here we use a NDDataset method
 _ = A1.plot()
 
@@ -363,7 +363,7 @@ _ = A1.plot()
 # But here the trend is clearly closer to a linear trend. So we can use a linear correction
 # with `A.detrend(order="linear")` or simply `A.detrend()` as "linear" is the default.
 
-# %%
+# %% tags=["requires-corn"]
 A2 = scp.detrend(
     A
 )  # Here we use the API method (this is fully equivalent to the NDDataset method)
@@ -375,7 +375,7 @@ _ = A2.plot()
 # If a higher degree of polynomial is necessary, it is possible to use a nonnegative integer scalar to define order (degree).
 # Note that for degree 2 and 3, the "quadratic" and "cubic" keywords are also available to define 2 and 3-degree of polynomial.
 
-# %%
+# %% tags=["requires-corn"]
 A3 = A.detrend(order="quadratic")  # one can also use `order=2`
 _ = A3.plot()
 
@@ -387,7 +387,7 @@ _ = A3.plot()
 #
 # For example, let's try on a single spectrum for clarity:
 
-# %%
+# %% tags=["requires-corn"]
 # without breakpoint
 R = A[0]
 R1 = R.detrend()
@@ -407,7 +407,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 #  Integer number would mean that we use indice starting at 0 (not the same thing!).
 #  in this case, indice 1856 does not exist as the size of the x axis is 700.</div>
 
-# %%
+# %% tags=["requires-corn"]
 # with breakpoints
 bp = [1300.0, 1856.0]  # warning must be float to set location, in int for indices
 R2 = R.detrend(breakpoints=bp)
@@ -431,7 +431,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 # the spectra limit to fit the baseline. This is useful when the spectra limits are
 # signal free.
 
-# %%
+# %% tags=["requires-corn"]
 Aa = A.basc()
 _ = Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
 
@@ -446,7 +446,7 @@ _ = Aa.plot()  # range are automatically set to the start and end of the spectra
 # Example:
 #
 
-# %%
+# %% tags=["requires-corn"]
 Ab = scp.rubberband(A)
 _ = Ab.plot()
 

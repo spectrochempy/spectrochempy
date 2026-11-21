@@ -51,6 +51,8 @@ if str(DOCS_SOURCE_ROOT) not in pythonpath_entries:
 _SCP_DOCS_CONFIG = tempfile.TemporaryDirectory(prefix="scp-docs-config-")
 os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
+from corn_data import gallery_pattern
+from corn_data import source_notice
 from data_setup import DATA as DOCS_DATA
 from data_setup import configure_data
 from data_setup import verify_data
@@ -834,7 +836,9 @@ if not single_doc_or_dir or gallery_preview:
         "image_scrapers": (
             _get_default_image_scraper(),
         ),  # Use the function getter instead of direct function reference
-        "filename_pattern": r"[/\\]plot" if gallery_preview else "/plot",
+        "filename_pattern": gallery_pattern(
+            r"[/\\]plot" if gallery_preview else "/plot"
+        ),
         "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
         "show_signature": False,  # Disable the signature if it's causing issues
@@ -1404,6 +1408,7 @@ def show_plotting_example_title(app, env, node, contnode):
 
 
 def setup(app):
+    app.connect("source-read", source_notice)
     if gallery_from_artifact:
         from sphinx_gallery.gen_gallery import generate_gallery_rst
 

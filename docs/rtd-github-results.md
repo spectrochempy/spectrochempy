@@ -57,11 +57,19 @@ the separate private Corn input. Only documentation outputs are transferred.
    Verify a real `latest` build there. PR previews retain native RTD execution
    until their separate flags are enabled after successful fork validation.
 
-The initial deployment must leave both PR flags unset. The fork test on
-2026-11-21 could not reach Eigenvector's public Corn endpoint; master preparation
-succeeded using the existing private input. This does not block prepared
-`latest` builds, but prevents activating prepared previews without losing
-examples. No Corn file or private credential is added to public artifacts.
+Public Corn data are fetched once per execution job, with a 15-second network
+timeout. A successful download must match the pinned size and SHA-256; the
+verified local file and ZIP are then reused by all examples. A malformed or
+changed download fails the job. A network failure marks Corn as unavailable:
+only the four Corn gallery examples and notebook cells tagged `requires-corn`
+are left unexecuted. Their source remains visible, with an explicit notice.
+The artifact manifests and Actions summary list the omitted results.
+
+Trusted master builds still require their separately verified private Corn
+fixture. They never silently fall back to incomplete scientific documentation.
+The PR gates remain disabled until an actual fork preview has validated both
+the successful-download and unavailable-data paths. No raw Corn input is
+included in public artifacts.
 
 The main flag selects `latest`; the additional PR flag selects external versions.
 Release tags, `stable`

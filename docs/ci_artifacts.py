@@ -15,6 +15,7 @@ from contextlib import nullcontext
 from importlib.metadata import version
 from pathlib import Path
 
+from docs import corn_data
 from docs.build_diagnostics import _diagnostics
 from docs.build_diagnostics import _phase
 
@@ -91,6 +92,7 @@ def produce(kind, bundle, *, no_data=False):
     if any(path.exists() for path in _files(SOURCES, kind)):
         raise RuntimeError(f"{kind} producer requires a clean source tree")
     bundle.mkdir(parents=True)
+    omitted = []
     if kind == "tutorials":
         notebooks.prepare(nodata=no_data, fresh=True)
         manifest = json.loads(notebooks.MANIFEST.read_text(encoding="utf-8"))
@@ -100,9 +102,16 @@ def produce(kind, bundle, *, no_data=False):
                 check=True,
             )
         notebooks.verify()
+        executed = json.loads(notebooks.MANIFEST.read_text(encoding="utf-8"))
+        omitted = [
+            f"{name}: {entry['skipped_corn_cells']} Corn cells"
+            for name, entry in executed["notebooks"].items()
+            if entry.get("skipped_corn_cells")
+        ]
     else:
         with _phase("execute gallery"):
             _produce_gallery(no_data=no_data)
+        omitted = corn_data.annotate_gallery(SOURCES / GALLERY)
         path = SOURCES / BACKREFERENCES
         backreferences = json.loads(path.read_text(encoding="utf-8"))
         for examples in backreferences.values():
@@ -125,12 +134,22 @@ def produce(kind, bundle, *, no_data=False):
                 "version": version("spectrochempy"),
                 "kind": kind,
                 "files": entries,
+                "omitted_corn": omitted,
             },
             indent=2,
         )
         + "\n",
         encoding="utf-8",
     )
+
+    if omitted:
+        message = "Corn unavailable; omitted executed results:\n" + "\n".join(
+            f"- {name}" for name in omitted
+        )
+        sys.stdout.write(message + "\n")
+        if summary := os.environ.get("GITHUB_STEP_SUMMARY"):
+            with Path(summary).open("a", encoding="utf-8") as stream:
+                stream.write(message + "\n")
 
 
 class ArtifactVersionMismatchError(RuntimeError):

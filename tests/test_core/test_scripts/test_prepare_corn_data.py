@@ -142,3 +142,42 @@ def test_private_fixture_is_outside_cache_and_artifact_paths(workflow):
         and step["if"] == "always()"
         for step in steps
     )
+
+
+def test_public_network_failure_declares_missing_without_staging(fixture, monkeypatch):
+    from urllib.error import URLError
+
+    _source, directory, env = fixture
+
+    def fail(*_args, **kwargs):
+        assert kwargs["timeout"] == 15
+        raise URLError("network unreachable")
+
+    monkeypatch.setattr(prepare_corn, "urlopen", fail)
+    assert prepare_corn.prepare_public(directory, env) is False
+    assert env.read_text() == "SCPY_DOCS_CORN_UNAVAILABLE=1\n"
+    assert not directory.exists()
+
+
+def test_public_download_is_verified_and_shared_locally(fixture, monkeypatch):
+    from io import BytesIO
+
+    source, directory, env = fixture
+    monkeypatch.setattr(
+        prepare_corn, "urlopen", lambda *_args, **_kwargs: BytesIO(source.read_bytes())
+    )
+    assert prepare_corn.prepare_public(directory, env) is True
+    assert (directory / "corn.mat").read_bytes() == source.read_bytes()
+    assert "SCPY_DOCS_CORN_UNAVAILABLE=0" in env.read_text()
+
+
+def test_public_corrupt_download_is_not_treated_as_unavailable(fixture, monkeypatch):
+    from io import BytesIO
+
+    _source, directory, env = fixture
+    monkeypatch.setattr(
+        prepare_corn, "urlopen", lambda *_args, **_kwargs: BytesIO(b"corrupt")
+    )
+    with pytest.raises(ValueError, match="SHA-256"):
+        prepare_corn.prepare_public(directory, env)
+    assert not env.exists()
