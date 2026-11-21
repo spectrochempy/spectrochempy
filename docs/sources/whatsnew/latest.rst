@@ -20,7 +20,7 @@ New Features
   ``get_baseline`` and ``basc``. They accept finite real unmasked 1D or rowwise
   2D spectra on regular grids and record parameters in the correction history.
   Existing defaults are unchanged. Inspect broad and negative peak areas;
-  convergence alone does not guarantee quantitative preservation.
+  convergence alone does not guarantee quantitative preservation (:pr:`1933`).
 
 - ``Baseline(model="distribution")`` adds experimental automatic signal/noise
   classification, local interpolation and mean smoothing for finite real
