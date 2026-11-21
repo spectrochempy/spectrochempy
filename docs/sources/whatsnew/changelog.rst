@@ -19,6 +19,15 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``Baseline(model="distribution")`` adds experimental automatic signal/noise
+  classification, local interpolation and mean smoothing for finite real
+  unmasked 1D or row-wise 2D spectra on regular grids.
+  ``distribution_width`` is a half-width in samples. Inspect the fitted
+  baseline and peak areas: broad weak signals can be removed as background.
+  Existing models and defaults are unchanged; no NMR dependency is added
+  (:pr:`1932`).
+
+
 
 .. section
 
