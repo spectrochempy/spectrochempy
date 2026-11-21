@@ -21,6 +21,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.processing.baselineprocessing._distribution import (
     _distribution_baseline,
 )
+from spectrochempy.processing.baselineprocessing._whittaker import _whittaker_baseline
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.utils.constants import TYPE_FLOAT
@@ -98,6 +99,15 @@ class Baseline(AnalysisConfigurable):
       or `cubic` (order=3).
     - ``'asls'`` : Asymmetric Least Squares Smoothing baseline correction. This method
       is based on the work of Eilers and Boelens (:cite:`eilers:2005`).
+    - ``'arpls'`` : Asymmetrically reweighted penalized least squares.
+    - ``'aspls'`` : Adaptive smoothness penalized least squares, with an
+      ``aspls_asymmetry`` coefficient of 0.5 by default (the pybaselines variant).
+      These two models require finite real unmasked 1D or rowwise 2D data on a
+      regular grid with at least three points. Multivariate fitting, LLS and
+      breakpoints are not supported. ``lamb`` penalizes second differences in
+      sample indices, not physical distances. Broad or negative peaks may be
+      absorbed into the baseline; these models are not automatic selectors.
+      A ``RuntimeWarning`` reports an unsuccessful weight convergence test.
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
       (:cite:`ryan:1988`).
     - ``'distribution'`` : Experimental automatic signal/noise classification,
@@ -177,7 +187,16 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
-        ["polynomial", "detrend", "asls", "snip", "rubberband", "distribution"],
+        [
+            "polynomial",
+            "detrend",
+            "asls",
+            "arpls",
+            "aspls",
+            "snip",
+            "rubberband",
+            "distribution",
+        ],
         default_value="polynomial",
         help="""The model used to determine the baseline.
 
@@ -187,6 +206,8 @@ class Baseline(AnalysisConfigurable):
 * `detrend`: removes a constant, linear or polynomial trend to the data. The order of
   the trend is determined by the `order` parameter.
 * `asls`: the baseline is determined by an asymmetric least square algorithm.
+* `arpls`: reweighted penalized least squares on a regular, unmasked grid.
+* `aspls`: adaptive smoothness penalized least squares on a regular, unmasked grid.
 * `snip`: the baseline is determined by a simple non-iterative peak detection
   algorithm.
 * `rubberband`: the baseline is determined by a rubberband algorithm.
@@ -210,6 +231,12 @@ class Baseline(AnalysisConfigurable):
         "model.",
     ).tag(config=True)
 
+    aspls_asymmetry = tr.Float(
+        default_value=0.5,
+        help="Positive logistic weighting coefficient for asPLS. The default 0.5 "
+        "follows pybaselines; the published coefficient is 2.",
+    ).tag(config=True)
+
     order = tr.Union(
         (
             tr.Integer(),
@@ -228,7 +255,7 @@ class Baseline(AnalysisConfigurable):
 
     lamb = tr.Float(
         default_value=1e5,
-        help="The smoothness parameter for the AsLS method. Larger values make the "
+        help="The smoothness parameter for AsLS, arPLS and asPLS. Larger values make the "
         "baseline stiffer. Values should be in the range (0, 1e9).",
     ).tag(config=True)
 
@@ -246,12 +273,13 @@ class Baseline(AnalysisConfigurable):
 
     tol = tr.Float(
         default_value=1e-3,
-        help="The tolerance parameter for the AsLS method. Smaller values make the "
+        help="Tolerance for AsLS, arPLS and asPLS. The latter two use relative "
+        "weight changes. Smaller values make the "
         "fitting better but potentially increases the number of iterations and the "
         "running time. Values should be in the range (0, 1).",
     ).tag(config=True, min=0, max=1)
 
-    max_iter = tr.Integer(50, help="Maximum number of :term:`AsLS` iteration.").tag(
+    max_iter = tr.Integer(50, help="Maximum iterations for AsLS, arPLS and asPLS.").tag(
         config=True,
         min=1,
     )
@@ -314,6 +342,44 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+    def _validate_reweighted_input(self, X):
+        label = f"{self.model} baseline"
+        if self.multivariate or self.lls or self.breakpoints:
+            raise ValueError(
+                f"{label} does not support multivariate, lls or breakpoints"
+            )
+        if not isinstance(X, NDDataset):
+            raise ValueError(f"{label} requires a dataset with regular coordinates")
+        data = np.asarray(X.data)
+        if (
+            data.ndim not in (1, 2)
+            or data.shape[-1] < 3
+            or data.size == 0
+            or data.dtype.kind not in "fiu"
+            or not np.isfinite(data).all()
+        ):
+            raise ValueError(
+                f"{label} requires finite real 1D or 2D data, at least 3 points"
+            )
+        if np.any(X.mask):
+            raise ValueError(f"{label} does not support masked input")
+        try:
+            coordinate = X.coordset[X.dims[-1]]
+        except (AttributeError, KeyError, TypeError) as exc:
+            raise ValueError(f"{label} requires regularly spaced coordinates") from exc
+        if coordinate.data is None or not coordinate.linear:
+            raise ValueError(f"{label} requires regularly spaced coordinates")
+        if not np.isfinite(self.lamb) or self.lamb <= 0:
+            raise ValueError(f"{label} requires finite lamb > 0")
+        if not np.isfinite(self.tol) or not 0 < self.tol < 1:
+            raise ValueError(f"{label} requires finite 0 < tol < 1")
+        if isinstance(self.max_iter, bool) or self.max_iter < 1:
+            raise ValueError(f"{label} requires max_iter >= 1")
+        if self.model == "aspls" and (
+            not np.isfinite(self.aspls_asymmetry) or self.aspls_asymmetry <= 0
+        ):
+            raise ValueError(f"{label} requires finite aspls_asymmetry > 0")
+
     @tr.validate("distribution_width")
     def _validate_distribution_width(self, proposal):
         value = proposal.value
@@ -790,6 +856,24 @@ baseline/trends for different segments of the data.
                 z += mi
                 _store[i] = z[::-1] if self._X.x.is_descendant else z
 
+        elif self.model in {"arpls", "aspls"}:
+            for i in range(M):
+                fitted, converged = _whittaker_baseline(
+                    Y[i],
+                    self.model,
+                    self.lamb,
+                    self.tol,
+                    self.max_iter,
+                    self.aspls_asymmetry,
+                )
+                if not converged:
+                    warning_(
+                        f"{self.model} baseline row {i}: weight convergence was not "
+                        "reached; inspect the baseline and adjust lamb, tol or max_iter.",
+                        RuntimeWarning,
+                    )
+                _store[i] = fitted
+
         elif self.model == "distribution":
             for i in range(M):
                 fitted = _distribution_baseline(Y[i], self.distribution_width)
@@ -865,12 +949,15 @@ baseline/trends for different segments of the data.
         # instance exposing results from a previous successful fit.
         self._fitted = False
         self._source_context = None
+        self._reweighted_fit_parameters = None
 
         # Reject invalid last-axis coordinates before any copy, range
         # construction, mask removal, sort or numerical work.
         self._validate_last_axis_coordinates(X)
         if self.model == "distribution":
             self._validate_distribution_input(X)
+        if self.model in {"arpls", "aspls"}:
+            self._validate_reweighted_input(X)
 
         self._fitted = False  # reinit this flag
 
@@ -957,6 +1044,8 @@ baseline/trends for different segments of the data.
             self._X._mask = self.Xmasked.mask
 
         self._outfit = (baseline, bplist)  # store the result
+        if self.model in {"arpls", "aspls"}:
+            self._reweighted_fit_parameters = self._history_parameters()
 
         # if the process was successful, _fitted is set to True so that other method
         # which needs fit will be possibly used.
@@ -983,7 +1072,11 @@ baseline/trends for different segments of the data.
         NDDataset
             Dataset with baseline correction applied
         """
-        if self.model == "asls" and hasattr(self, "Xmasked"):
+        if (
+            self.model == "asls"
+            and hasattr(self, "Xmasked")
+            and not getattr(self, "_reweighted_fit_parameters", None)
+        ):
             corrected = self.Xmasked - self.baseline
             self._annotate_corrected_history(corrected)
             self._restore_corrected_context(corrected)
@@ -1016,10 +1109,15 @@ baseline/trends for different segments of the data.
         context = getattr(self, "_source_context", None)
         if context is not None:
             transfer_source_context(context, out)
+            if getattr(self, "_reweighted_fit_parameters", None):
+                out.name = context.name
         return out
 
     def _history_parameters(self):
         """Return the effective scientific parameters of the fitted baseline."""
+        fitted = getattr(self, "_reweighted_fit_parameters", None)
+        if fitted is not None:
+            return fitted.copy()
         parameters = {"model": self.model}
         if self.model in {"polynomial", "detrend"}:
             parameters["order"] = self.order
@@ -1037,6 +1135,10 @@ baseline/trends for different segments of the data.
             parameters.update(
                 distribution_width=self.distribution_width, experimental=True
             )
+        if self.model in {"arpls", "aspls"}:
+            parameters.update(lamb=self.lamb, tol=self.tol, max_iter=self.max_iter)
+            if self.model == "aspls":
+                parameters["aspls_asymmetry"] = self.aspls_asymmetry
         if self.model == "snip":
             parameters["width"] = self.snip_width
         if self.breakpoints:
@@ -1048,6 +1150,9 @@ baseline/trends for different segments of the data.
 
     def _history_message(self):
         """Return the readable description of the applied baseline correction."""
+        fitted = getattr(self, "_reweighted_fit_parameters", None)
+        if fitted is not None:
+            return f"Corrected baseline using {fitted['model']} model"
         message = f"Corrected baseline using {self.model} model"
         if self.model in {"polynomial", "detrend"}:
             message += f" (order {self.order})"

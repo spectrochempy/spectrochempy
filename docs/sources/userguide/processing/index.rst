@@ -18,6 +18,7 @@ Processing
    math_operations
    smoothing
    baseline
+   reweighted_baseline
    denoising
    wavelet_denoising
    modulation_excitation

@@ -8,10 +8,12 @@
 
 __all__ = [
     "_distribution",
+    "_whittaker",
     "baselineprocessing",
     "baselineutils",
 ]
 
 from . import _distribution
+from . import _whittaker
 from . import baselineprocessing
 from . import baselineutils

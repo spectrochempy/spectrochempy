@@ -551,6 +551,10 @@ Statistical operations
 Baseline correction
 ====================
 
+The :class:`Baseline` models ``arpls`` and ``aspls`` provide explicitly selected
+reweighted corrections for finite real unmasked spectra on regular grids.
+See :doc:`/userguide/processing/reweighted_baseline` for parameters and limits.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
