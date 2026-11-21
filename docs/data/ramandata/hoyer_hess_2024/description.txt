@@ -1,0 +1,112 @@
+Fig. 2:
+
+- Fig_2-a-c_raw-data.txt: time-resolved Raman spectra of Cu/CeO2 (1st row: Raman shifts in cm^-1; 1st column: time as 0-1 (0=0h; 1=24h))
+- Fig_2-b-d_raw-data.txt: time-resolved Raman spectra of CeO2 (1st row: Raman shifts in cm^-1; 1st column: time as 0-1 (0=0h; 1=24h))
+- Fig_2-a.txt: averaged time-resolved Raman spectra of Cu/CeO2 (only every 5th spectrum is shown in Fig. 2a)
+- Fig_2-b.txt: averaged time-resolved Raman spectra of CeO2 (only every 5th spectrum is shown in Fig. 2b)
+- Fig_2-c.txt: phase-resolved Raman spectra of Cu/CeO2
+- Fig_2-d.txt: phase-resolved Raman spectra of CeO2
+
+- By processing Fig_2-a-c_raw-data.txt using the PSD GUI (https://doi.org/10.5281/zenodo.3648463), one can obtain Fig_2-a.txt and Fig_2-c.txt
+- By processing Fig_2-b-d_raw-data.txt using the PSD GUI (https://doi.org/10.5281/zenodo.3648463), one can obtain Fig_2-b.txt and Fig_2-d.txt
+- PSD GUI parameters: spectroscopy type = Raman; number spectra/period = 60; number periods = 41; number periods to cut off = 1;
+phase resolution = 30; harmonic = 1; spike removing = on; normalization = on
+
+
+Fig. 3:
+
+- Fig_3-a-c_raw-data.txt: time-resolved UV-Vis spectra of Cu/CeO2 (first 8 rows: meta data; 9th row: time in 10^5 s; 1st column: wavelength in nm)
+- Fig_3-b-d_raw-data.txt: time-resolved UV-Vis spectra of CeO2 (first 8 rows: meta data; 9th row: time in 10^5 s; 1st column: wavelength in nm)
+- Fig_3-a.txt: averaged time-resolved UV-Vis spectra of Cu/CeO2 (only every 5th spectrum is shown in Fig. 3a)
+- Fig_3-b.txt: averaged time-resolved UV-Vis spectra of CeO2 (only every 5th spectrum is shown in Fig. 3b)
+- Fig_3-c.txt: phase-resolved UV-Vis spectra of Cu/CeO2
+- Fig_3-d.txt: phase-resolved UV-Vis spectra of CeO2
+
+- By processing Fig_3-a-c_raw-data.txt using the PSD GUI (https://doi.org/10.5281/zenodo.3648463), one can obtain Fig_3-a.txt and Fig_3-c.txt
+- By processing Fig_3-b-d_raw-data.txt using the PSD GUI (https://doi.org/10.5281/zenodo.3648463), one can obtain Fig_3-b.txt and Fig_3-d.txt
+- PSD GUI parameters: spectroscopy type = UV-Vis; number spectra/period = 60; number periods = 11; number periods to cut off = 1;
+phase resolution = 30; harmonic = 1
+
+
+Fig. S1:
+
+- Fig_S1-(1).txt: In situ/operando Raman spectrum in (1) O2 of Cu/CeO2 (1st column: Raman shift in cm^-1; 2nd column: intensity in a.u.)
+- Fig_S1-(2).txt: In situ/operando Raman spectrum in (2) CO+O2 of Cu/CeO2 (1st column: Raman shift in cm^-1; 2nd column: intensity in a.u.)
+- Fig_S1-(3).txt: In situ/operando Raman spectrum in (3) O2 of Cu/CeO2 (1st column: Raman shift in cm^-1; 2nd column: intensity in a.u.)
+
+
+Fig. S2:
+
+- Fig_S2-(1).txt: In situ/operando Raman spectrum in (1) O2 of CeO2 (1st column: Raman shift in cm^-1; 2nd column: intensity in a.u.)
+- Fig_S2-(2).txt: In situ/operando Raman spectrum in (2) CO+O2 of CeO2 (1st column: Raman shift in cm^-1; 2nd column: intensity in a.u.)
+- Fig_S2-(3).txt: In situ/operando Raman spectrum in (3) O2 of CeO2 (1st column: Raman shift in cm^-1; 2nd column: intensity in a.u.)
+
+
+Fig. S3:
+
+- Enlarged view of the time- and phase-resolved spectra of Cu/CeO2 (Fig. 2a/c)
+- Fig. S3a: based on Fig_2-a.txt
+- Fig. S3b: based on Fig_2-c.txt
+
+
+Fig. S4:
+
+- 1st column of Fig_S4.txt: time in min (based on Fig_2-a.txt)
+- 2nd column of Fig_S4.txt: Raman intensity in a.u. at 456 cm^-1 (based on Fig_2-a.txt)
+- 3rd column of Fig_S4.txt: Raman intensity in a.u. at 565 cm^-1 (based on Fig_2-a.txt)
+- 4th column of Fig_S4.txt: F2g position in cm^-1
+
+
+Fig. S5:
+
+- Fig. S5a: same as Fig. 2d (Fig_2-d.txt)
+- Fig. S5b: Fig_S5-b.txt
+
+
+Fig. S6:
+
+- Fig. S6a: Fig_S6-a.txt
+- Fig. S6b: Fig_S6-b.txt
+
+
+Fig. S7:
+
+- Fig. S7a: Fig_S7-a.txt
+- Fig. S7b: Fig_S7-b.txt
+
+
+Fig. S8:
+
+- Fig_S8-(1).txt: In situ/operando UV-Vis spectrum in (1) O2 of Cu/CeO2
+- Fig_S8-(2).txt: In situ/operando UV-Vis spectrum in (2) CO+O2 of Cu/CeO2
+- Fig_S8-(3).txt: In situ/operando UV-Vis spectrum in (3) O2 of Cu/CeO2
+- One can obtain the difference spectra in Fig. S8b by substraction of (2)-(1) and (3)-(1)
+
+
+Fig. S9:
+
+- Fig_S9-(1).txt: In situ/operando UV-Vis spectrum in (1) O2 of CeO2
+- Fig_S9-(2).txt: In situ/operando UV-Vis spectrum in (2) CO+O2 of CeO2
+- Fig_S9-(3).txt: In situ/operando UV-Vis spectrum in (3) O2 of CeO2
+- One can obtain the difference spectra in Fig. S9b by substraction of (2)-(1) and (3)-(1)
+
+
+Fig. S10:
+
+- 1st column of Fig_S10.txt: time in min (based on Fig_3-a-c_raw-data.txt)
+- 2nd column of Fig_S10.txt: -log(R) in a.u. at 390 nm (based on Fig_3-a-c_raw-data.txt)
+- 3rd column of Fig_S10.txt: -log(R) in a.u. at 565 nm (based on Fig_3-a-c_raw-data.txt)
+- 4th column of Fig_S10.txt: -log(R) in a.u. at 690 nm (based on Fig_3-a-c_raw-data.txt)
+- 5th column of Fig_S10.txt: -log(R) in a.u. at 900 nm (based on Fig_3-a-c_raw-data.txt)
+
+
+Fig. S11:
+
+- Fig. S11a: same as Fig. 3d (Fig_3-d.txt)
+- Fig. S11b: Fig_S11-b.txt
+
+
+Fig. S12:
+
+- Fig. S12a: Fig_S12-a.txt
+- Fig. S12b: Fig_S12-b.txt

@@ -307,7 +307,7 @@ scp.read_omnic("irdata/subdir/1-20")
 # In cases where not all files are compatible, they are returned in different
 # NDDatasets (with independent merging).
 #
-# For example:
+# For a local file, use ``local_only=True`` to avoid a remote lookup:
 
 # %%
 Y = scp.read_omnic("irdata/subdir/")
@@ -383,7 +383,7 @@ X.title
 
 # %%
 try:
-    X = scp.read_omnic("nonexistent_file.spa")
+    X = scp.read_omnic("nonexistent_file.spa", local_only=True)
 except FileNotFoundError:
     scp.error_(FileNotFoundError, "File not found")
 except Exception as e:

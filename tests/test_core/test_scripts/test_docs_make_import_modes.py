@@ -209,6 +209,7 @@ def test_internal_helper_import_errors_are_not_masked(tmp_path, mode):
     package = tmp_path / "probe"
     (package / "tools").mkdir(parents=True)
     shutil.copy2(MAKE_SCRIPT, package / "make.py")
+    shutil.copy2(MAKE_SCRIPT.with_name("data_setup.py"), package / "data_setup.py")
     (package / "tools" / "helpers.py").write_text(
         "import spectrochempy_module_that_does_not_exist\n" "\n" "sh = None\n",
         encoding="utf-8",

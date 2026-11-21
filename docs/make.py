@@ -15,7 +15,7 @@ It handles:
 - Tutorial packaging and distribution
 - Multiple version support with Git tags
 - Directory structure management for documentation
-- Test data downloading and setup
+- Local documentation data setup
 
 Some code is copied from the Pandas project's documentation builder.
 
@@ -43,7 +43,7 @@ Options
 --single-doc : Build a single document
 --directory, -d : Build a specific directory
 --whatsnew : Build only the whatsnew document
---no-data : Do not download the test data (fast smoke builds only)
+--no-data : Skip the initial bundled documentation-data check
 
 Examples
 --------
@@ -89,8 +89,12 @@ except ImportError:  # pragma: no cover
 # name when the file is executed directly. Import it by package when this module
 # is loaded as ``docs.make`` and by directory entry otherwise.
 if __package__:
+    from .data_setup import configure_data
+    from .data_setup import verify_data
     from .tools.helpers import sh
 else:
+    from data_setup import configure_data
+    from data_setup import verify_data
     from tools.helpers import sh
 
 # Suppress other specific warnings
@@ -553,6 +557,8 @@ class BuildDocumentation:
 
     def __init__(self, **kwargs):
         # Initialize the BuildDocumentation class with settings.
+        self._data_config = tempfile.TemporaryDirectory(prefix="scp-docs-data-")
+        environ["SCP_CONFIG_HOME"] = self._data_config.name
         self.settings = settings = self._init_settings(kwargs)
 
         # DOCUMENTATION SRC PATH
@@ -957,19 +963,12 @@ class BuildDocumentation:
                 f"\n{'-' * 80}"
             )
 
-        if not self.settings["whatsnew"] and not self.settings["nodata"]:
-            print("Loading spectrochempy and downloading test data...")
-
-            from spectrochempy import preferences as prefs
-
-            datadir = prefs.datadir
-
-            from spectrochempy.application.testdata import (
-                download_full_testdata_directory,
-            )
-
-            with _trace_docs_span("download_full_testdata_directory"):
-                download_full_testdata_directory(datadir, force=True)
+        if not self.settings["whatsnew"]:
+            print("Using bundled documentation data from docs/data...")
+            if not self.settings["nodata"]:
+                with _trace_docs_span("verify documentation data"):
+                    verify_data()
+            configure_data()
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
@@ -1408,7 +1407,7 @@ def _main():
 
     parser.add_argument(
         "--no-data",
-        help="do not download the test data (fast smoke builds only)",
+        help="skip the initial bundled documentation-data check",
         action="store_true",
     )
 

@@ -7,6 +7,8 @@ Compare time-resolved spectra, phase-resolved spectra and Fourier
 coefficients from the same operando
 Raman experiment on Cu/CeO₂. The raw spectra are from the
 `Hoyer and Hess dataset <https://doi.org/10.5281/zenodo.13929684>`_.
+Documentation builds use the bundled data; standalone runs download the
+original archive if the local input file is unavailable.
 """
 
 # %%
@@ -17,30 +19,32 @@ Raman experiment on Cu/CeO₂. The raw spectra are from the
 # The first row contains Raman shifts. Each subsequent row starts with
 # the acquisition time as a fraction of a day.
 
+from io import BytesIO
+from zipfile import ZipFile
+
 import numpy as np
+import requests
 
 import spectrochempy as scp
 
 # %%
 # .. raw:: html
 #
-#    <details><summary>Download and read the Zenodo archive</summary>
+#    <details><summary>Read the Raman data</summary>
 
-# isort: split
-from io import BytesIO
-from zipfile import ZipFile
-
-import requests
-
-url = "https://zenodo.org/records/13929684/files/data.zip"
-with requests.get(url, timeout=60) as response:
+filename = scp.preferences.datadir / "ramandata/hoyer_hess_2024/Fig_2-a-c_raw-data.txt"
+if filename.is_file():
+    payload = filename.read_bytes()
+else:
+    response = requests.get(
+        "https://zenodo.org/records/13929684/files/data.zip", timeout=60
+    )
     response.raise_for_status()
-    with (
-        ZipFile(BytesIO(response.content)) as archive,
-        archive.open("data/Fig_2-a-c_raw-data.txt") as stream,
-    ):
-        shifts = np.fromstring(stream.readline().decode(), sep=" ")
-        table = np.loadtxt(stream)
+    with ZipFile(BytesIO(response.content)) as archive:
+        payload = archive.read("data/Fig_2-a-c_raw-data.txt")
+with BytesIO(payload) as stream:
+    shifts = np.fromstring(stream.readline().decode(), sep=" ")
+    table = np.loadtxt(stream)
 
 # %%
 # .. raw:: html

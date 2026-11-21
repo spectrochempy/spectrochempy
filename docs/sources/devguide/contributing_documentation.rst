@@ -40,8 +40,19 @@ Guides & Tutorials
 ~~~~~~~~~~~~~~~~~~
 - Written in reST or Jupytext Python files with ``# %%`` cells
 - Located in ``docs/sources/userguide/``
+- Edit the Jupytext ``.py`` source; the build generates and executes its
+  paired ``.ipynb`` file. Do not commit generated notebooks.
 - Provide high-level overviews and examples
 - All code examples are tested
+
+Gallery Examples
+~~~~~~~~~~~~~~~~
+
+Add gallery scripts under ``src/spectrochempy/examples/<category>/`` and
+use the ``plot_<topic>.py`` naming convention. Keep their input datasets
+in ``docs/data/``, alongside the data used by tutorial notebooks, rather
+than beside the scripts. Plugin examples stay in their plugin's examples
+directory. Use the preview commands below to execute either kind of page.
 
 Building Documentation
 ----------------------
@@ -128,6 +139,87 @@ If port 8765 is busy, choose a free port and use it in the preview URL.
 Append the printed HTML path relative to ``build/preview/`` to
 ``http://127.0.0.1:8765/``. After editing, rerun the preview command and
 refresh the page in your browser. The URL works while the server is running.
+
+Documentation Data
+~~~~~~~~~~~~~~~~~~
+
+Public input data for the tutorials and galleries is versioned in
+``docs/data/``. The normal build verifies its size and SHA-256 manifest,
+then selects this directory for Sphinx examples and notebook kernels.
+It does not download or extract the full ``spectrochempy_data`` repository.
+These files are excluded from wheel and source distributions. Corn remains
+separate, as described below.
+
+Adding or Updating Input Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. Put only the files needed by the example or notebook in
+   ``docs/data/<data-family>/<dataset>/``. When copying an existing fixture,
+   retain its path relative to the original ``testdata/`` directory.
+2. Preserve the original file bytes and attribution notices. For a new
+   dataset, add a README recording the source URL or DOI, version, authors
+   and license. Keep private data such as Corn outside this directory.
+3. Update ``docs/data/manifest.json`` with the relative path, byte count
+   and SHA-256 for each added or changed file, including dataset notices.
+   Keep its source revision accurate; document additions from other sources
+   in their dataset README. Do not include generated plots or exported data.
+4. Run the affected gallery or tutorial preview, then the full documentation
+   build to check that the selection is sufficient. A missing or changed
+   input fails verification instead of triggering a full-corpus download.
+
+For example, inspect a fixture's manifest values from the repository root:
+
+.. code-block:: python
+
+    import hashlib
+    from pathlib import Path
+
+    data = Path("docs/data")
+    path = data / "irdata/nh4y-activation.spg"
+    with path.open("rb") as stream:
+        digest = hashlib.file_digest(stream, "sha256").hexdigest()
+    print(path.relative_to(data).as_posix(), path.stat().st_size, digest)
+
+See ``docs/data/README.md`` for the current selection's provenance.
+
+Reading Data in Examples and Notebooks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use paths relative to ``scp.preferences.datadir`` in both gallery scripts
+and Jupytext notebooks. The documentation builder sets this preference to
+the checkout's ``docs/data/`` before executing each page. The reader resolves
+its relative input there; it does not depend on the script or notebook's
+working directory.
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    dataset = scp.read("irdata/nh4y-activation.spg", local_only=True)
+
+For a format-specific reader, use the same path and option, for example
+``scp.read_omnic("irdata/nh4y-activation.spg", local_only=True)``. For NumPy
+or ordinary file I/O, obtain the full path from the preference:
+
+.. code-block:: python
+
+    filename = scp.preferences.datadir / "ramandata/hoyer_hess_2024/Fig_2-a-c_raw-data.txt"
+    with filename.open("rb") as stream:
+        first_line = stream.readline()
+
+Do not hardcode ``docs/data/``, a home directory or ``../`` paths in the
+example itself. Use ``local_only=True`` for local-only reads and examples
+of missing files, so the reader cannot try a remote fallback. Keep data
+retrieval out of the executed documentation path.
+
+Outside a documentation build, the preference points to the user's usual
+data directory; installing SpectroChemPy does not install ``docs/data/``.
+State how a standalone reader can obtain any new dataset. Existing Raman
+scripts use the local fixture when present and fetch its public archive
+only when run without it. Corn uses the separate environment variables below.
+For a one-off run from a checkout, prefer the gallery or tutorial preview
+command: it selects the bundled data and isolates saved preferences. Setting
+``scp.preferences.datadir`` manually persists in the user's configuration.
 
 Documentation CI Artifacts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

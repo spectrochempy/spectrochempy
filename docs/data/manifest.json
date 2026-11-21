@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "data_repository": "spectrochempy/spectrochempy_data",
+  "data_base_commit": "bd9b61453c68e630935acd4f578ae45bae445aaf",
+  "data_local_addition": "ramandata/hoyer_hess_2024 (unchanged Zenodo bytes)",
+  "files": {
+    "galacticdata/BENZENE.SPC": {
+      "bytes": 7912,
+      "sha256": "5ca47625263891dc58a2c2949b50a8f1502f42e6b341e0c2ba381c14cf14caac"
+    },
+    "galacticdata/CONTOUR.SPC": {
+      "bytes": 14436,
+      "sha256": "6020a6198e3c3c849a6ed0e345436b0a3b683a5cb8e8eea0e8e746bebfbd478c"
+    },
+    "galacticdata/DRUG_SAMPLE_PEAKS.SPC": {
+      "bytes": 10447,
+      "sha256": "8df069fbf00342365971d929d324538aee22da66bc5af17be2f9e15fade644b6"
+    },
+    "galacticdata/README.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "irdata/2dir/README.md": {
+      "bytes": 1540,
+      "sha256": "f843f77897f950be11dca9eb92a73fa36cc6f43b6ccd5c7cd992d938518a65d9"
+    },
+    "irdata/2dir/silicalite_210C_0ps_2DIR.scp": {
+      "bytes": 123895,
+      "sha256": "32d97e30b5c4df5af0d76b03d649571f39f6ffe4c969d6f4f9d4b126510953b9"
+    },
+    "irdata/CO@Mo_Al2O3.SPG": {
+      "bytes": 1541992,
+      "sha256": "c128d65f9f655b07163b4adf4b4b2ceb3f701f95887d5cf466011db62d1ea1ae"
+    },
+    "irdata/IR.CSV": {
+      "bytes": 104610,
+      "sha256": "75b839005972f2ef29692f380907367ebdc9fa6a9f7cc884c3af8fcaaf503325"
+    },
+    "irdata/OPUS/OPUS_assembled_file.0": {
+      "bytes": 12613816,
+      "sha256": "9e1a1be39f017185b76336c5be6fa893d2b6b6dd4b84759f3628ac71ae59571e"
+    },
+    "irdata/OPUS/background.0": {
+      "bytes": 34328,
+      "sha256": "1eddaab08784c4c0d3bc78d7bdccb522ebe4cdd7fe1aefbcf5195c89fab2e326"
+    },
+    "irdata/OPUS/test.0000": {
+      "bytes": 65688,
+      "sha256": "449fd7ebe693e6902b6a9e18aa95724ff3e8e3cd02d577eee3a44a9670736d70"
+    },
+    "irdata/OPUS/test.0001": {
+      "bytes": 65688,
+      "sha256": "8d92456c3171f9af8259332f7d975189e86e4ca74ed33d86f11816701e831f35"
+    },
+    "irdata/OPUS/test.0002": {
+      "bytes": 65688,
+      "sha256": "97be1e7e8e8e4f5ff6ae86fa87966c003d2b9cc1eff889c36d1147f984f65546"
+    },
+    "irdata/OPUS/test.0003": {
+      "bytes": 65688,
+      "sha256": "8f274223acad99bcc01796d0fe6cac4d8424b429324c037eaeb203a265c4e46a"
+    },
+    "irdata/interferogram/interfero.SPA": {
+      "bytes": 18620,
+      "sha256": "e63b63b6d5b16d39ffae5604ae8d2e38ae9d50ca1d4603202c12e31cbb6f2e38"
+    },
+    "irdata/interferogram/spectre.SPA": {
+      "bytes": 34236,
+      "sha256": "d1eb242323b8056a8cf10642d7ed4ed798ed933084700f14d1323f2c0c3c3d5a"
+    },
+    "irdata/nh4y-activation.spg": {
+      "bytes": 4959152,
+      "sha256": "2631df843527782eb50e9c81eac54c59a113d16eb72c8ac0c7b427a3e79dd0ff"
+    },
+    "irdata/perkinelmer/spectra.sp": {
+      "bytes": 28004,
+      "sha256": "6a244e8d5aab752eb5a436348ddb51ed605665c0dd3345bb3e7833c92f02c745"
+    },
+    "irdata/subdir/1-20/7_CZ0-100_Pd_3.SPA": {
+      "bytes": 24792,
+      "sha256": "446b55fce8061e4c63b727b2370f3cef6dd3b4b2cd36fc3aed4756c672ffe749"
+    },
+    "irdata/subdir/1-20/7_CZ0-100_Pd_4.SPA": {
+      "bytes": 24792,
+      "sha256": "21f91630d5cc12edf9ea156c8c5c876aa66d62bc8676df57eb550885b2181a9b"
+    },
+    "irdata/subdir/1-20/7_CZ0-100_Pd_5.SPA": {
+      "bytes": 24792,
+      "sha256": "6be63fcbaf43e9ece6e3e65eae1beee7ae0fcbfd6ae776e5f9c4345d5ff42f5a"
+    },
+    "irdata/subdir/20-50/7_CZ0-100_Pd_21.SPA": {
+      "bytes": 24792,
+      "sha256": "eed48d036d7ecdea6cae219e4d1b1d0889a18f99dfd7e86d5f171198b28b17ad"
+    },
+    "irdata/subdir/7_CZ0-100_Pd_101.SPA": {
+      "bytes": 24792,
+      "sha256": "467f9b4fe9cbab915500386c9bc4ae0353ff9fbb8dff9ba888ad205566f687ab"
+    },
+    "irdata/subdir/7_CZ0-100_Pd_102.SPA": {
+      "bytes": 24792,
+      "sha256": "2f42c113b951b4a43526a41e71b3b10c9fd1b0a2b39c6a9f14a0e23d2f861f9d"
+    },
+    "irdata/subdir/7_CZ0-100_Pd_103.SPA": {
+      "bytes": 24792,
+      "sha256": "0fb3a7db0f539d3574b68f49132f52bcfa12d8ec8a2e032b67f63062d19a36af"
+    },
+    "irdata/subdir/7_CZ0-100_Pd_104.SPA": {
+      "bytes": 24792,
+      "sha256": "1f3263f983cc8629a2acca7ef0a4eaa368804c8658f7af44c03a4da1b52c1fae"
+    },
+    "irdata/subdir/TGAIR-unreadable.srs": {
+      "bytes": 2704960,
+      "sha256": "0ce35f66b972232eff0a6e0d6ca2b480fb719f89b2f98a7ba56a5971cade2214"
+    },
+    "matlabdata/METING9.MAT": {
+      "bytes": 874796,
+      "sha256": "5084f3851c913e6e3f0a91967dbef3d08e4d356cb78c4c167d62cff4780dbdf6"
+    },
+    "matlabdata/als2004dataset.MAT": {
+      "bytes": 207608,
+      "sha256": "4d0557572f37ac1632f8de33b403dc882ef85adc92b2298f3d82bf0a6cb8797d"
+    },
+    "nmrdata/bruker/tests/nmr/topspin_1d/1/acqu": {
+      "bytes": 7187,
+      "sha256": "c1bda6ce1818e525986e33509a8235f4ee585c0aacc83265dd0c188f52f75912"
+    },
+    "nmrdata/bruker/tests/nmr/topspin_1d/1/acqus": {
+      "bytes": 7285,
+      "sha256": "00f86298b13a4f9a116feba96b9691fde6bf163ca4d1291a84d4ac8a82d12560"
+    },
+    "nmrdata/bruker/tests/nmr/topspin_1d/1/fid": {
+      "bytes": 100352,
+      "sha256": "a471ce0ec0c5f28b02c1ae05200f1b0300e29f042d36c3d5ff2d53c433219ed6"
+    },
+    "nmrdata/bruker/tests/nmr/topspin_1d/1/pdata/1/proc": {
+      "bytes": 2030,
+      "sha256": "26c5099a0e1ff3157ca9be8c1a7a723bdd922516909a02a3aa4301716851f4c3"
+    },
+    "nmrdata/bruker/tests/nmr/topspin_1d/1/pdata/1/procs": {
+      "bytes": 2231,
+      "sha256": "7ff305739fe2df2c9dca4576786568a67d80c055a7bd5fc487aa81f467b3f065"
+    },
+    "nmrdata/bruker/tests/nmr/topspin_1d/1/pulseprogram": {
+      "bytes": 5887,
+      "sha256": "910342785ef4ce59634579e812c6856005d8fe7ef503ed02f5079aec81e5146c"
+    },
+    "ramandata/hoyer_hess_2024/Fig_2-a-c_raw-data.txt": {
+      "bytes": 9782758,
+      "sha256": "38eef3bf7f197c7d34045d78eeac9236bca80ffad02ae2b2bed0e3ca9d2988c5"
+    },
+    "ramandata/hoyer_hess_2024/README.md": {
+      "bytes": 2233,
+      "sha256": "82052898630d337de790a2a6e8dfeef6f2b6eea73586f22ebb4cac6074a50ef4"
+    },
+    "ramandata/hoyer_hess_2024/description.txt": {
+      "bytes": 5015,
+      "sha256": "5fde07ed4f30f502b90f9094548c11503b3486852931059d416fa951e8a860a2"
+    },
+    "ramandata/labspec/Activation.txt": {
+      "bytes": 3453153,
+      "sha256": "6bbd4c582c3992ac0fbce72763c0f6986f53eb0f965f720b60a40049ee8a37ee"
+    },
+    "ramandata/labspec/SMC1-Initial_RT.txt": {
+      "bytes": 13403,
+      "sha256": "294665c337cbfaac0afc209074d52c9b1d357bd924d429e1ba910a6569bed143"
+    },
+    "ramandata/labspec/serie190214-1.txt": {
+      "bytes": 601232,
+      "sha256": "5c00ea088a127b611bcc83b57b7ca307f34ffdab0b1e568101267dc7bd94bba5"
+    },
+    "ramandata/labspec/subdir/LiNbWO6-0-H.txt": {
+      "bytes": 16835,
+      "sha256": "b062958d0024d81128b7b332c357763b62748120a7c4e0c5143c1b759780f1e6"
+    },
+    "ramandata/labspec/subdir/LiNbWO6-0-V.txt": {
+      "bytes": 16870,
+      "sha256": "c7a7bb206b1079fbf911de0dee1403225b41b80db10733e49e9bbbeabcbe01a4"
+    },
+    "ramandata/labspec/subdir/LiNbWO6-45-H.txt": {
+      "bytes": 16850,
+      "sha256": "7da7902bc7d99eed6095ca852ea07f95bb6b5ba95ad635e85160922705264e68"
+    },
+    "ramandata/labspec/subdir/LiNbWO6-45-V.txt": {
+      "bytes": 16884,
+      "sha256": "6ab4819c73f30c90efa7e154b23ad15fdb3c6dac972d36d2c0efaec5a9d78aa6"
+    },
+    "ramandata/labspec/subdir/LiNbWO6-90-H.txt": {
+      "bytes": 16860,
+      "sha256": "3d1d318d66539547d0fbef7999fc53974fd3e63e1c7dcb48e67dca32aeb504f8"
+    },
+    "ramandata/labspec/subdir/LiNbWO6-90-V.txt": {
+      "bytes": 16848,
+      "sha256": "6d13c878d4bdbd1eefaae6d2404f10861da6b019955035874b914be43b44c261"
+    },
+    "ramandata/wire/depth.wdf": {
+      "bytes": 236302,
+      "sha256": "2f6558d5ec3695ed1046152fe5e0e8acea8485c63fd8d676c83d178df15fc0de"
+    },
+    "ramandata/wire/line.wdf": {
+      "bytes": 1232014,
+      "sha256": "bb4a978504587fc37760df303f8380f141cdeac9089121ad5162ae9a700aea78"
+    },
+    "ramandata/wire/mapping.wdf": {
+      "bytes": 46312326,
+      "sha256": "4ebeae5f5ebe8045d7537769445242c5775670463e15144819f799595aba17e7"
+    },
+    "ramandata/wire/sp.wdf": {
+      "bytes": 74855,
+      "sha256": "5ca8c55848b4bdbe73fa2ca44f3e211613b52c65bf2aaaf5b14e8858f4e3f565"
+    },
+    "wodger.spg": {
+      "bytes": 180816,
+      "sha256": "c0caef3b5603a6920c3fbd0bad976718b9af5e32e098492b01704ef9ddd0ce15"
+    }
+  },
+  "purpose": "Public input fixtures for the documentation; Corn is supplied separately."
+}
