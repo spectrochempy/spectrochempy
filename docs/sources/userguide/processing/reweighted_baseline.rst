@@ -61,6 +61,9 @@ weights. ``max_iter`` is the maximum number of linear solves (at least one).
 A ``RuntimeWarning`` reports failure to satisfy the convergence criterion,
 including insufficient negative residuals to estimate the noise. A finite
 baseline may still be returned, but it must be inspected before use.
+For asPLS, floating-point roundoff can change the stopping iteration and
+whether the weight tolerance is reached. Check the stability of the
+estimated baseline as well as the convergence warning.
 
 ``aspls_asymmetry`` is the positive logistic coefficient used only by asPLS.
 The default 0.5 follows the pybaselines variant; the original publication

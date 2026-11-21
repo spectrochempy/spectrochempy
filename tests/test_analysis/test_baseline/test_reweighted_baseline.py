@@ -38,8 +38,12 @@ def spectrum(descending=False, rows=1):
 
 
 @pytest.mark.parametrize("case", REFERENCE["cases"], ids=lambda case: case["name"])
-def test_matches_independent_reference(case):
-    source = scp.NDDataset(case["data"], coordset=[scp.Coord(REFERENCE["coordinates"])])
+@pytest.mark.parametrize("offset", [0.0, 1e-15, -1e-15])
+def test_matches_independent_reference(case, offset):
+    source = scp.NDDataset(
+        np.asarray(case["data"]) + offset,
+        coordset=[scp.Coord(REFERENCE["coordinates"])],
+    )
     processor = scp.Baseline(model=case["model"], **case["params"])
     expected = (
         nullcontext()
@@ -126,6 +130,35 @@ def test_three_point_penalty_and_iteration_limit(model):
     expected = np.linalg.solve(np.eye(3) + 10 * difference.T @ difference, y)
     actual, _ = _whittaker_baseline(y, model, 10, 1e-3, 1)
     assert_allclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "model, coefficient", [("arpls", 0.5), ("aspls", 0.5), ("aspls", 2)]
+)
+@pytest.mark.parametrize("iterations", [2, 5])
+def test_reweighting_against_dense_recurrence(model, coefficient, iterations):
+    y = np.array([2.0, 4.0, 1.0, 6.0, 3.0, 2.0, 7.0, 4.0, 3.0])
+    difference = np.diff(np.eye(y.size), n=2, axis=0)
+    penalty = 10 * difference.T @ difference
+    weights = np.ones(y.size)
+    alpha = np.ones(y.size)
+    for _ in range(iterations):
+        system = np.diag(weights) + np.diag(alpha) @ penalty
+        expected = np.linalg.solve(system, weights * y)
+        residual = y - expected
+        negative = residual[residual < 0]
+        deviation = negative.std(ddof=1)
+        if model == "arpls":
+            exponent = 2 * (residual - (2 * deviation - negative.mean())) / deviation
+        else:
+            exponent = coefficient * (residual - deviation) / deviation
+            alpha = np.abs(residual) / np.max(np.abs(residual))
+        weights = 1 / (1 + np.exp(exponent))
+    actual, converged = _whittaker_baseline(
+        y, model, 10, 1e-12, iterations, coefficient
+    )
+    assert not converged
+    assert_allclose(actual, expected, rtol=1e-10, atol=1e-10)
 
 
 @pytest.mark.parametrize("model", ["arpls", "aspls"])
