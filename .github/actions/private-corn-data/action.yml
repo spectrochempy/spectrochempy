@@ -17,8 +17,9 @@ runs:
       run: |
         set -eu
         if [[ "$GITHUB_REPOSITORY" != spectrochempy/spectrochempy ||
-              "$GITHUB_EVENT_NAME" != push && "$GITHUB_EVENT_NAME" != workflow_dispatch ||
-              "$GITHUB_REF" != refs/heads/master && "$GITHUB_REF" != refs/tags/* ]]; then
+              "$GITHUB_EVENT_NAME" != push && "$GITHUB_EVENT_NAME" != workflow_dispatch && "$GITHUB_EVENT_NAME" != release ||
+              "$GITHUB_REF" != refs/heads/master && "$GITHUB_REF" != refs/tags/* ||
+              "$GITHUB_EVENT_NAME" == release && "$GITHUB_REF" != refs/tags/* ]]; then
           echo "Private Corn data is restricted to trusted upstream master/tag builds" >&2
           exit 1
         fi

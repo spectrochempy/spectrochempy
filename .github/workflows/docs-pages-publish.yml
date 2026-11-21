@@ -1,0 +1,159 @@
+name: Publish documentation Pages
+
+on:
+  workflow_run:
+    workflows: [Documentation Pages build]
+    types: [completed]
+  pull_request_target:
+    types: [closed]
+
+concurrency:
+  group: documentation-pages-publication
+  cancel-in-progress: false
+  queue: max
+
+permissions: {}
+
+jobs:
+  publish:
+    if: vars.DOCS_PAGES_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+      pull-requests: read
+      checks: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+          path: trusted
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: actions/download-artifact@v8
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ github.event.workflow_run.id }}
+          name: pages-html
+          path: incoming
+      - uses: actions/github-script@v8
+        id: route
+        with:
+          script: |
+            const fs = require('node:fs');
+            const resolve = require('./trusted/.github/pages/resolve.cjs');
+            const tag = context.eventName === 'workflow_run' && context.payload.workflow_run.conclusion === 'success'
+              ? JSON.parse(fs.readFileSync('./incoming/.pages-build.json', 'utf8')).tag : '';
+            await resolve({github, context, core, tag});
+      - name: Load persistent publication tree
+        if: steps.route.outputs.target != ''
+        working-directory: trusted
+        run: |
+          if git ls-remote --exit-code --heads origin gh-pages; then
+            git fetch origin gh-pages
+            if ! git cat-file -e FETCH_HEAD:.pages-managed; then
+              echo 'Refusing to replace an existing unmanaged gh-pages branch' >&2
+              exit 1
+            fi
+            echo "PAGES_PREVIOUS_SHA=$(git rev-parse FETCH_HEAD)" >> "$GITHUB_ENV"
+            git worktree add --detach ../site FETCH_HEAD
+          else
+            git worktree add --detach ../site HEAD
+            cd ../site
+            git checkout --orphan pages-initial
+            git rm -rf .
+          fi
+      - name: Assemble site without executing artifact content
+        if: steps.route.outputs.target != ''
+        env:
+          TARGET: ${{ steps.route.outputs.target }}
+          REMOVE: ${{ steps.route.outputs.remove }}
+          ARCHIVE_ONLY: ${{ steps.route.outputs.archive_only }}
+          CORE_URL: ${{ vars.DOCS_CORE_URL || 'https://spectrochempy.github.io/spectrochempy/latest/' }}
+          NMR_URL: ${{ vars.DOCS_NMR_URL || 'https://spectrochempy.github.io/spectrochempy_nmr/latest/' }}
+        run: |
+          args=()
+          if [ "$REMOVE" = true ]; then args+=(--remove); fi
+          if [ "$ARCHIVE_ONLY" = true ]; then args+=(--archive-only); fi
+          python trusted/.github/pages/assemble.py site incoming "$TARGET" "${args[@]}" --core-url "$CORE_URL" --nmr-url "$NMR_URL"
+          cp trusted/.github/pages/navigation.js site/pages-navigation.js
+          touch site/.pages-managed
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          Path('site/projects.json').write_text(json.dumps([
+              {'name': 'SpectroChemPy', 'url': os.environ['CORE_URL']},
+              {'name': 'NMR', 'url': os.environ['NMR_URL']},
+              {'name': 'Download archives', 'url': 'https://github.com/' + os.environ['GITHUB_REPOSITORY'] + '/releases'},
+          ]))
+          PY
+      - name: Package release documentation
+        if: steps.route.outputs.release_id != ''
+        run: |
+          python - <<'PY'
+          import shutil
+          shutil.make_archive('documentation', 'zip', 'incoming')
+          PY
+      - name: Save downloadable HTML with the existing release
+        if: steps.route.outputs.release_id != ''
+        uses: actions/github-script@v8
+        env:
+          RELEASE_ID: ${{ steps.route.outputs.release_id }}
+          UPLOAD_URL: ${{ steps.route.outputs.upload_url }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const release_id = Number(process.env.RELEASE_ID);
+            const name = 'documentation-html.zip';
+            const assets = await github.paginate(github.rest.repos.listReleaseAssets, {...context.repo, release_id});
+            if (!assets.some(asset => asset.name === name)) {
+              const data = fs.readFileSync('documentation.zip');
+              if (data.length >= 2 * 1024 ** 3) throw new Error('Documentation archive exceeds the release asset limit');
+              await github.rest.repos.uploadReleaseAsset({
+                ...context.repo, release_id, url: process.env.UPLOAD_URL,
+                name, data, headers: {'content-type': 'application/zip', 'content-length': data.length},
+              });
+            }
+      - name: Save publication tree
+        if: steps.route.outputs.target != '' && steps.route.outputs.archive_only != 'true'
+        working-directory: site
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git checkout --orphan pages-snapshot
+          git add --all --force
+          git commit -m 'CI: update documentation Pages'
+          git push --force-with-lease="refs/heads/gh-pages:${PAGES_PREVIOUS_SHA:-}" origin HEAD:refs/heads/gh-pages
+      - uses: actions/upload-pages-artifact@v4
+        if: steps.route.outputs.target != '' && steps.route.outputs.archive_only != 'true'
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4
+        if: steps.route.outputs.target != '' && steps.route.outputs.archive_only != 'true'
+        id: deployment
+      - name: Link published documentation from the PR checks
+        if: github.event_name == 'workflow_run' && steps.route.outputs.remove != 'true' && steps.deployment.outcome == 'success' && startsWith(steps.route.outputs.target, 'previews/')
+        uses: actions/github-script@v8
+        env:
+          TARGET: ${{ steps.route.outputs.target }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        with:
+          script: |
+            const url = new URL(`${process.env.TARGET}/`, process.env.PAGE_URL).href;
+            await github.rest.checks.create({
+              ...context.repo,
+              name: 'Documentation preview',
+              head_sha: context.payload.workflow_run.head_sha,
+              status: 'completed',
+              conclusion: 'success',
+              details_url: url,
+              output: {title: 'Documentation preview published', summary: `[Open preview](${url})`},
+            });
