@@ -3,6 +3,9 @@
 Status: prepared, disabled until qualification. Read the Docs remains available
 for comparison and rollback. No DNS change is part of installing these files.
 
+This is a fallback option while native Read the Docs build optimizations are
+evaluated. These workflows do not change RTD execution or decide a cutover.
+
 ## Publication model
 
 Each repository owns its Sphinx build, Pages site and `gh-pages` snapshot branch.
