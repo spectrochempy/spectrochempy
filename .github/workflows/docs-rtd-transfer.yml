@@ -30,7 +30,8 @@ jobs:
     if: >-
       github.repository == 'spectrochempy/spectrochempy' &&
       (github.event_name == 'workflow_dispatch' ||
-      (vars.RTD_RESULTS_PROJECT != '' && github.event.workflow_run.conclusion == 'success'))
+      (vars.RTD_RESULTS_PROJECT != '' && github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event != 'pull_request' || vars.RTD_RESULTS_PREVIEWS == '1')))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

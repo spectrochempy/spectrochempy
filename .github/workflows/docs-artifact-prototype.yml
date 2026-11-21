@@ -13,7 +13,10 @@ permissions:
 
 jobs:
   execute:
-    if: github.event_name == 'workflow_dispatch' || vars.RTD_RESULTS_PROJECT != ''
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (vars.RTD_RESULTS_PROJECT != '' &&
+      (github.event_name != 'pull_request' || vars.RTD_RESULTS_PREVIEWS == '1'))
     name: Execute ${{ matrix.kind }}
     runs-on: ubuntu-24.04
     timeout-minutes: 40

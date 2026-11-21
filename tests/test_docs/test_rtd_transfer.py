@@ -22,20 +22,22 @@ URL = "https://results.blob.core.windows.net/artifact/bundle.zip?sig=temporary"
 
 
 @pytest.mark.parametrize(
-    ("enabled", "version", "kind", "expected"),
+    ("enabled", "version", "kind", "previews", "expected"),
     [
-        ("", "latest", "branch", False),
-        ("1", "latest", "branch", True),
-        ("1", "1927", "external", True),
-        ("1", "v0.9", "tag", False),
-        ("1", "stable", "tag", False),
+        ("", "latest", "branch", "", False),
+        ("1", "latest", "branch", "", True),
+        ("1", "1927", "external", "", False),
+        ("1", "1927", "external", "1", True),
+        ("1", "v0.9", "tag", "1", False),
+        ("1", "stable", "tag", "1", False),
     ],
 )
 def test_new_mode_leaves_old_releases_native(
-    monkeypatch, enabled, version, kind, expected
+    monkeypatch, enabled, version, kind, previews, expected
 ):
     monkeypatch.delenv("SCPY_RTD_DOCS_ARTIFACTS", raising=False)
     monkeypatch.setenv("SCPY_RTD_GITHUB_RESULTS", enabled)
+    monkeypatch.setenv("SCPY_RTD_GITHUB_RESULTS_PR", previews)
     monkeypatch.setenv("READTHEDOCS_VERSION", version)
     monkeypatch.setenv("READTHEDOCS_VERSION_TYPE", kind)
     assert reader.selected() is expected

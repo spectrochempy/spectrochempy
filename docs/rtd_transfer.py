@@ -24,7 +24,10 @@ KINDS = ("tutorials", "gallery")
 def public_mode():
     return os.environ.get("SCPY_RTD_GITHUB_RESULTS") == "1" and (
         os.environ.get("READTHEDOCS_VERSION") == "latest"
-        or os.environ.get("READTHEDOCS_VERSION_TYPE") == "external"
+        or (
+            os.environ.get("READTHEDOCS_VERSION_TYPE") == "external"
+            and os.environ.get("SCPY_RTD_GITHUB_RESULTS_PR") == "1"
+        )
     )
 
 

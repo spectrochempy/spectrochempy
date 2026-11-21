@@ -42,17 +42,29 @@ the separate private Corn input. Only documentation outputs are transferred.
    notebook or gallery reexecution. Inspect figures, notebook downloads, gallery
    pages, API mini-galleries, navigation and NMR links. Measure RTD installation,
    download and rendering time separately from the GitHub execution time.
-4. Enable external builds on the test project and set `RTD_RESULTS_PROJECT` to
-   `spectrochempy-artifacts-test` to test automatic master and PR builds,
-   including a fork PR. RTD's initial webhook build exits with code 183 before
+4. Set `RTD_RESULTS_PROJECT=spectrochempy-artifacts-test` on GitHub to test
+   automatic master builds. Prepared PR builds have a separate gate: enable
+   external builds on the test project, add the public RTD flag
+   `SCPY_RTD_GITHUB_RESULTS_PR=1` and set `RTD_RESULTS_PREVIEWS=1` on GitHub.
+   Test a PR from a fork, including all Corn examples, before enabling this
+   extra flag on the main project. RTD's initial webhook build exits with code
+   183 before
    installation when the prepared sources are not ready. The transfer job starts
    the actual RTD build when preparation succeeds. A failed GitHub job leaves
    the previously published site intact and must be fixed or rerun.
-5. After those tests succeed, add the same public flag on the main RTD project
-   and change `RTD_RESULTS_PROJECT` to `spectrochempy`. Verify a real `latest`
-   build and PR preview there before calling the change active.
+5. After the hosted `latest` tests succeed, add `SCPY_RTD_GITHUB_RESULTS=1`
+   on the main RTD project and change `RTD_RESULTS_PROJECT` to `spectrochempy`.
+   Verify a real `latest` build there. PR previews retain native RTD execution
+   until their separate flags are enabled after successful fork validation.
 
-The new flag selects only `latest` and external versions. Release tags, `stable`
+The initial deployment must leave both PR flags unset. The fork test on
+2026-11-21 could not reach Eigenvector's public Corn endpoint; master preparation
+succeeded using the existing private input. This does not block prepared
+`latest` builds, but prevents activating prepared previews without losing
+examples. No Corn file or private credential is added to public artifacts.
+
+The main flag selects `latest`; the additional PR flag selects external versions.
+Release tags, `stable`
 and older immutable checkouts keep their native RTD build. Automatic producer
 runs are gated by `RTD_RESULTS_PROJECT`; manual producer dispatch remains
 available. Manual transfer dispatch accepts only the official and test projects.
@@ -61,7 +73,8 @@ exceeds its budget or publishes a different commit.
 
 ## Roll back
 
-Remove `RTD_RESULTS_PROJECT` from GitHub and remove `SCPY_RTD_GITHUB_RESULTS` on
+Remove `RTD_RESULTS_PROJECT` and `RTD_RESULTS_PREVIEWS` from GitHub and remove
+`SCPY_RTD_GITHUB_RESULTS` and `SCPY_RTD_GITHUB_RESULTS_PR` on
 RTD, then rebuild the desired version. RTD will execute notebooks and galleries
 natively again. Do not activate the legacy token-based option on external PRs.
 GitHub Pages workflows are independent and are not needed for this arrangement.
