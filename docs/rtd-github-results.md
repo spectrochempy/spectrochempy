@@ -69,6 +69,8 @@ changed download fails the job. A network failure marks Corn as unavailable:
 only the four Corn gallery examples and notebook cells tagged `requires-corn`
 are left unexecuted. Their source remains visible, with an explicit notice.
 The artifact manifests and Actions summary list the omitted results.
+Each affected gallery page displays a named **Corn unavailable** notice.
+The HTML build checks that these notices are present before publication.
 
 Trusted master builds still require their separately verified private Corn
 fixture. They never silently fall back to incomplete scientific documentation.
