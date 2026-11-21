@@ -9,6 +9,8 @@ import importlib
 from pathlib import Path
 
 import pytest
+from jinja2 import DictLoader
+from jinja2 import Environment
 from packaging.version import InvalidVersion
 from packaging.version import Version
 
@@ -130,7 +132,6 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert "Documentation version" in layout
     assert "This is development documentation." in layout
     assert "pull request documentation preview" in layout
-    assert "{% if not READTHEDOCS %}" in layout
     assert "not READTHEDOCS and docs_context" in layout
     assert "Stable — ${manifest.stable}" in script
     assert "Development — unreleased" in script
@@ -138,6 +139,41 @@ def test_navigation_labels_contexts_and_page_fallback_are_present():
     assert "relativePathFromBase" in script
     assert "pageExists(candidate)" in script
     assert 'new URL("index.html"' in script
+
+
+@pytest.mark.parametrize(
+    ("readthedocs", "github_pages", "show_legacy_selector"),
+    [
+        (False, False, True),
+        (False, True, False),
+        (True, False, False),
+        (True, True, False),
+    ],
+)
+def test_legacy_version_selector_is_only_rendered_outside_rtd_and_pages(
+    readthedocs, github_pages, show_legacy_selector
+):
+    layout = (ROOT / "docs" / "_templates" / "layout.html").read_text(encoding="utf-8")
+    parent = "".join(
+        f"{{% block {name} %}}{{% endblock %}}"
+        for name in ("sidebartitle", "menu", "document", "extrahead")
+    )
+    environment = Environment(
+        loader=DictLoader(
+            {"layout.html": layout, "!layout.html": parent, "searchbox.html": ""}
+        ),
+        autoescape=True,
+    )
+    rendered = environment.get_template("layout.html").render(
+        READTHEDOCS=readthedocs,
+        github_pages=github_pages,
+        root_doc="index",
+        pathto=lambda path, *_args: path,
+        docs_context="stable",
+    )
+
+    assert ('id="versions-dropdown"' in rendered) is show_legacy_selector
+    assert ("github-pages-versions.js" in rendered) is show_legacy_selector
 
 
 def test_version_selector_keeps_its_accessible_name_and_drops_its_visible_title():
