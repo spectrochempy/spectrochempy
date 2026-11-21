@@ -1,0 +1,151 @@
+name: Documentation Pages build
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+  push:
+    branches: [master]
+    tags: ['spectrochempy-v*', 'v*']
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  group: docs-pages-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  SCPY_PAGES: "1"
+  SCPY_DOCS_CONTEXT: ${{ github.event_name == 'pull_request' && 'preview' || (github.ref_type == 'tag' && 'stable' || 'development') }}
+  SCPY_DOCS_PREVIEW_NAME: ${{ github.event.pull_request.number }}
+
+permissions:
+  contents: read
+
+jobs:
+  helpers:
+    if: vars.DOCS_PAGES_ENABLED == 'true' || github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'docs-pages-qualify')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: python -m pip install pytest
+      - run: python -m pytest --noconftest -o addopts= tests/test_docs/test_pages_publication.py -q
+      - run: node --test .github/pages/test_resolve.cjs
+  execute:
+    needs: helpers
+    if: vars.DOCS_PAGES_ENABLED == 'true' || github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'docs-pages-qualify')
+    name: Execute ${{ matrix.kind }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        kind: [tutorials, gallery]
+    steps:
+      - &checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - &python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - &install
+        name: Install documentation dependencies
+        env:
+          UPSTREAM_URL: https://github.com/spectrochempy/spectrochempy.git
+        run: |
+          git fetch --no-tags "$UPSTREAM_URL" "refs/tags/spectrochempy-v*:refs/tags/spectrochempy-v*"
+          git describe --tags --match "spectrochempy-v[0-9]*"
+          sudo apt-get update
+          sudo apt-get install --yes pandoc
+          python .github/actions/verified-pip/verified_pip.py
+          python -m pip install -e ".[docs,wavelets]"
+          python -m pip install "ipython==9.17.1" "jupyterlab==4.6.4" "notebook==7.6.3"
+          names=$(python -m spectrochempy.ci.install_plugins --list-names)
+          for name in $names; do
+            python -m pip install --no-deps -e "plugins/$name"
+          done
+          python -m pip install "spectrochempy-nmr>=0.2,<1" osqp scipy tensorly
+          python -c 'from importlib.metadata import version; import spectrochempy as scp; assert callable(scp.nmr.read); print("NMR plugin", version("spectrochempy-nmr"))'
+      - name: Prepare private Corn data
+        if: ${{ github.repository == 'spectrochempy/spectrochempy' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'release') && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')) }}
+        uses: ./.github/actions/private-corn-data
+        with:
+          ssh-key: ${{ secrets.SCPY_CORN_DATA_SSH_KEY }}
+          revision: ${{ vars.SCPY_CORN_DATA_REVISION }}
+      - name: Generate source artifact
+        run: python -u -m docs.ci_artifacts produce ${{ matrix.kind }} "${{ runner.temp }}/bundle"
+      - name: Remove private Corn working copies
+        if: always()
+        shell: bash
+        run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True)"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs-${{ matrix.kind }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bundle
+          if-no-files-found: error
+          retention-days: 7
+
+  render:
+    name: Render integrated Sphinx site
+    needs: execute
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - *checkout
+      - *python
+      - *install
+      - name: Test Read the Docs artifact integration
+        run: |
+          python -m pip install pytest
+          python -m pytest --noconftest -o addopts= \
+            tests/test_docs/test_rtd_build.py \
+            tests/test_docs/test_preexecute_notebooks.py::test_rtd_commands_select_the_build_mode
+      - name: Set output directory
+        run: echo "READTHEDOCS_OUTPUT=$RUNNER_TEMP/docs-output" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-tutorials-${{ github.sha }}
+          path: ${{ runner.temp }}/docs-inputs/tutorials
+      - uses: actions/download-artifact@v8
+        with:
+          name: docs-gallery-${{ github.sha }}
+          path: ${{ runner.temp }}/docs-inputs/gallery
+      - name: Verify source artifacts and build HTML
+        run: python -u -m docs.ci_artifacts render "${{ runner.temp }}/docs-inputs"
+      - name: Check integrated site entry points
+        run: |
+          test -s "$READTHEDOCS_OUTPUT/html/index.html"
+          test -s "$READTHEDOCS_OUTPUT/html/userguide/index.html"
+          test -s "$READTHEDOCS_OUTPUT/html/userguide/plotting/plot_types.html"
+          test -s "$READTHEDOCS_OUTPUT/html/gettingstarted/examples/index.html"
+          test -s "$READTHEDOCS_OUTPUT/html/gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html"
+          test -s "$READTHEDOCS_OUTPUT/html/objects.inv"
+      - name: Record documentation release tag
+        env:
+          DOCS_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          HTML_OUTPUT: "${{ runner.temp }}/docs-output/html"
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          (Path(os.environ['HTML_OUTPUT']) / '.pages-build.json').write_text(json.dumps({'tag': os.environ['DOCS_TAG']}))
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pages-html
+          include-hidden-files: true
+          path: ${{ runner.temp }}/docs-output/html
+          if-no-files-found: error
+          retention-days: 7

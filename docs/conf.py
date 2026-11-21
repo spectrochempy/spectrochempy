@@ -517,6 +517,7 @@ if docs_context not in {"development", "preview", "stable"}:
 preview_name = os.environ.get("SCPY_DOCS_PREVIEW_NAME", "").strip()
 
 html_context = {
+    "github_pages": os.environ.get("SCPY_PAGES") == "1",
     "include_gallery": not single_doc_or_dir,
     "include_api": include_api,
     "version_preview_json": os.environ.get("SCPY_VERSION_PREVIEW_JSON", ""),

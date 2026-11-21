@@ -13,7 +13,7 @@
     {%- endif %}
 </a>
 
-{% if not READTHEDOCS %}
+{% if not READTHEDOCS and not github_pages %}
 <div class="switch-menus">
     <select id="versions-dropdown"
             aria-label="Documentation version"
@@ -59,7 +59,7 @@
 {% if not rtd_pull_request %}
 <script defer src="{{ pathto('_static/js/rtd-search.js', 1) }}"></script>
 {% endif %}
-{% if not READTHEDOCS %}
+{% if not READTHEDOCS and not github_pages %}
 <script defer src="{{ pathto('_static/js/github-pages-versions.js', 1) }}"></script>
 {% endif %}
 {% endblock %}

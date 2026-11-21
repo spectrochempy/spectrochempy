@@ -85,6 +85,9 @@ def test_rejects_environment_file_injection(fixture):
             "refs/heads/feature",
             False,
         ),
+        ("spectrochempy/spectrochempy", "release", "refs/tags/v1.4.0", True),
+        ("spectrochempy/spectrochempy", "release", "refs/heads/master", False),
+        ("someone/fork", "release", "refs/tags/v1.4.0", False),
         ("someone/fork", "push", "refs/heads/master", False),
     ],
 )
@@ -110,7 +113,8 @@ def test_private_checkout_requires_trusted_context(repository, event, ref, allow
 
 
 @pytest.mark.parametrize(
-    "workflow", ["test_package.yml", "docs-artifact-prototype.yml"]
+    "workflow",
+    ["test_package.yml", "docs-artifact-prototype.yml", "docs-pages-build.yml"],
 )
 def test_private_fixture_is_outside_cache_and_artifact_paths(workflow):
     config = yaml.safe_load((ROOT / ".github/workflows" / workflow).read_text())
@@ -124,6 +128,8 @@ def test_private_fixture_is_outside_cache_and_artifact_paths(workflow):
     assert "github.repository == 'spectrochempy/spectrochempy'" in private["if"]
     assert "github.event_name == 'push'" in private["if"]
     assert "github.event_name == 'workflow_dispatch'" in private["if"]
+    if workflow == "docs-pages-build.yml":
+        assert "github.event_name == 'release'" in private["if"]
     for step in steps:
         if "upload-artifact@" in step.get("uses", "") or "cache@" in step.get(
             "uses", ""
