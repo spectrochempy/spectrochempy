@@ -19,6 +19,11 @@ and publishes them in a GitHub check for that RTD project. It starts the RTD
 build using the existing `SCPY_RTD_API_TOKEN` Actions secret and refreshes the
 links every 20 seconds until the build finishes, for at most 25 minutes.
 
+Automatic transfers are serialized per RTD project, source repository and
+branch. Two forks with the same branch name have independent queues. A queued
+transfer checks the current PR head before starting RTD and skips superseded
+commits.
+
 RTD uses the public check and public GitHub metadata to verify the source run,
 commit, artifact IDs and archive digests. The existing source manifests also
 verify the package version and each restored file. RTD receives no GitHub token.
@@ -67,9 +72,11 @@ The artifact manifests and Actions summary list the omitted results.
 
 Trusted master builds still require their separately verified private Corn
 fixture. They never silently fall back to incomplete scientific documentation.
-The PR gates remain disabled until an actual fork preview has validated both
-the successful-download and unavailable-data paths. No raw Corn input is
-included in public artifacts.
+Enable the PR gates only after an actual fork preview has validated both the
+successful-download and unavailable-data paths. PRs opened from older branches
+should incorporate the current `master` before using the prepared results;
+in particular they need the public Corn preparation and omission handling.
+No raw Corn input is included in public artifacts.
 
 The main flag selects `latest`; the additional PR flag selects external versions.
 Release tags, `stable`
