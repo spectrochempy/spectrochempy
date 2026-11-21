@@ -111,10 +111,11 @@ def test_gallery_notice_survives_regeneration_and_artifact_transfer(
 
 
 def test_transferred_notices_render_in_html(missing_corn, tmp_path, monkeypatch):
-    from io import StringIO
+    import subprocess
+    import sys
+    from types import SimpleNamespace
 
     pytest.importorskip("sphinx")
-    from sphinx.application import Sphinx
 
     sources = tmp_path / "sources"
     gallery = sources / "gettingstarted/examples/gallery"
@@ -139,19 +140,24 @@ def test_transferred_notices_render_in_html(missing_corn, tmp_path, monkeypatch)
     )
     monkeypatch.delenv("SCPY_DOCS_CORN_UNAVAILABLE")
     monkeypatch.setenv("SCPY_DOCS_GALLERY_ARTIFACT", "1")
-    app = Sphinx(
-        str(sources),
-        str(sources),
-        str(tmp_path / "html"),
-        str(tmp_path / "doctrees"),
-        "html",
-        status=StringIO(),
-        warning=StringIO(),
-        warningiserror=True,
-        freshenv=True,
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "sphinx",
+            "-W",
+            "-b",
+            "html",
+            str(sources),
+            str(tmp_path / "html"),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
     )
-    app.build()
-    assert app.statuscode == 0
+    app = SimpleNamespace(
+        srcdir=sources, outdir=tmp_path / "html", builder=SimpleNamespace(format="html")
+    )
     for stem in corn_data.GALLERY_STEMS:
         page = tmp_path / "html/gettingstarted/examples/gallery" / f"{stem}.html"
         assert corn_data.NOTICE in page.read_text()
