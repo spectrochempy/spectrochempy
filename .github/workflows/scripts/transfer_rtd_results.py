@@ -11,6 +11,7 @@ import sys
 import time
 from pathlib import Path
 from urllib.error import HTTPError
+from urllib.parse import urlencode
 from urllib.request import HTTPRedirectHandler
 from urllib.request import Request
 from urllib.request import build_opener
@@ -63,12 +64,27 @@ def version_for(run, token):
         return None
     commit = run["head_sha"]
     if run["event"] == "pull_request":
-        pulls = github(f"commits/{commit}/pulls?per_page=100", token)
+        repository = (run.get("head_repository") or {}).get("full_name", "")
+        owner, _, name = repository.partition("/")
+        branch = run.get("head_branch")
+        if not owner or not name or not branch:
+            return None
+        query = urlencode(
+            {
+                "state": "open",
+                "base": "master",
+                "head": f"{owner}:{branch}",
+                "per_page": 100,
+            }
+        )
+        pulls = github(f"pulls?{query}", token)
         matches = [
             pr
             for pr in pulls
             if pr["state"] == "open"
             and pr["head"]["sha"] == commit
+            and pr["head"].get("ref") == branch
+            and (pr["head"].get("repo") or {}).get("full_name") == repository
             and pr["base"]["ref"] == "master"
             and pr["base"]["repo"]["full_name"] == REPOSITORY
         ]

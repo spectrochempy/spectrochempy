@@ -4,6 +4,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from urllib.parse import parse_qs
 
 import pytest
 
@@ -63,6 +64,7 @@ def source_run(event="push"):
         "id": 12,
         "head_sha": SHA,
         "head_branch": "master",
+        "head_repository": {"full_name": "contributor/spectrochempy"},
         "event": event,
         "repository": {"full_name": reader.REPOSITORY},
         "path": reader.WORKFLOW,
@@ -161,13 +163,65 @@ def test_fork_preview_requires_open_pr_and_exact_head(monkeypatch):
     pr = {
         "number": 1927,
         "state": "open",
-        "head": {"sha": SHA},
+        "head": {
+            "sha": SHA,
+            "ref": "master",
+            "repo": {"full_name": "contributor/spectrochempy"},
+        },
         "base": {"ref": "master", "repo": {"full_name": reader.REPOSITORY}},
     }
-    monkeypatch.setattr(driver, "github", lambda *_: [pr])
+
+    def github(path, token):
+        assert path.startswith("pulls?")
+        assert parse_qs(path.split("?", 1)[1]) == {
+            "state": ["open"],
+            "base": ["master"],
+            "head": ["contributor:master"],
+            "per_page": ["100"],
+        }
+        return [pr]
+
+    monkeypatch.setattr(driver, "github", github)
     assert driver.version_for(source_run("pull_request"), "test") == "1927"
     pr["head"]["sha"] = "b" * 40
     assert driver.version_for(source_run("pull_request"), "test") is None
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("ref", "other"), ("repo", None), ("repo", {"full_name": "other/spectrochempy"})],
+)
+def test_fork_lookup_rejects_unrelated_branch_or_repository(monkeypatch, field, value):
+    pr = {
+        "number": 1929,
+        "state": "open",
+        "head": {
+            "sha": SHA,
+            "ref": "master",
+            "repo": {"full_name": "contributor/spectrochempy"},
+        },
+        "base": {"ref": "master", "repo": {"full_name": reader.REPOSITORY}},
+    }
+    pr["head"][field] = value
+    monkeypatch.setattr(driver, "github", lambda *_: [pr])
+    assert driver.version_for(source_run("pull_request"), "test") is None
+
+
+def test_fork_lookup_encodes_branch_and_rejects_missing_origin(monkeypatch):
+    paths = []
+    monkeypatch.setattr(driver, "github", lambda path, *_: paths.append(path) or [])
+    run = source_run("pull_request")
+    run["head_branch"] = "ci/rtd-prepared-previews"
+    assert driver.version_for(run, "test") is None
+    assert parse_qs(paths[0].split("?", 1)[1])["head"] == [
+        "contributor:ci/rtd-prepared-previews"
+    ]
+    run.pop("head_repository")
+    assert driver.version_for(run, "test") is None
+    assert len(paths) == 1
+    run["head_repository"] = None
+    assert driver.version_for(run, "test") is None
+    assert len(paths) == 1
 
 
 def test_transfer_starts_rtd_after_links_and_verifies_published_commit(monkeypatch):
