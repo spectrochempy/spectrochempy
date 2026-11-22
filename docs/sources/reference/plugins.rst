@@ -15,7 +15,7 @@ NMR plugin
 ==========
 
 The standalone `NMR API reference
-<https://www.spectrochempy.fr/projects/nmr/latest/reference/nmr_api.html>`_
+<https://www.spectrochempy.fr/projects/nmr/latest/reference/index.html>`_
 provides the following entry points.
 
 .. list-table::
