@@ -80,7 +80,7 @@ Plugin pages
    :maxdepth: 1
 
    official_plugins
-   nmr
+   NMR plugin <https://www.spectrochempy.fr/projects/nmr/latest/index.html>
    tensor
    iris
    carroucell
