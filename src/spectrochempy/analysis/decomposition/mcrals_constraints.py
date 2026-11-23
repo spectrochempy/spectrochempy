@@ -1704,6 +1704,17 @@ class ModelProfile(Constraint):
         ``components[i]``.  ``None`` entries keep the ALS estimate.
         ``None`` (the default) means identity: components receive model
         outputs in order.  Duplicate indices are allowed.
+    blocks : list[int], optional
+        Indices of the blocks to which the model applies when the data are
+        augmented (a list of datasets passed to ``MCRALS.fit``). For
+        ``profile="C"``, the model is called separately for each selected
+        block, receives the profiles of that block and returns them.
+        ``None`` (default) means all blocks. Selecting blocks for
+        non-augmented data raises a ``ValueError`` in ``fit``. For
+        ``profile="St"``, blocks select the column blocks of horizontally
+        augmented data. With vertical augmentation, ``St`` is common to all
+        blocks: the indices are only checked against the number of blocks, and
+        the model is called once with the whole ``St``.
 
     Examples
     --------

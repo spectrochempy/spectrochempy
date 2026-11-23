@@ -857,6 +857,24 @@ class MCRALS(DecompositionAnalysis):
     same relative, dimensionless convention as their tolerances. The final
     message identifies the stopping diagnostic, its value, and its tolerance.
 
+    The appropriate tolerance depends on the problem (noise, initial guess,
+    constraints): no value is right for all data sets. As the residual can
+    change slowly while the profiles still evolve, for instance close to the
+    initial guess, check the stopping diagnostic (``result.diagnostics`` or the
+    final message) and the resolved profiles. If needed, decrease
+    ``tol_residual_change``, or set it to ``None`` and use
+    ``tol_profile_change``, with a sufficient ``max_iter``.
+
+    The default constraints (``constraints=None``) are the non-negativity of
+    ``C`` and ``St`` and the unimodality of all concentration profiles (legacy
+    ``unimodConc="all"``). Unimodality suits profiles that evolve along the
+    observations, such as elution or kinetic profiles. For independent samples,
+    give the constraints explicitly without ``Unimodal``, e.g.::
+
+        from spectrochempy.analysis import constraints as mc
+
+        mcr = MCRALS(constraints=[mc.NonNegative("C"), mc.NonNegative("St")])
+
     The bilinear model has an intrinsic scale ambiguity: without a calibrated,
     unit-bearing initial ``C0`` or ``St0``, the individual value units of the
     resolved factors are undefined. In that case ``C`` and ``St`` remain

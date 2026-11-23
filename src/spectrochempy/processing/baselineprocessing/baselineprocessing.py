@@ -130,6 +130,17 @@ class Baseline(AnalysisConfigurable):
     By default, `ranges` is set to the feature limits (i.e., ``ranges=[features[0],
     features[-1]]``) and the baseline is fitted on the full range of the dataset.
 
+    For the ``'polynomial'`` model, the default ``include_limits=True`` adds a few
+    points at each end of the spectrum to the given `ranges`: set
+    ``include_limits=False`` to fit only on the given ranges (the ranges actually
+    used are given by `used_ranges`). Float range limits are coordinate values.
+    Integer limits are first compared with the coordinate domain as coordinate
+    values (e.g., ``ranges=[[10, 20]]`` on a 1000 to 4000 cm⁻¹ axis raises an
+    error), and integer ranges that intersect this domain are then used as
+    indices when the data are selected. Integers are therefore not a reliable
+    way to give indices: use floats for coordinates, e.g. ``[1100.0, 1200.0]``
+    rather than ``[1100, 1200]``.
+
     The last axis of the input dataset must have finite coordinates that are
     strictly increasing or strictly decreasing. Irregularly spaced coordinates
     are accepted by the other models as long as they are strictly monotonic.

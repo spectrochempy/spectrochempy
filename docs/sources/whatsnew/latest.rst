@@ -58,3 +58,14 @@ Deprecations
   the next minor release. ``PFR`` cannot be built with any Cantera version 3.0 or
   later and has no known users. Cases that need Cantera can use it directly and
   load the results into an ``NDDataset`` (:pr:`1925`).
+
+Developer
+~~~~~~~~~
+
+- DOC: Document defaults that can surprise where they apply: coordinate
+  rounding (``Coord``, ``interpolate``), contour start level and axis reversal
+  (``plot``), ``Baseline`` range limits, parameter order of ``Optimize``
+  uncertainties, ``MCRALS`` default unimodality and tolerance, and the
+  ``blocks`` parameter of ``ModelProfile``. New gallery examples show Gaussian
+  broadening in coordinate units and augmented MCR-ALS with fixed reference
+  concentrations (:issue:`1953`).
