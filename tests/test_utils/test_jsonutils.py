@@ -229,6 +229,20 @@ def test_roundtrip_preservation(IR_dataset_2D):
             assert "meta" in decoded
 
 
+@pytest.mark.parametrize(
+    "unit_str", ["absorbance", "centimeter^-1", "a.u.", "1 / second", "dimensionless"]
+)
+def test_json_decoder_unit_uses_application_registry(unit_str):
+    # Issue #1951: decoded units must be built by SpectroChemPy's registry.
+    from spectrochempy.core.units import ur
+
+    decoded = json_decoder({"str": unit_str, "__class__": "UNIT"})
+
+    assert type(decoded) is ur.Unit
+    assert decoded == ur.Unit(unit_str)
+    assert json_encoder(decoded) == json_encoder(ur.Unit(unit_str))
+
+
 def test_json_decoder_rejects_base64_pickle_without_opt_in(monkeypatch):
     payload = json.dumps(
         {

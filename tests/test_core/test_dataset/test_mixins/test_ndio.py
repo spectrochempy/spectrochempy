@@ -172,6 +172,39 @@ def test_ndio_2D(ndataset_2d, tmp_path):
     f.unlink()
 
 
+def test_ndio_roundtrip_units_use_application_registry(tmp_path):
+    # Issue #1951: units read back from .scp must be of the same class as units
+    # created in memory, so that a Baseline-corrected reread dataset integrates.
+    x = scp.Coord.linspace(1500.0, 1400.0, 201, title="wavenumbers", units="cm^-1")
+    g = scp.gaussian(x, pos=1455.0, width=8.0, normalized=False)
+    ds = NDDataset(
+        [g.data, g.data],
+        coordset=[Coord([0.0, 1.0], title="spectrum"), x],
+        title="absorbance",
+        units="absorbance",
+    )
+    filename = ds.save_as(tmp_path / "units_roundtrip.scp", confirm=False)
+    reread = scp.read(filename)
+
+    assert type(reread.units) is type(ds.units) is scp.ur.Unit
+    assert type(reread.x.units) is type(ds.x.units) is scp.ur.Unit
+    assert reread.units == ds.units
+    assert reread.x.units == ds.x.units
+
+    results = []
+    for dataset in (ds, reread):
+        blc = scp.Baseline(model="polynomial", order=1, include_limits=False)
+        blc.ranges = [[1500.0, 1480.0], [1430.0, 1400.0]]
+        blc.fit(dataset)
+        corrected = blc.transform()
+        assert type(corrected.units) is scp.ur.Unit
+        results.append(scp.trapezoid(corrected))
+
+    assert results[1].units == results[0].units
+    assert type(results[1].units) is type(results[0].units)
+    assert_array_equal(results[1].data, results[0].data)
+
+
 def test_save_as_failure_preserves_identity_and_target(tmp_path):
     ds = NDDataset(np.arange(3.0), name="save_as_source")
     ds.filename = tmp_path / "initial.scp"

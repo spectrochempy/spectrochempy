@@ -33,6 +33,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Units of datasets and coordinates read from ``.scp`` files are now created by
+  SpectroChemPy's unit registry (``scp.ur``), as units created in memory are.
+  Combining a reread dataset with a processed one, for example
+  ``scp.trapezoid`` on the output of ``Baseline.transform()``, no longer raises
+  ``AttributeError``. The file format is unchanged (:issue:`1951`).
+
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing
