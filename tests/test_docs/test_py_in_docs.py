@@ -200,6 +200,7 @@ def nbsphinx_script_run(path):
 import runpy
 import shutil
 import sys
+import traceback
 from pathlib import Path
 import spectrochempy as scp
 
@@ -208,7 +209,11 @@ shutil.copytree(scp.preferences.stylesheets, stylesheets)
 scp.preferences.stylesheets = str(stylesheets)
 sys.argv = sys.argv[1:]
 sys.path.insert(0, str(Path(sys.argv[0]).resolve().parent))
-runpy.run_path(sys.argv[0], run_name="__main__")
+try:
+    runpy.run_path(sys.argv[0], run_name="__main__")
+except Exception:
+    traceback.print_exc()
+    raise SystemExit(1) from None
 """
             pipe = subprocess.Popen(  # noqa: S603
                 [sys.executable, "-c", bootstrap, directory, str(path), "--nodisplay"],
@@ -405,3 +410,55 @@ def test_doc_script_generated_styles_are_isolated(tmp_path):
     )
     assert not Path(generated).exists()
     assert not original.exists()
+
+
+@pytest.mark.parametrize(
+    "raise_statement",
+    ["raise FileNotFoundError", "raise FileNotFoundError from error"],
+)
+def test_doc_script_preserves_network_exception_chain(tmp_path, raise_statement):
+    script = tmp_path / "network_failure.py"
+    script.write_text(
+        "from urllib.error import URLError\n"
+        "try:\n"
+        "    raise URLError('https://www.eigenvector.com/data/Corn/corn.mat: Network is unreachable')\n"
+        "except URLError as error:\n"
+        f"    {raise_statement}\n"
+    )
+    status, output, errors = nbsphinx_script_run(script)
+    assert status == 1, output + errors
+    assert "URLError:" in errors
+    assert "Network is unreachable" in errors
+    assert "FileNotFoundError" in errors
+    assert _looks_like_external_network_failure(errors, "eigenvector.com")
+    assert not _looks_like_external_network_failure(errors, None)
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "raise FileNotFoundError('local_data.mat')",
+        "try:\n"
+        "    raise ValueError('bad shape')\n"
+        "except ValueError as error:\n"
+        "    raise FileNotFoundError('local_data.mat') from error",
+    ],
+)
+def test_doc_script_local_failure_is_not_network_failure(tmp_path, source):
+    script = tmp_path / "local_failure.py"
+    script.write_text(source)
+    status, output, errors = nbsphinx_script_run(script)
+    assert status == 1, output + errors
+    assert "FileNotFoundError" in errors
+    assert "local_data.mat" in errors
+    assert not _looks_like_external_network_failure(errors, "eigenvector.com")
+
+
+@pytest.mark.parametrize("status", [0, 7])
+def test_doc_script_preserves_exit_status_and_output(tmp_path, status):
+    script = tmp_path / "exit_script.py"
+    script.write_text(f"print('script output')\nraise SystemExit({status})\n")
+    actual, output, errors = nbsphinx_script_run(script)
+    assert actual == status, output + errors
+    assert "script output" in output
+    assert "Traceback" not in errors
