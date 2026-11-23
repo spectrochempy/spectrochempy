@@ -128,3 +128,45 @@ def test_all_convergence_criteria_cannot_be_disabled():
 
     with pytest.raises(ValueError, match="At least one"):
         mcr.fit(X, C0)
+
+
+def test_info_log_summarizes_active_constraints_at_fit_start():
+    X, C0 = _exact_rank_one_problem()
+    mcr = MCRALS(max_iter=2, log_level="INFO")
+
+    start = len(mcr.log)
+    mcr.fit(X, C0)
+
+    log = mcr.log[start:]
+    assert "Active constraints:" in log
+    assert "NonNegative(profile='C'" in log
+    assert "Unimodal(profile='C'" in log
+    assert "NonNegative(profile='St'" in log
+    assert log.index("Active constraints:") < log.index("ALS optimisation log")
+
+
+def test_info_log_reports_no_active_constraints():
+    X, C0 = _exact_rank_one_problem()
+    mcr = MCRALS(constraints=[], max_iter=2, log_level="INFO")
+
+    start = len(mcr.log)
+    mcr.fit(X, C0)
+
+    assert "Active constraints: none" in mcr.log[start:]
+
+
+def test_info_log_does_not_list_unsupported_constraints():
+    from spectrochempy.analysis.decomposition.mcrals_constraints import Monotonic
+
+    X, C0 = _exact_rank_one_problem()
+    mcr = MCRALS(
+        constraints=[Monotonic(profile="St", direction="increasing")],
+        max_iter=2,
+        log_level="INFO",
+    )
+
+    start = len(mcr.log)
+    with pytest.raises(NotImplementedError, match="Monotonic"):
+        mcr.fit(X, C0)
+
+    assert "Active constraints" not in mcr.log[start:]
