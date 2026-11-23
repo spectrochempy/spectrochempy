@@ -237,6 +237,23 @@ def isolate_scp_preferences():
     prefs.update(snapshot)
 
 
+@pytest.fixture(autouse=True)
+def isolate_scp_loglevel():
+    """Restore the SpectroChemPy log level (application and loggers) after each test."""
+    import logging
+
+    from spectrochempy.application.application import app
+
+    logger = logging.getLogger("spectrochempy")
+    app_level, logger_level = app.log_level, logger.level
+
+    yield
+
+    if app.log_level != app_level:
+        app.log_level = app_level
+    logger.setLevel(logger_level)
+
+
 # ======================================================================================
 # FIXTURES
 # ======================================================================================
