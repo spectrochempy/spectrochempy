@@ -54,6 +54,8 @@ class Importer(HasTraits):
     def __init__(self):
         super().__init__()
 
+        self._skip_unreadable = False
+        self._skipped = []
         self.filetypes = dict(registry.filetypes)
         temp = list(zip(*registry.filetypes, strict=False))
         temp.reverse()
@@ -625,7 +627,7 @@ def read_dir(directory=None, **kwargs):
 def _read_dir(*args, **kwargs):
     _, directory = args
     directory = get_directory_name(directory)
-    files = get_filenames(directory, **kwargs)
+    files = get_filenames(directory, **kwargs) or {}
     datasets = []
     valid_extensions = (
         list(zip(*registry.filetypes, strict=False))[0]
