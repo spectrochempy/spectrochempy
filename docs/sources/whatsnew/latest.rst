@@ -33,6 +33,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``asymmetricvoigtmodel`` and ``asymmetricvoigt``: a negative ``asym`` now
+  gives the asymmetry on the other side of the peak instead of being silently
+  ignored and giving the symmetric profile: the profile for ``asym = -a`` is
+  the mirror image, about ``pos``, of the profile for ``+a``. Results for
+  ``asym >= 0`` are unchanged (:issue:`1948`).
+
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing

@@ -427,6 +427,108 @@ class TestPseudoVoigt:
         assert opt.fp is not None
 
 
+class TestAsymmetricVoigt:
+    """The sign of ``asym`` sets the side of the asymmetry (issue #1948)."""
+
+    # Dyadic grid exactly symmetric about pos: x - pos is exact and antisymmetric.
+    POS = 2.0
+    X = POS + np.arange(-64, 65) * 0.0625
+    IDX = [16, 48, 64, 80, 112]
+
+    # Values computed with the implementation before the fix of issue #1948.
+    REFERENCE = {
+        (0.5, True): [
+            0.001624027203536192,
+            0.010882165793904185,
+            0.08104101328099297,
+            0.006733149845392054,
+            0.0003629051711783133,
+        ],
+        (0.5, False): [
+            0.03005935768421132,
+            0.20141960261847647,
+            1.5,
+            0.12462485794778223,
+            0.006717065035700158,
+        ],
+        (0.0, True): [
+            0.000994270845210752,
+            0.00886111872365564,
+            0.08104101328099297,
+            0.00886111872365564,
+            0.000994270845210752,
+        ],
+        (0.0, False): [
+            0.018403104890174375,
+            0.1640117459957875,
+            1.5,
+            0.1640117459957875,
+            0.018403104890174375,
+        ],
+    }
+
+    def _profile(self, asym, normalized=True, ratio=0.4):
+        return scp.asymmetricvoigt(
+            self.X,
+            ampl=1.5,
+            pos=self.POS,
+            width=1.0,
+            ratio=ratio,
+            asym=asym,
+            normalized=normalized,
+        )
+
+    @pytest.mark.parametrize("normalized", [True, False])
+    @pytest.mark.parametrize("asym", [0.0, 0.5])
+    def test_non_negative_asym_unchanged(self, asym, normalized):
+        y = self._profile(asym, normalized=normalized)
+
+        np.testing.assert_allclose(
+            y[self.IDX], self.REFERENCE[(asym, normalized)], rtol=1e-12, atol=0
+        )
+
+    @pytest.mark.parametrize("normalized", [True, False])
+    @pytest.mark.parametrize("ratio", [0.0, 0.4, 1.0])
+    @pytest.mark.parametrize("asym", [0.2, 0.5, 3.0])
+    def test_negative_asym_is_mirror_image(self, asym, ratio, normalized):
+        plus = self._profile(asym, normalized=normalized, ratio=ratio)
+        minus = self._profile(-asym, normalized=normalized, ratio=ratio)
+        symmetric = self._profile(0.0, normalized=normalized, ratio=ratio)
+
+        np.testing.assert_allclose(minus, plus[::-1], rtol=1e-14, atol=0)
+        assert np.max(np.abs(minus - symmetric)) > 1e-3 * np.max(symmetric)
+
+    def test_positive_asym_broadens_low_x_side(self):
+        plus = self._profile(0.5)
+        minus = self._profile(-0.5)
+
+        assert plus[16] > plus[112]
+        assert minus[16] < minus[112]
+
+    def test_optimize_dry_run_honours_negative_asym(self):
+        x = scp.Coord(self.X, title="wavenumbers", units="cm^-1")
+        Y = scp.gaussian(x, pos=self.POS, width=1.0, normalized=False)
+
+        def fitted(asym):
+            script = f"""
+            MODEL: PEAK
+            shape: asymmetricvoigtmodel
+                * ampl: 1.0, 0.0, none
+                * pos: {self.POS}, 1.0, 3.0
+                * width: 1.0, 0.1, 5.0
+                * ratio: 0.4, 0.0, 1.0
+                * asym: {asym}, -1.0, 1.0
+            """
+            opt = scp.Optimize(script=script, dry=True)
+            _ = opt.fit(Y)
+            return opt.result.fitted.data.squeeze()
+
+        plus, minus, symmetric = fitted(0.5), fitted(-0.5), fitted(0.0)
+
+        assert np.max(np.abs(minus - symmetric)) > 1e-3 * np.max(symmetric)
+        np.testing.assert_allclose(minus, plus[::-1], rtol=1e-12, atol=1e-15)
+
+
 class TestBaselineHelper:
     """The baseline helper should provide ergonomic synthetic baselines."""
 
