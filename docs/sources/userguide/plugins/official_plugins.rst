@@ -30,10 +30,10 @@ Current official plugins
      - ``spectrochempy-iris``
      - ``scp.iris``, ``dataset.iris``
      - 2D-IRIS analysis, IRIS kernels, dataset-bound IRIS operations.
-   * - NMR
+   * - `NMR <https://www.spectrochempy.fr/projects/nmr/latest/index.html>`_
      - ``spectrochempy-nmr``
      - ``scp.nmr``
-     - NMR file readers and processing tools.
+     - NMR data import, processing, analysis and simulation.
    * - Tensor
      - ``spectrochempy-tensor``
      - ``scp.tensor``
@@ -136,7 +136,8 @@ The table above is the quick reference. The dedicated plugin pages below
 provide the user-facing details:
 
 * :doc:`iris` for 2D-IRIS workflows and the ``scp.iris`` / ``dataset.iris`` APIs
-* :doc:`nmr` for NMR readers and NMR-specific processing workflows
+* `NMR documentation <https://www.spectrochempy.fr/projects/nmr/latest/index.html>`_
+  for NMR data import, processing, analysis and simulation
 * :doc:`tensor` for TensorLy-backed tensor decompositions such as CP/PARAFAC
 * :doc:`carroucell` for carroucell experiment directory imports
 * :doc:`perkinelmer` for PerkinElmer ``.sp`` IR file reading
