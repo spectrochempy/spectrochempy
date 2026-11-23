@@ -37,7 +37,7 @@ Bug Fixes
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing
   incorrect fits with multiple user models. Model instances retain their bound
-  state and have independent parameter-name lists.
+  state and have independent parameter-name lists (:pr:`1941`).
 
 - ``ActionMassKinetics``: the analytical Jacobian (``use_jac=True``) is now correct
   for stoichiometric coefficients greater than one; ``fit_to_concentrations``
