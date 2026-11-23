@@ -7,6 +7,7 @@
 # ruff: noqa
 
 __all__ = [
+    "_callable_spec",
     "_fit_backend",
     "_model_evaluation",
     "_models",
@@ -23,6 +24,7 @@ __all__ = [
     "simulation",
 ]
 
+from . import _callable_spec
 from . import _fit_backend
 from . import _model_evaluation
 from . import _models
