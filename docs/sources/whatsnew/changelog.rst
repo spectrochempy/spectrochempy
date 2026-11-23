@@ -42,6 +42,17 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``concatenate`` and ``stack`` now take the coordinates of the
+  non-concatenated dimensions from the first dataset, as specified by the
+  concatenate/stack metadata policy, instead of silently from the last one.
+  They warn when these coordinates differ between inputs: numeric values in
+  only some inputs, or values differing by more than the absolute 3-decimal
+  tolerance of dataset arithmetic (1.5e-3 in the units of the first dataset,
+  after unit conversion); labels are not compared. Use
+  ``align(..., method="interpolate")`` first to put the datasets on common
+  coordinates. ``stack`` of datasets without coordinates no longer files the
+  new stacking coordinate under the wrong dimension (:issue:`1944`).
+
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing

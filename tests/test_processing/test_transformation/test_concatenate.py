@@ -5,6 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
+import warnings
 from datetime import UTC
 from datetime import datetime
 
@@ -537,3 +538,273 @@ def test_stack_does_not_mutate_inputs_for_axis_0_or_axis_1():
     assert axis1_right.shape == (3,)
     assert axis1_left.dims == ["x"]
     assert axis1_right.dims == ["x"]
+
+
+_COORD_MISMATCH = "Coordinates of dimension 'x' differ"
+
+
+def _one_spectrum(x, name):
+    g = scp.gaussian(x, pos=1455.0, width=8.0, normalized=False)
+    return scp.NDDataset(
+        [g.data], coordset=[scp.Coord([0.0], title="spectrum"), x], name=name
+    )
+
+
+def _wavenumbers(start, units="cm^-1", scale=1.0):
+    return scp.Coord.linspace(
+        start * scale,
+        (start - 50.0) * scale,
+        101,
+        title="wavenumbers",
+        units=units,
+    )
+
+
+def _coordinate_mismatch_warnings(func, *args, **kwargs):
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        result = func(*args, **kwargs)
+    messages = [
+        str(w.message) for w in record if "differ between the input" in str(w.message)
+    ]
+    return result, messages
+
+
+def test_concatenate_warns_when_non_concatenated_coordinates_differ():
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(_wavenumbers(1485.0), "B")
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH) as record:
+        C = concatenate([A, B], dim="y")
+
+    message = str(record[0].message)
+    assert "first dataset" in message
+    assert 'scp.align(..., method="interpolate")' in message
+    np.testing.assert_array_equal(C.x.data, A.x.data)
+    np.testing.assert_array_equal(C.data, np.concatenate([A.data, B.data]))
+
+
+@pytest.mark.parametrize(
+    "other_x",
+    [
+        pytest.param(lambda: _wavenumbers(1480.0), id="identical"),
+        pytest.param(
+            lambda: scp.Coord(
+                _wavenumbers(1480.0).data + 1e-9,
+                title="wavenumbers",
+                units="cm^-1",
+            ),
+            id="numerically-equal",
+        ),
+        pytest.param(
+            lambda: _wavenumbers(1480.0, units="m^-1", scale=100.0),
+            id="equal-after-unit-conversion",
+        ),
+    ],
+)
+def test_concatenate_does_not_warn_for_matching_coordinates(other_x):
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(other_x(), "B")
+
+    C, messages = _coordinate_mismatch_warnings(concatenate, [A, B], dim="y")
+
+    assert messages == []
+    assert C.shape == (2, 101)
+
+
+def test_stack_warns_when_coordinates_differ():
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(_wavenumbers(1485.0), "B")
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        S = stack(A, B)
+
+    np.testing.assert_array_equal(S.x.data, A.x.data)
+
+    a = A.squeeze()
+    b = B.squeeze()
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        columns = stack(a, b, axis=1)
+
+    np.testing.assert_array_equal(columns.x.data, a.x.data)
+
+
+def test_stack_does_not_warn_for_identical_coordinates():
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(_wavenumbers(1480.0), "B")
+
+    _, messages = _coordinate_mismatch_warnings(stack, A, B)
+
+    assert messages == []
+
+
+def test_concatenate_warns_when_a_middle_input_differs():
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(_wavenumbers(1485.0), "B")
+    C = _one_spectrum(_wavenumbers(1480.0), "C")
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        out = concatenate([A, B, C], dim="y")
+
+    np.testing.assert_array_equal(out.x.data, A.x.data)
+
+
+def test_concatenate_does_not_warn_for_equivalent_wavelength_grid():
+    x_cm = _wavenumbers(1480.0)
+    x_nm = scp.Coord(1.0e7 / x_cm.data, title="wavelength", units="nm")
+    A = _one_spectrum(x_cm, "A")
+    B = _one_spectrum(x_nm, "B")
+
+    _, messages = _coordinate_mismatch_warnings(concatenate, [A, B], dim="y")
+
+    assert messages == []
+
+
+def test_concatenate_unit_conversion_with_zero_has_no_runtime_warning():
+    x_cm = scp.Coord(np.arange(0.0, 101.0), title="wavenumbers", units="cm^-1")
+    x_nm = scp.Coord(np.linspace(1.0, 2.0, 101), title="wavelength", units="nm")
+    A = _one_spectrum(x_cm, "A")
+    B = _one_spectrum(x_nm, "B")
+
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        concatenate([A, B], dim="y")
+
+    assert not [w for w in record if issubclass(w.category, RuntimeWarning)]
+    assert any("differ between the input" in str(w.message) for w in record)
+
+
+def test_concatenate_warns_when_coordinate_values_are_missing_on_one_side():
+    y = scp.Coord([0.0])
+    labels = [f"p{i}" for i in range(3)]
+    A = scp.NDDataset(np.ones((1, 3)), coordset=[y, scp.Coord(np.arange(3.0))])
+    B = scp.NDDataset(np.ones((1, 3)), coordset=[y, scp.Coord(labels=labels)])
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        concatenate([A, B], dim="y")
+
+
+def test_concatenate_does_not_compare_labels():
+    y = scp.Coord([0.0])
+    A = scp.NDDataset(np.ones((1, 3)), coordset=[y, scp.Coord(labels=["a", "b", "c"])])
+    B = scp.NDDataset(np.ones((1, 3)), coordset=[y, scp.Coord(labels=["d", "e", "f"])])
+
+    _, messages = _coordinate_mismatch_warnings(concatenate, [A, B], dim="y")
+
+    assert messages == []
+
+
+@pytest.mark.parametrize(("offset", "warns"), [(0.0, False), (1.0, True)])
+def test_concatenate_compares_multi_coordinate_dimensions(offset, warns):
+    def dataset(shift):
+        x = scp.CoordSet(
+            scp.Coord(np.arange(3.0) + shift, title="first"),
+            scp.Coord(np.arange(3.0, 6.0), title="second"),
+        )
+        return scp.NDDataset(np.ones((2, 3)), coordset=[scp.Coord(np.arange(2.0)), x])
+
+    _, messages = _coordinate_mismatch_warnings(
+        concatenate, dataset(0.0), dataset(offset), dims="y"
+    )
+
+    assert bool(messages) is warns
+
+
+def test_concatenate_warns_when_multi_coordinate_structure_differs():
+    x_multi = scp.CoordSet(
+        scp.Coord(np.arange(3.0), title="first"),
+        scp.Coord(np.arange(3.0, 6.0), title="second"),
+    )
+    y = scp.Coord(np.arange(2.0))
+    A = scp.NDDataset(np.ones((2, 3)), coordset=[y, x_multi])
+    B = scp.NDDataset(np.ones((2, 3)), coordset=[y, scp.Coord(np.arange(3.0))])
+
+    _, messages = _coordinate_mismatch_warnings(concatenate, A, B, dims="y")
+
+    assert messages
+
+
+def test_concatenate_incompatible_data_units_raise_before_coordinate_warning():
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(_wavenumbers(1485.0), "B")
+    A.units = "m"
+    B.units = "s"
+
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        with pytest.raises(UnitsCompatibilityError):
+            concatenate([A, B], dim="y")
+
+    assert not [w for w in record if "differ between the input" in str(w.message)]
+
+
+def test_stack_keeps_values_when_warning():
+    A = _one_spectrum(_wavenumbers(1480.0), "A")
+    B = _one_spectrum(_wavenumbers(1485.0), "B")
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        S = stack(A, B)
+
+    assert S.shape == (2, 1, 101)
+    np.testing.assert_array_equal(S.data[0], A.data)
+    np.testing.assert_array_equal(S.data[1], B.data)
+    np.testing.assert_array_equal(S.x.data, A.x.data)
+
+
+@pytest.mark.parametrize(
+    "missing",
+    [
+        pytest.param(lambda: None, id="absent"),
+        pytest.param(lambda: scp.Coord(None, size=3), id="empty"),
+    ],
+)
+@pytest.mark.parametrize("missing_first", [False, True])
+def test_concatenate_warns_when_coordinate_is_missing_in_some_inputs(
+    missing, missing_first
+):
+    y = scp.Coord([0.0])
+    numeric = scp.NDDataset(
+        np.ones((1, 3)), coordset=[y, scp.Coord(np.arange(3.0))], name="numeric"
+    )
+    other = scp.NDDataset(np.ones((1, 3)), name="other")
+    x = missing()
+    if x is None:
+        other.set_coordset(y=y)
+    else:
+        other.set_coordset(y=y, x=x)
+    inputs = [other, numeric] if missing_first else [numeric, other]
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        out = concatenate(inputs, dim="y")
+
+    if missing_first:
+        names = out.coordset.names
+        assert "x" not in names or out.coordset["x"].data is None
+    else:
+        np.testing.assert_array_equal(out.x.data, np.arange(3.0))
+
+
+def test_stack_coordinate_less_1d_inputs_does_not_warn():
+    a = scp.NDDataset([1.0, 2.0], name="a")
+    b = scp.NDDataset([3.0, 4.0], name="b")
+
+    S, messages = _coordinate_mismatch_warnings(stack, a, b)
+
+    assert messages == []
+    assert S.dims == ["y", "x"]
+    assert S.coordset.names == ["y"]
+    assert S.y.labels.tolist() == ["a", "b"]
+    np.testing.assert_array_equal(S.data, [[1.0, 2.0], [3.0, 4.0]])
+
+
+def test_concatenate_absent_versus_labels_only_coordinate_does_not_warn():
+    y = scp.Coord([0.0])
+    labelled = scp.NDDataset(
+        np.ones((1, 3)), coordset=[y, scp.Coord(labels=["a", "b", "c"])]
+    )
+    bare = scp.NDDataset(np.ones((1, 3)))
+    bare.set_coordset(y=y)
+
+    _, messages = _coordinate_mismatch_warnings(concatenate, bare, labelled, dim="y")
+
+    assert messages == []
