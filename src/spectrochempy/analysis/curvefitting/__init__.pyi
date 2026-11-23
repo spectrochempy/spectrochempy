@@ -8,6 +8,7 @@
 
 __all__ = [
     "_fit_backend",
+    "_model_evaluation",
     "_models",
     "_modelspec",
     "_optimize_nd",
@@ -23,6 +24,7 @@ __all__ = [
 ]
 
 from . import _fit_backend
+from . import _model_evaluation
 from . import _models
 from . import _modelspec
 from . import _optimize_nd

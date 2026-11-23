@@ -23,6 +23,7 @@ from spectrochempy.analysis.curvefitting._fit_backend import _extract_solver_art
 from spectrochempy.analysis.curvefitting._fit_backend import _freeze_jacobian_artifact
 from spectrochempy.analysis.curvefitting._fit_backend import _normalize_solver_meta
 from spectrochempy.analysis.curvefitting._fit_backend import _run_optimizer
+from spectrochempy.analysis.curvefitting._model_evaluation import _evaluate_callable
 from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
@@ -2199,16 +2200,11 @@ def getmodel(
             else:
                 raise ValueError(e) from e
 
-    x = np.array(x, dtype=np.float64)
-    if y is not None:
-        y = np.array(y, dtype=np.float64)
-
-    val = a.f(x, *args, **kwargs) if y is None else a.f(x, y, *args, **kwargs)
-
-    # Return amplitude or area ? return calc is scaled by area by default
-    if amplitude_mode.lower() == "height":
-        # in this case ampl parameter is the height, so we need to rescale
-        # calc
-        ampl = args[0]
-        val = ampl * val / val.max()
-    return val
+    return _evaluate_callable(
+        lambda *values, **options: a.f(*values, **options),
+        x,
+        args,
+        y=y,
+        amplitude_mode=amplitude_mode,
+        **kwargs,
+    )
