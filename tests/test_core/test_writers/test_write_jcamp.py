@@ -580,3 +580,73 @@ def test_write_jcamp_link_uses_same_unit_policy_as_singletons(tmp_path):
     for block in blocks:
         assert block["XUNITS"] == "ARBITRARY UNITS"
         assert block["YUNITS"] == "ARBITRARY UNITS"
+
+
+def _three_spectra_dataset(labels):
+    x = scp.Coord.linspace(1480.0, 1430.0, 11, title="wavenumbers", units="cm^-1")
+    y = scp.Coord([0.0, 1.0, 2.0], labels=labels, title="spectrum")
+    return scp.NDDataset(
+        np.arange(33, dtype=float).reshape(3, 11) * 1.0e-3,
+        coordset=[y, x],
+        title="absorbance",
+        units="absorbance",
+        name="three_spectra",
+    )
+
+
+_THREE_DATETIMES = [
+    datetime(2024, 1, 1, 12, 0, tzinfo=UTC),
+    datetime(2024, 1, 2, 13, 1, tzinfo=UTC),
+    datetime(2024, 1, 3, 14, 2, tzinfo=UTC),
+]
+
+
+@pytest.mark.parametrize(
+    ("labels", "expected_titles", "expected_dates"),
+    [
+        pytest.param(
+            ["ref Al", "ref Ga", "MFI 43"],
+            ["ref Al", "ref Ga", "MFI 43"],
+            None,
+            id="one-column-text",
+        ),
+        pytest.param(
+            _THREE_DATETIMES,
+            ["spectrum #0", "spectrum #1", "spectrum #2"],
+            ["2024/01/01", "2024/01/02", "2024/01/03"],
+            id="one-column-datetime",
+        ),
+        pytest.param(
+            list(zip(_THREE_DATETIMES, ["ref Al", "ref Ga", "MFI 43"], strict=True)),
+            ["ref Al", "ref Ga", "MFI 43"],
+            ["2024/01/01", "2024/01/02", "2024/01/03"],
+            id="two-columns-datetime-text",
+        ),
+        pytest.param(
+            None,
+            ["spectrum #0", "spectrum #1", "spectrum #2"],
+            None,
+            id="no-labels",
+        ),
+    ],
+)
+def test_write_jcamp_link_titles_for_label_layouts(
+    tmp_path, labels, expected_titles, expected_dates
+):
+    dataset = _three_spectra_dataset(labels)
+
+    path = dataset.write_jcamp(tmp_path / "spectra.jdx", confirm=False)
+    text = path.read_text()
+    blocks = _parse_jcamp_blocks(text)
+
+    assert text.splitlines()[0] == "##TITLE=three_spectra"
+    assert [block["TITLE"] for block in blocks] == expected_titles
+    if expected_dates is not None:
+        assert [block["LONGDATE"] for block in blocks] == expected_dates
+
+    back = scp.read_jcamp(path, sortbydate=False)
+    assert back.shape == (3, 11)
+    assert list(back.y.labels[:, 1]) == expected_titles
+    np.testing.assert_allclose(back.data, dataset.data)
+    np.testing.assert_allclose(back.x.data, dataset.x.data)
+    assert back.units == dataset.units

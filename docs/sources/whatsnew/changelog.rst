@@ -42,6 +42,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``write_jcamp`` now writes the full label as the ``##TITLE`` of each spectrum
+  when the ``y`` coordinate has single-column labels (previously only the first
+  character was written). Single-column datetime labels no longer raise a
+  ``TypeError`` and are used as acquisition dates (:issue:`1949`).
+
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing
