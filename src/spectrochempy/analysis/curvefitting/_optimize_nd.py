@@ -8,6 +8,7 @@ import numpy as np
 from pint import Quantity as PintQuantity
 from scipy.optimize import least_squares
 
+from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
 from spectrochempy.analysis.curvefitting._profile_models import extended_profiles
 from spectrochempy.analysis.curvefitting._profile_models import profile_history
 from spectrochempy.analysis.curvefitting.simulation import _MODELS
@@ -66,6 +67,12 @@ def _grid(dataset):
 
 
 def _parameter(spec, name, unit, *, width=False):
+    """Return the historical ND parser tuple."""
+    return _prepare_parameter(spec, name, unit, width=width).as_legacy_tuple()
+
+
+def _prepare_parameter(spec, name, unit, *, width=False, identifier=None):
+    """Normalize an ND declaration into a physical parameter record."""
     if not isinstance(spec, Mapping):
         spec = {"value": spec}
     if "value" not in spec or spec.keys() - {"value", "bounds", "fixed"}:
@@ -90,7 +97,14 @@ def _parameter(spec, name, unit, *, width=False):
         raise ValueError(
             f"{name}: width and any free width lower bound must be positive"
         )
-    return value, low, high, fixed
+    return _PreparedParameter(
+        identifier if identifier is not None else (name,),
+        name,
+        value,
+        (low, high),
+        fixed,
+        _interval_unit(unit) if width and unit is not None else unit,
+    )
 
 
 def _prepare_peaks(specs, intensity_unit, units):
@@ -99,16 +113,13 @@ def _prepare_peaks(specs, intensity_unit, units):
 
     peaks, free, limits, names, parameter_units = [], [], [], [], []
 
-    def register(target, key, parameter, name, unit):
-        value, low, high, fixed = parameter
-        target[key] = value
-        if not fixed:
+    def register(target, key, parameter, name):
+        target[key] = parameter.value
+        if not parameter.fixed:
             free.append((target, key))
-            limits.append((low, high))
+            limits.append(parameter.bounds)
             names.append(name)
-            parameter_units.append(
-                _interval_unit(unit) if key == "width" and unit is not None else unit
-            )
+            parameter_units.append(parameter.unit)
 
     for index, spec in enumerate(specs):
         if not isinstance(spec, Mapping) or set(spec) != {"height", "axes"}:
@@ -120,9 +131,13 @@ def _prepare_peaks(specs, intensity_unit, units):
         register(
             peak,
             "height",
-            _parameter(spec["height"], "height", intensity_unit),
+            _prepare_parameter(
+                spec["height"],
+                "height",
+                intensity_unit,
+                identifier=("peaks", index, "height"),
+            ),
             f"peaks[{index}].height",
-            intensity_unit,
         )
         for dim in sorted(units):
             axis = axes[dim]
@@ -140,11 +155,14 @@ def _prepare_peaks(specs, intensity_unit, units):
                 register(
                     resolved,
                     key,
-                    _parameter(
-                        axis[key], f"{dim} {key}", units[dim], width=key == "width"
+                    _prepare_parameter(
+                        axis[key],
+                        f"{dim} {key}",
+                        units[dim],
+                        width=key == "width",
+                        identifier=("peaks", index, "axes", dim, key),
                     ),
                     f"peaks[{index}].axes[{dim!r}].{key}",
-                    units[dim],
                 )
             peak["axes"][dim] = resolved
         peaks.append(peak)
