@@ -9,6 +9,7 @@ __configurables__ = __all__
 import inspect
 import re
 import sys
+from copy import deepcopy
 
 import numpy as np
 import traitlets as tr
@@ -934,6 +935,29 @@ class Optimize(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
+
+    @classmethod
+    def _from_model_spec(cls, model_spec, **kwargs):
+        """Construct a fresh 1D estimator from a private canonical definition."""
+        if not isinstance(model_spec, _FitModelSpec):
+            raise TypeError("model_spec must be a _FitModelSpec")
+        if kwargs.get("warm_start", False):
+            raise ValueError("A model spec cannot be combined with warm_start=True")
+        if "script" in kwargs:
+            raise ValueError("A model spec cannot be combined with a script")
+        if (
+            kwargs.get("peaks") is not None
+            or kwargs.get("shared_parameters") is not None
+        ):
+            raise ValueError("A model spec cannot be combined with ND peak definitions")
+        constraints = kwargs.pop("constraints", None)
+        estimator = cls(script="", **kwargs)
+        estimator._model_spec = deepcopy(model_spec)
+        estimator.fp = estimator._model_spec.to_fitparameters()
+        estimator._set_rendered_script(str(estimator.fp))
+        if constraints is not None:
+            estimator.constraints = constraints
+        return estimator
 
     # ----------------------------------------------------------------------------------
     # Private methods ( overriding abstract methods)
