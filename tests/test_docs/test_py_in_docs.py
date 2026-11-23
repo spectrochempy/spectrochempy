@@ -13,6 +13,7 @@ import ast
 import subprocess
 import sys
 import tempfile
+import traceback
 from importlib.util import find_spec
 from os import environ
 from pathlib import Path
@@ -179,6 +180,22 @@ def _looks_like_external_network_failure(error_text, network_marker):
     return False
 
 
+def _exception_chain_text(error):
+    """Describe exception causes without including source lines from tracebacks."""
+    messages = []
+    seen = set()
+    while error is not None and id(error) not in seen:
+        seen.add(id(error))
+        messages.append(f"{type(error).__name__}: {error}")
+        if error.__cause__ is not None:
+            error = error.__cause__
+        elif not error.__suppress_context__:
+            error = error.__context__
+        else:
+            break
+    return "\n".join(messages)
+
+
 def nbsphinx_script_run(path):
     import matplotlib
 
@@ -298,21 +315,63 @@ def test_examples(example):
     try:
         import_item(module)
     except Exception as e:
-        error_text = f"{type(e).__name__}: {e}"
+        error_text = _exception_chain_text(e)
         if _looks_like_external_network_failure(error_text, network_marker):
             pytest.skip(f"external network ({network_marker}) not reachable")
         error_msg = f"Error in example: {example}\n"
         error_msg += f"Module: {module}\n"
         error_msg += f"Exception: {type(e).__name__}: {e}\n"
-        import traceback
-
-        error_msg += f"Traceback:\n{traceback.format_exc()}\n"
+        error_msg += f"Traceback:\n{''.join(traceback.format_exception(e))}\n"
         pytest.fail(error_msg)
 
 
 # --------------------------------------------------------------------------------------
 # Unit tests for helper functions (not marked slow — run directly)
 # --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("explicit_cause", [False, True])
+@pytest.mark.parametrize("network_source", [False, True])
+@pytest.mark.parametrize("network_error", [False, True])
+def test_example_import_classifies_chained_failure(
+    tmp_path, monkeypatch, explicit_cause, network_source, network_error
+):
+    example = tmp_path / "spectrochempy" / "examples" / "example.py"
+    example.parent.mkdir(parents=True)
+    example.write_text(
+        'url = "https://www.eigenvector.com/data/Corn/corn.mat"'
+        if network_source
+        else 'filename = "local_data.mat"'
+    )
+
+    def failed_import(module):
+        try:
+            if network_error:
+                raise ConnectionError(
+                    "https://www.eigenvector.com/data/Corn/corn.mat: Network is unreachable"
+                )
+            raise ValueError("bad local data shape")
+        except Exception as error:
+            if explicit_cause:
+                raise FileNotFoundError from error
+            raise FileNotFoundError  # noqa: B904
+
+    monkeypatch.setitem(globals(), "import_item", failed_import)
+    monkeypatch.setitem(globals(), "environ", {})
+    monkeypatch.setattr(scp, "NO_DISPLAY", True)
+    expected = (
+        pytest.skip.Exception
+        if network_source and network_error
+        else pytest.fail.Exception
+    )
+    with pytest.raises(expected) as caught:
+        test_examples(example)
+    if network_source and network_error:
+        assert "external network (eigenvector.com) not reachable" in str(caught.value)
+    else:
+        assert "FileNotFoundError" in str(caught.value)
+        cause = "Network is unreachable" if network_error else "bad local data shape"
+        assert cause in str(caught.value)
 
 
 def test_unit__requires_external_network(tmp_path):
@@ -324,6 +383,39 @@ def test_unit__requires_external_network(tmp_path):
     p2 = tmp_path / "no_network.py"
     p2.write_text("x = 1 + 1")
     assert _requires_external_network(p2) is None
+
+
+def test_example_import_keeps_local_failure_with_url_in_source(tmp_path, monkeypatch):
+    import runpy
+
+    example = tmp_path / "spectrochempy" / "examples" / "example.py"
+    example.parent.mkdir(parents=True)
+    example.write_text(
+        "def read(url):\n"
+        "    raise FileNotFoundError('local calibration.mat')\n"
+        "read('https://www.eigenvector.com/data/Corn/corn.mat')\n"
+    )
+    monkeypatch.setitem(
+        globals(), "import_item", lambda module: runpy.run_path(example)
+    )
+    monkeypatch.setitem(globals(), "environ", {})
+    monkeypatch.setattr(scp, "NO_DISPLAY", True)
+    with pytest.raises(pytest.fail.Exception, match="local calibration.mat"):
+        test_examples(example)
+
+
+def test_unit_exception_chain_respects_suppression_and_cycles():
+    network = ConnectionError("Network is unreachable")
+    local = FileNotFoundError("local calibration.mat")
+    local.__context__ = network
+    local.__suppress_context__ = True
+    assert _exception_chain_text(local) == "FileNotFoundError: local calibration.mat"
+
+    local.__cause__ = network
+    network.__cause__ = local
+    text = _exception_chain_text(local)
+    assert text.count("FileNotFoundError") == 1
+    assert text.count("ConnectionError") == 1
 
 
 def test_unit__looks_like_external_network_failure_FileNotFoundError_with_url():
