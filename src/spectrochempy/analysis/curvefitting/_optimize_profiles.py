@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from collections.abc import Sequence
+from dataclasses import replace
 
 import numpy as np
 from scipy.optimize import least_squares
@@ -9,8 +10,8 @@ from scipy.optimize import least_squares
 from spectrochempy.analysis.curvefitting._optimize_nd import _fit_diagnostics
 from spectrochempy.analysis.curvefitting._optimize_nd import _fit_outputs
 from spectrochempy.analysis.curvefitting._optimize_nd import _grid
-from spectrochempy.analysis.curvefitting._optimize_nd import _parameter
 from spectrochempy.analysis.curvefitting._optimize_nd import _physical_covariance
+from spectrochempy.analysis.curvefitting._optimize_nd import _prepare_parameter
 from spectrochempy.analysis.curvefitting._profile_models import axis_parameters
 from spectrochempy.analysis.curvefitting._profile_models import evaluate_profiles
 from spectrochempy.analysis.curvefitting._profile_models import profile_history
@@ -34,7 +35,15 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
     groups, shared_groups, peaks, target_units = [], {}, [], {}
 
     def register(
-        target, key, raw, unit, name, positive=False, interval=False, infer_unit=False
+        target,
+        key,
+        raw,
+        unit,
+        name,
+        positive=False,
+        interval=False,
+        infer_unit=False,
+        identifier=None,
     ):
         spec = dict(raw) if isinstance(raw, Mapping) else {"value": raw}
         declared = spec.pop("unit", None)
@@ -65,17 +74,23 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
                 )
                 if interval and canonical is not None:
                     canonical = _interval_unit(canonical)
-                parsed = _parameter(definition, shared_name, canonical, width=positive)
+                parameter = _prepare_parameter(
+                    definition,
+                    shared_name,
+                    canonical,
+                    width=positive,
+                    identifier=("shared_parameters", shared_name),
+                )
                 group = {
-                    "parsed": parsed,
-                    "unit": canonical,
-                    "name": f"shared_parameters[{shared_name!r}]",
+                    "parameter": replace(
+                        parameter, name=f"shared_parameters[{shared_name!r}]"
+                    ),
                     "bindings": [],
                 }
                 groups.append(group)
                 shared_groups[shared_name] = group
             group = shared_groups[shared_name]
-            source_unit = group["unit"]
+            source_unit = group["parameter"].unit
             if (
                 unit is None
                 and declared is None
@@ -92,7 +107,7 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
                     Quantity(value, source_unit), unit, name, interval=interval
                 )
 
-            initial, lower, upper, fixed = group["parsed"]
+            initial, lower, upper, fixed = group["parameter"].as_legacy_tuple()
             if positive and (
                 convert(initial) <= 0 or (not fixed and convert(lower) <= 0)
             ):
@@ -101,11 +116,20 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
         else:
             if declared is not None and ur.Unit(declared) != unit:
                 raise ValueError(f"{name}: inconsistent declared units")
-            parsed = _parameter(spec, name, unit, width=positive)
+            parameter = _prepare_parameter(
+                spec,
+                name,
+                unit,
+                width=positive,
+                identifier=identifier,
+            )
             group = {
-                "parsed": parsed,
-                "unit": _interval_unit(unit) if interval and unit is not None else unit,
-                "name": name,
+                "parameter": replace(
+                    parameter,
+                    unit=_interval_unit(unit)
+                    if interval and unit is not None
+                    else unit,
+                ),
                 "bindings": [],
             }
             groups.append(group)
@@ -115,7 +139,7 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
 
         target_units[(id(target), key)] = unit
         group["bindings"].append((target, key, convert))
-        target[key] = convert(group["parsed"][0])
+        target[key] = convert(group["parameter"].value)
 
     for index, spec in enumerate(specs):
         if not isinstance(spec, Mapping) or set(spec) != {"height", "axes"}:
@@ -124,7 +148,12 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
             raise ValueError("Each peak must specify every dataset dimension")
         peak = {"axes": {}}
         register(
-            peak, "height", spec["height"], intensity_unit, f"peaks[{index}].height"
+            peak,
+            "height",
+            spec["height"],
+            intensity_unit,
+            f"peaks[{index}].height",
+            identifier=("peaks", index, "height"),
         )
         for dim in sorted(units):
             model, entries = axis_parameters(spec["axes"][dim], units[dim], dim)
@@ -143,12 +172,13 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
                     positive,
                     interval,
                     infer_unit=callable(model),
+                    identifier=("peaks", index, "axes", dim, "parameters", key),
                 )
                 if model in ("voigt", "pseudovoigt") and key == "ratio":
                     group = (
                         shared_groups[raw["shared"]] if "shared" in raw else groups[-1]
                     )
-                    value, low, high, fixed = group["parsed"]
+                    value, low, high, fixed = group["parameter"].as_legacy_tuple()
                     convert = group["bindings"][-1][2]
                     value = convert(value)
                     valid_bounds = fixed or (
@@ -164,7 +194,11 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
         raise ValueError(
             "Every shared parameter must be referenced by a profile or height"
         )
-    return peaks, [group for group in groups if not group["parsed"][3]], target_units
+    return (
+        peaks,
+        [group for group in groups if not group["parameter"].fixed],
+        target_units,
+    )
 
 
 def fit_profiles(dataset, specs, max_calls, shared):
@@ -184,8 +218,12 @@ def fit_profiles(dataset, specs, max_calls, shared):
         raise ValueError("ND fitting requires observations for all free parameters")
     observed = data[valid]
     intensity_scale = np.max(np.abs(observed)) or 1.0
-    initial = np.array([group["parsed"][0] for group in groups], dtype=np.longdouble)
-    limits = np.array([group["parsed"][1:3] for group in groups], dtype=np.longdouble).T
+    initial = np.array(
+        [group["parameter"].value for group in groups], dtype=np.longdouble
+    )
+    limits = np.array(
+        [group["parameter"].bounds for group in groups], dtype=np.longdouble
+    ).T
     binding_groups = {
         (id(target), key): group
         for group in groups
@@ -201,7 +239,10 @@ def fit_profiles(dataset, specs, max_calls, shared):
             unit = target_units[(id(parameters), "width")]
             if unit is not None:
                 width = _parameter_value(
-                    Quantity(width, unit), group["unit"], "center scale", interval=True
+                    Quantity(width, unit),
+                    group["parameter"].unit,
+                    "center scale",
+                    interval=True,
                 )
             group["center_scale"] = min(group.get("center_scale", width), width)
     origins = np.array(
@@ -217,8 +258,8 @@ def fit_profiles(dataset, specs, max_calls, shared):
                 "center_scale",
                 abs(value)
                 or (
-                    group["parsed"][2] - group["parsed"][1]
-                    if np.isfinite(group["parsed"][1:3]).all()
+                    group["parameter"].bounds[1] - group["parameter"].bounds[0]
+                    if np.isfinite(group["parameter"].bounds).all()
                     else 1.0
                 ),
             )
@@ -228,8 +269,8 @@ def fit_profiles(dataset, specs, max_calls, shared):
     )
     bounds = np.asarray((limits - origins) / scales, dtype=float) if groups else None
     start = np.asarray((initial - origins) / scales, dtype=float)
-    names = tuple(group["name"] for group in groups)
-    parameter_units = tuple(group["unit"] for group in groups)
+    names = tuple(group["parameter"].name for group in groups)
+    parameter_units = tuple(group["parameter"].unit for group in groups)
     group_indices = {id(group): index for index, group in enumerate(groups)}
     solver_grids = []
     centered_axes = {}

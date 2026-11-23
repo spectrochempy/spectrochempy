@@ -14,6 +14,7 @@ __all__ = [
     "_parameter_space",
     "_parameter_transform",
     "_parameters",
+    "_prepared_parameter",
     "_profile_models",
     "linearregression",
     "optimize",
@@ -27,6 +28,7 @@ from . import _optimize_profiles
 from . import _parameter_space
 from . import _parameter_transform
 from . import _parameters
+from . import _prepared_parameter
 from . import _profile_models
 from . import linearregression
 from . import optimize

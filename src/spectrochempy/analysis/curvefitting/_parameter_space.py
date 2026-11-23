@@ -13,6 +13,7 @@ It does not parse scripts, evaluate profiles, or select an optimization method.
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
+from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
 
 
 def _modelspec_parameter_count(spec):
@@ -43,52 +44,90 @@ def _restore_modelspec_external(spec, values, keys):
 
 def _modelspec_internal_vector(spec):
     """Return internal optimizer values and keys for varying spec parameters."""
-    values = []
-    keys = []
-    for key, ps in spec._iter_varying():
-        lob, upb = ps.bounds
-        if ps.name in spec.expvars:
-            for i in range(spec.expnumber):
-                values.append(_to_internal(ps.value[i], lob, upb))
-                keys.append(f"{key}_exp{i}")
+    return _vector_from_prepared(_prepared_parameters(spec))
+
+
+def _prepared_parameters(definition):
+    """Snapshot 1D declarations using stable identifiers and historical ordering."""
+    declarations = []
+    if isinstance(definition, _FitModelSpec):
+        for name, parameter in definition.common_params.items():
+            declarations.append(
+                (
+                    name,
+                    ("common", name),
+                    parameter.name,
+                    parameter.value,
+                    parameter.bounds,
+                    not parameter.vary,
+                )
+            )
+        for component in definition.components:
+            for name, parameter in component.params.items():
+                declarations.append(
+                    (
+                        f"{name}_{component.label}",
+                        ("components", component.label, name),
+                        parameter.name,
+                        parameter.value,
+                        parameter.bounds,
+                        not parameter.vary,
+                    )
+                )
+        declarations.sort(key=lambda entry: entry[0])
+    else:
+        for key in sorted(definition.keys()):
+            declarations.append(
+                (
+                    key,
+                    ("legacy", key),
+                    key.split("_")[0],
+                    definition.data[key],
+                    (definition.lob.get(key), definition.upb.get(key))
+                    if definition.fixed[key]
+                    else (definition.lob[key], definition.upb[key]),
+                    definition.fixed[key],
+                )
+            )
+
+    parameters = []
+    for key, identifier, source_name, value, bounds, fixed in declarations:
+        if not fixed and source_name in definition.expvars:
+            for index in range(definition.expnumber):
+                parameters.append(
+                    _PreparedParameter(
+                        (*identifier, "experiments", index),
+                        f"{key}_exp{index}",
+                        value[index],
+                        bounds,
+                    )
+                )
         else:
-            values.append(_to_internal(ps.value, lob, upb))
-            keys.append(key)
+            parameters.append(
+                _PreparedParameter(
+                    identifier,
+                    key,
+                    value.copy() if isinstance(value, list) else value,
+                    bounds,
+                    fixed,
+                )
+            )
+    return tuple(parameters)
+
+
+def _vector_from_prepared(parameters):
+    """Apply the historical 1D bound transform to free physical parameters."""
+    values, keys = [], []
+    for parameter in parameters:
+        if not parameter.fixed:
+            values.append(_to_internal(parameter.value, *parameter.bounds))
+            keys.append(parameter.name)
     return values, keys
 
 
 def _internal_vector(fp):
     """Return optimizer values and keys in historical parameter order."""
-    if isinstance(fp, _FitModelSpec):
-        return _modelspec_internal_vector(fp)
-
-    par = []
-    keys = []
-
-    for key in sorted(fp.keys()):
-        if not fp.fixed[key]:
-            keysp = key.split("_")[0]
-            if keysp in fp.expvars:
-                for i in range(fp.expnumber):
-                    par.append(
-                        _to_internal(
-                            fp.data[key][i],
-                            fp.lob[key],
-                            fp.upb[key],
-                        ),
-                    )
-                    keys.append(f"{key}_exp{i}")
-            else:
-                par.append(
-                    _to_internal(
-                        fp.data[key],
-                        fp.lob[key],
-                        fp.upb[key],
-                    ),
-                )
-                keys.append(key)
-
-    return par, keys
+    return _vector_from_prepared(_prepared_parameters(fp))
 
 
 def _restore_external(fp, p, keys):
