@@ -1156,10 +1156,14 @@ class Optimize(DecompositionAnalysis):
             usermodels = {}
         newdict = {}
         for key, value in usermodels.items():
-            # the keys must be with lower case
-            # and the values must be a models_.usermodel instance
-            if not isinstance(value, models_.usermodel):
-                usermodel = models_.usermodel
+
+            class usermodel(models_.usermodel):
+                pass
+
+            if isinstance(value, models_.usermodel):
+                usermodel.f = staticmethod(value.f)
+                usermodel.args = list(value.args)
+            else:
                 usermodel.f = staticmethod(value)
                 usermodel.args = inspect.getfullargspec(value).args[1:]
             newdict[key.lower()] = usermodel

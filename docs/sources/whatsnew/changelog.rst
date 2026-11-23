@@ -42,6 +42,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``Optimize.usermodels`` now keeps each registered model in an independent
+  adapter. Registering another function or configuring another optimizer no
+  longer replaces existing model functions and parameter signatures, preventing
+  incorrect fits with multiple user models. Model instances retain their bound
+  state and have independent parameter-name lists.
+
 - ``ActionMassKinetics``: the analytical Jacobian (``use_jac=True``) is now correct
   for stoichiometric coefficients greater than one; ``fit_to_concentrations``
   honors ``method`` in ``optimizer_kwargs`` (it was silently ignored, and
