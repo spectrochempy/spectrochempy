@@ -139,6 +139,13 @@ Bug Fixes
   coordinates. ``stack`` of datasets without coordinates no longer files the
   new stacking coordinate under the wrong dimension (:pr:`1955`).
 
+- 2D plots: with ``clear=False``, line (stack) plots now keep the vertical
+  limits of the lines already drawn on the axes instead of clipping them to
+  the new dataset, as 1D plots do. ``x_reverse=False``, ``reverse=False`` and
+  ``y_reverse=False`` now disable the automatic reversal of wavenumber and ppm
+  axes, as documented; without these parameters the axes are reversed as
+  before (:issue:`1945`, :pr:`1956`).
+
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing

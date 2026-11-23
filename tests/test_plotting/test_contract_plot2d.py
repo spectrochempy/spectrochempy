@@ -303,3 +303,90 @@ def test_named_linear_norm_accepts_zero_limits(method, bipolar):
         show=False,
     )
     np.testing.assert_array_equal(ax.collections[0].norm(data), Normalize(0, 0)(data))
+
+
+def _wavenumber_spectra(height):
+    import spectrochempy as scp
+
+    x = scp.Coord.linspace(1480.0, 1430.0, 101, title="wavenumbers", units="cm^-1")
+    rows = [
+        scp.gaussian(x, ampl=height, pos=pos, width=8.0, normalized=False).data
+        for pos in (1452.0, 1458.0)
+    ]
+    return scp.NDDataset(rows, coordset=[scp.Coord([0.0, 1.0], title="spectrum"), x])
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "decreasing"),
+    [
+        ({}, True),
+        ({"x_reverse": True}, True),
+        ({"x_reverse": False}, False),
+        ({"reverse": True}, True),
+        ({"reverse": False}, False),
+        ({"x_reverse": False, "reverse": True}, False),
+    ],
+)
+def test_plot2d_x_reverse_matches_plot1d(kwargs, decreasing):
+    import matplotlib.pyplot as plt
+
+    dataset = _wavenumber_spectra(1.0)
+    xlim_1d = dataset[0].squeeze().plot(show=False, **kwargs).get_xlim()
+    assert bool(xlim_1d[0] > xlim_1d[1]) is decreasing
+    for method in ("lines", "image"):
+        xlim_2d = dataset.plot(method=method, show=False, **kwargs).get_xlim()
+        assert xlim_2d == pytest.approx(xlim_1d)
+    plt.close("all")
+
+
+@pytest.mark.parametrize("method", ["lines", "image"])
+def test_plot2d_x_reverse_none_uses_coordinate_convention(method):
+    import matplotlib.pyplot as plt
+
+    dataset = _wavenumber_spectra(1.0)
+    xlim = dataset.plot(method=method, x_reverse=None, show=False).get_xlim()
+    assert xlim == pytest.approx((1480.0, 1430.0))
+    plt.close("all")
+
+
+@pytest.mark.parametrize(
+    ("y_reverse", "expected"),
+    [(None, (1550.0, 1350.0)), (True, (1550.0, 1350.0)), (False, (1350.0, 1550.0))],
+)
+def test_plot2d_y_reverse_overrides_coordinate_convention(y_reverse, expected):
+    import matplotlib.pyplot as plt
+
+    import spectrochempy as scp
+
+    dataset = _wavenumber_spectra(1.0)
+    dataset.y = scp.Coord([1500.0, 1400.0], title="wavenumbers", units="cm^-1")
+    ax = dataset.plot(method="image", y_reverse=y_reverse, show=False)
+    assert ax.get_ylim() == pytest.approx(expected)
+    plt.close("all")
+
+
+def test_plot2d_clear_false_keeps_previous_vertical_limits():
+    import matplotlib.pyplot as plt
+
+    first = _wavenumber_spectra(3.0)
+    second = _wavenumber_spectra(1.0)
+
+    ax_1d = first[0].squeeze().plot(show=False)
+    second[0].squeeze().plot(ax=ax_1d, clear=False, show=False)
+    ax_2d = first.plot(method="lines", show=False)
+    second.plot(method="lines", ax=ax_2d, clear=False, show=False)
+
+    for ax in (ax_1d, ax_2d):
+        assert ax.get_ylim()[1] >= first.data.max()
+    plt.close("all")
+
+
+def test_plot2d_clear_false_respects_explicit_zlim():
+    import matplotlib.pyplot as plt
+
+    ax = _wavenumber_spectra(3.0).plot(method="lines", show=False)
+    _wavenumber_spectra(1.0).plot(
+        method="lines", ax=ax, clear=False, zlim=(0.0, 1.0), show=False
+    )
+    assert ax.get_ylim() == pytest.approx((0.0, 1.0))
+    plt.close("all")

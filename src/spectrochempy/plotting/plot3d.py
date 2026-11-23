@@ -108,14 +108,16 @@ def plot_surface(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -227,14 +229,16 @@ def plot_waterfall(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -366,14 +370,16 @@ def plot_3D(dataset, method="surface", **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
