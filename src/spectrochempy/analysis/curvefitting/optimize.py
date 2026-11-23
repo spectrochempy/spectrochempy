@@ -25,8 +25,11 @@ from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
 from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
-from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
-from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
+from spectrochempy.analysis.curvefitting._parameter_space import _internal_vector
+from spectrochempy.analysis.curvefitting._parameter_space import (
+    _modelspec_parameter_count,
+)
+from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
@@ -245,48 +248,6 @@ def _compute_fit_diagnostics(observed, fitted, solver_meta=None, fit_parameters=
     }
     diagnostics.update(dict(solver_meta or {}))
     return residuals, diagnostics
-
-
-def _modelspec_parameter_count(spec):
-    """Return the FitParameters-compatible total parameter count for a spec."""
-    return len(spec.common_params) + sum(len(comp.params) for comp in spec.components)
-
-
-def _restore_modelspec_external(spec, values, keys):
-    """Restore external parameter values in a model spec from optimizer values."""
-    key_index = {key: idx for idx, key in enumerate(keys)}
-    for key, ps in spec._iter_varying():
-        lob, upb = ps.bounds
-        if ps.name in spec.expvars:
-            restored = []
-            for i in range(spec.expnumber):
-                exp_key = f"{key}_exp{i}"
-                if exp_key not in key_index:
-                    break
-                restored.append(_to_external(values[key_index[exp_key]], lob, upb))
-            if restored:
-                ps.value = restored
-        else:
-            if key not in key_index:
-                continue
-            ps.value = _to_external(values[key_index[key]], lob, upb)
-    return spec
-
-
-def _modelspec_internal_vector(spec):
-    """Return internal optimizer values and keys for varying spec parameters."""
-    values = []
-    keys = []
-    for key, ps in spec._iter_varying():
-        lob, upb = ps.bounds
-        if ps.name in spec.expvars:
-            for i in range(spec.expnumber):
-                values.append(_to_internal(ps.value[i], lob, upb))
-                keys.append(f"{key}_exp{i}")
-        else:
-            values.append(_to_internal(ps.value, lob, upb))
-            keys.append(key)
-    return values, keys
 
 
 def _sync_fitparameters_from_modelspec(fp, spec):
@@ -2193,40 +2154,8 @@ def _optimize(
     global keys
     use_model_spec = isinstance(fp0, _FitModelSpec)
 
-    def restore_external(fp, p, keys):
-        # restore external parameters
-        if isinstance(fp, _FitModelSpec):
-            return _restore_modelspec_external(fp, p, keys)
-
-        for key in list(fp.keys()):
-            keysp = key.split("_")
-            if keysp[0] in fp.expvars:
-                ps = []
-                for i in range(fp.expnumber):
-                    ks = f"{key}_exp{i}"
-                    if ks not in keys:
-                        break
-                    k = keys.index(ks)
-                    ps.append(p[k])
-                if ps:
-                    fp.data[key] = _to_external(
-                        ps,
-                        fp.lob[key],
-                        fp.upb[key],
-                    )
-            else:
-                if key not in keys:
-                    continue
-                k = keys.index(key)
-                fp.data[key] = _to_external(
-                    p[k],
-                    fp.lob[key],
-                    fp.upb[key],
-                )
-        return fp
-
     def internal_func(p, dat, fp, keys, *args):
-        fp = restore_external(fp, p, keys)
+        fp = _restore_external(fp, p, keys)
         return func(fp, dat)
 
     def internal_callback(*args):
@@ -2237,37 +2166,7 @@ def _optimize(
     if not isinstance(fp0, FitParameters | _FitModelSpec):
         raise TypeError("fp0 is not of FitParameter or _FitModelSpec type")
 
-    # make internal parameters
-    if use_model_spec:
-        par, keys = _modelspec_internal_vector(fp0)
-    else:
-        par = []
-        keys = []
-
-        for key in sorted(fp0.keys()):
-            if not fp0.fixed[key]:
-                # we make internal parameters in case of bounding
-                # We also take care of the multiple experiments
-                keysp = key.split("_")[0]
-                if keysp in fp0.expvars:
-                    for i in range(fp0.expnumber):
-                        par.append(
-                            _to_internal(
-                                fp0.data[key][i],
-                                fp0.lob[key],
-                                fp0.upb[key],
-                            ),
-                        )
-                        keys.append(f"{key}_exp{i}")
-                else:
-                    par.append(
-                        _to_internal(
-                            fp0.data[key],
-                            fp0.lob[key],
-                            fp0.upb[key],
-                        ),
-                    )
-                    keys.append(key)
+    par, keys = _internal_vector(fp0)
 
     args = list(args)
     args.append(fp0)
@@ -2339,7 +2238,7 @@ def _optimize(
         raise NotImplementedError(f"method: {method}")
 
     # restore the external parameter
-    fpe = restore_external(fp0, res, keys)
+    fpe = _restore_external(fp0, res, keys)
     # for i, key in enumerate(keys):
     #    fp0.to_external(key, res[i])
 

@@ -11,6 +11,7 @@ __all__ = [
     "_modelspec",
     "_optimize_nd",
     "_optimize_profiles",
+    "_parameter_space",
     "_parameter_transform",
     "_parameters",
     "_profile_models",
@@ -23,6 +24,7 @@ from . import _models
 from . import _modelspec
 from . import _optimize_nd
 from . import _optimize_profiles
+from . import _parameter_space
 from . import _parameter_transform
 from . import _parameters
 from . import _profile_models
