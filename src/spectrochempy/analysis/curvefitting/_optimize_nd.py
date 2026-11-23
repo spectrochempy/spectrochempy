@@ -6,8 +6,10 @@ from copy import deepcopy
 
 import numpy as np
 from pint import Quantity as PintQuantity
-from scipy.optimize import least_squares
 
+from spectrochempy.analysis.curvefitting._fit_backend import (
+    _least_squares as least_squares,
+)
 from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
 from spectrochempy.analysis.curvefitting._profile_models import extended_profiles
 from spectrochempy.analysis.curvefitting._profile_models import profile_history

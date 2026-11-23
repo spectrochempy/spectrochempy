@@ -13,12 +13,16 @@ import sys
 import numpy as np
 import traitlets as tr
 from IPython import display
-from scipy import optimize
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
+from spectrochempy.analysis.curvefitting import _fit_backend
 from spectrochempy.analysis.curvefitting import _models as models_
+from spectrochempy.analysis.curvefitting._fit_backend import _extract_solver_artifacts
+from spectrochempy.analysis.curvefitting._fit_backend import _freeze_jacobian_artifact
+from spectrochempy.analysis.curvefitting._fit_backend import _normalize_solver_meta
+from spectrochempy.analysis.curvefitting._fit_backend import _run_optimizer
 from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
@@ -35,6 +39,8 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+
+optimize = _fit_backend.optimize
 
 
 # ======================================================================================
@@ -108,15 +114,6 @@ def _scalar_from_masked(value, *, default=np.nan):
     if np.ma.is_masked(value):
         return float(default)
     return float(value)
-
-
-def _freeze_jacobian_artifact(jacobian):
-    """Return an immutable ndarray snapshot of a solver-provided Jacobian."""
-    if jacobian is None:
-        return None
-    array = np.array(jacobian, copy=True)
-    array.flags.writeable = False
-    return array
 
 
 def _freeze_covariance_matrix(covariance):
@@ -345,89 +342,6 @@ def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
     covariance = sigma2 * np.linalg.pinv(information, hermitian=True)
     covariance = 0.5 * (covariance + covariance.T)
     return _freeze_covariance_matrix(covariance)
-
-
-def _normalize_solver_meta(method, result, warnmess=None):
-    """Normalize backend-specific solver information into stable diagnostics."""
-    message = getattr(result, "message", warnmess)
-    if isinstance(message, (list, tuple)):
-        message = " ".join(str(item) for item in message)
-    elif message is None:
-        message = ""
-    else:
-        message = str(message)
-
-    method_lower = method.lower()
-    if method_lower in ["lm", "trf"]:
-        return {
-            "success": bool(getattr(result, "success", False)),
-            "status": getattr(result, "status", None),
-            "message": message,
-        }
-
-    if method_lower == "simplex":
-        status = int(warnmess) if warnmess is not None else None
-        if status == 0:
-            success = True
-            message = message or "Optimization terminated successfully."
-        elif status == 1:
-            success = False
-            message = message or "Maximum number of function evaluations made."
-        elif status == 2:
-            success = False
-            message = message or "Maximum number of iterations reached."
-        else:
-            success = False
-            message = message or "Simplex optimization ended with an unknown status."
-        return {
-            "success": success,
-            "status": status,
-            "message": message,
-        }
-
-    if method_lower == "basinhopping":
-        lowest = getattr(result, "lowest_optimization_result", None)
-        success = getattr(result, "success", None)
-        status = getattr(result, "status", None)
-        if lowest is not None:
-            if success is None:
-                success = getattr(lowest, "success", None)
-            if status is None:
-                status = getattr(lowest, "status", None)
-            if not message:
-                lowest_message = getattr(lowest, "message", "")
-                if isinstance(lowest_message, (list, tuple)):
-                    lowest_message = " ".join(str(item) for item in lowest_message)
-                message = str(lowest_message)
-        if success is None:
-            success = bool(status in (0, 1, True)) if status is not None else False
-        return {
-            "success": bool(success),
-            "status": status,
-            "message": message,
-        }
-
-    return {
-        "success": False,
-        "status": None,
-        "message": message,
-    }
-
-
-def _extract_solver_artifacts(method, result):
-    """Retain backend artifacts needed for future uncertainty features."""
-    method_lower = method.lower()
-
-    if method_lower in ["lm", "trf"]:
-        return {
-            "jacobian": _freeze_jacobian_artifact(getattr(result, "jac", None)),
-            "jacobian_backend": method_lower,
-        }
-
-    return {
-        "jacobian": None,
-        "jacobian_backend": method_lower,
-    }
 
 
 def _parse_script_to_modelspec(script, usermodels=None):
@@ -2181,61 +2095,28 @@ def _optimize(
         n_parameters = _modelspec_parameter_count(fp0) if use_model_spec else len(fp0)
         method = "lm" if n_parameters < 10 else "trf"
 
+    result = _run_optimizer(
+        internal_func,
+        par,
+        args=tuple(args),
+        method=method,
+        maxfun=maxfun,
+        maxiter=maxiter,
+        ftol=ftol,
+        xtol=xtol,
+        callback=internal_callback,
+    )
     if method.lower() in ["lm", "trf"]:
-        result = optimize.least_squares(
-            internal_func,
-            par,
-            args=tuple(args),
-            method=method.lower(),
-        )
         res, fopt, warnmess = result.x, result.cost, result.message
-        solver_meta = _normalize_solver_meta(method, result, warnmess)
-        solver_artifacts = _extract_solver_artifacts(method, result)
-
+        solver_result = result
     elif method.lower() == "simplex":
-        result = optimize.fmin(
-            internal_func,
-            par,
-            args=tuple(args),
-            maxfun=maxfun,
-            maxiter=maxiter,
-            ftol=ftol,
-            xtol=xtol,
-            full_output=True,
-            disp=False,
-            callback=internal_callback,
-        )
         res, fopt, _, _, warnmess = result
-        solver_meta = _normalize_solver_meta(method, None, warnmess)
-        solver_artifacts = _extract_solver_artifacts(method, None)
-
-    elif method.lower() == "basinhopping":
-        result = optimize.basinhopping(
-            internal_func,
-            par,
-            niter=100,
-            T=1.0,
-            stepsize=0.5,
-            minimizer_kwargs={"args": tuple(args)},
-            take_step=None,
-            accept_test=None,
-            callback=internal_callback,
-            interval=50,
-            disp=False,
-            niter_success=None,
-        )
-
-        # fmin(func, par, args=args, maxfun=maxfun, maxiter=maxiter, ftol=ftol, xtol=xtol,
-        #                                                full_output=True, disp=False, callback=callback)
-        res, fopt, warnmess = result.x, result.fun, result.message
-        solver_meta = _normalize_solver_meta(method, result, warnmess)
-        solver_artifacts = _extract_solver_artifacts(method, result)
-
-    elif method == "XXXX":
-        raise NotImplementedError(f"method: {method}")
-        # TODO: implement other algorithms
+        solver_result = None
     else:
-        raise NotImplementedError(f"method: {method}")
+        res, fopt, warnmess = result.x, result.fun, result.message
+        solver_result = result
+    solver_meta = _normalize_solver_meta(method, solver_result, warnmess)
+    solver_artifacts = _extract_solver_artifacts(method, solver_result)
 
     # restore the external parameter
     fpe = _restore_external(fp0, res, keys)

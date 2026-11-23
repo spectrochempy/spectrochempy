@@ -5,8 +5,10 @@ from collections.abc import Sequence
 from dataclasses import replace
 
 import numpy as np
-from scipy.optimize import least_squares
 
+from spectrochempy.analysis.curvefitting._fit_backend import (
+    _least_squares as least_squares,
+)
 from spectrochempy.analysis.curvefitting._optimize_nd import _fit_diagnostics
 from spectrochempy.analysis.curvefitting._optimize_nd import _fit_outputs
 from spectrochempy.analysis.curvefitting._optimize_nd import _grid
