@@ -134,6 +134,13 @@ Bug Fixes
   first data column is read), and its docstring examples show the actual
   behavior (:issue:`1971`, :pr:`1978`).
 
+- Printing or displaying an ``NDDataset``, ``Coord`` or ``CoordSet`` no longer
+  changes the global NumPy print options; user arrays keep their own
+  ``np.set_printoptions`` settings (:issue:`1974`). The text of these objects,
+  and of binary-operation history entries, is unchanged. Array-valued pint
+  ``Quantity`` objects (for instance ``Coord.values``), which are formatted by
+  pint rather than by SpectroChemPy, now follow the user's NumPy print options.
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata
