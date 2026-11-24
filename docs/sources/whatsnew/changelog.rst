@@ -126,6 +126,9 @@ Bug Fixes
   clearer message, and ``nrow`` or ``ncol`` values that are not positive
   integers raise a ``ValueError`` (:issue:`1946`).
 
+- ``EFA.f_ev`` and ``EFA.b_ev`` are now titled "eigenvalues" instead of
+  inheriting the title of the input data (:issue:`1973`).
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata
