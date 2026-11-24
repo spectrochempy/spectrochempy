@@ -3,6 +3,7 @@
 import inspect
 import re
 from collections.abc import Mapping
+from copy import deepcopy
 from numbers import Real
 
 import numpy as np
@@ -77,3 +78,31 @@ def _callable_model_spec(
         common_params=common,
     )
     return spec, {"pythonmodel": model}
+
+
+def _callable_models_spec(functions, parameters=None, *, common_params=None):
+    """Combine named callable definitions with one shared COMMON parameter block."""
+    if not isinstance(functions, Mapping):
+        raise TypeError("functions must be a mapping of component labels to callables")
+    if not functions:
+        raise ValueError("At least one callable component is required")
+    if parameters is not None and not isinstance(parameters, Mapping):
+        raise TypeError("parameters must be a mapping of component definitions")
+    definitions = dict(parameters or {})
+    unknown = [label for label in definitions if label not in functions]
+    if unknown:
+        raise ValueError(f"Unknown component parameter definitions: {unknown}")
+    components = []
+    registry = {}
+    common = {}
+    for index, (label, function) in enumerate(functions.items()):
+        spec, model = _callable_model_spec(
+            function, definitions.get(label), label=label, common_params=common_params
+        )
+        component = deepcopy(spec.components[0])
+        component.model_name = "pythonmodel" if index == 0 else f"pythonmodel{index}"
+        components.append(component)
+        registry[component.model_name] = model["pythonmodel"]
+        if index == 0:
+            common = spec.common_params
+    return _FitModelSpec(components=components, common_params=common), registry
