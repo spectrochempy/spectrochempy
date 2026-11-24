@@ -21,6 +21,7 @@ from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis.curvefitting import _fit_backend
 from spectrochempy.analysis.curvefitting import _models as models_
 from spectrochempy.analysis.curvefitting._callable_spec import _callable_model_spec
+from spectrochempy.analysis.curvefitting._callable_spec import _callable_models_spec
 from spectrochempy.analysis.curvefitting._fit_backend import _extract_solver_artifacts
 from spectrochempy.analysis.curvefitting._fit_backend import _freeze_jacobian_artifact
 from spectrochempy.analysis.curvefitting._fit_backend import _normalize_solver_meta
@@ -936,6 +937,21 @@ class Optimize(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
+
+    @classmethod
+    def _from_callables(
+        cls, functions, parameters=None, *, common_params=None, **kwargs
+    ):
+        """Compose private callable components through the canonical 1D pipeline."""
+        if "usermodels" in kwargs:
+            raise ValueError("Callable components cannot be combined with usermodels")
+        spec, usermodels = _callable_models_spec(
+            functions, parameters, common_params=common_params
+        )
+        kwargs.setdefault("amplitude_mode", "area")
+        kwargs.setdefault("autobase", False)
+        kwargs.setdefault("autoampl", False)
+        return cls._from_model_spec(spec, usermodels=usermodels, **kwargs)
 
     @classmethod
     def _from_callable(
