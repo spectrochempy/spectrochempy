@@ -294,7 +294,7 @@ class TestBaselinePlotWithRegions:
         """Baseline.plot(show_regions=True) renders regions."""
         orig = _make_synthetic_dataset_1d()
         bl = scp.Baseline()
-        bl.ranges = [(3500, 3000), (1500, 1200)]
+        bl.ranges = [(3500.0, 3000.0), (1500.0, 1200.0)]
         bl.fit(orig)
 
         ax1, ax2 = bl.plot(show_regions=True, show=False)
@@ -308,7 +308,7 @@ class TestBaselinePlotWithRegions:
         """Baseline.plot(show_regions=False) does not render regions."""
         orig = _make_synthetic_dataset_1d()
         bl = scp.Baseline()
-        bl.ranges = [(3500, 3000), (1500, 1200)]
+        bl.ranges = [(3500.0, 3000.0), (1500.0, 1200.0)]
         bl.fit(orig)
 
         ax1, ax2 = bl.plot(show_regions=False, show=False)

@@ -44,6 +44,17 @@ New Features
   Existing models and defaults are unchanged; no NMR dependency is added
   (:pr:`1932`).
 
+- Run-time hints for surprising defaults. ``align(method="inner")`` warns when
+  the intersection keeps fewer than half of the points of the sparsest
+  coordinate in the common range, or keeps irregularly spaced points from
+  regular grids, and suggests ``method="interpolate"``. ``MCRALS.fit`` lists
+  the active constraints, defaults included, in its ``INFO`` log.
+  ``Baseline`` ``ranges`` that select no points are reported, in the error
+  raised when no support remains or in a warning when they are ignored, with a
+  reminder that integer limits are indices and float limits coordinates. The
+  error for integer ranges outside the coordinate domain carries the same
+  reminder (:issue:`1954`).
+
 
 
 .. section
@@ -60,6 +71,20 @@ Bug Fixes
   coordinates, units and metadata conventions as ``PCA``. Unlike ``PCA``,
   SVD does not center the data. ``SVD.n_components`` is now available after
   ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`).
+
+- ``multiplot`` now accepts fewer datasets than ``nrow * ncol`` panels: the
+  unused panels are hidden and still returned with the other axes, instead of
+  raising "Not enough datasets given in this list". A grid given with both
+  ``nrow`` and ``ncol`` that is too small for the datasets now raises a clear
+  ``ValueError`` instead of being silently replaced. When only one of them is
+  given, the other is inferred to hold every dataset (``nrow=1`` with three
+  datasets gives a 1 x 3 grid). Without ``nrow`` and ``ncol``, the automatic
+  grid now holds every dataset: three datasets are plotted on a 2 x 2 grid
+  instead of dropping one, and five or more no longer fail with an
+  ``IndexError``; one, two and four datasets keep their layout. Calling
+  ``multiplot`` without any dataset still raises a ``ValueError``, with a
+  clearer message, and ``nrow`` or ``ncol`` values that are not positive
+  integers raise a ``ValueError`` (:issue:`1946`).
 
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
@@ -103,12 +128,27 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- ``plot_compare`` (and ``plot_merit``) legends now use "experimental" and
+  "calculated" instead of automatic dataset names such as
+  ``NDDataset_1a2b3c4d``; names set on the datasets remain the default labels.
+  The legend is built from the plotted lines, so it shows their line styles and
+  transparency, and lists the other labelled artists of the axes whose label is
+  not already shown (:issue:`1954`).
+
+- ``Baseline`` ``ranges`` that select no points now raise a ``ValueError``
+  instead of a ``TraitError`` when no baseline support remains
+  (:issue:`1954`).
+
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+- Passing ``labels`` to ``plot_compare`` is deprecated: it is ignored and emits
+  a ``DeprecationWarning``. Use ``exp_label``, ``calc_label`` and
+  ``resid_label`` instead (:issue:`1954`).
 
 - The experimental ``spectrochempy-cantera`` plugin and its ``PFR`` model
   (``scp.cantera.PFR`` and the deprecated alias ``scp.PFR``) will be removed in
