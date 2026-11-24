@@ -117,6 +117,18 @@ Bug Fixes
   clearer message, and ``nrow`` or ``ncol`` values that are not positive
   integers raise a ``ValueError`` (:issue:`1946`).
 
+- ``Baseline.plot`` and ``plot_baseline`` now emit a warning naming the keyword
+  arguments they ignore, instead of silently dropping them. The documentation
+  lists the supported options and the gallery example no longer passes unused
+  ones (:issue:`1976`).
+
+- ``EFA.f_ev`` and ``EFA.b_ev`` are now titled "eigenvalues" instead of
+  inheriting the title of the input data (:issue:`1973`).
+
+- The ``MCRALS`` ``normSpec="euclid"`` help now correctly states that spectra
+  are normalized by their Euclidean (L2) norm, not their total area; behavior is
+  unchanged (:issue:`1975`).
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata
