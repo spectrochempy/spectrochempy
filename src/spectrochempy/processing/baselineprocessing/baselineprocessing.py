@@ -1278,9 +1278,11 @@ baseline/trends for different segments of the data.
         **kwargs : keyword arguments, optional
             Options of `~spectrochempy.plot_baseline` (``region_color``,
             ``region_alpha``, ``clear``, ``show``, ``output``, ``linewidth``,
-            ``linestyle``, ``baseline_linestyle``, ``baseline_color``). Any
-            other keyword argument is ignored and a warning naming the
-            ignored arguments is emitted.
+            ``linestyle``, ``baseline_linestyle``, ``baseline_color``).
+            ``original``, ``baseline``, ``corrected``, ``regions`` and ``ax``
+            are set by the method and cannot be passed. Any other unknown
+            keyword argument is ignored and a warning naming the ignored
+            arguments is emitted.
 
         Returns
         -------
@@ -1291,10 +1293,14 @@ baseline/trends for different segments of the data.
         from spectrochempy.plotting.composite.plotbaseline import _warn_ignored_kwargs
         from spectrochempy.plotting.composite.plotbaseline import plot_baseline
 
-        known = set(inspect.signature(plot_baseline).parameters)
+        known = {
+            name
+            for name, param in inspect.signature(plot_baseline).parameters.items()
+            if param.kind in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
+        }
         unknown = [k for k in kwargs if k not in known]
         if unknown:
-            _warn_ignored_kwargs(unknown, stacklevel=3)
+            _warn_ignored_kwargs(unknown, stacklevel=3, caller="Baseline.plot")
             kwargs = {k: v for k, v in kwargs.items() if k in known}
 
         original = self.X

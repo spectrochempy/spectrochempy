@@ -26,10 +26,10 @@ from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import make_label
 
 
-def _warn_ignored_kwargs(names, stacklevel):
-    """Warn that the keyword arguments `names` are not plot_baseline options."""
+def _warn_ignored_kwargs(names, stacklevel, caller="plot_baseline"):
+    """Warn that the keyword arguments `names` are ignored by `caller`."""
     warnings.warn(
-        "plot_baseline ignores unknown keyword argument(s): "
+        f"{caller} ignores unknown keyword argument(s): "
         + ", ".join(repr(n) for n in sorted(names)),
         UserWarning,
         stacklevel=stacklevel,

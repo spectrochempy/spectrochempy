@@ -407,7 +407,9 @@ class TestPlotBaselineIgnoredKwargs:
     def test_unknown_kwargs_warn_and_name_arguments(self):
         orig = _make_synthetic_dataset_1d()
         baseline = orig * 0.2
-        with pytest.warns(UserWarning, match=r"'nb_traces', 'offset'") as rec:
+        with pytest.warns(
+            UserWarning, match=r"plot_baseline ignores.*'nb_traces', 'offset'"
+        ) as rec:
             plot_baseline(
                 orig, baseline, orig - baseline, show=False, offset=1, nb_traces=2
             )
@@ -421,7 +423,7 @@ class TestPlotBaselineIgnoredKwargs:
         orig = _make_synthetic_dataset_1d()
         baseline = orig * 0.2
         with warnings.catch_warnings():
-            warnings.simplefilter("error")
+            warnings.filterwarnings("error", message=".*ignores unknown keyword.*")
             plot_baseline(
                 orig,
                 baseline,
@@ -444,11 +446,19 @@ class TestPlotBaselineIgnoredKwargs:
         ds = _make_synthetic_dataset_2d()
         blc = scp.Baseline()
         blc.fit(ds)
-        with pytest.warns(UserWarning, match=r"'nb_traces'") as rec:
+        with pytest.warns(
+            UserWarning, match=r"Baseline\.plot ignores.*'nb_traces'"
+        ) as rec:
             blc.plot(nb_traces=2, show=False)
         assert len(rec) == 1
         assert rec[0].filename == __file__
+        with pytest.warns(
+            UserWarning, match=r"Baseline\.plot ignores.*'kwargs'"
+        ) as rec:
+            blc.plot(kwargs=1, show=False)
+        assert len(rec) == 1
+        assert rec[0].filename == __file__
         with warnings.catch_warnings():
-            warnings.simplefilter("error")
+            warnings.filterwarnings("error", message=".*ignores unknown keyword.*")
             blc.plot(show_regions=True, linewidth=2.0, show=False)
         plt.close("all")

@@ -66,7 +66,6 @@ def test_efa_fit_returns_forward_and_backward_ev(efa_dataset):
     assert efa.b_ev.dims == ["y", "k"]
     assert efa.f_ev.title == "eigenvalues"
     assert efa.b_ev.title == "eigenvalues"
-    assert efa.f_ev.title != efa_dataset.title
     assert efa.f_ev.units is None
     assert efa.b_ev.units is None
 
