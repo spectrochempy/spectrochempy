@@ -31,6 +31,8 @@ from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
+from spectrochempy.analysis.curvefitting._optimize_curves import CURVE_MODELS
+from spectrochempy.analysis.curvefitting._optimize_curves import fit_curve
 from spectrochempy.analysis.curvefitting._optimize_model import fit_callable_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
 from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
@@ -801,6 +803,14 @@ class Optimize(DecompositionAnalysis):
     covariance is available for converged, full-rank fits with positive
     residual degrees of freedom and no active bounds.
 
+    For a recovery or decay curve, use ``model="saturation_recovery"`` or
+    ``model="exponential_decay"`` with ``parameters={"amplitude": ..., "tau": ...}``.
+    These named models fit a native 1D dataset without a user function. They
+    retain the recorded coordinates, including nonuniform or decreasing delays.
+    The fitted ``tau`` is available with its coordinate unit through
+    ``result.fitted_parameters["tau"]``. Recovery starts at zero and approaches
+    ``amplitude``; decay starts at ``amplitude`` and approaches zero.
+
     Full-grid models receive a zero-valued template with detached, full-precision
     coordinates and the fixed finite/unmasked observation support. Parameters
     are passed by keyword. Array outputs use the observations' intensity units;
@@ -828,6 +838,20 @@ class Optimize(DecompositionAnalysis):
         This is a general estimator-state option shared with other
         SpectroChemPy analysis classes; it should not be interpreted as a
         dedicated `Optimize` solver-backend feature.
+
+    Examples
+    --------
+    Fit a measured 1D recovery curve named ``signal``:
+
+    .. code-block:: python
+
+        fit = scp.Optimize(
+            model="saturation_recovery",
+            parameters={"amplitude": 4000, "tau": 2 * scp.ur.s},
+        ).fit(signal)
+        print(fit.result.fitted_parameters["tau"])
+        prediction = fit.predict()
+        residual = fit.result.residuals
 
     """
 
@@ -941,13 +965,20 @@ class Optimize(DecompositionAnalysis):
             references in heights or axis parameters. Each shared value is
             optimized once. Definitions accept ``value``, ``bounds``, ``fixed``
             and ``unit``. This option requires ``peaks``.
-        model : callable, optional
+        model : callable or {"saturation_recovery", "exponential_decay"}, optional
             Enable full-grid ND fitting with ``model(template, **parameters)``.
             The template is a detached NDDataset with zero data, full-precision
             coordinates and the effective observation mask. Return a real array
             or compatible NDDataset on that grid, or an ordered mapping of
             named components. Components are summed without implicit scaling.
             Cannot be combined with peaks or script.
+            The named laws instead fit a real 1D dataset with nonnegative,
+            strictly monotone coordinates. Both require ``amplitude`` and ``tau``
+            initial values. Amplitude uses intensity units and tau uses coordinate
+            units; compatible Pint quantities are converted automatically.
+            A scalar tau has a positive lower bound by default. Explicit bounds
+            must also be positive. Named laws do not use ``linear_amplitudes``
+            or ``solver_options``.
         parameters : mapping, optional
             Named values for model. Each scalar is initially free. A definition
             can contain value, bounds, fixed, unit and a positive scale for free
@@ -972,11 +1003,19 @@ class Optimize(DecompositionAnalysis):
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
+        named_curve = isinstance(model, str) and model in CURVE_MODELS
         if model is not None and (
-            not callable(model) or peaks is not None or "script" in kwargs
+            not (callable(model) or named_curve)
+            or peaks is not None
+            or "script" in kwargs
         ):
             raise ValueError(
-                "model requires a callable and cannot be combined with peaks or script"
+                "model requires a callable or a named recovery/decay law "
+                "and cannot be combined with peaks or script"
+            )
+        if named_curve and (linear_amplitudes or solver_options is not None):
+            raise ValueError(
+                "Named curves do not accept linear_amplitudes or solver_options"
             )
         if model is None and (
             parameters is not None or linear_amplitudes or solver_options is not None
@@ -1992,7 +2031,9 @@ class Optimize(DecompositionAnalysis):
             )
         max_calls = self.max_fun_calls or 4 * self.max_iter
 
-        if self._nd_model is not None:
+        if isinstance(self._nd_model, str):
+            fit, solution = fit_curve(X, self._nd_model, self._nd_parameters, max_calls)
+        elif self._nd_model is not None:
             fit, solution = fit_callable_model(
                 X,
                 self._nd_model,
@@ -2019,7 +2060,9 @@ class Optimize(DecompositionAnalysis):
         fit["jacobian"] = _freeze_jacobian_artifact(fit["jacobian"])
         fit["config"] = {
             "method": "trf",
-            "mode": "callable_model"
+            "mode": "named_curve"
+            if isinstance(self._nd_model, str)
+            else "callable_model"
             if self._nd_model is not None
             else "separable_peaks",
             "max_fun_calls": max_calls,
@@ -2027,6 +2070,8 @@ class Optimize(DecompositionAnalysis):
         if self._nd_model is not None:
             fit["config"]["solver_options"] = deepcopy(self._nd_solver_options)
             fit["config"]["linear_amplitudes"] = self._nd_linear_amplitudes
+        if isinstance(self._nd_model, str):
+            fit["config"]["model"] = self._nd_model
         self._nd_fit = fit
         self._n_components = len(fit["components"])
         self._fitted = True
