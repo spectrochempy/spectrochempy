@@ -20,6 +20,7 @@ from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import FitResult
 from spectrochempy.analysis.curvefitting import _fit_backend
 from spectrochempy.analysis.curvefitting import _models as models_
+from spectrochempy.analysis.curvefitting._callable_spec import _callable_model_spec
 from spectrochempy.analysis.curvefitting._fit_backend import _extract_solver_artifacts
 from spectrochempy.analysis.curvefitting._fit_backend import _freeze_jacobian_artifact
 from spectrochempy.analysis.curvefitting._fit_backend import _normalize_solver_meta
@@ -935,6 +936,21 @@ class Optimize(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
+
+    @classmethod
+    def _from_callable(
+        cls, function, parameters=None, *, label="model", common_params=None, **kwargs
+    ):
+        """Prepare a private scalar callable model without a user-written script."""
+        if "usermodels" in kwargs:
+            raise ValueError("A callable model cannot be combined with usermodels")
+        spec, usermodels = _callable_model_spec(
+            function, parameters, label=label, common_params=common_params
+        )
+        kwargs.setdefault("amplitude_mode", "area")
+        kwargs.setdefault("autobase", False)
+        kwargs.setdefault("autoampl", False)
+        return cls._from_model_spec(spec, usermodels=usermodels, **kwargs)
 
     @classmethod
     def _from_model_spec(cls, model_spec, **kwargs):
