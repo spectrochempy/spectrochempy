@@ -390,3 +390,19 @@ def test_plot2d_clear_false_respects_explicit_zlim():
     )
     assert ax.get_ylim() == pytest.approx((0.0, 1.0))
     plt.close("all")
+
+
+def test_plot2d_clear_false_keeps_previous_limits_in_log_scale():
+    import matplotlib.pyplot as plt
+
+    import spectrochempy as scp
+
+    first = scp.NDDataset([[1.0, 100.0, 10.0], [1.0, 100.0, 10.0]])
+    second = scp.NDDataset([[0.0, 1.0, 2.0], [0.0, 2.0, 1.0]])
+
+    ax = first.plot(method="lines", yscale="log", show=False)
+    assert ax.get_ylim() == pytest.approx((1.0, 100.0))
+    second.plot(method="lines", ax=ax, clear=False, yscale="log", show=False)
+
+    assert ax.get_ylim() == pytest.approx((0.001, 100.0))
+    plt.close("all")

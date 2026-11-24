@@ -1872,6 +1872,7 @@ def plot_2D(dataset, method=None, **kwargs):
             zl = (np.min(np.ma.min(zdata) - amp), np.max(np.ma.max(zdata)) + amp)
             zlim = list(kwargs.get("zlim", zl))
             zlim.sort()
+            current = None
             if "zlim" not in kwargs and not kwargs.get("clear", True) and ax.lines:
                 current = sorted(ax.get_ylim())
                 zlim = [min(zlim[0], current[0]), max(zlim[1], current[1])]
@@ -1885,10 +1886,16 @@ def plot_2D(dataset, method=None, **kwargs):
                 # set the limits wrt smallest and largest strictly positive values
                 mi = np.amin(np.abs(zdata))
                 ma = np.amax(np.abs(zdata))
-                ax.set_ylim(
+                log_lim = [
                     10 ** (int(np.log10(mi + (ma - mi) * 0.001)) - 1),
                     10 ** (int(np.log10(ma)) + 1),
-                )
+                ]
+                if current is not None:
+                    # keep the limits of the curves already drawn (clear=False)
+                    if current[0] > 0:
+                        log_lim[0] = min(log_lim[0], current[0])
+                    log_lim[1] = max(log_lim[1], current[1])
+                ax.set_ylim(log_lim)
             else:
                 ax.set_ylim(zlim)
 
