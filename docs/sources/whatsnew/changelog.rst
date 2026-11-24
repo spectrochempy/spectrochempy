@@ -143,6 +143,10 @@ Bug Fixes
   first data column is read), and its docstring examples show the actual
   behavior (:issue:`1971`, :pr:`1978`).
 
+- Printing or displaying an ``NDDataset``, ``Coord`` or ``CoordSet`` no longer
+  changes the global NumPy print options; user arrays keep their own
+  ``np.set_printoptions`` settings (:issue:`1974`).
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata

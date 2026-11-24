@@ -26,6 +26,7 @@ from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _format_array_values
 from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _local_numpyprintoptions
 from spectrochempy.utils.print import _render_sections
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
@@ -726,7 +727,8 @@ class Coord(NDMath, NDArray):
 
         if self.is_labeled:
             header = "       labels: ... \n"
-            text = str(self.labels.T).strip()
+            with _local_numpyprintoptions():
+                text = str(self.labels.T).strip()
             if "\n" not in text:  # single line!
                 out += header.replace("...", f"\0\0{text}\0\0")
             else:
@@ -790,7 +792,8 @@ class Coord(NDMath, NDArray):
             items.append(DisplayItem("data", "Undefined", "coordinates"))
 
         if self.is_labeled:
-            text = str(self.labels.T).strip()
+            with _local_numpyprintoptions():
+                text = str(self.labels.T).strip()
             items.append(DisplayItem("label", text, "labels"))
 
         return [DisplaySection("summary", "Summary", items)]
