@@ -19,6 +19,9 @@ from warnings import warn
 
 import traitlets as tr
 
+from spectrochempy.utils.meta import Meta
+from spectrochempy.utils.objects import ReadOnlyDict
+
 
 def _deprecated_removal_sentence(removed=None, *, policy=False):
     """Return the removal sentence for a deprecation warning."""
@@ -518,6 +521,25 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 # ======================================================================================
 # Shared single-source context transfer
 # ======================================================================================
+def _metadata_locks(value, seen=None):
+    """Visit metadata containers once, without following parent references."""
+    seen = set() if seen is None else seen
+    if id(value) in seen:
+        return
+    seen.add(id(value))
+    if isinstance(value, Meta):
+        yield value, value._readonly
+        yield from _metadata_locks(value._data, seen)
+    elif isinstance(value, dict):
+        if isinstance(value, ReadOnlyDict):
+            yield value, value._readonly
+        for child in value.values():
+            yield from _metadata_locks(child, seen)
+    elif isinstance(value, (list, tuple)):
+        for child in value:
+            yield from _metadata_locks(child, seen)
+
+
 def transfer_source_context(
     source, target, *, author=None, include_acquisition_date=True
 ):
@@ -554,11 +576,18 @@ def transfer_source_context(
     """
     metadata = copy.deepcopy(source.meta)
     readonly = target.meta.readonly
+    locks = list(_metadata_locks(target.meta))
+    existing = {id(node) for node, _ in locks}
     try:
-        target.meta.readonly = False
+        for node, _ in locks:
+            node._readonly = False
         target.meta = metadata
     finally:
-        target.meta.readonly = readonly
+        for node, _ in _metadata_locks(target.meta):
+            if id(node) not in existing:
+                node._readonly = readonly
+        for node, state in locks:
+            node._readonly = state
     target.author = copy.copy(source.author if author is None else author)
     target.description = copy.copy(source.description)
     target.origin = copy.copy(source.origin)
