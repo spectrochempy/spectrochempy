@@ -203,9 +203,9 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
     )
 
 
-def fit_profiles(dataset, specs, max_calls, shared):
+def fit_profiles(dataset, specs, max_calls, shared, *, min_ndim=2):
     """Fit general profiles using the same observation and result contract as ND peaks."""
-    coordinates, units = _grid(dataset)
+    coordinates, units = _grid(dataset, min_ndim=min_ndim)
     peaks, groups, target_units = _prepare_profiles(specs, shared, dataset.units, units)
     with np.errstate(over="ignore"):
         data = np.asarray(dataset.data, dtype=float)
