@@ -83,3 +83,38 @@ def test_new_context_fields_follow_target_lock_policy(locked):
     else:
         target.meta.new["nested"]["gain"] = 99
     assert source.meta.new["nested"]["gain"] == 12
+
+
+@pytest.mark.parametrize("root_locked, branch_locked", [(False, True), (True, False)])
+@pytest.mark.parametrize("fail", [False, True])
+def test_new_nested_fields_inherit_the_nearest_existing_lock(
+    monkeypatch, root_locked, branch_locked, fail
+):
+    source = scp.NDDataset([1.0, 2.0])
+    source.meta.acq = {"new": {"gain": 12}}
+    target = scp.NDDataset([3.0, 4.0])
+    target.meta.acq = {"existing": {"gain": 1}}
+    target.meta.readonly = root_locked
+    target.meta.acq.set_readonly(branch_locked)
+    if fail:
+        original = type(target).meta
+
+        def failed_setter(dataset, metadata):
+            original.fset(dataset, metadata)
+            raise RuntimeError("merge failed")
+
+        monkeypatch.setattr(
+            type(target), "meta", property(original.fget, failed_setter)
+        )
+        with pytest.raises(RuntimeError, match="merge failed"):
+            transfer_source_context(source, target)
+    else:
+        transfer_source_context(source, target)
+    assert target.meta.readonly is root_locked
+    assert target.meta.acq["existing"]["gain"] == 1
+    if branch_locked:
+        with pytest.raises(ValueError, match="read-only"):
+            target.meta.acq["new"]["gain"] = 99
+    else:
+        target.meta.acq["new"]["gain"] = 99
+    assert source.meta.acq["new"]["gain"] == 12

@@ -521,23 +521,27 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 # ======================================================================================
 # Shared single-source context transfer
 # ======================================================================================
-def _metadata_locks(value, seen=None):
+def _metadata_locks(value, seen=None, states=None, inherited=False):
     """Visit metadata containers once, without following parent references."""
     seen = set() if seen is None else seen
     if id(value) in seen:
         return
     seen.add(id(value))
     if isinstance(value, Meta):
-        yield value, value._readonly
-        yield from _metadata_locks(value._data, seen)
+        state = value._readonly if states is None else states.get(id(value), inherited)
+        yield value, state
+        yield from _metadata_locks(value._data, seen, states, state)
     elif isinstance(value, dict):
         if isinstance(value, ReadOnlyDict):
-            yield value, value._readonly
+            inherited = (
+                value._readonly if states is None else states.get(id(value), inherited)
+            )
+            yield value, inherited
         for child in value.values():
-            yield from _metadata_locks(child, seen)
+            yield from _metadata_locks(child, seen, states, inherited)
     elif isinstance(value, (list, tuple)):
         for child in value:
-            yield from _metadata_locks(child, seen)
+            yield from _metadata_locks(child, seen, states, inherited)
 
 
 def transfer_source_context(
@@ -575,17 +579,15 @@ def transfer_source_context(
     `datetime` nor `None` are ignored rather than assigned.
     """
     metadata = copy.deepcopy(source.meta)
-    readonly = target.meta.readonly
     locks = list(_metadata_locks(target.meta))
-    existing = {id(node) for node, _ in locks}
+    states = {id(node): state for node, state in locks}
     try:
         for node, _ in locks:
             node._readonly = False
         target.meta = metadata
     finally:
-        for node, _ in _metadata_locks(target.meta):
-            if id(node) not in existing:
-                node._readonly = readonly
+        for node, state in _metadata_locks(target.meta, states=states):
+            node._readonly = state
         for node, state in locks:
             node._readonly = state
     target.author = copy.copy(source.author if author is None else author)
