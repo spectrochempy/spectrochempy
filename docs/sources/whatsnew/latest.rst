@@ -18,7 +18,7 @@ New Features
 - ``Optimize(model="saturation_recovery" or "exponential_decay", parameters=...)``
   fits a native 1D curve from an amplitude and a positive time constant, without
   a user function. Results retain nonuniform physical coordinates, masks and
-  units, and expose the fitted amplitude and ``tau`` with their units.
+  units, and expose the fitted amplitude and ``tau`` with their units (:pr:`1970`).
 
 - ``Optimize(model=..., parameters=...)`` fits nonseparable physical models on
   a full multidimensional ``NDDataset`` grid, with optional positive linear
