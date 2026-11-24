@@ -26,6 +26,7 @@ from spectrochempy.utils._logging import error_
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.objects import OrderedSet
+from spectrochempy.utils.print import _local_numpyprintoptions
 
 __all__ = []
 __dataset_methods__ = []
@@ -381,7 +382,8 @@ def _append_reduction_history(
 
 
 def _get_name(x):
-    return str(x.name if hasattr(x, "name") else x)
+    with _local_numpyprintoptions():
+        return str(x.name if hasattr(x, "name") else x)
 
 
 def _history_operand(value, role):
