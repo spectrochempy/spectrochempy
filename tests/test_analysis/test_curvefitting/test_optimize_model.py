@@ -294,3 +294,22 @@ def test_unrepresentable_physical_residual_is_rejected():
     source.data = np.ones(source.shape) * 1e308
     with pytest.raises(ValueError, match="Physical residuals"):
         scp.Optimize(model=lambda template: np.full(template.shape, -1e308)).fit(source)
+
+
+@pytest.mark.parametrize("intensity", [1e308, 1e-308])
+def test_projected_amplitude_rescaling_preserves_representable_extremes(intensity):
+    source = scp.NDDataset(
+        np.full((3, 4), intensity),
+        coordset=[scp.Coord.arange(3), scp.Coord.arange(4)],
+    )
+    result = (
+        scp.Optimize(
+            model=lambda template: {"site": np.full(template.shape, intensity)},
+            linear_amplitudes=True,
+        )
+        .fit(source)
+        .result
+    )
+    assert_allclose(result.amplitudes["site"], 1.0, rtol=1e-14)
+    assert_allclose(result.fitted.data / intensity, 1.0, rtol=1e-14)
+    assert np.isfinite(result.residuals.data).all()

@@ -165,9 +165,18 @@ def fit_callable_model(dataset, function, specs, max_calls, linear_amplitudes, o
                 coefficients = _nonnegative_least_squares(
                     normalized / norms, observed / intensity_scale
                 )
-                amplitudes[supported] = (
-                    coefficients * intensity_scale / norms / maxima[supported]
-                )
+                coefficient, coefficient_power = np.frexp(coefficients)
+                intensity, intensity_power = np.frexp(intensity_scale)
+                norm, norm_power = np.frexp(norms)
+                maximum, maximum_power = np.frexp(maxima[supported])
+                with np.errstate(over="ignore", under="ignore"):
+                    amplitudes[supported] = np.ldexp(
+                        coefficient * intensity / norm / maximum,
+                        coefficient_power
+                        + intensity_power
+                        - norm_power
+                        - maximum_power,
+                    )
             with np.errstate(over="ignore", invalid="ignore"):
                 components = [
                     weight * part
