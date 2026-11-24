@@ -1212,7 +1212,7 @@ and `C[:,hardConc]`.
             r"""Defines whether the spectral profiles should be normalized.
 
 - `None`\ : no normalization is applied.
-- ``'euclid'``\ : spectra are normalized with respect to their total area,
+- ``'euclid'``\ : spectra are normalized with respect to their Euclidean (L2) norm,
 - ``'max'``\ : spectra are normalized with respect to their maximum value."""
         ),
     ).tag(config=True)
