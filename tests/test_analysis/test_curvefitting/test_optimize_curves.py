@@ -213,3 +213,32 @@ def test_unsigned_delay_coordinates_preserve_the_native_grid(model, dtype):
     assert_allclose(fit.predict().data, curve.data, atol=1e-6)
     assert_array_equal(fit.predict().x.data, times)
     assert fit.predict().x.dtype == times.dtype
+
+
+@pytest.mark.parametrize("model", ["saturation_recovery", "exponential_decay"])
+@pytest.mark.parametrize("dtype", [np.float16, np.float32])
+@pytest.mark.parametrize("fixed", [False, True])
+def test_lower_precision_grid_uses_precise_internal_evaluation(model, dtype, fixed):
+    true_tau = 100000 if fixed else 1e-6
+    raw_times = (
+        [0, 1000, 3000, 10000, 30000, 60000]
+        if fixed
+        else np.array([0, 0.1, 0.3, 1, 3, 10]) * 1e-6
+    )
+    times = np.asarray(raw_times, dtype=dtype)
+    decay = np.exp(-times.astype(float) / true_tau)
+    curve = scp.NDDataset(
+        2 * (1 - decay if model == "saturation_recovery" else decay),
+        coordset=[scp.Coord(times, units="s", rounding=False)],
+    )
+    parameters = {"amplitude": 2, "tau": 2}
+    if fixed:
+        parameters = {
+            "amplitude": {"value": 2, "fixed": True},
+            "tau": {"value": true_tau, "fixed": True},
+        }
+    fit = scp.Optimize(model=model, parameters=parameters).fit(curve)
+    assert_allclose(fit.result.fitted_parameters["tau"].magnitude, true_tau, rtol=1e-6)
+    assert_allclose(fit.predict().data, curve.data, atol=1e-8)
+    assert_array_equal(fit.predict().x.data, times)
+    assert fit.predict().x.dtype == times.dtype
