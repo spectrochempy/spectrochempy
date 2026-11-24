@@ -63,6 +63,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``asymmetricvoigtmodel`` and ``asymmetricvoigt``: a negative ``asym`` now
+  gives the asymmetry on the other side of the peak instead of being silently
+  ignored and giving the symmetric profile: the profile for ``asym = -a`` is
+  the mirror image, about ``pos``, of the profile for ``+a``. Results for
+  ``asym >= 0`` are unchanged (:issue:`1948`).
+
 - ``multiplot`` now accepts fewer datasets than ``nrow * ncol`` panels: the
   unused panels are hidden and still returned with the other axes, instead of
   raising "Not enough datasets given in this list". A grid given with both
