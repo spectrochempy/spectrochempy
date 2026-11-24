@@ -44,6 +44,17 @@ New Features
   Existing models and defaults are unchanged; no NMR dependency is added
   (:pr:`1932`).
 
+- Run-time hints for surprising defaults. ``align(method="inner")`` warns when
+  the intersection keeps fewer than half of the points of the sparsest
+  coordinate in the common range, or keeps irregularly spaced points from
+  regular grids, and suggests ``method="interpolate"``. ``MCRALS.fit`` lists
+  the active constraints, defaults included, in its ``INFO`` log.
+  ``Baseline`` ``ranges`` that select no points are reported, in the error
+  raised when no support remains or in a warning when they are ignored, with a
+  reminder that integer limits are indices and float limits coordinates. The
+  error for integer ranges outside the coordinate domain carries the same
+  reminder (:issue:`1954`).
+
 
 
 .. section
@@ -108,12 +119,27 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- ``plot_compare`` (and ``plot_merit``) legends now use "experimental" and
+  "calculated" instead of automatic dataset names such as
+  ``NDDataset_1a2b3c4d``; names set on the datasets remain the default labels.
+  The legend is built from the plotted lines, so it shows their line styles and
+  transparency, and lists the other labelled artists of the axes whose label is
+  not already shown (:issue:`1954`).
+
+- ``Baseline`` ``ranges`` that select no points now raise a ``ValueError``
+  instead of a ``TraitError`` when no baseline support remains
+  (:issue:`1954`).
+
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+- Passing ``labels`` to ``plot_compare`` is deprecated: it is ignored and emits
+  a ``DeprecationWarning``. Use ``exp_label``, ``calc_label`` and
+  ``resid_label`` instead (:issue:`1954`).
 
 - The experimental ``spectrochempy-cantera`` plugin and its ``PFR`` model
   (``scp.cantera.PFR`` and the deprecated alias ``scp.PFR``) will be removed in

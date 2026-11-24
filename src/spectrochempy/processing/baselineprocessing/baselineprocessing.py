@@ -573,15 +573,27 @@ baseline/trends for different segments of the data.
             return
 
         domain = self._format_domain(domain_min, domain_max)
+        hint = ""
+        if any(
+            isinstance(limit, int | np.integer) and not isinstance(limit, bool)
+            for pair in invalid_ranges
+            for limit in pair
+        ):
+            hint = (
+                " Integer range limits are interpreted as indices and float "
+                "limits as coordinates when points are selected, but this check "
+                "compares all limits with the coordinate values: give "
+                "coordinates as floats."
+            )
         if len(invalid_ranges) == len(ranges):
             raise ValueError(
                 "Requested baseline ranges do not intersect the coordinate "
-                f"domain {domain}. Requested ranges={ranges}."
+                f"domain {domain}. Requested ranges={ranges}.{hint}"
             )
 
         raise ValueError(
             "Some requested baseline ranges do not intersect the coordinate "
-            f"domain {domain}. Non-intersecting ranges={invalid_ranges}."
+            f"domain {domain}. Non-intersecting ranges={invalid_ranges}.{hint}"
         )
 
     def _validate_polynomial_support(self, x_support, dataset_coord):
@@ -619,17 +631,19 @@ baseline/trends for different segments of the data.
         dim = X.dims[-1]
         section_data = []
         section_coordsets = []
+        empty_ranges = []
 
         for pair in ranges:
             keys = X._make_index((Ellipsis, slice(*pair)))
             data = X.masked_data[keys]
             if data.shape[-1] == 0:
+                empty_ranges.append(pair)
                 continue
             section_data.append(data)
             section_coordsets.append(X.coordset._slice_dims(X.dims, keys))
 
         if not section_data:
-            return None
+            return None, empty_ranges
 
         concatenated = np.ma.concatenate(tuple(section_data), axis=-1)
 
@@ -637,7 +651,7 @@ baseline/trends for different segments of the data.
         out._data = np.asarray(concatenated)
         out._mask = concatenated.mask
         out._coordset = X.coordset._concatenate_dim(dim, section_coordsets)
-        return out
+        return out, empty_ranges
 
     @tr.observe("_X", "ranges", "include_limits", "model", "multivariate")
     def _preprocess_as_X_or_ranges_changed(self, change):
@@ -701,14 +715,25 @@ baseline/trends for different segments of the data.
         # This preserves the existing location-slicing semantics while avoiding
         # the construction of intermediate NDDataset sections that would
         # immediately be re-concatenated for polynomial fitting.
-        self._X_ranges = self._assemble_polynomial_support_dataset(X, ranges)
+        X_ranges, empty_ranges = self._assemble_polynomial_support_dataset(X, ranges)
 
-        if self._X_ranges is None:
+        hint = (
+            "Integer range limits are interpreted as indices and float limits "
+            "as coordinates."
+        )
+        if X_ranges is None:
             domain = self._format_domain(domain_min, domain_max)
             raise ValueError(
                 "No baseline support points could be selected from the requested "
-                f"ranges. Coordinate domain={domain}, used_ranges={ranges}."
+                f"ranges. Coordinate domain={domain}, used_ranges={ranges}. {hint}"
             )
+        if empty_ranges:
+            warning_(
+                f"Baseline ranges {empty_ranges} select no points and are "
+                f"ignored. {hint}"
+            )
+
+        self._X_ranges = X_ranges
 
         # we will also do necessary validation of other parameters:
         if self.multivariate:

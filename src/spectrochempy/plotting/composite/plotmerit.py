@@ -16,10 +16,15 @@ plotmerit:
 
 __all__ = ["plot_merit", "plot_compare"]
 
+import os
+import re
+import sys
+from pathlib import Path
+
 import numpy as np
-from matplotlib.lines import Line2D
 
 from spectrochempy.plotting._render import render_lines
+from spectrochempy.utils.decorators import warn_deprecated
 from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import _setup_axes
 from spectrochempy.utils.mplutils import make_label
@@ -27,6 +32,29 @@ from spectrochempy.utils.mplutils import make_label
 # ======================================================================================
 # Generic comparison function
 # ======================================================================================
+
+_AUTOMATIC_NAME = re.compile(
+    r"(?:(?:standardized|scaled) )*"
+    r"(?:NDArray|NDComplexArray|NDDataset|Coord|CoordSet|Project)_[0-9a-f]{8}(?:_|$)"
+)
+
+
+def _caller_stacklevel():
+    """Return the `warn_deprecated` stacklevel of the first external caller."""
+    package = str(Path(__file__).parents[2]) + os.sep
+    frame = sys._getframe(2)
+    stacklevel = 3
+    while frame is not None and frame.f_code.co_filename.startswith(package):
+        frame = frame.f_back
+        stacklevel += 1
+    return stacklevel
+
+
+def _default_label(dataset, fallback):
+    name = dataset._name
+    if not name or _AUTOMATIC_NAME.match(name):
+        return fallback
+    return name
 
 
 def plot_compare(
@@ -91,6 +119,14 @@ def plot_compare(
         Line widths of the experimental, comparison, and residual traces.
     exp_label, calc_label, resid_label : str, optional
         Legend labels for the experimental, comparison, and residual traces.
+        The labels are set on the plotted lines, so the legend also lists
+        other labelled artists of the axes, except those whose label is
+        already shown; the entries of this call are always listed, even when
+        they share a label. `exp_label` and `calc_label` default to the name
+        set on `X` and `X_ref`, or to ``"experimental"`` and ``"calculated"``
+        when the name is automatic (including names derived from an unnamed
+        dataset, such as ``"NDDataset_1a2b3c4d_MCRALS.reconstruction"`` or
+        ``"standardized NDDataset_1a2b3c4d"``).
     legend_loc : str, default="best"
         Matplotlib legend location.
     kind, method : {"line", "scatter"}, optional
@@ -101,13 +137,25 @@ def plot_compare(
     nb_traces : int or "all", default="all"
         Number of evenly spaced traces to display from 2D datasets.
     **kwargs
-        Additional rendering options passed to the line renderer.
+        Additional rendering options passed to the line renderer. Line labels
+        are set with `exp_label`, `calc_label` and `resid_label`; ``labels`` is
+        deprecated, ignored, and emits a `DeprecationWarning`.
 
     Returns
     -------
     matplotlib.axes.Axes
         Axes containing the comparison plot.
     """
+    if "labels" in kwargs:
+        del kwargs["labels"]
+        warn_deprecated(
+            "labels",
+            subject="The `labels` argument of `plot_compare`",
+            action="is deprecated and ignored",
+            extra_msg="Use `exp_label`, `calc_label` and `resid_label` instead.",
+            policy=True,
+            stacklevel=_caller_stacklevel(),
+        )
 
     # ----------------------------
     # Figure management (L3 only)
@@ -251,11 +299,17 @@ def plot_compare(
     resid_z = [0] * n_traces
     orig_z = [1] * n_traces
     ref_z = [2] * n_traces
+
+    def _labels(label):
+        return [label or "_nolegend_"] + ["_nolegend_"] * (n_traces - 1)
+
+    exp_label = exp_label or _default_label(X, "experimental")
+    calc_label = calc_label or _default_label(X_ref, "calculated")
     # ----------------------------
     # Render residual first
     # ----------------------------
     if residual:
-        render_lines(
+        resid_lines = render_lines(
             ax,
             xdata,
             plot_res_data,
@@ -264,6 +318,7 @@ def plot_compare(
             linewidths=[resid_linewidth] * n_traces,
             zorders=resid_z,
             reverse=False,
+            labels=_labels(resid_label),
             **marker_kwargs,
             **kwargs,
         )
@@ -271,7 +326,7 @@ def plot_compare(
     # ----------------------------
     # Render experimental
     # ----------------------------
-    render_lines(
+    exp_lines = render_lines(
         ax,
         xdata,
         plot_orig_data,
@@ -281,6 +336,7 @@ def plot_compare(
         alpha=0.85,
         zorders=orig_z,
         reverse=False,
+        labels=_labels(exp_label),
         **marker_kwargs,
         **kwargs,
     )
@@ -288,7 +344,7 @@ def plot_compare(
     # ----------------------------
     # Render reconstructed
     # ----------------------------
-    render_lines(
+    calc_lines = render_lines(
         ax,
         xdata,
         plot_ref_data,
@@ -297,9 +353,13 @@ def plot_compare(
         linewidths=[calc_linewidth] * n_traces,
         zorders=ref_z,
         reverse=False,
+        labels=_labels(calc_label),
         **marker_kwargs,
         **kwargs,
     )
+    legend_lines = [exp_lines[0], calc_lines[0]]
+    if residual:
+        legend_lines.append(resid_lines[0])
 
     # ----------------------------
     # Deterministic limits
@@ -336,38 +396,18 @@ def plot_compare(
     # ----------------------------
     # Legend
     # ----------------------------
-    handles = [
-        Line2D(
-            [0],
-            [0],
-            color=orig_color[0],
-            linestyle=orig_linestyle[0],
-            marker=marker_kwargs.get("markers", [None])[0],
-            label=exp_label or X.name,
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=ref_color[0],
-            linestyle=ref_linestyle[0],
-            marker=marker_kwargs.get("markers", [None])[0],
-            label=calc_label or X_ref.name,
-        ),
-    ]
-
-    if residual:
-        handles.append(
-            Line2D(
-                [0],
-                [0],
-                color=resid_color[0],
-                linestyle=resid_linestyle[0],
-                marker=marker_kwargs.get("markers", [None])[0],
-                label=resid_label,
-            ),
-        )
-
-    ax.legend(handles=handles, loc=legend_loc)
+    entries = {
+        line: line.get_label()
+        for line in legend_lines
+        if not line.get_label().startswith("_")
+    }
+    shown = set(entries.values())
+    for handle, label in zip(*ax.get_legend_handles_labels(), strict=True):
+        if handle not in entries and label not in shown:
+            entries[handle] = label
+            shown.add(label)
+    if entries:
+        ax.legend(list(entries), list(entries.values()), loc=legend_loc)
 
     # ----------------------------
     # Title
