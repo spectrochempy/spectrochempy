@@ -129,11 +129,8 @@ def profile_values(values, axis):
         tau = parameters["tau"]
         if tau <= 0:
             raise ValueError("Recovery and decay tau must be positive")
-        result = (
-            -np.expm1(-values / tau)
-            if model == "saturation_recovery"
-            else np.exp(-values / tau)
-        )
+        ratio = np.asarray(values, dtype=np.longdouble) / np.longdouble(tau)
+        result = -np.expm1(-ratio) if model == "saturation_recovery" else np.exp(-ratio)
     if hasattr(result, "units") and result.units is not None:
         if not result.units.dimensionless:
             raise ValueError("Axis profiles must return dimensionless values")

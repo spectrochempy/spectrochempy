@@ -15,6 +15,16 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- ``Optimize(model="saturation_recovery" or "exponential_decay", parameters=...)``
+  fits a native 1D curve from an amplitude and a positive time constant, without
+  a user function. Results retain nonuniform physical coordinates, masks and
+  units, and expose the fitted amplitude and ``tau`` with their units (:pr:`1970`).
+
+- ``Optimize(model=..., parameters=...)`` fits nonseparable physical models on
+  a full multidimensional ``NDDataset`` grid, with optional positive linear
+  amplitude projection and native ``FitResult`` outputs (:pr:`1968`).
+
+
 - ``Baseline(model="arpls")`` and ``Baseline(model="aspls")`` add explicitly
   selected reweighted baseline correction using NumPy/SciPy, also through
   ``get_baseline`` and ``basc``. They accept finite real unmasked 1D or rowwise
@@ -43,6 +53,17 @@ New Features
 
 Bug Fixes
 ~~~~~~~~~
+
+- Processing context transfer, including baseline correction of imported NMR
+  spectra, accepts protected nested metadata while preserving the target's
+  read-only state and keeping source metadata independent. Copying metadata
+  preserves independently protected subtrees without temporarily unlocking
+  the source (:pr:`1969`).
+
+- ``NNLS.coef`` and ``LSTSQ.coef`` now return coefficient arrays for NumPy
+  inputs with multiple features, including multiple targets, instead of raising
+  ``UnboundLocalError``. Dataset coefficients retain their units and scalar
+  coefficients keep their existing return type (:pr:`1968`).
 
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no

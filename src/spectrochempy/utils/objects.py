@@ -11,6 +11,7 @@ like attribute access and read-only capabilities.
 """
 
 import collections
+import copy
 import re
 import uuid
 from datetime import datetime
@@ -295,6 +296,16 @@ class ReadOnlyDict(dict):
         if default is None:
             return super().pop(key)
         return super().pop(key, default)
+
+    def __deepcopy__(self, memo):
+        result = type(self)()
+        memo[id(self)] = result
+        for key, value in self.items():
+            dict.__setitem__(
+                result, copy.deepcopy(key, memo), copy.deepcopy(value, memo)
+            )
+        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        return result
 
     def copy(self) -> "ReadOnlyDict":
         """
