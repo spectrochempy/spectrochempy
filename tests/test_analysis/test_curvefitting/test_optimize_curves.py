@@ -169,3 +169,47 @@ def test_default_tau_bound_remains_positive_in_scaled_jacobian(model, unit):
     )
     assert_allclose(fit.predict().data, curve.data, atol=1e-6)
     assert np.isfinite(fit.jacobian).all()
+
+
+@pytest.mark.parametrize("model", ["saturation_recovery", "exponential_decay"])
+@pytest.mark.parametrize("unit", ["s", "ms"])
+@pytest.mark.parametrize("true_tau", [1.0, 1e-6])
+def test_named_curve_jacobian_and_covariance_match_analytic(model, unit, true_tau):
+    times = np.array([0, 0.1, 0.3, 1, 3, 10]) * true_tau
+    recovery = model == "saturation_recovery"
+    profile = -np.expm1(-times / true_tau) if recovery else np.exp(-times / true_tau)
+    noise = np.array([0.001, -0.002, 0.001, 0.002, -0.001, 0.001])
+    coordinate = scp.Coord(times, units="s", rounding=False).to(unit)
+    curve = scp.NDDataset(2 * profile + noise, coordset=[coordinate], units="V")
+    fit = scp.Optimize(
+        model=model, parameters={"amplitude": 2, "tau": 2 * scp.ur.s}
+    ).fit(curve)
+    result = fit.result
+    amplitude = result.fitted_parameters["amplitude"].magnitude
+    tau = result.fitted_parameters["tau"].magnitude
+    ratio = coordinate.data / tau
+    decay = np.exp(-ratio)
+    profile = -np.expm1(-ratio) if recovery else decay
+    tau_column = amplitude * ratio * decay / tau
+    analytic = np.column_stack((-profile, tau_column if recovery else -tau_column))
+    assert_allclose(fit.jacobian, analytic, rtol=1e-9, atol=1e-10)
+    variance = np.sum(result.residuals.data**2) / (curve.size - 2)
+    expected_covariance = variance * np.linalg.inv(analytic.T @ analytic)
+    assert result.diagnostics["covariance_reason"] is None
+    assert_allclose(result.covariance, expected_covariance, rtol=1e-5, atol=1e-22)
+
+
+@pytest.mark.parametrize("model", ["saturation_recovery", "exponential_decay"])
+@pytest.mark.parametrize("dtype", [np.uint32, np.uint64])
+def test_unsigned_delay_coordinates_preserve_the_native_grid(model, dtype):
+    times = np.array([0, 1, 3, 7, 20], dtype=dtype)
+    decay = np.exp(-times.astype(float) / 3)
+    curve = scp.NDDataset(
+        2 * (1 - decay if model == "saturation_recovery" else decay),
+        coordset=[scp.Coord(times, units="s", rounding=False)],
+    )
+    fit = scp.Optimize(model=model, parameters={"amplitude": 2, "tau": 2}).fit(curve)
+    assert_allclose(fit.result.fitted_parameters["tau"].magnitude, 3, rtol=1e-6)
+    assert_allclose(fit.predict().data, curve.data, atol=1e-6)
+    assert_array_equal(fit.predict().x.data, times)
+    assert fit.predict().x.dtype == times.dtype

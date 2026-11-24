@@ -36,7 +36,29 @@ def fit_curve(dataset, model, parameters, max_calls):
             "axes": {dim: {"model": model, "parameters": {"tau": tau}}},
         }
     ]
-    fit, solution = fit_profiles(dataset, peaks, max_calls, None, min_ndim=1)
+
+    def derivatives(resolved, names):
+        amplitude = np.longdouble(resolved[0]["height"])
+        time_constant = np.longdouble(resolved[0]["axes"][dim]["parameters"]["tau"])
+        ratio = np.asarray(coordinates[dim], dtype=np.longdouble) / time_constant
+        decay = np.exp(-ratio)
+        recovery = model == "saturation_recovery"
+        profile = -np.expm1(-ratio) if recovery else decay
+        tau_column = amplitude * (ratio * decay) / time_constant
+        if not recovery:
+            tau_column = -tau_column
+        return np.column_stack(
+            [-profile if name.endswith(".height") else tau_column for name in names]
+        )
+
+    fit, solution = fit_profiles(
+        dataset,
+        peaks,
+        max_calls,
+        None,
+        min_ndim=1,
+        residual_jacobian=derivatives,
+    )
     fitted = fit["peaks"][0]
     values = {
         "amplitude": (fitted["height"], dataset.units),
