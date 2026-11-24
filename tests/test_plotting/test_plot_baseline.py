@@ -401,3 +401,54 @@ class TestPlotClearFalseReusesAxis:
         assert len(plt.get_fignums()) == 1
 
         plt.close("all")
+
+
+class TestPlotBaselineIgnoredKwargs:
+    def test_unknown_kwargs_warn_and_name_arguments(self):
+        orig = _make_synthetic_dataset_1d()
+        baseline = orig * 0.2
+        with pytest.warns(UserWarning, match=r"'nb_traces', 'offset'") as rec:
+            plot_baseline(
+                orig, baseline, orig - baseline, show=False, offset=1, nb_traces=2
+            )
+        assert len(rec) == 1
+        assert rec[0].filename == __file__
+        plt.close("all")
+
+    def test_documented_options_do_not_warn(self):
+        import warnings
+
+        orig = _make_synthetic_dataset_1d()
+        baseline = orig * 0.2
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            plot_baseline(
+                orig,
+                baseline,
+                orig - baseline,
+                regions=[(3000, 2000)],
+                show_regions=True,
+                linewidth=2.0,
+                linestyle="--",
+                baseline_linestyle=":",
+                baseline_color="red",
+                region_color="gray",
+                region_alpha=0.1,
+                show=False,
+            )
+        plt.close("all")
+
+    def test_baseline_plot_method_warns_at_user_code(self):
+        import warnings
+
+        ds = _make_synthetic_dataset_2d()
+        blc = scp.Baseline()
+        blc.fit(ds)
+        with pytest.warns(UserWarning, match=r"'nb_traces'") as rec:
+            blc.plot(nb_traces=2, show=False)
+        assert len(rec) == 1
+        assert rec[0].filename == __file__
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            blc.plot(show_regions=True, linewidth=2.0, show=False)
+        plt.close("all")

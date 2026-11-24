@@ -5,6 +5,8 @@
 # ======================================================================================
 """Module implementing the `Baseline` class for baseline corrections and related methods."""
 
+import inspect
+
 import numpy as np
 import scipy.interpolate
 import scipy.signal
@@ -1274,7 +1276,11 @@ baseline/trends for different segments of the data.
             If True, display the regions used for baseline fitting.
             Default is False.
         **kwargs : keyword arguments, optional
-            Additional keyword arguments passed to the plot function.
+            Options of `~spectrochempy.plot_baseline` (``region_color``,
+            ``region_alpha``, ``clear``, ``show``, ``output``, ``linewidth``,
+            ``linestyle``, ``baseline_linestyle``, ``baseline_color``). Any
+            other keyword argument is ignored and a warning naming the
+            ignored arguments is emitted.
 
         Returns
         -------
@@ -1282,7 +1288,14 @@ baseline/trends for different segments of the data.
             (ax_top, ax_bottom) matplotlib axes.
 
         """
+        from spectrochempy.plotting.composite.plotbaseline import _warn_ignored_kwargs
         from spectrochempy.plotting.composite.plotbaseline import plot_baseline
+
+        known = set(inspect.signature(plot_baseline).parameters)
+        unknown = [k for k in kwargs if k not in known]
+        if unknown:
+            _warn_ignored_kwargs(unknown, stacklevel=3)
+            kwargs = {k: v for k, v in kwargs.items() if k in known}
 
         original = self.X
         baseline = self.baseline

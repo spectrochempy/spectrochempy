@@ -15,6 +15,8 @@ L3 composite: figure creation, orchestration, style resolution.
 
 __all__ = ["plot_baseline"]
 
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -22,6 +24,16 @@ from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.utils.mplutils import _finalize_plot
 from spectrochempy.utils.mplutils import make_label
+
+
+def _warn_ignored_kwargs(names, stacklevel):
+    """Warn that the keyword arguments `names` are not plot_baseline options."""
+    warnings.warn(
+        "plot_baseline ignores unknown keyword argument(s): "
+        + ", ".join(repr(n) for n in sorted(names)),
+        UserWarning,
+        stacklevel=stacklevel,
+    )
 
 
 def plot_baseline(
@@ -82,7 +94,8 @@ def plot_baseline(
     baseline_color : str, optional
         Color for baseline curves. Default is "tab:orange".
     **kwargs
-        Additional keyword arguments (reserved for future use).
+        Not used. Any keyword argument other than the options listed above is
+        ignored and a warning naming the ignored arguments is emitted.
 
     Returns
     -------
@@ -96,6 +109,9 @@ def plot_baseline(
         If input shapes do not match.
         If input ndim is not 1 or 2.
     """
+    if kwargs:
+        _warn_ignored_kwargs(kwargs, stacklevel=3)
+
     if ax is not None:
         raise ValueError(
             "plot_baseline creates its own two-axes figure. "
