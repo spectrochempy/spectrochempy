@@ -5,6 +5,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy.utils.decorators import transfer_source_context
+from spectrochempy.utils.objects import ReadOnlyDict
 
 
 @pytest.mark.parametrize("locked_target", [False, True])
@@ -118,3 +119,43 @@ def test_new_nested_fields_inherit_the_nearest_existing_lock(
     else:
         target.meta.acq["new"]["gain"] = 99
     assert source.meta.acq["new"]["gain"] == 12
+
+
+@pytest.mark.parametrize("protected_first", [False, True])
+@pytest.mark.parametrize("fail", [False, True])
+def test_shared_new_context_is_protected_under_either_parent(
+    monkeypatch, protected_first, fail
+):
+    shared = ReadOnlyDict(gain=12)
+    source = scp.NDDataset([1.0, 2.0])
+    source.meta.a = {"new": shared}
+    source.meta.b = {"new": shared}
+    source.meta.future = {"value": 1}
+    target = scp.NDDataset([3.0, 4.0])
+    target.meta.a = {}
+    target.meta.b = {}
+    target.meta.future = {"value": 0}
+    getattr(target.meta, "a" if protected_first else "b").set_readonly(True)
+    if fail:
+        original = type(target).meta
+
+        def partial_setter(dataset, metadata):
+            for key in ("a", "b"):
+                original.fset(dataset, {key: metadata[key]})
+            raise RuntimeError("partial merge failed")
+
+        monkeypatch.setattr(
+            type(target), "meta", property(original.fget, partial_setter)
+        )
+        with pytest.raises(RuntimeError, match="partial merge failed"):
+            transfer_source_context(source, target)
+        assert target.meta.future["value"] == 0
+    else:
+        transfer_source_context(source, target)
+        assert target.meta.future["value"] == 1
+    assert target.meta.a["new"] is target.meta.b["new"]
+    for branch in (target.meta.a, target.meta.b):
+        with pytest.raises(ValueError, match="read-only"):
+            branch["new"]["gain"] = 99
+    assert not source.meta.a["new"]._readonly
+    assert source.meta.a["new"]["gain"] == 12

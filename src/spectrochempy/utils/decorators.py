@@ -524,9 +524,10 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 def _metadata_locks(value, seen=None, states=None, inherited=False):
     """Visit metadata containers once, without following parent references."""
     seen = set() if seen is None else seen
-    if id(value) in seen:
+    identity = id(value) if states is None else (id(value), inherited)
+    if identity in seen:
         return
-    seen.add(id(value))
+    seen.add(identity)
     if isinstance(value, Meta):
         state = value._readonly if states is None else states.get(id(value), inherited)
         yield value, state
@@ -554,6 +555,9 @@ def transfer_source_context(
     ``description``, ``origin``, ``filename`` and the acquisition date.
     Mutable metadata is deep-copied so that the result never shares state with
     the source, and the source itself is never modified.
+    Existing target container locks are retained. New descendants inherit their
+    nearest existing container's policy; a shared new descendant is protected
+    when any inherited policy protects it.
 
     Parameters
     ----------
@@ -586,7 +590,13 @@ def transfer_source_context(
             node._readonly = False
         target.meta = metadata
     finally:
+        resolved = {}
         for node, state in _metadata_locks(target.meta, states=states):
+            identity = id(node)
+            if identity not in states and identity in resolved:
+                state = state or resolved[identity][1]
+            resolved[identity] = (node, state)
+        for node, state in resolved.values():
             node._readonly = state
         for node, state in locks:
             node._readonly = state
