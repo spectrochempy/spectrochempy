@@ -63,6 +63,20 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``multiplot`` now accepts fewer datasets than ``nrow * ncol`` panels: the
+  unused panels are hidden and still returned with the other axes, instead of
+  raising "Not enough datasets given in this list". A grid given with both
+  ``nrow`` and ``ncol`` that is too small for the datasets now raises a clear
+  ``ValueError`` instead of being silently replaced. When only one of them is
+  given, the other is inferred to hold every dataset (``nrow=1`` with three
+  datasets gives a 1 x 3 grid). Without ``nrow`` and ``ncol``, the automatic
+  grid now holds every dataset: three datasets are plotted on a 2 x 2 grid
+  instead of dropping one, and five or more no longer fail with an
+  ``IndexError``; one, two and four datasets keep their layout. Calling
+  ``multiplot`` without any dataset still raises a ``ValueError``, with a
+  clearer message, and ``nrow`` or ``ncol`` values that are not positive
+  integers raise a ``ValueError`` (:issue:`1946`).
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata
