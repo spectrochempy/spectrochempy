@@ -173,8 +173,9 @@ class SVD(DecompositionAnalysis):
 
     def _right_singular_vectors(self, method):
         # The k = min(M, N) first rows of VT (VT has N rows when
-        # full_matrices is True).
-        if not self.compute_uv:
+        # full_matrices is True). Check what was fitted, not the current
+        # compute_uv trait, which may have been changed since.
+        if self._outfit[2] is None:
             raise ValueError(
                 f"{method} requires the right singular vectors: "
                 "fit the SVD with compute_uv=True."
@@ -375,7 +376,7 @@ class SVD(DecompositionAnalysis):
 
         return self._inverse_transform(X_transform)
 
-    def fit_transform(self, X, **kwargs):
+    def fit_transform(self, X, Y=None, **kwargs):
         r"""
         Fit the SVD model on `X` and apply the dimensionality reduction on `X`.
 
@@ -387,6 +388,8 @@ class SVD(DecompositionAnalysis):
         ----------
         X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
             Training data.
+        Y : any, optional
+            Ignored; present for API consistency.
         **kwargs : keyword parameters, optional
             See Other Parameters.
 

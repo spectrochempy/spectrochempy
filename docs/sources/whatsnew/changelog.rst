@@ -58,8 +58,8 @@ Bug Fixes
   :math:`U \Sigma` (:math:`X V` for new data), right singular vectors
   :math:`V^T` and rank-``n_components`` reconstructions, with the same
   coordinates, units and metadata conventions as ``PCA``. Unlike ``PCA``,
-  SVD does not center the data. ``U``, ``s`` and ``VT`` are unchanged
-  (:issue:`1972`).
+  SVD does not center the data. ``SVD.n_components`` is now available after
+  ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`).
 
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's

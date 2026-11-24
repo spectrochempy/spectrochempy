@@ -348,3 +348,25 @@ def test_svd_transform_errors(random_dataset):
         svd.get_components(n_components=2)
     with pytest.raises(ValueError, match="compute_uv=True"):
         svd.inverse_transform(np.ones((6, 2)))
+
+
+def test_svd_methods_follow_fitted_state_not_current_compute_uv(random_dataset):
+    svd = SVD(compute_uv=False, full_matrices=False).fit(random_dataset)
+    svd.compute_uv = True
+    with pytest.raises(ValueError, match="compute_uv=True"):
+        svd.transform()
+    with pytest.raises(ValueError, match="compute_uv=True"):
+        _ = svd.components
+
+    svd = SVD(compute_uv=True, full_matrices=False).fit(random_dataset)
+    expected = svd.U * svd.s
+    svd.compute_uv = False
+    assert_allclose(svd.transform().data, expected, atol=1e-12)
+
+
+def test_svd_fit_transform_accepts_ignored_Y(random_dataset):
+    scores = SVD(compute_uv=True, full_matrices=False).fit_transform(
+        random_dataset, None
+    )
+    assert scores.shape == (6, 6)
+    assert SVD().fit(random_dataset).n_components == 6
