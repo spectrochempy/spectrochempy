@@ -12,6 +12,7 @@ __all__ = [
     "_model_evaluation",
     "_models",
     "_modelspec",
+    "_optimize_model",
     "_optimize_nd",
     "_optimize_profiles",
     "_parameter_space",
@@ -29,6 +30,7 @@ from . import _fit_backend
 from . import _model_evaluation
 from . import _models
 from . import _modelspec
+from . import _optimize_model
 from . import _optimize_nd
 from . import _optimize_profiles
 from . import _parameter_space

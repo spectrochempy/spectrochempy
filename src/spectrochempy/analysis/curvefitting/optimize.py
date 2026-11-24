@@ -31,6 +31,7 @@ from spectrochempy.analysis.curvefitting._modelspec import _ComponentSpec
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
+from spectrochempy.analysis.curvefitting._optimize_model import fit_callable_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
 from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
 from spectrochempy.analysis.curvefitting._parameter_space import _internal_vector
@@ -792,11 +793,29 @@ class Optimize(DecompositionAnalysis):
     -----
     The script interface fits 1D spectra. Pass ``peaks`` to fit separable
     Gaussian or Lorentzian profiles jointly on a multidimensional grid.
+    Pass ``model`` and ``parameters`` for a nonseparable full-grid ND model,
+    optionally profiling positive linear amplitudes.
     The ND fit uses unweighted residuals at finite, unmasked observations.
-    Its result includes fitted peaks suitable for ``simulate_peaks`` and
-    the parameter names and units in Jacobian column order. The local
+    Separable-peak results include fitted peaks for ``simulate_peaks``.
+    Results identify parameter names and units in Jacobian column order. The local
     covariance is available for converged, full-rank fits with positive
     residual degrees of freedom and no active bounds.
+
+    Full-grid models receive a zero-valued template with detached, full-precision
+    coordinates and the fixed finite/unmasked observation support. Parameters
+    are passed by keyword. Array outputs use the observations' intensity units;
+    dataset outputs must preserve the grid and have compatible units. The
+    callback is evaluated on the full grid and must remain finite on the fit
+    support. Component names and ordering must remain stable during a fit.
+
+    With ``linear_amplitudes=True``, the callback returns a mapping of raw
+    component responses. Nonnegative linear coefficients are fitted internally
+    at every nonlinear step. ``result.fitted_parameters`` reports the physical
+    model parameters, ``result.amplitudes`` the dimensionless linear coefficients,
+    and ``result.component_names`` the ordering of ``result.components``.
+    The residual degrees of freedom count both sets of estimated parameters.
+    The Jacobian and ``result.parameter_names`` describe only the profiled
+    nonlinear problem; a joint covariance is deliberately unavailable.
 
     Parameters
     ----------
@@ -879,6 +898,7 @@ class Optimize(DecompositionAnalysis):
     usermodels = tr.Dict(default_value={}, help="User defined models.")
     fp = tr.Instance(FitParameters, allow_none=True)
     modeldata = tr.List(Array())
+    _nd_model = None
 
     # ----------------------------------------------------------------------------------
     # Initialization
@@ -890,6 +910,10 @@ class Optimize(DecompositionAnalysis):
         warm_start=False,
         peaks=None,
         shared_parameters=None,
+        model=None,
+        parameters=None,
+        linear_amplitudes=False,
+        solver_options=None,
         **kwargs,
     ):
         """
@@ -917,6 +941,30 @@ class Optimize(DecompositionAnalysis):
             references in heights or axis parameters. Each shared value is
             optimized once. Definitions accept ``value``, ``bounds``, ``fixed``
             and ``unit``. This option requires ``peaks``.
+        model : callable, optional
+            Enable full-grid ND fitting with ``model(template, **parameters)``.
+            The template is a detached NDDataset with zero data, full-precision
+            coordinates and the effective observation mask. Return a real array
+            or compatible NDDataset on that grid, or an ordered mapping of
+            named components. Components are summed without implicit scaling.
+            Cannot be combined with peaks or script.
+        parameters : mapping, optional
+            Named values for model. Each scalar is initially free. A definition
+            can contain value, bounds, fixed, unit and a positive scale for free
+            parameters. Numeric
+            callback arguments use the declared unit's magnitudes. Results are
+            available in ``result.fitted_parameters``.
+        linear_amplitudes : bool, optional
+            Require named components and estimate their nonnegative amplitudes
+            at every step. Result components include the fitted amplitudes;
+            ``result.amplitudes`` contains their dimensionless coefficients.
+            Degrees of freedom count both nonlinear and linear parameters.
+            The retained Jacobian describes the profiled nonlinear residuals;
+            covariance is unavailable with reason ``profiled_amplitudes``.
+        solver_options : mapping, optional
+            Full-grid model solver options: ftol, xtol, gtol, diff_step and
+            x_scale. The solver is bounded TRF with linear least squares loss.
+            Use max_fun_calls to limit the number of solver evaluations.
         **kwargs : dict
             Additional keyword arguments.
         """
@@ -924,6 +972,26 @@ class Optimize(DecompositionAnalysis):
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
+        if model is not None and (
+            not callable(model) or peaks is not None or "script" in kwargs
+        ):
+            raise ValueError(
+                "model requires a callable and cannot be combined with peaks or script"
+            )
+        if model is None and (
+            parameters is not None or linear_amplitudes or solver_options is not None
+        ):
+            raise ValueError(
+                "parameters, linear_amplitudes and solver_options require model"
+            )
+        if not isinstance(linear_amplitudes, (bool, np.bool_)):
+            raise ValueError("linear_amplitudes must be boolean")
+        self._nd_model = model
+        self._nd_parameters = snapshot_peaks(
+            parameters if parameters is not None else {}
+        )
+        self._nd_linear_amplitudes = bool(linear_amplitudes)
+        self._nd_solver_options = deepcopy(dict(solver_options or {}))
         if shared_parameters is not None and peaks is None:
             raise ValueError("shared_parameters requires peaks")
         self._nd_shared_parameters = snapshot_peaks(shared_parameters)
@@ -1357,7 +1425,7 @@ class Optimize(DecompositionAnalysis):
     @tr.default("_script")
     def _script_default(self):
         """Return a default script."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             return ""
         return """
         # -----------------------------------------------------------------------
@@ -1874,7 +1942,7 @@ class Optimize(DecompositionAnalysis):
             The fitted model.
 
         """
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             return self._require_nd_fit()["fitted"].copy()
         return self.inverse_transform()
 
@@ -1904,7 +1972,7 @@ class Optimize(DecompositionAnalysis):
         fit_reduce : Alias of `fit_transform` (Deprecated).
 
         """
-        if self._nd_peaks is None:
+        if not self._is_grid_fit:
             return super().fit(X, Y=None)
 
         self._fitted = False
@@ -1924,25 +1992,49 @@ class Optimize(DecompositionAnalysis):
             )
         max_calls = self.max_fun_calls or 4 * self.max_iter
 
-        fit, solution = fit_separable_peaks(
-            X, self._nd_peaks, max_calls, self._nd_shared_parameters
-        )
+        if self._nd_model is not None:
+            fit, solution = fit_callable_model(
+                X,
+                self._nd_model,
+                self._nd_parameters,
+                max_calls,
+                self._nd_linear_amplitudes,
+                self._nd_solver_options,
+            )
+        else:
+            fit, solution = fit_separable_peaks(
+                X, self._nd_peaks, max_calls, self._nd_shared_parameters
+            )
         diagnostics = fit["diagnostics"]
         diagnostics.update(_normalize_solver_meta("trf", solution))
         if solution is None:
-            diagnostics.update(success=True, message="All peak parameters are fixed")
+            diagnostics.update(
+                success=True,
+                message="No nonlinear parameters to optimize"
+                if self._nd_model is not None
+                else "All peak parameters are fixed",
+            )
         else:
             diagnostics.update(cost=diagnostics["rss"] / 2, ncalls=solution.nfev)
         fit["jacobian"] = _freeze_jacobian_artifact(fit["jacobian"])
         fit["config"] = {
             "method": "trf",
-            "mode": "separable_peaks",
+            "mode": "callable_model"
+            if self._nd_model is not None
+            else "separable_peaks",
             "max_fun_calls": max_calls,
         }
+        if self._nd_model is not None:
+            fit["config"]["solver_options"] = deepcopy(self._nd_solver_options)
+            fit["config"]["linear_amplitudes"] = self._nd_linear_amplitudes
         self._nd_fit = fit
         self._n_components = len(fit["components"])
         self._fitted = True
         return self
+
+    @property
+    def _is_grid_fit(self):
+        return self._nd_peaks is not None or self._nd_model is not None
 
     def _require_nd_fit(self):
         if not self._fitted or self._nd_fit is None:
@@ -1952,20 +2044,20 @@ class Optimize(DecompositionAnalysis):
     @property
     def X(self):
         """Return the fitted observations."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             return self._require_nd_fit()["observed"].copy()
         return super().X
 
     @property
     def components(self):
         """Return fitted components, one dataset per peak in ND mode."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             return self.get_components()
         return super().components
 
     def get_components(self, n_components=None):
         """Return all or the requested number of fitted components."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             return tuple(
                 part.copy()
                 for part in self._require_nd_fit()["components"][:n_components]
@@ -1974,19 +2066,19 @@ class Optimize(DecompositionAnalysis):
 
     def transform(self, X=None, **kwargs):
         """Apply the legacy dimensionality reduction."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             raise NotImplementedError("ND fitting does not provide projections")
         return super().transform(X, **kwargs)
 
     def inverse_transform(self, X_transform=None, **kwargs):
         """Apply the legacy inverse transform."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             raise NotImplementedError("Use predict() to reconstruct the ND fit")
         return super().inverse_transform(X_transform, **kwargs)
 
     def fit_transform(self, X, Y=None, **kwargs):
         """Fit and apply the legacy dimensionality reduction."""
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             raise NotImplementedError("ND fitting does not provide projections")
         return super().fit_transform(X, Y, **kwargs)
 
@@ -2011,7 +2103,7 @@ class Optimize(DecompositionAnalysis):
                 "The fit method must be used before accessing the jacobian",
             )
 
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             return self._require_nd_fit()["jacobian"]
         return getattr(self, "_solver_artifacts", {}).get("jacobian")
 
@@ -2034,11 +2126,11 @@ class Optimize(DecompositionAnalysis):
                 "The fit method must be used before accessing the result",
             )
 
-        if self._nd_peaks is not None:
+        if self._is_grid_fit:
             fit = self._require_nd_fit()
             return FitResult(
                 estimator="Optimize",
-                parameters=fit["config"].copy(),
+                parameters=deepcopy(fit["config"]),
                 outputs={
                     "fitted": fit["fitted"].copy(),
                     "components": self.components,
@@ -2046,6 +2138,18 @@ class Optimize(DecompositionAnalysis):
                     "peaks": list(snapshot_peaks(fit["peaks"])),
                     "parameter_names": fit["names"],
                     "parameter_units": fit["units"],
+                    **(
+                        {
+                            key: snapshot_peaks(fit[key])
+                            for key in (
+                                "fitted_parameters",
+                                "amplitudes",
+                                "component_names",
+                            )
+                        }
+                        if self._nd_model is not None
+                        else {}
+                    ),
                 },
                 diagnostics=fit["diagnostics"].copy(),
                 covariance=fit["covariance"],
