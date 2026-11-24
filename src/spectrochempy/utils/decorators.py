@@ -19,6 +19,9 @@ from warnings import warn
 
 import traitlets as tr
 
+from spectrochempy.utils.meta import Meta
+from spectrochempy.utils.objects import ReadOnlyDict
+
 
 def _deprecated_removal_sentence(removed=None, *, policy=False):
     """Return the removal sentence for a deprecation warning."""
@@ -518,6 +521,30 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 # ======================================================================================
 # Shared single-source context transfer
 # ======================================================================================
+def _metadata_locks(value, seen=None, states=None, inherited=False):
+    """Visit metadata containers once, without following parent references."""
+    seen = set() if seen is None else seen
+    identity = id(value) if states is None else (id(value), inherited)
+    if identity in seen:
+        return
+    seen.add(identity)
+    if isinstance(value, Meta):
+        state = value._readonly if states is None else states.get(id(value), inherited)
+        yield value, state
+        yield from _metadata_locks(value._data, seen, states, state)
+    elif isinstance(value, dict):
+        if isinstance(value, ReadOnlyDict):
+            inherited = (
+                value._readonly if states is None else states.get(id(value), inherited)
+            )
+            yield value, inherited
+        for child in value.values():
+            yield from _metadata_locks(child, seen, states, inherited)
+    elif isinstance(value, (list, tuple)):
+        for child in value:
+            yield from _metadata_locks(child, seen, states, inherited)
+
+
 def transfer_source_context(
     source, target, *, author=None, include_acquisition_date=True
 ):
@@ -528,6 +555,9 @@ def transfer_source_context(
     ``description``, ``origin``, ``filename`` and the acquisition date.
     Mutable metadata is deep-copied so that the result never shares state with
     the source, and the source itself is never modified.
+    Existing target container locks are retained. New descendants inherit their
+    nearest existing container's policy; a shared new descendant is protected
+    when any inherited policy protects it.
 
     Parameters
     ----------
@@ -552,7 +582,24 @@ def transfer_source_context(
     string, not the value accepted by the trait). Values that are neither a
     `datetime` nor `None` are ignored rather than assigned.
     """
-    target.meta = copy.deepcopy(source.meta)
+    metadata = copy.deepcopy(source.meta)
+    locks = list(_metadata_locks(target.meta))
+    states = {id(node): state for node, state in locks}
+    try:
+        for node, _ in locks:
+            node._readonly = False
+        target.meta = metadata
+    finally:
+        resolved = {}
+        for node, state in _metadata_locks(target.meta, states=states):
+            identity = id(node)
+            if identity not in states and identity in resolved:
+                state = state or resolved[identity][1]
+            resolved[identity] = (node, state)
+        for node, state in resolved.values():
+            node._readonly = state
+        for node, state in locks:
+            node._readonly = state
     target.author = copy.copy(source.author if author is None else author)
     target.description = copy.copy(source.description)
     target.origin = copy.copy(source.origin)

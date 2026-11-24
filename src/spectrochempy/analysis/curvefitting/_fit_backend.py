@@ -20,6 +20,11 @@ def _least_squares(objective, initial, **options):
     return optimize.least_squares(objective, initial, **options)
 
 
+def _nonnegative_least_squares(matrix, target):
+    """Project linear coefficients onto the nonnegative least-squares solution."""
+    return optimize.nnls(matrix, target)[0]
+
+
 def _run_optimizer(
     objective,
     initial,
