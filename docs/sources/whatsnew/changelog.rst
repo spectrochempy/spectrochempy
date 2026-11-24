@@ -19,6 +19,11 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``Optimize(model=..., parameters=...)`` fits nonseparable physical models on
+  a full multidimensional ``NDDataset`` grid, with optional positive linear
+  amplitude projection and native ``FitResult`` outputs.
+
+
 - ``Baseline(model="arpls")`` and ``Baseline(model="aspls")`` add explicitly
   selected reweighted baseline correction using NumPy/SciPy, also through
   ``get_baseline`` and ``basc``. They accept finite real unmasked 1D or rowwise
@@ -41,6 +46,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
+- ``NNLS.coef`` and ``LSTSQ.coef`` now return coefficient arrays for NumPy
+  inputs with multiple features, including multiple targets, instead of raising
+  ``UnboundLocalError``. Dataset coefficients retain their units and scalar
+  coefficients keep their existing return type.
 
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
