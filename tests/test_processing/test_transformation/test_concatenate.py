@@ -808,3 +808,36 @@ def test_concatenate_absent_versus_labels_only_coordinate_does_not_warn():
     _, messages = _coordinate_mismatch_warnings(concatenate, bare, labelled, dim="y")
 
     assert messages == []
+
+
+@pytest.mark.parametrize("labelled_first", [False, True])
+def test_concatenate_absent_versus_labels_only_multi_coordinate_does_not_warn(
+    labelled_first,
+):
+    y = scp.Coord([0.0])
+    x_labels = scp.CoordSet(
+        scp.Coord(labels=["a", "b", "c"], title="first"),
+        scp.Coord(labels=["d", "e", "f"], title="second"),
+    )
+    labelled = scp.NDDataset(np.ones((1, 3)), coordset=[y, x_labels])
+    bare = scp.NDDataset(np.ones((1, 3)))
+    bare.set_coordset(y=y)
+    inputs = [labelled, bare] if labelled_first else [bare, labelled]
+
+    _, messages = _coordinate_mismatch_warnings(concatenate, inputs, dim="y")
+
+    assert messages == []
+
+
+def test_concatenate_absent_versus_multi_coordinate_with_values_warns():
+    y = scp.Coord([0.0])
+    x_mixed = scp.CoordSet(
+        scp.Coord(labels=["a", "b", "c"], title="first"),
+        scp.Coord(np.arange(3.0), title="second"),
+    )
+    mixed = scp.NDDataset(np.ones((1, 3)), coordset=[y, x_mixed])
+    bare = scp.NDDataset(np.ones((1, 3)))
+    bare.set_coordset(y=y)
+
+    with pytest.warns(UserWarning, match=_COORD_MISMATCH):
+        concatenate([mixed, bare], dim="y")

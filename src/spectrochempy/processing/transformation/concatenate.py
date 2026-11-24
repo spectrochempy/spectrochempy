@@ -536,9 +536,12 @@ def _coordinates_differ(coordinate, reference):
 
 
 def _has_values(coordinate):
-    return coordinate is not None and (
-        isinstance(coordinate, CoordSet) or coordinate.data is not None
-    )
+    """Return True when the coordinate (or any coordinate of a CoordSet) has values."""
+    if coordinate is None:
+        return False
+    if isinstance(coordinate, CoordSet):
+        return any(_has_values(coord) for coord in coordinate.coords)
+    return coordinate.data is not None
 
 
 def _warn_on_differing_coordinates(datasets, dim):
