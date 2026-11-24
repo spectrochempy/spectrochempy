@@ -147,3 +147,25 @@ def test_bound_and_partial_fixed_parameter_preserve_parameter_order():
     assert fit.result.parameter_names == ("tau",)
     assert fit.result.parameter_units == (scp.ur.s,)
     assert fit.result.diagnostics["covariance_reason"] == "active_bounds"
+
+
+@pytest.mark.parametrize("model", ["saturation_recovery", "exponential_decay"])
+@pytest.mark.parametrize("unit", ["s", "ms"])
+def test_default_tau_bound_remains_positive_in_scaled_jacobian(model, unit):
+    times = np.array([0, 0.1, 0.3, 1, 3, 10]) * 1e-6
+    profile = (
+        -np.expm1(-times / 1e-6)
+        if model == "saturation_recovery"
+        else np.exp(-times / 1e-6)
+    )
+    coordinate = scp.Coord(times, units="s", rounding=False).to(unit)
+    curve = scp.NDDataset(2 * profile, coordset=[coordinate])
+    fit = scp.Optimize(
+        model=model, parameters={"amplitude": 2, "tau": 2 * scp.ur.s}
+    ).fit(curve)
+    assert fit.result.diagnostics["success"]
+    assert_allclose(
+        fit.result.fitted_parameters["tau"].to("s").magnitude, 1e-6, rtol=1e-5
+    )
+    assert_allclose(fit.predict().data, curve.data, atol=1e-6)
+    assert np.isfinite(fit.jacobian).all()

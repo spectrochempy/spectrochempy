@@ -8,6 +8,7 @@ from spectrochempy.analysis.curvefitting._optimize_nd import _grid
 from spectrochempy.analysis.curvefitting._optimize_profiles import fit_profiles
 from spectrochempy.analysis.curvefitting._profile_models import profile_history
 from spectrochempy.analysis.curvefitting.simulation import _interval_unit
+from spectrochempy.analysis.curvefitting.simulation import _parameter_value
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
 
@@ -25,7 +26,10 @@ def fit_curve(dataset, model, parameters, max_calls):
         raise ValueError("Named curve parameters must contain amplitude and tau")
     tau = parameters["tau"]
     tau = dict(tau) if isinstance(tau, Mapping) else {"value": tau}
-    tau.setdefault("bounds", (np.nextafter(0.0, 1.0), None))
+    if "bounds" not in tau:
+        initial = _parameter_value(tau.get("value"), units[dim], "tau", interval=True)
+        lower = max(np.nextafter(0.0, 1.0), abs(initial) * np.finfo(float).tiny)
+        tau["bounds"] = (lower, None)
     peaks = [
         {
             "height": parameters["amplitude"],
