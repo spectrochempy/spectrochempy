@@ -49,7 +49,7 @@ Bug Fixes
 
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
-  read-only state and keeping source metadata independent.
+  read-only state and keeping source metadata independent (:pr:`1969`).
 
 - ``NNLS.coef`` and ``LSTSQ.coef`` now return coefficient arrays for NumPy
   inputs with multiple features, including multiple targets, instead of raising
