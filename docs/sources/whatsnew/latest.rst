@@ -54,6 +54,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``write_jcamp`` now writes the full label as the ``##TITLE`` of each spectrum
+  when the ``y`` coordinate has single-column labels (previously only the first
+  character was written). Single-column datetime labels no longer raise a
+  ``TypeError`` and are used as acquisition dates (:issue:`1949`).
+
 - ``asymmetricvoigtmodel`` and ``asymmetricvoigt``: a negative ``asym`` now
   gives the asymmetry on the other side of the peak instead of being silently
   ignored and giving the symmetric profile: the profile for ``asym = -a`` is

@@ -155,8 +155,11 @@ def _write_jcamp(*args, **kwargs):
         # be the first datetime.datetime
         title_index = None
         timestamp_index = None
-        if dataset.y.labels is not None:
-            for i, label in enumerate(dataset.y.labels[0]):
+        labels = dataset.y.labels
+        if labels is not None and labels.ndim == 1:
+            labels = labels[:, np.newaxis]
+        if labels is not None:
+            for i, label in enumerate(labels[0]):
                 if title_index is None and isinstance(label, str):
                     title_index = i
                 if timestamp_index is None and type(label) is datetime:
@@ -173,7 +176,7 @@ def _write_jcamp(*args, **kwargs):
         for i in range(dataset.shape[0]):
             if dataset.shape[0] > 1:
                 title = (
-                    dataset.y.labels[i][title_index]
+                    labels[i][title_index]
                     if title_index is not None
                     else f"spectrum #{i}"
                 )
@@ -184,7 +187,7 @@ def _write_jcamp(*args, **kwargs):
             fid.write(f"##OWNER={dataset.author}\n")
 
             if timestamp_index is not None:
-                timestamp = dataset.y.labels[i][timestamp_index]
+                timestamp = labels[i][timestamp_index]
 
             fid.write(f"##LONGDATE={timestamp.strftime('%Y/%m/%d')}\n")
             fid.write(f"##TIME={timestamp.strftime('%H:%M:%S')}\n")
