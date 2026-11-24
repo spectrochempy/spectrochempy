@@ -28,7 +28,6 @@ in the :doc:`analysis gallery </gettingstarted/examples/gallery/auto_examples_an
    peak_integration
    fitting
    global_fitting
-   fit_cosy_2d
    pipeline
    cross_validation
    pca
