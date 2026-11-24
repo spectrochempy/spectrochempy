@@ -552,7 +552,13 @@ def transfer_source_context(
     string, not the value accepted by the trait). Values that are neither a
     `datetime` nor `None` are ignored rather than assigned.
     """
-    target.meta = copy.deepcopy(source.meta)
+    metadata = copy.deepcopy(source.meta)
+    readonly = target.meta.readonly
+    try:
+        target.meta.readonly = False
+        target.meta = metadata
+    finally:
+        target.meta.readonly = readonly
     target.author = copy.copy(source.author if author is None else author)
     target.description = copy.copy(source.description)
     target.origin = copy.copy(source.origin)
