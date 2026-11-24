@@ -432,8 +432,12 @@ shape: asymmetricvoigtmodel
 #   $ width: val, 0.0, None
 #   $ pos: val, lob, upb
 #   $ ratio: val, 0.0, 1.0
-#   $ asym: val, 0.0, 1.0
+#   $ asym: val, -1.0, 1.0
 #   ```
+#
+#   The sign of `asym` sets the side of the asymmetry: a positive value broadens
+#   the low-x side of the peak, a negative value the high-x side, and `asym = 0`
+#   gives the symmetric Voigt profile.
 
 # For quick synthetic profiles outside the fitting workflow, SpectroChemPy also
 # exposes direct helpers at the top level: `scp.gaussian`, `scp.lorentzian`,

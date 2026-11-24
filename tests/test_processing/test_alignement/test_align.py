@@ -945,3 +945,64 @@ def test_align_interpolate_masks_distant_targets_without_collapsing_output_grid(
     np.testing.assert_array_equal(result.x.data, target.data)
     np.testing.assert_array_equal(result.mask, [False, True, True])
     np.testing.assert_array_equal(result.data, [0.5, 99999999999999, 99999999999999])
+
+
+def _inner_join_spectrum(x):
+    return scp.NDDataset(
+        np.ones((2, len(x))),
+        coordset=[None, scp.Coord(x, units="1/cm", title="wavenumber")],
+    )
+
+
+@pytest.mark.parametrize(
+    ("first_grid", "second_grid", "reason"),
+    [
+        (
+            1000.0 + 0.48 * np.arange(208),
+            1000.05 + 0.9643 * np.arange(104),
+            "keeps only 20 of the 104 points",
+        ),
+        (
+            1100.0 - 0.48 * np.arange(208),
+            1100.03 - 0.9643 * np.arange(104),
+            "keeps only 20 of the 104 points",
+        ),
+        (
+            10000.0 + np.arange(50),
+            10000.0 + 1.1 * np.arange(40),
+            "irregularly spaced",
+        ),
+    ],
+)
+def test_align_inner_warns_when_non_commensurate_grids_lose_points(
+    first_grid, second_grid, reason
+):
+    first = _inner_join_spectrum(first_grid)
+    second = _inner_join_spectrum(second_grid)
+
+    with pytest.warns(UserWarning, match=reason) as record:
+        aligned_first, _ = scp.align(first, second, method="inner")
+
+    assert "method='interpolate'" in str(record[0].message)
+    assert aligned_first.shape[-1] > 0
+
+
+@pytest.mark.parametrize(
+    ("first_grid", "second_grid"),
+    [
+        (np.arange(100.0), np.arange(100.0)),
+        (np.arange(100.0), np.arange(20.0, 60.0)),
+        (np.arange(100.0), np.arange(0.0, 100.0, 2.0)),
+        (np.arange(100.0), np.arange(80.0, 180.0)),
+        (np.array([0.0, 1, 2, 5, 6, 9]), np.array([0.0, 1, 2, 5, 6, 9, 10])),
+    ],
+)
+def test_align_inner_does_not_warn_for_commensurate_grids(first_grid, second_grid):
+    import warnings
+
+    first = _inner_join_spectrum(first_grid)
+    second = _inner_join_spectrum(second_grid)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        scp.align(first, second, method="inner")

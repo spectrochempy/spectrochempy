@@ -47,8 +47,8 @@ def test_read_raman_keeps_separate_grids():
 
 def test_read_raman_rejects_non_shift_units():
     payload = RAMAN.replace(b"1/CM", b"NANOMETERS")
-    with pytest.warns(UserWarning, match="Unsupported Raman JCAMP-DX XUNITS"):
-        assert scp.read_jcamp({"invalid.dx": payload}) is None
+    with pytest.raises(ValueError, match="Unsupported Raman JCAMP-DX XUNITS"):
+        scp.read_jcamp({"invalid.dx": payload})
 
 
 @pytest.mark.parametrize("metadata", [["Raman spectrum"], "RAMAN SPECTRUM"])
