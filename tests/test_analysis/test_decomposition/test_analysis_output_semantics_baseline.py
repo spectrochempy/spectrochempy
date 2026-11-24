@@ -329,11 +329,28 @@ class TestDiagnosticOutputs:
         )
 
 
-class TestCurrentApiLimits:
-    """Characterize current analysis API limitations where relevant."""
+class TestSVDScores:
+    """SVD scores follow the X latent-factor policy (issue #1972)."""
 
-    def test_svd_transform_is_not_implemented(self, semantic_dataset):
-        svd = SVD().fit(semantic_dataset)
+    def test_svd_transform_applies_canonical_scores_metadata(self, semantic_dataset):
+        scores = SVD().fit(semantic_dataset).transform(n_components=2)
 
-        with pytest.raises(NotImplementedError):
-            svd.transform()
+        assert scores.shape == (semantic_dataset.shape[0], 2)
+        assert scores.dims == ["y", "k"]
+        assert scores.y.title == semantic_dataset.y.title
+        assert scores.y.units == semantic_dataset.y.units
+        assert scores.k.title == "components"
+        assert scores.name == "source_name_SVD.scores"
+        assert scores.title == "scores"
+        assert scores.description == "scores from SVD fit of source_name."
+        assert scores.units is None
+        assert scores.author == semantic_dataset.author
+        assert scores.origin == semantic_dataset.origin
+        assert scores.filename is None
+        assert scores.meta.project == semantic_dataset.meta.project
+        assert scores.meta is not semantic_dataset.meta
+        assert scores.acquisition_date == semantic_dataset.acquisition_date
+        assert not np.any(scores.mask)
+        assert scores.history[-1].endswith(
+            "Created analysis output scores with SVD from source_name."
+        )

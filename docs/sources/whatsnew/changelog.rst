@@ -52,6 +52,15 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``SVD.transform``, ``SVD.fit_transform``, ``SVD.inverse_transform``,
+  ``SVD.components`` and ``SVD.get_components`` no longer raise
+  ``NotImplementedError``. They return ``NDDataset`` scores
+  :math:`U \Sigma` (:math:`X V` for new data), right singular vectors
+  :math:`V^T` and rank-``n_components`` reconstructions, with the same
+  coordinates, units and metadata conventions as ``PCA``. Unlike ``PCA``,
+  SVD does not center the data. ``U``, ``s`` and ``VT`` are unchanged
+  (:issue:`1972`).
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata

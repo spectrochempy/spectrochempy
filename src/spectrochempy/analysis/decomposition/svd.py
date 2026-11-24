@@ -5,6 +5,8 @@
 # ======================================================================================
 """Implements the Singular Value Decomposition (SVD) class."""
 
+import warnings
+
 import numpy as np
 import traitlets as tr
 
@@ -12,6 +14,7 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis._base._result import AnalysisResult
+from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]
@@ -64,6 +67,11 @@ class SVD(DecompositionAnalysis):
     The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
 
     This class has the attributes : U, s = diag(S) and VT=V :math:`^T`.
+
+    Unlike `PCA`, the data are not centered: `transform` returns the scores
+    :math:`U \Sigma` (:math:`X V` for new data), `components` the rows of
+    :math:`V^{T}`, and `inverse_transform` the rank-:math:`k` reconstruction
+    :math:`U_k \Sigma_k V_k^{T}` of the raw bilinear decomposition.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -158,7 +166,44 @@ class SVD(DecompositionAnalysis):
             # _outfit to a consistent (U, s, VT) tuple so that all
             # downstream properties can safely index _outfit[0|1|2].
             _outfit = (None, result, None)
+        # number of singular triplets (k = min(M, N)), also when full_matrices
+        # is True and VT has more rows than singular values.
+        self._n_components = int(np.size(_outfit[1]))
         return _outfit
+
+    def _right_singular_vectors(self, method):
+        # The k = min(M, N) first rows of VT (VT has N rows when
+        # full_matrices is True).
+        if not self.compute_uv:
+            raise ValueError(
+                f"{method} requires the right singular vectors: "
+                "fit the SVD with compute_uv=True."
+            )
+        return self._outfit[2][: self._n_components]
+
+    def _transform(self, X):
+        # Scores in the basis of the right singular vectors: X @ V.
+        # SVD does not center or scale the data, so no preprocessing is
+        # applied here; for the fitted X this equals U @ diag(s).
+        VT = self._right_singular_vectors("transform")
+        if X.shape[-1] != VT.shape[1]:
+            raise ValueError(
+                f"X has {X.shape[-1]} features, but SVD is expecting "
+                f"{VT.shape[1]} features as input."
+            )
+        return X @ VT.T
+
+    def _inverse_transform(self, X_transform):
+        # Truncated reconstruction X_hat = T[:, :k] @ VT[:k], without any
+        # mean added back since SVD does not center the data.
+        VT = self._right_singular_vectors("inverse_transform")
+        if X_transform.ndim == 1:
+            X_transform = X_transform.reshape(-1, 1)
+        k = min(X_transform.shape[1], VT.shape[0])
+        return X_transform[:, :k] @ VT[:k]
+
+    def _get_components(self):
+        return self._right_singular_vectors("components")
 
     # ----------------------------------------------------------------------------------
     # special methods
@@ -195,6 +240,181 @@ class SVD(DecompositionAnalysis):
 
         """
         return super().fit(X, Y=None)
+
+    def transform(self, X=None, **kwargs):
+        r"""
+        Apply dimensionality reduction to `X`.
+
+        Project `X` onto the right singular vectors :math:`V` of the fitted
+        model: :math:`T = X V`. Unlike `PCA`, SVD does not center (nor scale)
+        the data: the scores are those of the raw bilinear decomposition
+        :math:`X = U \Sigma V^{T}`, so for the fitted dataset
+        :math:`T = U \Sigma`.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`), optional
+            New data with the same features as the fitted dataset. If not
+            provided, the dataset used in `fit` is transformed.
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
+
+        Returns
+        -------
+        `NDDataset`
+            Scores with shape (:term:`n_observations`, :term:`n_components`).
+
+        Other Parameters
+        ----------------
+        n_components : `int`, optional
+            The number of components to keep. By default, all the
+            :math:`\min(M, N)` components are kept.
+
+        Raises
+        ------
+        ValueError
+            If the model was fitted with ``compute_uv=False``, or if `X` does
+            not have the number of (unmasked) features of the fitted dataset.
+
+        See Also
+        --------
+        fit_transform : Fit the model and apply dimensionality reduction.
+
+        Examples
+        --------
+        >>> dataset = scp.read('irdata/nh4y-activation.spg')
+        >>> svd = scp.SVD().fit(dataset)
+        >>> scores = svd.transform(n_components=2)
+        >>> scores.shape
+        (55, 2)
+
+        """
+        return super().transform(X, **kwargs)
+
+    @_wrap_ndarray_output_to_nddataset(analysis_role="reconstruction")
+    def inverse_transform(self, X_transform=None, **kwargs):
+        r"""
+        Transform data back to its original space.
+
+        Compute the rank-:math:`k` reconstruction
+        :math:`\hat{X} = T_k V_k^{T}` from the scores :math:`T`. As SVD does not
+        center the data (unlike `PCA`), no mean is added back: for the fitted
+        dataset, :math:`\hat{X} = U_k \Sigma_k V_k^{T}`, which is `X` itself
+        when all the components are kept.
+
+        Parameters
+        ----------
+        X_transform : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_components`), optional
+            Scores to transform back. If not provided, the scores of the
+            dataset used in `fit` are computed first.
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
+
+        Returns
+        -------
+        `NDDataset`
+            Reconstructed dataset with shape (:term:`n_observations`, :term:`n_features`).
+
+        Other Parameters
+        ----------------
+        n_components : `int`, optional
+            The number of components :math:`k` used for the reconstruction.
+            By default, all the components of `X_transform` are used.
+
+        Raises
+        ------
+        ValueError
+            If the model was fitted with ``compute_uv=False``.
+
+        See Also
+        --------
+        transform : Apply dimensionality reduction.
+
+        Examples
+        --------
+        >>> dataset = scp.read('irdata/nh4y-activation.spg')
+        >>> svd = scp.SVD().fit(dataset)
+        >>> X_hat = svd.inverse_transform(n_components=2)
+        >>> X_hat.shape
+        (55, 5549)
+
+        """
+        if not self._fitted:
+            raise NotFittedError
+
+        # Unlike the base class, n_components is honoured in all cases: the
+        # reconstruction uses the first n_components scores only.
+        n_components = kwargs.pop("n_components", None)
+        if n_components is not None and n_components > self._n_components:
+            warnings.warn(
+                "The number of components required for reduction "
+                "cannot be greater than the fitted model components : "
+                f"{self._n_components}. We then use this latter value.",
+                stacklevel=2,
+            )
+            n_components = self._n_components
+
+        if X_transform is None:
+            kw = {} if n_components is None else {"n_components": n_components}
+            X_transform = self.transform(**kw).data
+        elif isinstance(X_transform, NDDataset):
+            X_transform = X_transform.data
+        else:
+            X_transform = np.asarray(X_transform)
+        if X_transform.ndim == 1:
+            X_transform = X_transform.reshape(-1, 1)
+        if n_components is not None:
+            if n_components > X_transform.shape[1]:
+                warnings.warn(
+                    "The number of components required for reduction "
+                    "cannot be greater than the X_transform size : "
+                    f"{X_transform.shape[1]}. We then use this latter value.",
+                    stacklevel=2,
+                )
+            X_transform = X_transform[:, :n_components]
+
+        return self._inverse_transform(X_transform)
+
+    def fit_transform(self, X, **kwargs):
+        r"""
+        Fit the SVD model on `X` and apply the dimensionality reduction on `X`.
+
+        This is equivalent to ``fit(X).transform()``. Unlike `PCA`, the data are
+        not centered: the scores are :math:`U \Sigma` of the raw decomposition
+        :math:`X = U \Sigma V^{T}`.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
+
+        Returns
+        -------
+        `NDDataset`
+            Scores :math:`U \Sigma` with shape (:term:`n_observations`, :term:`n_components`).
+
+        Other Parameters
+        ----------------
+        n_components : `int`, optional
+            The number of components to keep. By default, all the
+            :math:`\min(M, N)` components are kept.
+
+        See Also
+        --------
+        transform : Apply dimensionality reduction.
+
+        Examples
+        --------
+        >>> dataset = scp.read('irdata/nh4y-activation.spg')
+        >>> scores = scp.SVD().fit_transform(dataset, n_components=3)
+        >>> scores.shape
+        (55, 3)
+
+        """
+        self.fit(X)
+        return self.transform(**kwargs)
 
     @property
     @_wrap_ndarray_output_to_nddataset(
