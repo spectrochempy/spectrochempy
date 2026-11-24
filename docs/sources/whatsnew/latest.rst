@@ -38,6 +38,12 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Processing context transfer, including baseline correction of imported NMR
+  spectra, accepts protected nested metadata while preserving the target's
+  read-only state and keeping source metadata independent. Copying metadata
+  preserves independently protected subtrees without temporarily unlocking
+  the source (:pr:`1969`).
+
 - ``NNLS.coef`` and ``LSTSQ.coef`` now return coefficient arrays for NumPy
   inputs with multiple features, including multiple targets, instead of raising
   ``UnboundLocalError``. Dataset coefficients retain their units and scalar
