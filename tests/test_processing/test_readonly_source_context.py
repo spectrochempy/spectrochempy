@@ -159,3 +159,51 @@ def test_shared_new_context_is_protected_under_either_parent(
             branch["new"]["gain"] = 99
     assert not source.meta.a["new"]._readonly
     assert source.meta.a["new"]["gain"] == 12
+
+
+@pytest.mark.parametrize("fail", [False, True])
+def test_new_top_level_context_preserves_shared_identity_and_protection(
+    monkeypatch, fail
+):
+    shared = ReadOnlyDict(gain=12)
+    source = scp.NDDataset([1.0, 2.0])
+    source.meta.a = shared
+    source.meta.b = {"new": shared}
+    source.meta.future = 1
+    target = scp.NDDataset([3.0, 4.0])
+    target.meta.b = {}
+    target.meta.future = 0
+    target.meta.readonly = True
+    target.meta.b.set_readonly(False)
+    if fail:
+        original = type(target).meta
+
+        def partial_setter(dataset, metadata):
+            for key in ("a", "b"):
+                original.fset(dataset, {key: metadata[key]})
+            raise RuntimeError("partial merge failed")
+
+        monkeypatch.setattr(
+            type(target), "meta", property(original.fget, partial_setter)
+        )
+        with pytest.raises(RuntimeError, match="partial merge failed"):
+            transfer_source_context(source, target)
+        assert target.meta.future == 0
+    else:
+        transfer_source_context(source, target)
+        assert target.meta.future == 1
+    assert target.meta.a is target.meta.b["new"]
+    with pytest.raises(ValueError, match="read-only"):
+        target.meta.b["new"]["gain"] = 99
+    assert not source.meta.a._readonly
+
+
+def test_new_top_level_context_keeps_its_dictionary_cycle():
+    shared = ReadOnlyDict(gain=12)
+    shared["self"] = shared
+    source = scp.NDDataset([1.0, 2.0])
+    source.meta.cycle = shared
+    target = scp.NDDataset([3.0, 4.0])
+    transfer_source_context(source, target)
+    assert target.meta.cycle is not shared
+    assert target.meta.cycle["self"] is target.meta.cycle

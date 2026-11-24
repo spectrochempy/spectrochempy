@@ -336,7 +336,11 @@ class Meta:
                 if key in self._data and isinstance(self._data[key], ReadOnlyDict):
                     self._data[key].update(value)
                 else:
-                    self._data[key] = ReadOnlyDict(value)
+                    self._data[key] = (
+                        value
+                        if isinstance(value, ReadOnlyDict)
+                        else ReadOnlyDict(value)
+                    )
             elif isinstance(value, Meta):
                 if key in self._data and isinstance(self._data[key], Meta):
                     for k, v in value.items():
