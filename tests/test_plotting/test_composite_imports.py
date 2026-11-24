@@ -139,10 +139,10 @@ class TestPlotMeritImports:
         """The legend refers to labelled plotted lines, with readable defaults."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(3, 20))
+        X = NDDataset(np.random.RandomState(0).rand(3, 20))
         X_ref = X * 0.9
 
         _, ax = plt.subplots()
@@ -181,10 +181,10 @@ class TestPlotMeritImports:
         """Names set on the datasets are kept; automatic names are replaced."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(3, 20))
+        X = NDDataset(np.random.RandomState(0).rand(3, 20))
         X_ref = X * 0.9
 
         def legend_texts(ax):
@@ -213,11 +213,11 @@ class TestPlotMeritImports:
         """User names that look like automatic ids remain the default labels."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(3, 20), name=exp_name)
-        X_ref = scp.NDDataset(X.data * 0.9, name=calc_name)
+        X = NDDataset(np.random.RandomState(0).rand(3, 20), name=exp_name)
+        X_ref = NDDataset(X.data * 0.9, name=calc_name)
 
         ax = plot_compare(X, X_ref, residual=False, show=False)
         assert [text.get_text() for text in ax.get_legend().get_texts()] == [
@@ -241,11 +241,11 @@ class TestPlotMeritImports:
         """Automatic ids, also as analysis name prefixes, fall back to roles."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(3, 20), name=exp_name)
-        X_ref = scp.NDDataset(X.data * 0.9, name=calc_name)
+        X = NDDataset(np.random.RandomState(0).rand(3, 20), name=exp_name)
+        X_ref = NDDataset(X.data * 0.9, name=calc_name)
 
         ax = plot_compare(X, X_ref, residual=False, show=False)
         assert [text.get_text() for text in ax.get_legend().get_texts()] == [
@@ -258,10 +258,10 @@ class TestPlotMeritImports:
         """``labels`` warns and leaves the per-role labels in charge."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(2, 20))
+        X = NDDataset(np.random.RandomState(0).rand(2, 20))
         X_ref = X * 0.9
 
         with pytest.warns(
@@ -288,10 +288,10 @@ class TestPlotMeritImports:
         """No empty legend box, and repeated calls do not repeat entries."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(2, 20))
+        X = NDDataset(np.random.RandomState(0).rand(2, 20))
         X_ref = X * 0.9
 
         ax = plot_compare(
@@ -318,13 +318,14 @@ class TestPlotMeritImports:
         """Overlaid reconstructions do not repeat the comparison legend entries."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import PCA
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_merit
 
         rng = np.random.RandomState(42)
-        X = scp.NDDataset(rng.randn(10, 8))
-        X_hat = scp.NDDataset(rng.randn(3, 10, 8))
-        pca = scp.PCA(n_components=2).fit(X)
+        X = NDDataset(rng.randn(10, 8))
+        X_hat = NDDataset(rng.randn(3, 10, 8))
+        pca = PCA(n_components=2).fit(X)
 
         ax = plot_merit(pca, X=X, X_hat=X_hat, show=False)
 
@@ -339,10 +340,11 @@ class TestPlotMeritImports:
         """PCA preprocessing prefixes on an automatic name keep role labels."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import PCA
+        from spectrochempy import NDDataset
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(10, 8))
-        pca = scp.PCA(n_components=2, standardized=True).fit(X)
+        X = NDDataset(np.random.RandomState(0).rand(10, 8))
+        pca = PCA(n_components=2, standardized=True).fit(X)
         assert pca.X.name.startswith("standardized ")
 
         ax = pca.plot_merit(show=False)
@@ -357,12 +359,13 @@ class TestPlotMeritImports:
         """A smoothed copy keeps its name, and both lines stay in the legend."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(
+        X = NDDataset(
             np.random.RandomState(0).rand(50),
-            coordset=[scp.Coord(np.linspace(1000.0, 2000.0, 50))],
+            coordset=[Coord(np.linspace(1000.0, 2000.0, 50))],
             name="noisy spectrum",
         )
         smoothed = X.smooth(size=7)
@@ -386,10 +389,10 @@ class TestPlotMeritImports:
         """Equal labels of one call are kept; other artists are deduplicated."""
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(2, 20))
+        X = NDDataset(np.random.RandomState(0).rand(2, 20))
         X_ref = X * 0.9
 
         _, ax = plt.subplots()
@@ -421,11 +424,12 @@ class TestPlotMeritImports:
 
         import matplotlib.pyplot as plt
 
-        import spectrochempy as scp
+        from spectrochempy import PCA
+        from spectrochempy import NDDataset
         from spectrochempy.plotting.composite.plotmerit import plot_compare
 
-        X = scp.NDDataset(np.random.RandomState(0).rand(10, 8))
-        pca = scp.PCA(n_components=2).fit(X)
+        X = NDDataset(np.random.RandomState(0).rand(10, 8))
+        pca = PCA(n_components=2).fit(X)
 
         calls = [
             lambda: plot_compare(X, X * 0.9, labels=["a", "b"], show=False),
