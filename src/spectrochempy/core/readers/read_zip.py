@@ -10,7 +10,9 @@ import zipfile
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _is_call_error
 from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.core.readers.importer import _warn_skipped_file
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils._logging import warning_
 
@@ -160,6 +162,7 @@ def _read_zip(*args, **kwargs):
 
         datasets = []
         ignored_files = []
+        skipped = []
         supported_extensions = set(
             list(zip(*(registry.aliases + registry.filetypes), strict=False))[0]
         )
@@ -182,7 +185,14 @@ def _read_zip(*args, **kwargs):
             file = zipfile.Path(zf, at=zipinfo.filename)
             if file.is_dir():
                 continue
-            d = extract(file, **kwargs)
+            try:
+                d = extract(file, **kwargs)
+            except Exception as exc:
+                if _is_call_error(exc):
+                    raise
+                _warn_skipped_file(zipinfo.filename, exc)
+                skipped.append(exc)
+                continue
             if d is not None:
                 datasets.append(d)
                 count += 1
@@ -195,6 +205,9 @@ def _read_zip(*args, **kwargs):
                 f"Some files in {filename} were ignored because no reader is available:\n"
                 f"{ignored_list}"
             )
+
+        if skipped and not datasets:
+            raise skipped[0]
 
         if len(datasets) == 1:
             return datasets[0]

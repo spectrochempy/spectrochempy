@@ -63,6 +63,21 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Reading files no longer hides reader errors. Reading a single file (path,
+  one-element list or ``content=``) with ``read`` or a format reader
+  (``read_omnic``, ``read_jcamp``, ``read_csv``, ...) raises the reader's
+  original exception, with a note naming the file, instead of a warning and
+  ``None``: for example a corrupted file, or an OMNIC ``.spg`` with inconsistent
+  x axes, as documented. A local file or given content (even empty) that
+  cannot be read is no longer looked for in the remote test data repository,
+  except a file in ``datadir`` that reports a missing file (partially
+  downloaded test data); a file downloaded from that repository that cannot be
+  read raises too. When several files, a directory or zip members are read, an
+  unreadable file is skipped with a warning giving its name and the exception
+  type (previously only the message, and file-content ``SpectroChemPyError``
+  errors aborted the whole read); if no file can be read, the first error is
+  raised instead of returning ``None`` (:issue:`1950`).
+
 - ``write_jcamp`` now writes the full label as the ``##TITLE`` of each spectrum
   when the ``y`` coordinate has single-column labels (previously only the first
   character was written). Single-column datetime labels no longer raise a
@@ -129,6 +144,12 @@ Dependency Updates
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
+
+- Reading a single unreadable file with ``read`` or a format reader now raises
+  the reader's exception instead of emitting a warning and returning ``None``;
+  reading several files raises when none of them can be read. Replace
+  ``if ds is None:`` checks by ``try: ... except Exception: ...`` around the
+  read (:issue:`1950`).
 
 - ``plot_compare`` (and ``plot_merit``) legends now use "experimental" and
   "calculated" instead of automatic dataset names such as
