@@ -18,6 +18,9 @@ __all__ = [
 __dataset_methods__ = []
 
 
+import math
+import numbers
+
 import numpy as np
 
 from spectrochempy.plotting._kwargs import normalize_plot_kwargs
@@ -112,8 +115,8 @@ multiplot_with_transposed = plot_with_transposed
 def multiplot(
     datasets=None,
     labels=None,
-    nrow=1,
-    ncol=1,
+    nrow=None,
+    ncol=None,
     method="lines",
     sharex=False,
     sharey=False,
@@ -144,10 +147,15 @@ def multiplot(
         ``"scatter"``, ``"lines"``, ``"contour"``, ``"contourf"``,
         ``"image"``, and ``"with_transposed"``. Compatibility aliases such as
         ``"stack"`` and ``"map"`` are normalized internally.
-    nrow, ncol : int, default=1
+    nrow, ncol : int, optional
         Number of rows and columns in the subplot grid. ``nrow * ncol`` must
-        provide enough panels for the datasets to plot. The plural aliases
-        ``nrows`` and ``ncols`` are accepted as additional keyword arguments.
+        provide enough panels for the ``n`` datasets to plot when both are
+        given, otherwise a `ValueError` is raised. When only one is given, the
+        other is the smallest value that holds the ``n`` datasets. When neither
+        is given, a single dataset uses one axes and a list of datasets uses
+        ``ceil(sqrt(n))`` columns and as many rows as needed. Panels left
+        without a dataset are hidden. The plural aliases ``nrows`` and
+        ``ncols`` are accepted as additional keyword arguments.
     sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default=False
         Controls sharing of properties among x (`sharex` ) or y (`sharey` )
         axes::
@@ -229,7 +237,8 @@ def multiplot(
     Returns
     -------
     matplotlib.axes.Axes or numpy.ndarray or dict
-        A single axes for the 1x1 case, otherwise the subplot collection. Use
+        A single axes for the 1x1 case, otherwise the subplot collection, one
+        axes per grid cell in row-major order (hidden cells included). Use
         ``return_dict=True`` to keep the internal axes naming.
 
     """
@@ -270,17 +279,23 @@ def multiplot(
         nrows = kwargs.pop("nrows", None)
         ncols = kwargs.pop("ncols", None)
         if nrows is not None:
-            if nrow not in (1, nrows):
+            if nrow not in (None, 1, nrows):
                 raise ValueError(
                     "Specify either nrow or nrows, not conflicting values."
                 )
             nrow = nrows
         if ncols is not None:
-            if ncol not in (1, ncols):
+            if ncol not in (None, 1, ncols):
                 raise ValueError(
                     "Specify either ncol or ncols, not conflicting values."
                 )
             ncol = ncols
+        for name, value in (("nrow", nrow), ("ncol", ncol)):
+            if value is not None and not (
+                isinstance(value, numbers.Integral) and value >= 1
+            ):
+                raise ValueError(f"{name} must be a positive integer, got {value!r}.")
+        grid_given = nrow is not None and ncol is not None
 
         # some basic checking
         # ------------------------------------------------------------------------
@@ -313,9 +328,15 @@ def multiplot(
             if not hasattr(dataset, "plot"):
                 raise ValueError(f"Dataset at index {i} has no plot method")
 
-        if len(datasets) < nrow * ncol and not show_transposed:
-            # not enough datasets given in this list.
-            raise ValueError("Not enough datasets given in this list")
+        if len(datasets) == 0:
+            raise ValueError("No dataset to plot: give at least one dataset.")
+
+        if nrow is None and ncol is not None:
+            nrow = math.ceil(len(datasets) / ncol)
+        elif ncol is None and nrow is not None:
+            ncol = math.ceil(len(datasets) / nrow)
+        nrow = 1 if nrow is None else nrow
+        ncol = 1 if ncol is None else ncol
 
         # if labels and len(labels) != len(datasets):
         #     # not enough labels given in this list.
@@ -368,9 +389,14 @@ def multiplot(
                 }
             return ax
         if nrow * ncol < len(datasets):
-            nrow = ncol = len(datasets) // 2
-            if nrow * ncol < len(datasets):
-                ncol += 1
+            if grid_given:
+                raise ValueError(
+                    f"The {nrow} x {ncol} grid has fewer panels than the "
+                    f"{len(datasets)} datasets to plot: increase nrow or ncol, "
+                    "or give only one of them."
+                )
+            ncol = math.ceil(math.sqrt(len(datasets)))
+            nrow = math.ceil(len(datasets) / ncol)
 
         ndims = {dataset.ndim for dataset in datasets}
         ndim = next(iter(ndims)) if len(ndims) == 1 else None
@@ -465,7 +491,15 @@ def multiplot(
         for irow in range(nrow):
             for icol in range(ncol):
                 idx = irow * ncol + icol
+                if idx >= len(datasets):
+                    ax = fig.add_subplot(grid[idx])
+                    ax._sharez = None
+                    ax.name = f"axe{irow + 1}{icol + 1}"
+                    axes[ax.name] = ax
+                    ax.set_visible(False)
+                    continue
                 dataset = datasets[idx]
+                has_panel_below = idx + ncol < len(datasets)
 
                 # Determine method for this dataset
                 current_method = method[idx] if method_is_list else method
@@ -524,7 +558,7 @@ def multiplot(
                         labelright=False,
                     )
                     axes[ax.name].yaxis.offsetText.set_visible(False)
-                if irow < nrow - 1 and sharex:
+                if has_panel_below and sharex:
                     # hide the bottom ticklabels of interior rows
                     plt.setp(axes[ax.name].get_xticklabels(), visible=False)
                     axes[ax.name].xaxis.set_tick_params(
@@ -551,7 +585,7 @@ def multiplot(
                 from spectrochempy.plotting._projections import _set_panel_title
 
                 _set_panel_title(ax, label, fontsize=8)
-                if sharex and irow < nrow - 1:
+                if sharex and has_panel_below:
                     ax.xaxis.label.set_visible(False)
                 if sharey and icol > 0:
                     ax.yaxis.label.set_visible(False)

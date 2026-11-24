@@ -22,6 +22,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.numutils import get_n_decimals
+from spectrochempy.utils.numutils import spacings
 
 _MISSING_VALUE = 99999999999999
 
@@ -99,6 +100,38 @@ def _outer_coordinates(values, dim):
     )
 
 
+def _is_regular(values):
+    return len(values) < 3 or not isinstance(spacings(values), list)
+
+
+def _warn_sparse_inner_join(source_grids, join_grid, dim):
+    """Warn when an inner join keeps few or irregularly spaced points."""
+    source_grids = list(source_grids)
+    low = max(keys.min() for keys, _ in source_grids)
+    high = min(keys.max() for keys, _ in source_grids)
+    shared = min(
+        int(np.count_nonzero((keys >= low) & (keys <= high)))
+        for keys, _ in source_grids
+    )
+    reasons = []
+    if 2 * len(join_grid) < shared:
+        reasons.append(
+            f"it keeps only {len(join_grid)} of the {shared} points that the "
+            "sparsest coordinate has in the common range"
+        )
+    if all(_is_regular(values) for _, values in source_grids):
+        keys, values = source_grids[0]
+        if not _is_regular(values[np.isin(keys, join_grid)]):
+            reasons.append("the kept points are irregularly spaced")
+    if reasons:
+        warning_(
+            f"Inner alignment along dimension {dim!r} matches coordinates at "
+            f"five significant digits and {' and '.join(reasons)}. Consider "
+            "method='interpolate' to resample onto the first dataset's "
+            "coordinates."
+        )
+
+
 def can_merge_or_align(coord1, coord2):
     """
     Check if two coordinates can be merged or aligned.
@@ -160,6 +193,9 @@ def align(dataset, *others, **kwargs):
         * 'outer' means that a union of the different coordinates is
           achieved (missing values are masked).
         * 'inner' means that the intersection of the coordinates is used.
+          A warning suggests 'interpolate' when the intersection keeps fewer
+          than half of the points of the sparsest coordinate in the common
+          range, or irregularly spaced points from regular coordinates.
         * 'first' uses the first dataset's coordinates, masking positions
           with no matching coordinate.
         * 'last' does the same using the last dataset's coordinates.
@@ -401,6 +437,7 @@ def align(dataset, *others, **kwargs):
             if not join_keys:
                 raise ValueError(f"No shared coordinates along dimension {dim!r}.")
             join_grid = np.asarray(sorted(join_keys))
+            _warn_sparse_inner_join(source_grids.values(), join_grid, dim)
             new_coord._data = join_grid
             new_coord._rounding = False
         elif method == "outer":

@@ -203,9 +203,11 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
     )
 
 
-def fit_profiles(dataset, specs, max_calls, shared):
+def fit_profiles(
+    dataset, specs, max_calls, shared, *, min_ndim=2, residual_jacobian=None
+):
     """Fit general profiles using the same observation and result contract as ND peaks."""
-    coordinates, units = _grid(dataset)
+    coordinates, units = _grid(dataset, min_ndim=min_ndim)
     peaks, groups, target_units = _prepare_profiles(specs, shared, dataset.units, units)
     with np.errstate(over="ignore"):
         data = np.asarray(dataset.data, dtype=float)
@@ -351,6 +353,22 @@ def fit_profiles(dataset, specs, max_calls, shared):
             raise ValueError("ND fitting produced non-finite residuals on the support")
         return residual
 
+    def analytic_at(vector, *, scaled):
+        update(vector)
+        matrix = np.asarray(residual_jacobian(peaks, names), dtype=np.longdouble)
+        if matrix.shape != (*dataset.shape, len(groups)):
+            raise ValueError("Profile Jacobian must match the grid and free parameters")
+        matrix = matrix[valid]
+        if scaled:
+            matrix = matrix * scales / intensity_scale
+        with np.errstate(over="ignore", invalid="ignore"):
+            matrix = np.asarray(matrix, dtype=float)
+        if not np.isfinite(matrix).all():
+            if scaled:
+                raise ValueError("ND fitting produced a non-finite analytic Jacobian")
+            return None
+        return matrix
+
     solution, jacobian = None, None
     if groups:
         solution = least_squares(
@@ -358,7 +376,9 @@ def fit_profiles(dataset, specs, max_calls, shared):
             start,
             bounds=bounds,
             method="trf",
-            jac="3-point",
+            jac=(lambda vector: analytic_at(vector, scaled=True))
+            if residual_jacobian is not None
+            else "3-point",
             x_scale="jac",
             max_nfev=max_calls,
             gtol=None,
@@ -370,7 +390,11 @@ def fit_profiles(dataset, specs, max_calls, shared):
             fitted, _ = model()
             return fitted[valid]
 
-        jacobian = _physical_profile_jacobian(solution.x, fitted_at, bounds, scales)
+        jacobian = (
+            analytic_at(solution.x, scaled=False)
+            if residual_jacobian is not None
+            else _physical_profile_jacobian(solution.x, fitted_at, bounds, scales)
+        )
         update(solution.x)
     fitted, components = model(keep_components=True, physical=True)
     residual = np.zeros(dataset.shape)
