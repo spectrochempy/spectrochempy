@@ -1965,8 +1965,9 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     def _last_axis_dim_and_coord(dataset):
         dim = dataset.dims[-1]
         coord = None
-        if dataset.coordset is not None:
-            coord = dataset.coordset[dim].copy()
+        coordset = dataset.coordset
+        if coordset is not None and dim in coordset.names:
+            coord = coordset[dim].copy()
         return dim, coord
 
     # ----------------------------------------------------------------------------------

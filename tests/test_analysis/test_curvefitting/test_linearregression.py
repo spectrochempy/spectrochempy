@@ -117,3 +117,29 @@ def test_intercept_without_fit_intercept_is_zero(model, pure_and_mixtures):
     S, Y = pure_and_mixtures
 
     assert model(fit_intercept=False).fit(S.T, Y.T).intercept == 0.0
+
+
+@pytest.mark.parametrize("model", [scp.NNLS, scp.LSTSQ])
+@pytest.mark.parametrize("y_has_observation_coord", [False, True])
+def test_coef_and_intercept_with_observation_coordinates_only(
+    model, y_has_observation_coord
+):
+    observations = scp.Coord([1.0, 2.0, 3.0], title="sample")
+    X = scp.NDDataset([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    X.set_coordset(y=observations)
+    Y = scp.NDDataset([[1.0, 2.0], [3.0, 4.0], [4.0, 6.0]])
+    if y_has_observation_coord:
+        Y.set_coordset(y=observations.copy())
+
+    fitted = model(fit_intercept=False).fit(X, Y)
+    coef = fitted.coef
+
+    assert list(coef.dims) == ["y", "x"]
+    assert_allclose(coef.data, [[1.0, 3.0], [2.0, 4.0]], atol=1e-10)
+    names = coef.coordset.names if coef.coordset is not None else []
+    for dim in ("y", "x"):
+        assert dim not in names or coef.coordset[dim].data is None
+
+    intercept = model(fit_intercept=True).fit(X, Y).intercept
+    assert list(intercept.dims) == ["x"]
+    assert intercept.shape == (2,)
