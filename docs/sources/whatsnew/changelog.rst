@@ -63,6 +63,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Units of datasets and coordinates read from ``.scp`` files are now created by
+  SpectroChemPy's unit registry (``scp.ur``), as units created in memory are.
+  Combining a reread dataset with a processed one, for example
+  ``scp.trapezoid`` on the output of ``Baseline.transform()``, no longer raises
+  ``AttributeError``. The file format is unchanged (:issue:`1951`).
+
 - Reading files no longer hides reader errors. Reading a single file (path,
   one-element list or ``content=``) with ``read`` or a format reader
   (``read_omnic``, ``read_jcamp``, ``read_csv``, ...) raises the reader's
