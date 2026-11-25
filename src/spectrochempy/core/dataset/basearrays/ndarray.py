@@ -34,14 +34,10 @@ from spectrochempy.utils.constants import MaskedConstant
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import make_new_object
 from spectrochempy.utils.print import _format_array_values
+from spectrochempy.utils.print import _local_numpyprintoptions
 from spectrochempy.utils.print import convert_to_html
-from spectrochempy.utils.print import numpyprintoptions
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
-
-# Printing settings
-# --------------------------------------------------------------------------------------
-numpyprintoptions()
 
 
 def _normalize_unit_context_arguments(extracted):
@@ -987,8 +983,10 @@ class NDArray(tr.HasTraits):
         return strunits
 
     def _repr_value(self):
-        numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120)
+        with _local_numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120):
+            return self._repr_value_text()
 
+    def _repr_value_text(self):
         prefix = type(self).__name__ + ": "
         units = ""
 
@@ -1013,7 +1011,6 @@ class NDArray(tr.HasTraits):
             size = ""
             body = "empty"
 
-        numpyprintoptions()
         return "".join([prefix, body, units, size])
 
     def _set_data(self, data):

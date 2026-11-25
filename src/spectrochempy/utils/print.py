@@ -685,12 +685,13 @@ def _format_array_values(
         mask_string = f"--{dtype}"
         data = insert_masked_print(ds, mask_string=mask_string)
 
-    body = np.array2string(data, separator=" ", prefix=prefix)
+    with _local_numpyprintoptions():
+        body = np.array2string(data, separator=" ", prefix=prefix)
     body = body.replace("\n", sep)
     return "".join([prefix, body, units])
 
 
-def numpyprintoptions(
+def _numpyprintoptions_kwargs(
     precision=4,
     threshold=6,
     edgeitems=2,
@@ -700,21 +701,7 @@ def numpyprintoptions(
     linewidth=150,
     **kargs,
 ):
-    """
-    Control array printing.
-
-    Parameters
-    ----------
-    precision
-    threshold
-    edgeitems
-    suppress
-    formatter
-    spc
-    linewidth
-    kargs
-
-    """
+    """Build the NumPy print options used by SpectroChemPy (no side effect)."""
 
     def _format_object(x):
         from spectrochempy.utils.constants import TYPE_COMPLEX
@@ -766,12 +753,31 @@ def numpyprintoptions(
             "all": _format_object,
         }
 
-    np.set_printoptions(
-        precision=precision,
-        threshold=threshold,
-        edgeitems=edgeitems,
-        suppress=suppress,
-        formatter=formatter,
-        linewidth=linewidth,
+    return {
+        "precision": precision,
+        "threshold": threshold,
+        "edgeitems": edgeitems,
+        "suppress": suppress,
+        "formatter": formatter,
+        "linewidth": linewidth,
         **kargs,
-    )
+    }
+
+
+def numpyprintoptions(*args, **kwargs):
+    """
+    Control array printing (set the *global* NumPy print options).
+
+    Parameters
+    ----------
+    precision, threshold, edgeitems, suppress, formatter, spc, linewidth, **kargs
+        See `_numpyprintoptions_kwargs` defaults (precision=4, threshold=6,
+        edgeitems=2, suppress=True, spc=4, linewidth=150).
+
+    """
+    np.set_printoptions(**_numpyprintoptions_kwargs(*args, **kwargs))
+
+
+def _local_numpyprintoptions(**kwargs):
+    """Context manager applying the SpectroChemPy print options locally only."""
+    return np.printoptions(**_numpyprintoptions_kwargs(**kwargs))
