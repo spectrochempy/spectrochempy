@@ -19,7 +19,8 @@ New Features
   1D ``Optimize(model=..., params=...)`` fits. ``Parameter`` and ``Parameters``
   configure initial values, fixed parameters, bounds and explicit arithmetic
   links. The existing canonical fitting engine and result uncertainty contract
-  are reused; the DSL, ND callbacks and named recovery laws remain supported.
+  are reused; the DSL, ND callbacks and named recovery laws remain supported
+  (:pr:`1981`).
 
 - ``Optimize(model="saturation_recovery" or "exponential_decay", parameters=...)``
   fits a native 1D curve from an amplitude and a positive time constant, without
