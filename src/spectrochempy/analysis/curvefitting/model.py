@@ -79,10 +79,6 @@ class Parameter:
             self.max is not None and self.value > self.max
         ):
             raise ValueError("Initial value lies outside its bounds")
-        elif self.vary and (self.value == self.min or self.value == self.max):
-            raise ValueError(
-                "Free initial values must lie strictly inside their bounds"
-            )
 
     def set(
         self,

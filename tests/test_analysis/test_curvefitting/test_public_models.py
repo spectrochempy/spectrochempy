@@ -308,14 +308,16 @@ def test_legacy_grid_callback_still_uses_parameters():
 
 
 @pytest.mark.parametrize("options", [{"min": 0}, {"max": 0}, {"min": 0, "max": 3}])
-def test_free_start_on_a_bound_is_rejected_instead_of_false_convergence(options):
+def test_free_start_on_a_bound_requires_a_qualified_estimator_policy(options):
+    parameter = scp.Parameter(0, **options)
+    model = scp.Linear()
+    params = model.make_params(slope=parameter, intercept=scp.Parameter(0, vary=False))
     with pytest.raises(ValueError, match="strictly inside"):
-        scp.Parameter(0, **options)
+        scp.Optimize(model=model, params=params)
+    assert parameter.value == 0
     fixed = scp.Parameter(0, vary=False, **options)
-    assert fixed.value == 0
-    with pytest.raises(ValueError, match="strictly inside"):
-        fixed.set(vary=True)
-    assert not fixed.vary
+    fixed.set(vary=True)
+    assert fixed.vary
 
 
 def test_bound_configuration_is_revalidated_and_interior_start_recovers_solution():

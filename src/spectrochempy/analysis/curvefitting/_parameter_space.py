@@ -136,6 +136,34 @@ def _internal_vector(fp):
     return _vector_from_prepared(_prepared_parameters(fp))
 
 
+def _physical_vector(definition):
+    """Prepare finite physical free values and inclusive native bounds."""
+    parameters = [p for p in _prepared_parameters(definition) if not p.fixed]
+    values = np.array([p.value for p in parameters], dtype=float)
+    bounds = np.array(
+        [
+            (
+                -np.inf if p.bounds[0] is None else p.bounds[0],
+                np.inf if p.bounds[1] is None else p.bounds[1],
+            )
+            for p in parameters
+        ],
+        dtype=float,
+    ).reshape(-1, 2)
+    if (
+        values.shape != (len(parameters),)
+        or not np.isfinite(values).all()
+        or np.isnan(bounds).any()
+        or np.any(bounds[:, 0] >= bounds[:, 1])
+        or np.any(values < bounds[:, 0])
+        or np.any(values > bounds[:, 1])
+    ):
+        raise ValueError(
+            "Native bounds require finite initial values inside ordered bounds"
+        )
+    return values, [p.name for p in parameters], bounds
+
+
 def _transform_artifacts(definition, values, keys):
     """Snapshot physical-coordinate derivatives in the actual solver order."""
     parameters = {p.name: p for p in _prepared_parameters(definition) if not p.fixed}

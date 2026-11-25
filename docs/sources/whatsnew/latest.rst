@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- ``Optimize(bounds_mode='native')`` opts 1D COMMON and Python least-squares
+  fits into physical-coordinate bounded TRF, including endpoint starts, with
+  explicit gradient/step termination and the existing uncertainty exclusions.
+  The default transform policy and ND routes are preserved. Parameter
+  declarations accept endpoints; Optimize validates the selected start policy.
+
 - 1D ``Optimize.result.diagnostics`` qualifies physical first-order stationarity
   separately from solver success, including independent feasible probes near
   bounds. Starting values, solver selection, fit results and ND paths are

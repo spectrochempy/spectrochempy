@@ -25,6 +25,23 @@ def _nonnegative_least_squares(matrix, target):
     return optimize.nnls(matrix, target)[0]
 
 
+def _native_least_squares(objective, initial, bounds, *, args=(), max_nfev=None):
+    """Run opt-in bounded TRF without cost-change termination."""
+    return _least_squares(
+        objective,
+        initial,
+        bounds=bounds,
+        args=args,
+        method="trf",
+        jac="3-point",
+        x_scale="jac",
+        ftol=None,
+        xtol=1e-12,
+        gtol=1e-8,
+        max_nfev=max_nfev,
+    )
+
+
 def _run_optimizer(
     objective,
     initial,
