@@ -226,3 +226,11 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- DOC: Document defaults that can surprise where they apply: coordinate
+  rounding (``Coord``, ``interpolate``), contour start level and axis reversal
+  (``plot``), ``Baseline`` range limits, parameter order of ``Optimize``
+  uncertainties, ``MCRALS`` default unimodality and tolerance, and the
+  ``blocks`` parameter of ``ModelProfile``. New gallery examples show Gaussian
+  broadening in coordinate units and augmented MCR-ALS with fixed reference
+  concentrations (:issue:`1953`).

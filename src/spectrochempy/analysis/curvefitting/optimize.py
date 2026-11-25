@@ -2272,6 +2272,18 @@ class Optimize(DecompositionAnalysis):
         FitResult
             Result object containing fitted model outputs,
             solver diagnostics, and estimator parameters.
+
+        Notes
+        -----
+        For a script fit, the entries of ``covariance``, ``variance``,
+        ``stderr``, ``correlation`` and ``confidence_intervals`` follow the free
+        parameters sorted by name, not their order in the script. The names are
+        those listed in `fp`: ``<parameter>_<model>`` for model parameters
+        (e.g., ``pos_line1``; script names are lowercased) and their own name
+        for COMMON parameters. Fixed and referenced parameters are excluded, so
+        the order is ``[name for name in sorted(fp) if not fp.fixed[name]]``.
+        For a fit with ``peaks``, the order is given by
+        ``result.parameter_names``, which script fits do not provide.
         """
         if not self._fitted:
             raise NotFittedError(
