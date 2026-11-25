@@ -153,14 +153,6 @@ def _apply_x_axis_policy(ax, coord, default_xlim, kwargs):
     else:
         x_reverse = coord.reversed if coord else False
 
-    # For explicit True: don't reverse xlim, just invert axis after
-    # For auto (coord.reversed=True): reverse xlim, matplotlib handles
-    # For explicit False: set xlim, no inversion
-    if x_reverse:
-        pass  # Don't reverse xlim, will invert after
-    elif coord is not None and coord.reversed:
-        xlim.reverse()
-
     ax.set_xlim(xlim)
 
     if x_reverse:
@@ -192,24 +184,20 @@ def _apply_y_axis_policy(ax, coord, default_ylim, kwargs):
     ylim = list(kwargs.get("ylim", default_ylim))
     ylim.sort()
 
-    y_reverse_explicit = kwargs.get("y_reverse", False)
-    y_reverse_auto = coord.reversed if coord else False
+    y_reverse_explicit = kwargs.get("y_reverse")
 
-    # Priority: explicit y_reverse > auto coord.reversed
-    if y_reverse_explicit:
-        # Keep original order, will invert after
-        pass
-    elif y_reverse_auto:
-        ylim.reverse()
+    # Priority: y_reverse > coord.reversed
+    if y_reverse_explicit is not None:
+        y_reverse = y_reverse_explicit
+    else:
+        y_reverse = coord.reversed if coord else False
 
     ax.set_ylim(ylim)
 
-    # For explicit y_reverse, explicitly invert the axis
-    # For auto y.reversed, matplotlib already handles when ylim[0] > ylim[1]
-    if y_reverse_explicit:
+    if y_reverse:
         ax.invert_yaxis()
 
-    return y_reverse_explicit or y_reverse_auto
+    return y_reverse
 
 
 def _handle_3d_aspect(ax, dataset, **kwargs):
@@ -448,14 +436,16 @@ def plot_lines(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -617,14 +607,16 @@ def plot_contour(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
     equal_aspect : bool, optional, default: False
         If True and X/Y units are compatible, enforce metric scaling
         (square pixels). This ensures 1 unit in X equals 1 unit in Y.
@@ -790,14 +782,16 @@ def plot_contourf(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
     equal_aspect : bool, optional, default: False
         If True and X/Y units are compatible, enforce metric scaling
         (square pixels). This ensures 1 unit in X equals 1 unit in Y.
@@ -973,14 +967,16 @@ def plot_stack(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -1143,14 +1139,16 @@ def plot_map(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -1332,14 +1330,16 @@ def plot_image(dataset, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -1506,14 +1506,16 @@ def plot_2D(dataset, method=None, **kwargs):
         limit on the horizontal axis.
     xlabel : str, optional
         label on the horizontal axis.
-    x_reverse : bool, optional, default: False
-        reverse the x axis. Equivalent to reverse.
+    x_reverse : bool or None, optional, default: None
+        reverse the x axis. Equivalent to reverse. If None, the
+        coordinate convention described for reverse applies.
     ylabel or zlabel : str, optional
         label on the vertical axis.
     ylim or zlim : tuple, optional
         limit on the vertical axis.
-    y_reverse : bool, optional, default: False
-        reverse the y axis (2D plot only).
+    y_reverse : bool or None, optional, default: None
+        reverse the y axis (2D plot only). If None, the y coordinate
+        follows the same convention as reverse for the x axis.
 
     Returns
     -------
@@ -1870,6 +1872,10 @@ def plot_2D(dataset, method=None, **kwargs):
             zl = (np.min(np.ma.min(zdata) - amp), np.max(np.ma.max(zdata)) + amp)
             zlim = list(kwargs.get("zlim", zl))
             zlim.sort()
+            current = None
+            if "zlim" not in kwargs and not kwargs.get("clear", True) and ax.lines:
+                current = sorted(ax.get_ylim())
+                zlim = [min(zlim[0], current[0]), max(zlim[1], current[1])]
             z_reverse = kwargs.get("z_reverse", False)
             if z_reverse:
                 zlim.reverse()
@@ -1880,10 +1886,16 @@ def plot_2D(dataset, method=None, **kwargs):
                 # set the limits wrt smallest and largest strictly positive values
                 mi = np.amin(np.abs(zdata))
                 ma = np.amax(np.abs(zdata))
-                ax.set_ylim(
+                log_lim = [
                     10 ** (int(np.log10(mi + (ma - mi) * 0.001)) - 1),
                     10 ** (int(np.log10(ma)) + 1),
-                )
+                ]
+                if current is not None:
+                    # keep the limits of the curves already drawn (clear=False)
+                    if current[0] > 0:
+                        log_lim[0] = min(log_lim[0], current[0])
+                    log_lim[1] = max(log_lim[1], current[1])
+                ax.set_ylim(log_lim)
             else:
                 ax.set_ylim(zlim)
 
