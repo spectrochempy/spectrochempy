@@ -5,6 +5,7 @@ import importlib
 from contextlib import redirect_stderr
 from io import BytesIO
 from io import StringIO
+from pathlib import Path
 from urllib.error import HTTPError
 from zipfile import ZipFile
 
@@ -16,6 +17,79 @@ pytest.importorskip("jupytext")
 pytest.importorskip("sphinx")
 
 rtd_build = importlib.import_module("docs.rtd_build")
+
+
+def test_case_distinct_api_names_have_distinct_gallery_labels(tmp_path, monkeypatch):
+    pytest.importorskip("sphinx_gallery")
+    from sphinx.application import Sphinx
+    from sphinx.ext.autosummary.generate import AutosummaryRenderer
+
+    import spectrochempy as scp
+
+    monkeypatch.setattr(scp.Gaussian, "__doc__", "A Gaussian model.")
+    monkeypatch.setattr(scp.gaussian, "__doc__", "A Gaussian profile.")
+    sources = tmp_path / "sources"
+    examples = tmp_path / "examples"
+    sources.mkdir()
+    examples.mkdir()
+    (examples / "README.rst").write_text("Examples\n========\n")
+    (examples / "plot_models.py").write_text(
+        '"""Gaussian models\n===============\n"""\n'
+        "import spectrochempy as scp\n"
+        "model = scp.Gaussian()\n"
+        "values = scp.gaussian([0., 1., 2.], pos=1., width=1.)\n"
+    )
+    templates = Path(__file__).resolve().parents[2] / "docs" / "_templates"
+    (sources / "conf.py").write_text(
+        'extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary", '
+        '"sphinx_gallery.gen_gallery"]\n'
+        f"templates_path = [{str(templates)!r}]\n"
+        "sphinx_gallery_conf = {\n"
+        f"    'examples_dirs': {str(examples)!r},\n"
+        "    'gallery_dirs': 'gallery',\n"
+        "    'backreferences_dir': 'backreferences',\n"
+        "    'doc_module': ('spectrochempy',),\n"
+        "    'plot_gallery': False,\n"
+        "    'download_all_examples': False,\n"
+        "}\n"
+    )
+    (sources / "index.rst").write_text(
+        "API\n===\n\n.. toctree::\n\n   model\n   function\n   gallery/index\n"
+    )
+    warnings = StringIO()
+    app = Sphinx(
+        str(sources),
+        str(sources),
+        str(tmp_path / "html"),
+        str(tmp_path / "doctrees"),
+        "html",
+        status=StringIO(),
+        warning=warnings,
+        freshenv=True,
+        warningiserror=True,
+    )
+    renderer = AutosummaryRenderer(app)
+    for page, objname, template in (
+        ("model", "Gaussian", "class"),
+        ("function", "gaussian", "function"),
+    ):
+        content = renderer.render(
+            template,
+            {
+                "fullname": f"spectrochempy.{objname}",
+                "module": "spectrochempy",
+                "objname": objname,
+                "methods": [],
+                "attributes": [],
+            },
+        )
+        (sources / f"{page}.rst").write_text(content)
+    app.build()
+
+    assert app.statuscode == 0, warnings.getvalue()
+    assert "duplicate label" not in warnings.getvalue()
+    for page in ("model", "function"):
+        assert "plot_models.html" in (tmp_path / "html" / f"{page}.html").read_text()
 
 
 def test_gallery_local_class_backreferences_are_portable(tmp_path, monkeypatch):

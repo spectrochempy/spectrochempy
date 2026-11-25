@@ -52,10 +52,8 @@ def test_uvvis_explicit_grid(tmp_path, table):
     ],
 )
 def test_uvvis_rejects_invalid_table(original, replacement):
-    with pytest.warns(UserWarning, match="UV-visible JCAMP-DX"):
-        assert (
-            scp.read_jcamp({"invalid.dx": UVVIS.replace(original, replacement)}) is None
-        )
+    with pytest.raises(ValueError, match="UV-visible JCAMP-DX"):
+        scp.read_jcamp({"invalid.dx": UVVIS.replace(original, replacement)})
 
 
 @pytest.mark.parametrize("options", [{}, {"merge": True}])

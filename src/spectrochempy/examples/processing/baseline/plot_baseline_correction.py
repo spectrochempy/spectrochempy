@@ -82,7 +82,7 @@ _ = corrected.plot()
 
 # %%
 # A detailed view with region annotations:
-ax = blc.plot(nb_traces=2, offset=50, show_regions=True)
+ax = blc.plot(show_regions=True)
 
 # %%
 # Compare individual spectra (corrected, baseline, original):

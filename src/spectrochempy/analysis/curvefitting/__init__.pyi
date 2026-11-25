@@ -22,6 +22,7 @@ __all__ = [
     "_prepared_parameter",
     "_profile_models",
     "linearregression",
+    "model",
     "optimize",
     "simulation",
 ]
@@ -41,5 +42,6 @@ from . import _parameters
 from . import _prepared_parameter
 from . import _profile_models
 from . import linearregression
+from . import model
 from . import optimize
 from . import simulation

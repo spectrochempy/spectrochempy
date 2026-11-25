@@ -23,6 +23,7 @@ from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.application.config import SpectroChemPyJSONConfigManager
+from spectrochempy.utils._logging import _apply_loglevel
 
 __all__ = [
     "DEBUG",
@@ -182,6 +183,13 @@ class SpectroChemPy(Application):
             },
         }
     ).tag(config=True)
+
+    @tr.observe("log_level")
+    def _apply_log_level_to_loggers(self, change):
+        level = change["new"]
+        if isinstance(level, str):
+            level = getattr(logging, level)
+        _apply_loglevel(int(level))
 
     # ----------------------------------------------------------------------------------
     # Error/warning capture
@@ -585,6 +593,11 @@ def set_loglevel(level: str | int = logging.WARNING) -> None:
     """
     Set the logging level for SpectroChemPy.
 
+    The level applies to the messages of the SpectroChemPy application (e.g.
+    ``info_``, ``debug_``) and of the ``spectrochempy`` logger and its child loggers
+    (core modules and plugins): only messages at or above this level are shown.
+    The default level is ``WARNING``.
+
     Parameters
     ----------
     level : Union[str, int]
@@ -601,6 +614,10 @@ def set_loglevel(level: str | int = logging.WARNING) -> None:
 def get_loglevel() -> int:
     """
     Get current logging level.
+
+    This is the level set with ``set_loglevel`` (default ``WARNING``), which
+    governs the SpectroChemPy application messages and the ``spectrochempy``
+    loggers.
 
     Returns
     -------

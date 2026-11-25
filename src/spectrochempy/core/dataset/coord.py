@@ -118,6 +118,22 @@ class Coord(NDMath, NDArray):
     --------
     NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
 
+    Notes
+    -----
+    With the default ``rounding=True``, the values returned by `data`, which are
+    also those used by methods such as `interpolate`, are rounded to `sigdigits`
+    significant digits, with at least three decimals. Evenly spaced values are
+    moreover linearized when they are set, and stored rounded to the
+    `sigdigits`-th significant digit of their spacing (e.g., to 1e-3 for a
+    spacing of 1 with the default ``sigdigits=4``). A shift is thus rounded to
+    the coarser of these two precisions (a shift below half of it is lost). To
+    keep it, create the coordinate from an array with ``rounding=False``. For evenly spaced values,
+    this is not enough, as they are still linearized at the given `sigdigits`:
+    increase it too, e.g. ``Coord(values, rounding=False, sigdigits=8)`` keeps
+    a shift of 1e-5 for a spacing of 1. These options apply to a coordinate
+    created from an array: ``Coord(coord, rounding=False, sigdigits=8)``, with
+    ``coord`` an existing `Coord`, keeps the settings and values of ``coord``.
+
     Examples
     --------
     We first import the object from the api :

@@ -245,3 +245,22 @@ sys.exit(0)
         timeout=120,
         env=env,
     )
+
+
+def test_read_csv_warns_when_extra_data_columns_are_ignored(tmp_path):
+    f = tmp_path / "multi.csv"
+    f.write_text("900,1,2,3\n890,1,2,3\n880,1,2,3\n870,1,2,3\n860,1,2,3\n")
+    with pytest.warns(UserWarning, match=r"multi\.csv.*2 additional data columns"):
+        ds = scp.read_csv(f, csv_delimiter=",")
+    assert ds.shape == (1, 5)
+    assert list(ds.x.data) == [900, 890, 880, 870, 860]
+    assert list(ds.data[0]) == [1] * 5
+
+
+def test_read_csv_no_warning_for_x_plus_one_data_column(tmp_path):
+    f = tmp_path / "single.csv"
+    f.write_text("900,1\n890,2\n880,3\n")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        ds = scp.read_csv(f, csv_delimiter=",")
+    assert ds.shape == (1, 3)

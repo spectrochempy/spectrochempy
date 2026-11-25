@@ -1965,6 +1965,17 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         # this method is called by the abstract class fit.
         return self._linear_regression.fit(X, Y, sample_weight=sample_weight)
 
+    @staticmethod
+    def _last_axis_dim_and_coord(dataset):
+        dim = dataset.dims[-1]
+        coord = None
+        coordset = dataset.coordset
+        if coordset is not None:
+            target = coordset.references.get(dim, dim)
+            if target in coordset.names:
+                coord = coordset[target].copy()
+        return dim, coord
+
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
@@ -2078,7 +2089,9 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                 A = float(self._linear_regression.coef_[0])
             if self._is_dataset and self._Y.has_units and self._X.has_units:
                 A = A * self._Y.units / self._X.units
-        elif self._is_dataset:
+        elif not self._is_dataset:
+            A = self._linear_regression.coef_.copy()
+        else:
             unitsX = self._X.units if self._X.units is not None else 1.0
             unitsY = self._Y.units if self._Y.units is not None else 1.0
             if unitsX != 1 or unitsY != 1:
@@ -2087,15 +2100,23 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                 units = None
 
             A = type(self._X)(
-                data=self._linear_regression.coef_,
-                coordset=self._Y.coordset,
-                dims=self._Y.T.dims,
+                data=self._linear_regression.coef_.copy(),
                 units=units,
                 title=f"{self._Y.title} / {self._X.title}",
                 history="Computed from the LSTSQ model",
             )
-        else:
-            A = np.array(self._linear_regression.coef_, copy=True)
+            feature_dim, feature_coord = self._last_axis_dim_and_coord(self._X)
+            if A.ndim == 1:
+                dims = [feature_dim]
+                coords = [feature_coord]
+            else:
+                target_dim, target_coord = self._last_axis_dim_and_coord(self._Y)
+                dims = [target_dim, feature_dim]
+                if target_dim == feature_dim:
+                    dims = list(A.dims)
+                coords = [target_coord, feature_coord]
+            A.dims = dims
+            A.set_coordset(dict(zip(dims, coords, strict=True)))
         return A
 
     @property
@@ -2106,21 +2127,24 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         Independent term in the linear model. Set to ``0.0`` if `fit_intercept` is `False`.
         If `Y` has units, then `intercept` has the same units.
         """
-        if self._linear_regression.intercept_.size == 1:
+        if np.size(self._linear_regression.intercept_) == 1:
             # A single value, return the associated quantity
             B = self._linear_regression.intercept_
             if self._is_dataset and self._Y.has_units:
                 B = B * self._Y.units
-        elif self._is_dataset:
+        elif not self._is_dataset:
+            B = self._linear_regression.intercept_.copy()
+        else:
             # else, return a NDDataset with the same units has Y
             B = type(self._X)(
-                data=self._linear_regression.intercept_,
-                coordset=self._Y.coordset,
-                dims=self._Y.dims,
+                data=self._linear_regression.intercept_.copy(),
                 units=self._Y.units,
                 title=f"{self._Y.title} at origin",
                 history="Computed from the LSTSQ model",
             )
+            target_dim, target_coord = self._last_axis_dim_and_coord(self._Y)
+            B.dims = [target_dim]
+            B.set_coordset({target_dim: target_coord})
         return B
 
     def predict(self, X=None):

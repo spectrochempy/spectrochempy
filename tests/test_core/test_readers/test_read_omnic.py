@@ -6,18 +6,26 @@
 # ruff: noqa
 
 import io
+import re
 import struct
+import zipfile
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
+import requests
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.importer import Importer
 from spectrochempy.utils.datetimeutils import UTC
+from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.exceptions import UnsupportedOriginError
+from spectrochempy.utils.jsonutils import UNSAFE_LEGACY_LOADING_MESSAGE
 from spectrochempy.utils.testing import assert_dataset_equal
 
 from tests.test_core.test_readers._omnic_synthetic import (
@@ -290,19 +298,280 @@ def test_read_srs_empty_vendor_history_keeps_only_import_message(monkeypatch):
 
 
 def test_return_ifg_validation(tmp_path):
-    """Regression test for #1144: invalid return_ifg values must warn clearly.
-    The Importer catches exceptions and re-emits them as warnings, so we check
-    for the warning."""
-    import warnings
-
+    """Regression test for #1144: invalid return_ifg values must fail clearly."""
     spa_file = tmp_path / "dummy.spa"
     spa_file.write_bytes(b"\x00" * 1024)
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        result = scp.read_spa(spa_file, return_ifg="invalid")
-    assert result is None
-    assert len(w) >= 1
-    assert any("Invalid return_ifg value" in str(warning.message) for warning in w)
+    with pytest.raises(ValueError, match="Invalid return_ifg value"):
+        scp.read_spa(spa_file, return_ifg="invalid")
+
+
+_NOT_OMNIC = b"not an OMNIC file" * 10  # struct.error while reading
+_NO_SPA_HEADER = b"\x00" * 1024  # OSError while reading
+_BAD_PAYLOADS = pytest.mark.parametrize(
+    ("payload", "error", "message"),
+    [
+        (_NOT_OMNIC, struct.error, "struct.error: unpack requires a buffer"),
+        (_NO_SPA_HEADER, OSError, "OSError: Error: SPA general header"),
+    ],
+    ids=["struct-error", "oserror"],
+)
+
+
+@pytest.fixture
+def no_remote_fallback(monkeypatch):
+    def unexpected_remote_fallback(*args, **kwargs):
+        raise AssertionError("remote fallback should not be attempted")
+
+    monkeypatch.setattr(
+        "spectrochempy.core.readers.importer._read_remote",
+        unexpected_remote_fallback,
+    )
+
+
+@pytest.mark.parametrize(
+    "reader",
+    [scp.read_omnic, scp.read, lambda path: scp.read_omnic([path])],
+    ids=["read_omnic", "read", "list-of-one"],
+)
+def test_corrupted_spg_raises_reader_error(tmp_path, reader):
+    """Regression test for #1950: reader errors are not turned into None."""
+    path = tmp_path / "broken.spg"
+    path.write_bytes(_NOT_OMNIC)
+
+    with pytest.raises(struct.error, match="unpack requires a buffer") as exc_info:
+        reader(path)
+
+    assert any(str(path) in note for note in exc_info.value.__notes__)
+
+
+@pytest.mark.parametrize("source", ["file", "content"])
+def test_unreadable_spa_raises_without_remote_fallback(
+    tmp_path, no_remote_fallback, source
+):
+    """Regression test for #1950: a local OSError is raised, not downloaded over."""
+    path = tmp_path / "unreadable.spa"
+    path.write_bytes(_NO_SPA_HEADER)
+
+    with pytest.raises(OSError, match="SPA general header"):
+        if source == "file":
+            scp.read_omnic(path)
+        else:
+            scp.read({path.name: path.read_bytes()})
+
+
+def test_missing_file_failing_after_download_raises(monkeypatch):
+    """Regression test for #1950: a downloaded file that cannot be read raises."""
+    monkeypatch.setattr(
+        "spectrochempy.core.readers.importer._download_from_github",
+        lambda *args, **kwargs: _NOT_OMNIC,
+    )
+
+    with pytest.raises(struct.error, match="unpack requires a buffer"):
+        scp.read_omnic("not_in_local_data_1950.spa")
+
+
+def _good_and_bad_spa_files(tmp_path, payload=_NOT_OMNIC):
+    good = []
+    for index in range(2):
+        path = tmp_path / f"good{index}.spa"
+        path.write_bytes(synthetic_spa_with_optical_velocity(8.8617, timestamp=index))
+        good.append(path)
+    bad = tmp_path / "bad.spa"
+    bad.write_bytes(payload)
+    return good, bad
+
+
+@_BAD_PAYLOADS
+@pytest.mark.parametrize("source", ["list", "directory", "read_dir", "contents"])
+def test_unreadable_file_among_several_is_skipped_with_warning(
+    tmp_path, no_remote_fallback, source, payload, error, message
+):
+    """Regression test for #1950: the skipped file and the error are named."""
+    good, bad = _good_and_bad_spa_files(tmp_path, payload)
+    paths = [*good, bad]
+    name = bad.name if source == "contents" else bad
+    expected = re.escape(f"Skipped '{name}': ") + message
+
+    with pytest.warns(UserWarning, match=expected):
+        if source == "list":
+            dataset = scp.read_omnic(paths)
+        elif source == "directory":
+            dataset = scp.read_omnic(tmp_path)
+        elif source == "read_dir":
+            dataset = scp.read_dir(tmp_path)
+        else:
+            dataset = scp.read({path.name: path.read_bytes() for path in paths})
+
+    assert dataset.shape == (2, 2)
+
+
+@_BAD_PAYLOADS
+def test_unreadable_zip_member_is_skipped_with_warning(
+    tmp_path, no_remote_fallback, payload, error, message
+):
+    """Regression test for #1950: an unreadable zip member is named and skipped."""
+    good, bad = _good_and_bad_spa_files(tmp_path, payload)
+    archive = tmp_path / "spectra.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        for path in [*good, bad]:
+            zf.write(path, path.name)
+
+    with pytest.warns(UserWarning, match=re.escape("Skipped 'bad.spa': ") + message):
+        datasets = scp.read_zip(archive)
+
+    assert [dataset.shape for dataset in datasets] == [(1, 2), (1, 2)]
+
+
+@_BAD_PAYLOADS
+@pytest.mark.parametrize(
+    "source", ["list", "directory", "read_dir", "read", "contents", "zip"]
+)
+def test_all_files_unreadable_raises(
+    tmp_path, no_remote_fallback, source, payload, error, message
+):
+    """Regression test for #1950: reading several files fails if none is readable."""
+    paths = []
+    for index in range(2):
+        path = tmp_path / f"bad{index}.spa"
+        path.write_bytes(payload)
+        paths.append(path)
+    archive = tmp_path.parent / f"{tmp_path.name}.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        for path in paths:
+            zf.write(path, path.name)
+    read_source = {
+        "list": lambda: scp.read_omnic(paths),
+        "directory": lambda: scp.read_omnic(tmp_path),
+        "read_dir": lambda: scp.read_dir(tmp_path),
+        "read": lambda: scp.read(tmp_path),
+        "contents": lambda: scp.read({path.name: path.read_bytes() for path in paths}),
+        "zip": lambda: scp.read_zip(archive),
+    }[source]
+
+    with pytest.warns(UserWarning, match="Skipped"):
+        with pytest.raises(error, match=message.split(": ", 1)[1]):
+            read_source()
+
+
+def test_jcamp_content_error_among_several_is_skipped():
+    """Regression test for #1950: a file-content SpectroChemPyError is skipped."""
+    from tests.test_core.test_readers.test_read_jcamp import _DIFDUP_IR
+
+    undetermined = _DIFDUP_IR.replace(b"##DATA TYPE=INFRARED SPECTRUM\n", b"")
+
+    with pytest.warns(UserWarning, match="Skipped 'bad.jdx': .*Cannot determine"):
+        dataset = scp.read_jcamp({"good.jdx": _DIFDUP_IR, "bad.jdx": undetermined})
+
+    assert dataset.shape == (1, 5)
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        SpectroChemPyError(UNSAFE_LEGACY_LOADING_MESSAGE),
+        UnsupportedOriginError("bad.spa", "omnic", "other", ["omnic"]),
+    ],
+    ids=["unsafe-legacy", "unsupported-origin"],
+)
+def test_call_errors_among_several_files_are_raised(tmp_path, monkeypatch, error):
+    """Regression test for #1950: errors about the call are never skipped."""
+    good, bad = _good_and_bad_spa_files(tmp_path)
+    read_spa = Importer._read_spa
+
+    def read_spa_or_fail(dataset, filename, **kwargs):
+        if filename.name == bad.name:
+            raise error
+        return read_spa(dataset, filename, **kwargs)
+
+    monkeypatch.setattr(Importer, "_read_spa", staticmethod(read_spa_or_fail))
+
+    with pytest.raises(type(error), match=re.escape(str(error))):
+        scp.read_omnic([*good, bad])
+
+
+@pytest.mark.parametrize("in_datadir", [False, True], ids=["local", "datadir"])
+def test_existing_file_not_found_error_remote_only_in_datadir(
+    tmp_path, monkeypatch, in_datadir
+):
+    """Regression test for #1950: only data directory paths are looked for remotely."""
+    path = tmp_path / "partial.spa"
+    path.write_bytes(_NOT_OMNIC)
+    datadir = tmp_path if in_datadir else tmp_path / "datadir"
+    monkeypatch.setattr(
+        "spectrochempy.application.preferences.preferences",
+        SimpleNamespace(datadir=datadir),
+    )
+
+    def read_spa_missing_part(dataset, filename, **kwargs):
+        raise FileNotFoundError("missing companion file")
+
+    remote_calls = []
+
+    def read_remote(dataset, filename, **kwargs):
+        remote_calls.append(filename)
+        return NDDataset([[1.0, 2.0]])
+
+    monkeypatch.setattr(Importer, "_read_spa", staticmethod(read_spa_missing_part))
+    monkeypatch.setattr("spectrochempy.core.readers.importer._read_remote", read_remote)
+
+    if in_datadir:
+        assert scp.read_omnic(path).shape == (1, 2)
+        assert remote_calls == [path]
+    else:
+        with pytest.raises(FileNotFoundError, match="missing companion file"):
+            scp.read_omnic(path)
+        assert remote_calls == []
+
+
+def test_empty_content_raises_without_remote_fallback(no_remote_fallback):
+    """Regression test for #1950: empty given content is not looked for remotely."""
+    with pytest.raises(FileNotFoundError) as exc_info:
+        scp.read({"empty_1950.spa": b""})
+
+    assert any("empty_1950.spa" in note for note in exc_info.value.__notes__)
+
+
+def test_missing_file_offline_warns_and_returns_none(monkeypatch):
+    """Current behaviour, unchanged by #1950: a network error only warns."""
+
+    def offline(*args, **kwargs):
+        raise requests.ConnectionError("network is unreachable")
+
+    monkeypatch.setattr(
+        "spectrochempy.core.readers.importer._download_from_github", offline
+    )
+
+    with pytest.warns(UserWarning, match="network is unreachable"):
+        assert scp.read_omnic("not_in_local_data_1950.spa") is None
+
+
+@pytest.mark.parametrize("source", ["read_omnic", "read", "read_dir"])
+def test_directory_with_one_unreadable_file_warns_and_raises(
+    tmp_path, no_remote_fallback, source
+):
+    """Regression test for #1950: a directory with one unreadable file raises."""
+    bad = tmp_path / "bad.spa"
+    bad.write_bytes(_NOT_OMNIC)
+    reader = getattr(scp, source)
+
+    with pytest.warns(UserWarning, match=re.escape(f"Skipped '{bad}': struct.error")):
+        with pytest.raises(struct.error, match="unpack requires a buffer"):
+            reader(tmp_path)
+
+
+@pytest.mark.parametrize("source", ["read_zip", "read"])
+def test_zip_with_one_unreadable_member_warns_and_raises(
+    tmp_path, no_remote_fallback, source
+):
+    """Regression test for #1950: a zip with one unreadable member raises."""
+    archive = tmp_path / "one.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        zf.writestr("bad.spa", _NOT_OMNIC)
+    reader = getattr(scp, source)
+
+    with pytest.warns(UserWarning, match=re.escape("Skipped 'bad.spa': struct.error")):
+        with pytest.raises(struct.error, match="unpack requires a buffer"):
+            reader(archive)
 
 
 def _spa_key_table_bytes(records, suffix=b""):

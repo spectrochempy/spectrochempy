@@ -42,6 +42,8 @@ from spectrochempy.analysis.curvefitting._parameter_space import (
 )
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+from spectrochempy.analysis.curvefitting.model import Model
+from spectrochempy.analysis.curvefitting.model import _prepare_public_model
 from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.extern.traittypes import Array
@@ -935,6 +937,7 @@ class Optimize(DecompositionAnalysis):
         peaks=None,
         shared_parameters=None,
         model=None,
+        params=None,
         parameters=None,
         linear_amplitudes=False,
         solver_options=None,
@@ -965,7 +968,14 @@ class Optimize(DecompositionAnalysis):
             references in heights or axis parameters. Each shared value is
             optimized once. Definitions accept ``value``, ``bounds``, ``fixed``
             and ``unit``. This option requires ``peaks``.
-        model : callable or {"saturation_recovery", "exponential_decay"}, optional
+        model : Model, callable or str, optional
+            A composable Model enables the canonical 1D fitting path, configured
+            with params. Functions are evaluated on numerical coordinates without
+            rescaling. This path requires amplitude_mode='area', autobase=False,
+            autoampl=False and warm_start=False; script, peaks, parameters and
+            grid-model options cannot be combined with it. All declarations are
+            copied on entry. See the Python model guide for profile conventions.
+
             Enable full-grid ND fitting with ``model(template, **parameters)``.
             The template is a detached NDDataset with zero data, full-precision
             coordinates and the effective observation mask. Return a real array
@@ -979,6 +989,10 @@ class Optimize(DecompositionAnalysis):
             A scalar tau has a positive lower bound by default. Explicit bounds
             must also be positive. Named laws do not use ``linear_amplitudes``
             or ``solver_options``.
+        params : Parameters, optional
+            Initial configuration for a composable Model, copied on entry.
+            Defaults to model.make_params(). Adjusted values are exposed through
+            result.fitted_parameters; params remains an initial configuration.
         parameters : mapping, optional
             Named values for model. Each scalar is initially free. A definition
             can contain value, bounds, fixed, unit and a positive scale for free
@@ -1003,6 +1017,44 @@ class Optimize(DecompositionAnalysis):
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
+        public_model = None
+        self._python_model_configuration = None
+        if isinstance(model, Model):
+            if (
+                warm_start
+                or peaks is not None
+                or shared_parameters is not None
+                or parameters is not None
+                or linear_amplitudes
+                or solver_options is not None
+                or "script" in kwargs
+                or "usermodels" in kwargs
+                or kwargs.get("constraints") is not None
+            ):
+                raise ValueError(
+                    "A composable Model cannot be combined with script, ND/grid configuration, usermodels, legacy constraints or warm_start=True"
+                )
+            if (
+                kwargs.get("autobase", False)
+                or kwargs.get("autoampl", False)
+                or str(kwargs.get("amplitude_mode", "area")).lower() != "area"
+            ):
+                raise ValueError(
+                    "Composable models require autobase=False, autoampl=False and amplitude_mode='area'"
+                )
+            public_model = _prepare_public_model(model, params)
+            kwargs.update(
+                script="",
+                usermodels=public_model[4],
+                amplitude_mode="area",
+                autobase=False,
+                autoampl=False,
+            )
+            model = None
+        elif params is not None:
+            raise ValueError(
+                "params requires a composable Model; grid callbacks use parameters"
+            )
         named_curve = isinstance(model, str) and model in CURVE_MODELS
         if model is not None and (
             not (callable(model) or named_curve)
@@ -1044,6 +1096,10 @@ class Optimize(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
+        if public_model is not None:
+            definition, initial, names, spec, _ = public_model
+            self._install_model_spec(spec)
+            self._python_model_configuration = (definition, initial, names)
 
     @classmethod
     def _from_callables(
@@ -1091,17 +1147,44 @@ class Optimize(DecompositionAnalysis):
             raise ValueError("A model spec cannot be combined with ND peak definitions")
         constraints = kwargs.pop("constraints", None)
         estimator = cls(script="", **kwargs)
-        estimator._model_spec = deepcopy(model_spec)
-        estimator.fp = estimator._model_spec.to_fitparameters()
-        estimator._set_rendered_script(str(estimator.fp))
+        estimator._install_model_spec(model_spec)
         if constraints is not None:
             estimator.constraints = constraints
         return estimator
+
+    def _install_model_spec(self, model_spec):
+        self._model_spec = deepcopy(model_spec)
+        self.fp = self._model_spec.to_fitparameters()
+        self._set_rendered_script(str(self.fp))
+
+    @property
+    def initial_params(self):
+        """
+        Independent copy of the initial Python-model configuration, or None.
+
+        Fitting does not update this configuration. Read result.fitted_parameters
+        for fitted magnitudes and result.stderr for free-parameter uncertainty.
+        """
+        configuration = self._python_model_configuration
+        return configuration[1].copy() if configuration is not None else None
 
     # ----------------------------------------------------------------------------------
     # Private methods ( overriding abstract methods)
     # ----------------------------------------------------------------------------------
     def _fit(self, X, Y=None):
+        if self._python_model_configuration is not None and (
+            self.autobase or self.autoampl or self.amplitude_mode.lower() != "area"
+        ):
+            raise ValueError(
+                "Composable models require autobase=False, autoampl=False and amplitude_mode='area'"
+            )
+        if self._python_model_configuration is not None:
+            for _, parameter in self._model_spec._iter_varying():
+                if parameter.value in parameter.bounds:
+                    raise ValueError(
+                        "Free initial values must lie strictly inside their bounds; "
+                        "create another Optimize with an interior starting value"
+                    )
         # NMR
         # sequence = kargs.get('sequence', 'ideal_pulse')
         # self.sequence = PulseSequence(type=sequence)
@@ -1239,7 +1322,23 @@ class Optimize(DecompositionAnalysis):
             "amplitude_mode": self.amplitude_mode,
             "constraints": self.constraints,
         }
-        if not self.dry:
+        evaluate_only = (
+            self._python_model_configuration is not None
+            and model_spec.count_varying() == 0
+        )
+        if not self.dry and evaluate_only:
+            residuals = np.ma.masked_invalid(
+                fun_residuals(model_spec, X.real.squeeze())
+            )
+            fopt = _scalar_from_masked(np.ma.sum(residuals**2), default=0.0)
+            if self.method in ["leastsq", "least_squares", "lm", "trf"]:
+                fopt *= 0.5
+            solver_meta = {
+                "success": True,
+                "status": None,
+                "message": "No free parameters; model evaluated without optimization.",
+            }
+        elif not self.dry:
             model_spec, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
                 model_spec,
@@ -1262,6 +1361,10 @@ class Optimize(DecompositionAnalysis):
             "ncalls": ncalls,
             **solver_meta,
         }
+        if self._python_model_configuration is not None:
+            self._fit_meta["optimization_performed"] = (
+                not self.dry and not evaluate_only
+            )
         self._fit_config = fit_config
         self._solver_artifacts = solver_artifacts
 
@@ -1334,6 +1437,10 @@ class Optimize(DecompositionAnalysis):
 
     @tr.validate("script")
     def _script_validate(self, proposal):
+        if self._python_model_configuration is not None:
+            raise ValueError(
+                "Create another Optimize to replace a Python model with a script"
+            )
         spec, errors = _parse_script_to_modelspec(proposal.value, self.usermodels)
         if errors:
             err = errors[0]
@@ -2165,6 +2272,18 @@ class Optimize(DecompositionAnalysis):
         FitResult
             Result object containing fitted model outputs,
             solver diagnostics, and estimator parameters.
+
+        Notes
+        -----
+        For a script fit, the entries of ``covariance``, ``variance``,
+        ``stderr``, ``correlation`` and ``confidence_intervals`` follow the free
+        parameters sorted by name, not their order in the script. The names are
+        those listed in `fp`: ``<parameter>_<model>`` for model parameters
+        (e.g., ``pos_line1``; script names are lowercased) and their own name
+        for COMMON parameters. Fixed and referenced parameters are excluded, so
+        the order is ``[name for name in sorted(fp) if not fp.fixed[name]]``.
+        For a fit with ``peaks``, the order is given by
+        ``result.parameter_names``, which script fits do not provide.
         """
         if not self._fitted:
             raise NotFittedError(
@@ -2246,6 +2365,22 @@ class Optimize(DecompositionAnalysis):
             },
         )
 
+        python_outputs = {}
+        if self._python_model_configuration is not None:
+            _, _, names = self._python_model_configuration
+            resolved = prepare_model(self._model_spec)
+            inverse_names = {internal: public for public, internal in names.items()}
+            python_outputs = {
+                "fitted_parameters": {
+                    public: resolved.common_params[internal].value
+                    for public, internal in names.items()
+                },
+                "parameter_names": tuple(
+                    inverse_names[key] for key, _ in self._model_spec._iter_varying()
+                ),
+            }
+            fit_diagnostics["derived_uncertainty_status"] = "not_propagated"
+
         return FitResult(
             estimator="Optimize",
             parameters=fit_config.copy(),
@@ -2253,11 +2388,45 @@ class Optimize(DecompositionAnalysis):
                 "fitted": fitted,
                 "components": self.components,
                 "residuals": residuals,
+                **python_outputs,
             },
             diagnostics=fit_diagnostics,
             covariance=covariance,
             parameter_values=parameter_values,
         )
+
+    def report(self):
+        """
+        Return a plain-text report from the canonical FitResult.
+
+        Covariance and standard errors describe the free physical parameters;
+        uncertainty propagation to expression-defined parameters is not provided.
+        """
+        result = self.result
+        lines = [
+            "Optimize fit report",
+            f"Method: {result.parameters.get('method', self.method)}",
+        ]
+        errors = result.stderr
+        error_map = (
+            dict(zip(result.outputs.get("parameter_names", ()), errors, strict=True))
+            if errors is not None and "parameter_names" in result.outputs
+            else {}
+        )
+        for name, value in result.outputs.get("fitted_parameters", {}).items():
+            uncertainty = f" +/- {error_map[name]:.4g}" if name in error_map else ""
+            lines.append(f"{name}: {value:.8g}{uncertainty}")
+        for name, value in result.diagnostics.items():
+            lines.append(f"{name}: {value}")
+        return "\n".join(lines)
+
+    def plot(self, **kwargs):
+        """
+        Plot the existing observation, fit and residual merit view.
+
+        Keyword arguments are forwarded to :meth:`plot_merit`.
+        """
+        return self.plot_merit(**kwargs)
 
 
 # ======================================================================================

@@ -15,6 +15,13 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- ``Model``, ``Gaussian`` and ``Linear`` define composable Python models for
+  1D ``Optimize(model=..., params=...)`` fits. ``Parameter`` and ``Parameters``
+  configure initial values, fixed parameters, bounds and explicit arithmetic
+  links. The existing canonical fitting engine and result uncertainty contract
+  are reused; the DSL, ND callbacks and named recovery laws remain supported
+  (:pr:`1981`).
+
 - ``Optimize(model="saturation_recovery" or "exponential_decay", parameters=...)``
   fits a native 1D curve from an amplitude and a positive time constant, without
   a user function. Results retain nonuniform physical coordinates, masks and
@@ -63,6 +70,42 @@ Bug Fixes
   SVD does not center the data. ``SVD.n_components`` is now available after
   ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`, :pr:`1980`).
 
+- The default ``WARNING`` log level hides INFO messages again, as documented:
+  since 0.8.2, messages such as "This coordinate (...) is outside the axis
+  limits", "... is already a masked array", "units forced to change" or reader
+  notices (OMNIC, MATLAB, data download) were shown whatever the level.
+  ``set_loglevel``, ``preferences.log_level`` and the ``SpectroChemPy.log_level``
+  configuration option now apply to the ``spectrochempy`` logger and its child
+  loggers, including plugins: ``set_loglevel("INFO")`` shows these messages,
+  ``"DEBUG"`` also shows debug messages, and ``"ERROR"`` hides plugin warnings
+  (:issue:`1952`).
+
+- Units of datasets and coordinates read from ``.scp`` files are now created by
+  SpectroChemPy's unit registry (``scp.ur``), as units created in memory are.
+  Combining a reread dataset with a processed one, for example
+  ``scp.trapezoid`` on the output of ``Baseline.transform()``, no longer raises
+  ``AttributeError``. The file format is unchanged (:issue:`1951`).
+
+- Reading files no longer hides reader errors. Reading a single file (path,
+  one-element list or ``content=``) with ``read`` or a format reader
+  (``read_omnic``, ``read_jcamp``, ``read_csv``, ...) raises the reader's
+  original exception, with a note naming the file, instead of a warning and
+  ``None``: for example a corrupted file, or an OMNIC ``.spg`` with inconsistent
+  x axes, as documented. A local file or given content (even empty) that
+  cannot be read is no longer looked for in the remote test data repository,
+  except a file in ``datadir`` that reports a missing file (partially
+  downloaded test data); a file downloaded from that repository that cannot be
+  read raises too. When several files, a directory or zip members are read, an
+  unreadable file is skipped with a warning giving its name and the exception
+  type (previously only the message, and file-content ``SpectroChemPyError``
+  errors aborted the whole read); if no file can be read, the first error is
+  raised instead of returning ``None`` (:issue:`1950`).
+
+- ``write_jcamp`` now writes the full label as the ``##TITLE`` of each spectrum
+  when the ``y`` coordinate has single-column labels (previously only the first
+  character was written). Single-column datetime labels no longer raise a
+  ``TypeError`` and are used as acquisition dates (:issue:`1949`).
+
 - ``asymmetricvoigtmodel`` and ``asymmetricvoigt``: a negative ``asym`` now
   gives the asymmetry on the other side of the peak instead of being silently
   ignored and giving the symmetric profile: the profile for ``asym = -a`` is
@@ -83,6 +126,23 @@ Bug Fixes
   clearer message, and ``nrow`` or ``ncol`` values that are not positive
   integers raise a ``ValueError`` (:issue:`1946`).
 
+- ``Baseline.plot`` and ``plot_baseline`` now emit a warning naming the keyword
+  arguments they ignore, instead of silently dropping them. The documentation
+  lists the supported options and the gallery example no longer passes unused
+  ones (:issue:`1976`, :pr:`1977`).
+
+- ``EFA.f_ev`` and ``EFA.b_ev`` are now titled "eigenvalues" instead of
+  inheriting the title of the input data (:issue:`1973`, :pr:`1977`).
+
+- The ``MCRALS`` ``normSpec="euclid"`` help now correctly states that spectra
+  are normalized by their Euclidean (L2) norm, not their total area; behavior is
+  unchanged (:issue:`1975`, :pr:`1977`).
+
+- ``read_csv`` now warns, with the file name and the number of ignored columns,
+  when a CSV file has more than one data column after the x column (only the
+  first data column is read), and its docstring examples show the actual
+  behavior (:issue:`1971`, :pr:`1978`).
+
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
   read-only state and keeping source metadata independent. Copying metadata
@@ -93,6 +153,33 @@ Bug Fixes
   inputs with multiple features, including multiple targets, instead of raising
   ``UnboundLocalError``. Dataset coefficients retain their units and scalar
   coefficients keep their existing return type (:pr:`1968`).
+
+- ``concatenate`` and ``stack`` now take the coordinates of the
+  non-concatenated dimensions from the first dataset, as specified by the
+  concatenate/stack metadata policy, instead of silently from the last one.
+  They warn when these coordinates differ between inputs: numeric values in
+  only some inputs, or values differing by more than the absolute 3-decimal
+  tolerance of dataset arithmetic (1.5e-3 in the units of the first dataset,
+  after unit conversion); labels are not compared. Use
+  ``align(..., method="interpolate")`` first to put the datasets on common
+  coordinates. ``stack`` of datasets without coordinates no longer files the
+  new stacking coordinate under the wrong dimension (:pr:`1955`).
+
+- 2D plots: with ``clear=False``, line (stack) plots now keep the vertical
+  limits of the lines already drawn on the axes instead of clipping them to
+  the new dataset, as 1D plots do. ``x_reverse=False``, ``reverse=False`` and
+  ``y_reverse=False`` now disable the automatic reversal of wavenumber and ppm
+  axes, as documented; without these parameters the axes are reversed as
+  before (:issue:`1945`, :pr:`1956`).
+
+- ``LSTSQ.coef`` and ``NNLS.coef`` now work for several features, whether the
+  inputs are ``NDDataset`` objects, with or without coordinates, or arrays. The
+  coefficients have shape (targets, features), take the coordinates of the
+  matching axes of ``Y`` and ``X`` when available, and are returned as an
+  array for array inputs. Dataset outputs are independent copies, so changing
+  them does not change the fitted model. ``intercept`` follows the same rules
+  for several targets, and returns ``0.0`` when ``fit_intercept=False`` instead of raising
+  an error (:issue:`1947`, :pr:`1958`).
 
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
@@ -113,6 +200,12 @@ Bug Fixes
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
+
+- Reading a single unreadable file with ``read`` or a format reader now raises
+  the reader's exception instead of emitting a warning and returning ``None``;
+  reading several files raises when none of them can be read. Replace
+  ``if ds is None:`` checks by ``try: ... except Exception: ...`` around the
+  read (:issue:`1950`).
 
 - ``plot_compare`` (and ``plot_merit``) legends now use "experimental" and
   "calculated" instead of automatic dataset names such as
@@ -137,3 +230,14 @@ Deprecations
   the next minor release. ``PFR`` cannot be built with any Cantera version 3.0 or
   later and has no known users. Cases that need Cantera can use it directly and
   load the results into an ``NDDataset`` (:pr:`1925`).
+
+Developer
+~~~~~~~~~
+
+- DOC: Document defaults that can surprise where they apply: coordinate
+  rounding (``Coord``, ``interpolate``), contour start level and axis reversal
+  (``plot``), ``Baseline`` range limits, parameter order of ``Optimize``
+  uncertainties, ``MCRALS`` default unimodality and tolerance, and the
+  ``blocks`` parameter of ``ModelProfile``. New gallery examples show Gaussian
+  broadening in coordinate units and augmented MCR-ALS with fixed reference
+  concentrations (:issue:`1953`).
