@@ -190,3 +190,22 @@ def test_single_target_coef_resolves_feature_coordinate_reference(model):
     assert fitted.coef.shape == (3,)
     assert fitted.coef.x == X.x
     assert_allclose(fitted.coef.data, Y.data)
+
+
+@pytest.mark.parametrize("model", [scp.NNLS, scp.LSTSQ])
+@pytest.mark.parametrize("output", ["coef", "intercept"])
+def test_mutating_dataset_outputs_does_not_change_fitted_model(model, output):
+    X = scp.NDDataset([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [2.0, 0.5]])
+    Y = scp.NDDataset(X.data @ np.array([[2.0, 3.0], [4.0, 1.0]]).T + [0.2, 0.4])
+    fitted = model().fit(X, Y)
+    coef = fitted.coef.data.copy()
+    intercept = fitted.intercept.data.copy()
+    prediction = fitted.predict().data.copy()
+    score = fitted.score()
+
+    getattr(fitted, output).data[:] = -99.0
+
+    assert_allclose(fitted.coef.data, coef)
+    assert_allclose(fitted.intercept.data, intercept)
+    assert_allclose(fitted.predict().data, prediction)
+    assert fitted.score() == pytest.approx(score)

@@ -2096,7 +2096,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                 units = None
 
             A = type(self._X)(
-                data=self._linear_regression.coef_,
+                data=self._linear_regression.coef_.copy(),
                 units=units,
                 title=f"{self._Y.title} / {self._X.title}",
                 history="Computed from the LSTSQ model",
@@ -2133,7 +2133,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         else:
             # else, return a NDDataset with the same units has Y
             B = type(self._X)(
-                data=self._linear_regression.intercept_,
+                data=self._linear_regression.intercept_.copy(),
                 units=self._Y.units,
                 title=f"{self._Y.title} at origin",
                 history="Computed from the LSTSQ model",
