@@ -146,6 +146,15 @@ Bug Fixes
   axes, as documented; without these parameters the axes are reversed as
   before (:issue:`1945`, :pr:`1956`).
 
+- ``LSTSQ.coef`` and ``NNLS.coef`` now work for several features, whether the
+  inputs are ``NDDataset`` objects, with or without coordinates, or arrays. The
+  coefficients have shape (targets, features), take the coordinates of the
+  matching axes of ``Y`` and ``X`` when available, and are returned as an
+  array for array inputs. Dataset outputs are independent copies, so changing
+  them does not change the fitted model. ``intercept`` follows the same rules
+  for several targets, and returns ``0.0`` when ``fit_intercept=False`` instead of raising
+  an error (:issue:`1947`, :pr:`1958`).
+
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
   longer replaces existing model functions and parameter signatures, preventing
