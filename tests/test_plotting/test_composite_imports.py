@@ -10,6 +10,7 @@ These tests ensure the modules can be imported and basic functions are callable.
 """
 
 import numpy as np
+import pytest
 
 
 class TestPlotMeritImports:
@@ -133,6 +134,320 @@ class TestPlotMeritImports:
         legend = ax.get_legend()
         assert legend is not None
         assert [text.get_text() for text in legend.get_texts()] == ["exp", "fit", "res"]
+
+    def test_plot_compare_legend_uses_the_plotted_lines(self):
+        """The legend refers to labelled plotted lines, with readable defaults."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(3, 20))
+        X_ref = X * 0.9
+
+        _, ax = plt.subplots()
+        (component,) = ax.plot([0, 1], [0, 1], label="component")
+        ax = plot_compare(X, X_ref, ax=ax, clear=False, show=False)
+
+        legend = ax.get_legend()
+        assert [text.get_text() for text in legend.get_texts()] == [
+            "experimental",
+            "calculated",
+            "difference",
+            "component",
+        ]
+        handles, _ = ax.get_legend_handles_labels()
+        assert component in handles
+        assert all(handle in ax.lines for handle in handles)
+        assert [line.get_label() for line in ax.lines[1:]] == [
+            "difference",
+            "_nolegend_",
+            "_nolegend_",
+            "experimental",
+            "_nolegend_",
+            "_nolegend_",
+            "calculated",
+            "_nolegend_",
+            "_nolegend_",
+        ]
+        styles = [
+            (handle.get_color(), handle.get_linestyle())
+            for handle in legend.legend_handles
+        ]
+        assert styles[:3] == [("tab:blue", "-"), ("tab:orange", "--"), ("0.6", "-")]
+        plt.close("all")
+
+    def test_plot_compare_default_labels_keep_names_set_on_datasets(self):
+        """Names set on the datasets are kept; automatic names are replaced."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(3, 20))
+        X_ref = X * 0.9
+
+        def legend_texts(ax):
+            return [text.get_text() for text in ax.get_legend().get_texts()]
+
+        X_ref.name = f"{X.name}_MCRALS.reconstruction"
+        ax = plot_compare(X, X_ref, residual=False, show=False)
+        assert legend_texts(ax) == ["experimental", "calculated"]
+
+        X.name = "measured"
+        X_ref.name = "measured_MCRALS.reconstruction"
+        ax = plot_compare(X, X_ref, residual=False, show=False)
+        assert legend_texts(ax) == ["measured", "measured_MCRALS.reconstruction"]
+        plt.close("all")
+
+    @pytest.mark.parametrize(
+        ("exp_name", "calc_name"),
+        [
+            ("IR_20240315", "fit_ab12cd34"),
+            ("sample_deadbeef", "Coordinates_12345678_fit"),
+        ],
+    )
+    def test_plot_compare_default_labels_keep_user_names_resembling_ids(
+        self, exp_name, calc_name
+    ):
+        """User names that look like automatic ids remain the default labels."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(3, 20), name=exp_name)
+        X_ref = NDDataset(X.data * 0.9, name=calc_name)
+
+        ax = plot_compare(X, X_ref, residual=False, show=False)
+        assert [text.get_text() for text in ax.get_legend().get_texts()] == [
+            exp_name,
+            calc_name,
+        ]
+        plt.close("all")
+
+    @pytest.mark.parametrize(
+        ("exp_name", "calc_name"),
+        [
+            ("NDDataset_1a2b3c4d", "NDDataset_1a2b3c4d_MCRALS.reconstruction"),
+            ("NDComplexArray_0f0f0f0f", "Coord_12345678_PCA.reconstruction"),
+            ("standardized NDDataset_1a2b3c4d", "scaled NDDataset_1a2b3c4d"),
+            ("standardized standardized NDDataset_1a2b3c4d", "NDDataset_1a2b3c4d"),
+        ],
+    )
+    def test_plot_compare_default_labels_replace_automatic_names(
+        self, exp_name, calc_name
+    ):
+        """Automatic ids, also as analysis name prefixes, fall back to roles."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(3, 20), name=exp_name)
+        X_ref = NDDataset(X.data * 0.9, name=calc_name)
+
+        ax = plot_compare(X, X_ref, residual=False, show=False)
+        assert [text.get_text() for text in ax.get_legend().get_texts()] == [
+            "experimental",
+            "calculated",
+        ]
+        plt.close("all")
+
+    def test_plot_compare_labels_keyword_is_deprecated_and_ignored(self):
+        """``labels`` warns and leaves the per-role labels in charge."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(2, 20))
+        X_ref = X * 0.9
+
+        with pytest.warns(
+            DeprecationWarning,
+            match="`labels` argument of `plot_compare` is deprecated and ignored"
+            ".*Use `exp_label`, `calc_label` and `resid_label` instead",
+        ):
+            ax = plot_compare(X, X_ref, labels=["a", "b"], exp_label="exp", show=False)
+
+        assert [text.get_text() for text in ax.get_legend().get_texts()] == [
+            "exp",
+            "calculated",
+            "difference",
+        ]
+        assert {line.get_label() for line in ax.lines} == {
+            "exp",
+            "calculated",
+            "difference",
+            "_nolegend_",
+        }
+        plt.close("all")
+
+    def test_plot_compare_legend_skips_hidden_and_repeated_entries(self):
+        """No empty legend box, and repeated calls do not repeat entries."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(2, 20))
+        X_ref = X * 0.9
+
+        ax = plot_compare(
+            X,
+            X_ref,
+            residual=False,
+            exp_label="_hidden",
+            calc_label="_hidden",
+            show=False,
+        )
+        assert ax.get_legend() is None
+
+        _, ax = plt.subplots()
+        plot_compare(X, X_ref, ax=ax, clear=False, show=False)
+        plot_compare(X, X_ref * 0.9, ax=ax, clear=False, show=False)
+        assert [text.get_text() for text in ax.get_legend().get_texts()] == [
+            "experimental",
+            "calculated",
+            "difference",
+        ]
+        plt.close("all")
+
+    def test_plot_merit_overlay_keeps_one_legend_entry_per_role(self):
+        """Overlaid reconstructions do not repeat the comparison legend entries."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import PCA
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_merit
+
+        rng = np.random.RandomState(42)
+        X = NDDataset(rng.randn(10, 8))
+        X_hat = NDDataset(rng.randn(3, 10, 8))
+        pca = PCA(n_components=2).fit(X)
+
+        ax = plot_merit(pca, X=X, X_hat=X_hat, show=False)
+
+        assert [text.get_text() for text in ax.get_legend().get_texts()] == [
+            "experimental",
+            "calculated",
+            "difference",
+        ]
+        plt.close("all")
+
+    def test_plot_merit_standardized_pca_uses_role_labels(self):
+        """PCA preprocessing prefixes on an automatic name keep role labels."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import PCA
+        from spectrochempy import NDDataset
+
+        X = NDDataset(np.random.RandomState(0).rand(10, 8))
+        pca = PCA(n_components=2, standardized=True).fit(X)
+        assert pca.X.name.startswith("standardized ")
+
+        ax = pca.plot_merit(show=False)
+        assert [text.get_text() for text in ax.get_legend().get_texts()] == [
+            "experimental",
+            "calculated",
+            "difference",
+        ]
+        plt.close("all")
+
+    def test_plot_compare_legend_keeps_both_datasets_with_the_same_name(self):
+        """A smoothed copy keeps its name, and both lines stay in the legend."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(
+            np.random.RandomState(0).rand(50),
+            coordset=[Coord(np.linspace(1000.0, 2000.0, 50))],
+            name="noisy spectrum",
+        )
+        smoothed = X.smooth(size=7)
+        assert smoothed.name == X.name
+
+        ax = plot_compare(X, smoothed, show=False)
+        legend = ax.get_legend()
+        assert [text.get_text() for text in legend.get_texts()] == [
+            "noisy spectrum",
+            "noisy spectrum",
+            "difference",
+        ]
+        assert [handle.get_linestyle() for handle in legend.legend_handles] == [
+            "-",
+            "--",
+            "-",
+        ]
+        plt.close("all")
+
+    def test_plot_compare_legend_keeps_explicit_equal_labels(self):
+        """Equal labels of one call are kept; other artists are deduplicated."""
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(2, 20))
+        X_ref = X * 0.9
+
+        _, ax = plt.subplots()
+        ax.plot([0, 1], [0, 1], label="same")
+        (other,) = ax.plot([0, 1], [1, 0], label="other")
+        ax = plot_compare(
+            X,
+            X_ref,
+            ax=ax,
+            clear=False,
+            exp_label="same",
+            calc_label="same",
+            show=False,
+        )
+
+        legend = ax.get_legend()
+        assert [text.get_text() for text in legend.get_texts()] == [
+            "same",
+            "same",
+            "difference",
+            "other",
+        ]
+        assert legend.legend_handles[3].get_color() == other.get_color()
+        plt.close("all")
+
+    def test_plot_compare_labels_deprecation_points_at_the_caller(self):
+        """The ``labels`` warning is attributed to the user's call."""
+        import warnings
+
+        import matplotlib.pyplot as plt
+
+        from spectrochempy import PCA
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotmerit import plot_compare
+
+        X = NDDataset(np.random.RandomState(0).rand(10, 8))
+        pca = PCA(n_components=2).fit(X)
+
+        calls = [
+            lambda: plot_compare(X, X * 0.9, labels=["a", "b"], show=False),
+            lambda: X.plot_compare(X * 0.9, labels=["a", "b"], show=False),
+            lambda: pca.plot_merit(labels=["a", "b"], show=False),
+        ]
+        for call in calls:
+            with warnings.catch_warnings(record=True) as records:
+                warnings.simplefilter("always")
+                call()
+            deprecations = [
+                record
+                for record in records
+                if issubclass(record.category, DeprecationWarning)
+            ]
+            assert len(deprecations) == 1
+            assert deprecations[0].filename == __file__
+        plt.close("all")
 
     def test_plot_compare_color_kwarg(self, sample_1d_dataset):
         """'color' in kwargs should distribute to all three traces."""

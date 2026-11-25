@@ -146,20 +146,17 @@ class Meta:
         return len(self._data)
 
     def __copy__(self) -> "Meta":
-        # Create a shallow copy of the Meta object.
+        return self.__deepcopy__({})
+
+    def __deepcopy__(self, memo=None) -> "Meta":
+        memo = {} if memo is None else memo
         ret = self.__class__()
-        readonly = self.readonly  # Save readonly state
-        self.readonly = False  # Temporarily disable readonly
-        ret.update(copy.deepcopy(self._data))
-        self.readonly = readonly
-        ret.readonly = readonly
+        memo[id(self)] = ret
+        ret._data = copy.deepcopy(self._data, memo)
+        ret._readonly = self._readonly
         ret.parent = self.parent
         ret.name = self.name
         return ret
-
-    def __deepcopy__(self, memo=None) -> "Meta":
-        # Create a deep copy of the Meta object.
-        return self.__copy__()
 
     def __eq__(self, other: object) -> bool:
         # Check equality with another Meta object or dictionary.
@@ -339,7 +336,11 @@ class Meta:
                 if key in self._data and isinstance(self._data[key], ReadOnlyDict):
                     self._data[key].update(value)
                 else:
-                    self._data[key] = ReadOnlyDict(value)
+                    self._data[key] = (
+                        value
+                        if isinstance(value, ReadOnlyDict)
+                        else ReadOnlyDict(value)
+                    )
             elif isinstance(value, Meta):
                 if key in self._data and isinstance(self._data[key], Meta):
                     for k, v in value.items():

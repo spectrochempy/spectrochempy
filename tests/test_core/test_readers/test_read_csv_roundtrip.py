@@ -9,6 +9,7 @@ import csv
 
 import numpy as np
 import pytest
+from pint.errors import UndefinedUnitError
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences as prefs
@@ -260,10 +261,8 @@ def test_read_csv_partial_metadata_respects_explicit_dataset_options(tmp_path):
 def test_read_csv_unknown_header_unit_is_not_guessed():
     content = "elapsed time / not_a_unit,signal / V\n0,1.25\n0.5,2.5\n1,3.75\n"
 
-    with pytest.warns(UserWarning, match="'not_a_unit' is not defined"):
-        loaded = scp.read_csv({"unknown_unit.csv": content.encode("utf-8")})
-
-    assert loaded is None
+    with pytest.raises(UndefinedUnitError, match="'not_a_unit' is not defined"):
+        scp.read_csv({"unknown_unit.csv": content.encode("utf-8")})
 
 
 def test_read_csv_malformed_header_unit_preserves_other_valid_metadata():

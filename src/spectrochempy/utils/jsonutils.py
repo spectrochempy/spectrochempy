@@ -200,7 +200,7 @@ def _decode_complex_payload(payload):
 
 def _decode_serialized_obj(obj, *, allow_unsafe_legacy=False, safe_document=False):
     from spectrochempy.core.units import Quantity
-    from spectrochempy.core.units import Unit
+    from spectrochempy.core.units import ur
     from spectrochempy.utils.meta import Meta
 
     if isinstance(obj, list):
@@ -253,7 +253,7 @@ def _decode_serialized_obj(obj, *, allow_unsafe_legacy=False, safe_document=Fals
     if klass == "QUANTITY":
         return Quantity.from_tuple(decoded["tuple"])
     if klass == "UNIT":
-        return Unit(decoded["str"])
+        return ur.Unit(decoded["str"])
     if klass == "COMPLEX":
         if decoded.get("encoding") == "pair":
             return _decode_complex_payload(decoded)

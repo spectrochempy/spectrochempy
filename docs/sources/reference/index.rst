@@ -726,6 +726,11 @@ Non-linear optimization and curve fit
     :toctree: generated/
 
     Optimize
+    Model
+    Gaussian
+    Linear
+    Parameter
+    Parameters
 
 Partial Least Square regression
 ===============================

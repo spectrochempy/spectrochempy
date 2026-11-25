@@ -19,8 +19,10 @@ import warnings
 
 from spectrochempy.utils.exceptions import SpectroChemPyError
 
-# Get or create the SpectroChemPy logger
+# Get or create the SpectroChemPy logger, at the default SpectroChemPy level
 _logger = logging.getLogger("spectrochempy")
+if _logger.level == logging.NOTSET:
+    _logger.setLevel(logging.WARNING)
 
 
 def _ensure_logger_configured():
@@ -30,7 +32,20 @@ def _ensure_logger_configured():
         formatter = logging.Formatter("%(levelname)s | %(message)s")
         handler.setFormatter(formatter)
         _logger.addHandler(handler)
-        _logger.setLevel(logging.INFO)
+
+
+def _apply_loglevel(level):
+    """
+    Apply a SpectroChemPy log level to the ``spectrochempy`` logger.
+
+    Parameters
+    ----------
+    level : int
+        Logging level (e.g. ``logging.INFO``). ``NOTSET`` (0) shows all messages,
+        as for the application logger, instead of deferring to the root logger
+        level.
+    """
+    _logger.setLevel(level if level != logging.NOTSET else 1)
 
 
 def info_(msg, *args, **kwargs):
@@ -64,7 +79,7 @@ def debug_(msg, *args, **kwargs):
         Additional keyword arguments.
     """
     _ensure_logger_configured()
-    _logger.debug("DEBUG | " + msg, *args, **kwargs)
+    _logger.debug(msg, *args, **kwargs)
 
 
 def error_(*args, **kwargs):

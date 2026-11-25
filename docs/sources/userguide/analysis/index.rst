@@ -27,6 +27,7 @@ in the :doc:`analysis gallery </gettingstarted/examples/gallery/auto_examples_an
    peak_analysis_workflow
    peak_integration
    fitting
+   python_models
    global_fitting
    pipeline
    cross_validation

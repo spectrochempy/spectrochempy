@@ -7,10 +7,13 @@
 # ruff: noqa
 
 __all__ = [
+    "_callable_spec",
     "_fit_backend",
     "_model_evaluation",
     "_models",
     "_modelspec",
+    "_optimize_curves",
+    "_optimize_model",
     "_optimize_nd",
     "_optimize_profiles",
     "_parameter_space",
@@ -19,14 +22,18 @@ __all__ = [
     "_prepared_parameter",
     "_profile_models",
     "linearregression",
+    "model",
     "optimize",
     "simulation",
 ]
 
+from . import _callable_spec
 from . import _fit_backend
 from . import _model_evaluation
 from . import _models
 from . import _modelspec
+from . import _optimize_curves
+from . import _optimize_model
 from . import _optimize_nd
 from . import _optimize_profiles
 from . import _parameter_space
@@ -35,5 +42,6 @@ from . import _parameters
 from . import _prepared_parameter
 from . import _profile_models
 from . import linearregression
+from . import model
 from . import optimize
 from . import simulation

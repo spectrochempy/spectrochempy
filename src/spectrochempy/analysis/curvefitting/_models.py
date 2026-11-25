@@ -334,7 +334,11 @@ def asymmetricvoigt(
     ratio : float, optional
         Ratio of Gaussian to Lorentzian character.
     asym : float, optional
-        Asymmetry parameter.
+        Asymmetry parameter. ``0`` (default) gives the symmetric Voigt profile.
+        A positive value broadens the low-*x* side of the peak and narrows the
+        high-*x* side; a negative value does the opposite: the profile for
+        ``asym = -a`` is the mirror image, about *pos*, of the profile for
+        ``+a``.
     normalized : bool, optional
         If ``True`` (default) the profile is normalized so that its integral
         is approximately *ampl*. If ``False`` the peak value is exactly
@@ -616,7 +620,7 @@ class asymmetricvoigtmodel:
         from scipy.special import wofz
 
         g = width
-        if asym > 0.0:
+        if asym != 0.0:
             # sigmoid variation of the width
             g = 2.0 * sigmoidmodel().f(x, width, pos, asym)
         gb = ratio * g / 2.3548
