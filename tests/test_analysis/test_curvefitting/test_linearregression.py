@@ -143,3 +143,50 @@ def test_coef_and_intercept_with_observation_coordinates_only(
     intercept = model(fit_intercept=True).fit(X, Y).intercept
     assert list(intercept.dims) == ["x"]
     assert intercept.shape == (2,)
+
+
+@pytest.mark.parametrize("model", [scp.NNLS, scp.LSTSQ])
+@pytest.mark.parametrize("x_reference", [False, True])
+@pytest.mark.parametrize("y_reference", [False, True])
+def test_coef_and_intercept_resolve_last_axis_references(
+    model, x_reference, y_reference
+):
+    X = scp.NDDataset(np.eye(3), units="V")
+    Y = scp.NDDataset(2.0 * np.eye(3), units="A")
+    for dataset, reference, title in (
+        (X, x_reference, "features"),
+        (Y, y_reference, "targets"),
+    ):
+        coordinate = scp.Coord([10.0, 20.0, 30.0], title=title, units="s")
+        dataset.set_coordset(y=coordinate, x="y" if reference else coordinate.copy())
+
+    fitted = model(fit_intercept=True).fit(X, Y)
+    coef = fitted.coef
+    intercept = fitted.intercept
+
+    assert coef.shape == (3, 3)
+    assert list(coef.dims) == ["y", "x"]
+    assert coef.y == Y.x
+    assert coef.x == X.x
+    assert coef.units == Y.units / X.units
+    assert intercept.shape == (3,)
+    assert intercept.x == Y.x
+    assert intercept.units == Y.units
+    assert_allclose(X.data @ coef.data.T + intercept.data, Y.data, atol=1e-12)
+    coef.x.title = "changed"
+    intercept.x.title = "changed"
+    assert X.x.title == "features"
+    assert Y.x.title == "targets"
+
+
+@pytest.mark.parametrize("model", [scp.NNLS, scp.LSTSQ])
+def test_single_target_coef_resolves_feature_coordinate_reference(model):
+    X = scp.NDDataset(np.eye(3))
+    X.set_coordset(y=scp.Coord([10.0, 20.0, 30.0]), x="y")
+    Y = scp.NDDataset([1.0, 2.0, 3.0])
+
+    fitted = model(fit_intercept=False).fit(X, Y)
+
+    assert fitted.coef.shape == (3,)
+    assert fitted.coef.x == X.x
+    assert_allclose(fitted.coef.data, Y.data)

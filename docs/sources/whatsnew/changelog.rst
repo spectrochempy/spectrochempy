@@ -161,7 +161,7 @@ Bug Fixes
   matching axes of ``Y`` and ``X`` when available, and are returned as an
   array for array inputs. ``intercept`` follows the same rules for several
   targets, and returns ``0.0`` when ``fit_intercept=False`` instead of raising
-  an error (:issue:`1947`).
+  an error (:issue:`1947`, :pr:`1958`).
 
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no

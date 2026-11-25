@@ -1966,8 +1966,10 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         dim = dataset.dims[-1]
         coord = None
         coordset = dataset.coordset
-        if coordset is not None and dim in coordset.names:
-            coord = coordset[dim].copy()
+        if coordset is not None:
+            target = coordset.references.get(dim, dim)
+            if target in coordset.names:
+                coord = coordset[target].copy()
         return dim, coord
 
     # ----------------------------------------------------------------------------------
