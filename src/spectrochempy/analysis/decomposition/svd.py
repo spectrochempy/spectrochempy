@@ -411,12 +411,8 @@ class SVD(DecompositionAnalysis):
             source.dims = [source_scores.dims[0], training.dims[-1]]
             source.set_coordset(
                 {
-                    source.dims[0]: source_scores.coord(0).copy()
-                    if source_scores.coordset is not None
-                    else None,
-                    source.dims[-1]: training.coord(-1).copy()
-                    if training.coordset is not None
-                    else None,
+                    source.dims[0]: self._copy_axis_coord(source_scores, 0),
+                    source.dims[-1]: self._copy_axis_coord(training, -1),
                 }
             )
             rows = self._analysis_full_rows(source_scores.mask)
@@ -431,7 +427,7 @@ class SVD(DecompositionAnalysis):
             restored = self._analysis_restore_full_geometry(
                 NDDataset(data), AnalysisSourceMetadata(source)
             )
-            result = self._wrap_reconstruction(restored.data, X=source)
+            result = self._wrap_reconstruction(restored.data, X=training)
             return self._analysis_copy_exact_geometry(
                 result, AnalysisSourceMetadata(source)
             )
@@ -439,9 +435,31 @@ class SVD(DecompositionAnalysis):
             return self._wrap_reconstruction(data, X=X_transform)
         return self._wrap_reconstruction(data)
 
-    @_wrap_ndarray_output_to_nddataset(analysis_role="reconstruction")
+    @staticmethod
+    def _copy_axis_coord(dataset, axis):
+        if dataset.coordset is None:
+            return None
+        dim = dataset.dims[axis]
+        dim = dataset.coordset.references.get(dim, dim)
+        coord = dataset.coordset[dim]
+        return coord.copy() if coord is not None else None
+
     def _wrap_reconstruction(self, data, X=None):
-        return data
+        result = NDDataset(data)
+        context = {
+            "role_id": "reconstruction",
+            "meta_from": "_X",
+            "direct_x": X,
+            "direct_y": None,
+            "direct_x_kind": "none"
+            if X is None
+            else "dataset"
+            if isinstance(X, NDDataset)
+            else "arraylike",
+            "direct_y_kind": "none",
+        }
+        result = self._apply_analysis_output_geometry(result, **context)
+        return self._apply_analysis_output_metadata(result, **context)
 
     def fit_transform(self, X, Y=None, **kwargs):
         r"""

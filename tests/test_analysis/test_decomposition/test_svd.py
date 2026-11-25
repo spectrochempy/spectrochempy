@@ -442,3 +442,18 @@ def test_svd_explicit_scores_without_coordinates():
     restored = model.inverse_transform(model.transform())
     assert restored.shape == original.shape
     assert_allclose(restored.data, original, atol=1e-12)
+
+
+def test_svd_explicit_reconstruction_resolves_coordinate_references():
+    X = scp.NDDataset(
+        np.random.default_rng(4).random((4, 4)),
+        coordset=scp.CoordSet(y=scp.Coord(range(4)), x="y"),
+        name="training",
+    )
+    model = SVD().fit(X)
+    restored = model.inverse_transform(model.transform())
+    assert_allclose(restored.data, X.data, atol=1e-12)
+    assert_allclose(restored.x.data, np.arange(4))
+    assert_allclose(restored.y.data, np.arange(4))
+    assert restored.name == "training_SVD.reconstruction"
+    assert "fit of training." in restored.description
