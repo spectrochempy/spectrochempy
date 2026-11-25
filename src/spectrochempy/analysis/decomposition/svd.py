@@ -173,6 +173,8 @@ class SVD(DecompositionAnalysis):
         return _outfit
 
     def _right_singular_vectors(self, method):
+        if not self._fitted:
+            raise NotFittedError()
         # The k = min(M, N) first rows of VT (VT has N rows when
         # full_matrices is True). Check what was fitted, not the current
         # compute_uv trait, which may have been changed since.

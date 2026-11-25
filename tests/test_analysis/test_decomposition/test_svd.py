@@ -535,3 +535,17 @@ def test_svd_new_observations_named_k_keep_coordinates():
     restored = model.inverse_transform(scores)
     assert_allclose(restored.coord(0).data, [10, 20])
     assert_allclose(model.transform().data, model.U * model.s, atol=1e-12)
+
+
+def test_svd_components_unavailable_after_failed_refit():
+    model = SVD().fit(np.arange(20.0).reshape(4, 5))
+    with pytest.raises(np.linalg.LinAlgError):
+        model.fit(np.full((4, 5), np.nan))
+    with pytest.raises(NotFittedError):
+        _ = model.components
+    with pytest.raises(NotFittedError):
+        model.get_components()
+    with pytest.raises(NotFittedError):
+        model.transform()
+    with pytest.raises(NotFittedError):
+        model.inverse_transform()
