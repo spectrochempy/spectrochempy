@@ -165,6 +165,56 @@ Propagation to linked/derived parameters is not implemented;
 ``report()`` returns text based on these outputs; ``plot()`` forwards to the
 existing ``plot_merit()`` view. Neither introduces a second result object.
 
+Physical stationarity qualification
+-----------------------------------
+
+For 1D least-squares Python and COMMON fits, ``result.diagnostics`` also
+reports a local physical-coordinate check, independently of the solver's
+``success``, ``status`` and ``message``:
+
+* ``physical_stationarity_status`` is ``'satisfied'``, ``'not_satisfied'``,
+  ``'unavailable'`` or ``'not_checked'``.
+* ``physical_projected_gradient`` is the largest absolute residual/Jacobian
+  column cosine after projection onto feasible directions. A positive gradient
+  exactly on a lower bound or a negative gradient exactly on an upper bound
+  is projected out. A nearby strictly interior value retains both directions.
+  The score is dimensionless; ``physical_stationarity_tolerance`` is ``1e-6``.
+* ``physical_stationarity_reason`` explains an unavailable check, or reports
+  ``'residual_at_roundoff'`` when every residual is at most 32 machine epsilons
+  times the largest finite unmasked observed magnitude.
+* ``stationarity_evaluations`` counts additional model calls used by this
+  diagnostic. Regular interior fits use the retained Jacobian and signed
+  transform derivatives, without extra model evaluations.
+
+Near bounds, the check uses independent feasible physical probes because
+the optimizer-coordinate Jacobian can lose the physical gradient there.
+Three-point derivatives at two step sizes estimate derivative and roundoff
+errors. Their estimated effect on the normalized gradient must be below a
+quarter of the stationarity tolerance, and the resulting score interval must
+lie entirely on one side of that tolerance. Otherwise the check is unavailable.
+An ordinary one-sided check reuses
+one probe and needs three model calls per column; a centered check needs four.
+Probes evaluate copies of the fitted definition, including its parameter
+links. Failed, nonfinite, flat or unresolved derivatives make the check
+unavailable. Personal functions must remain deterministic.
+
+The neighborhood triggering probes matches the conservative covariance
+qualification above; it does not establish bound activity for projection.
+Its one-sided absolute scale is expressed in the configured numerical
+magnitudes; this is not unit-aware validation. This numerical first-order
+check does not establish a global minimum or parameter identifiability.
+An approximate boundary solution that is still strictly interior can fail
+this check despite negligible remaining improvement. Finite probes are local
+numerical estimates; interior columns retain the backend Jacobian approximation.
+It does not change the solution, solver success, covariance policy or starting
+values, and it does not retry an optimization. In particular, a historical
+COMMON fit starting at an endpoint may still report solver success together
+with ``physical_stationarity_status='not_satisfied'``. The strictly interior
+starting-value requirement for composable Python models remains in place.
+Dry previews and all-fixed evaluations report ``'not_checked'``; solvers
+without a retained least-squares Jacobian report ``'unavailable'``.
+The existing ND diagnostics are unchanged.
+
 Historical options and scope
 ----------------------------
 

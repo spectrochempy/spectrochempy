@@ -15,6 +15,11 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- 1D ``Optimize.result.diagnostics`` qualifies physical first-order stationarity
+  separately from solver success, including independent feasible probes near
+  bounds. Starting values, solver selection, fit results and ND paths are
+  unchanged; unsupported or unresolved checks are explicitly unavailable.
+
 - ``Model``, ``Gaussian`` and ``Linear`` define composable Python models for
   1D ``Optimize(model=..., params=...)`` fits. ``Parameter`` and ``Parameters``
   configure initial values, fixed parameters, bounds and explicit arithmetic

@@ -149,6 +149,41 @@ def _transform_artifacts(definition, values, keys):
     }
 
 
+def _restore_physical(definition, values, keys):
+    """Assign physical free magnitudes without a round trip through solver space."""
+    magnitudes = dict(zip(keys, values, strict=True))
+    components = (
+        {component.label: component for component in definition.components}
+        if isinstance(definition, _FitModelSpec)
+        else {}
+    )
+    for parameter in _prepared_parameters(definition):
+        if parameter.fixed or parameter.name not in magnitudes:
+            continue
+        path = parameter.identifier
+        if path[0] == "legacy":
+            owner, name = definition.data, path[1]
+        elif path[0] == "common":
+            owner, name = definition.common_params, path[1]
+        else:
+            owner, name = components[path[1]].params, path[2]
+        entry = owner[name]
+        value = entry if path[0] == "legacy" else entry.value
+        if len(path) > 3 and path[-2] == "experiments":
+            was_scalar = np.ndim(value) == 0
+            value = [value] if was_scalar else list(value)
+            value[path[-1]] = float(magnitudes[parameter.name])
+            if path[0] == "legacy" and was_scalar:
+                value = value[0]
+        else:
+            value = float(magnitudes[parameter.name])
+        if path[0] == "legacy":
+            owner[name] = value
+        else:
+            entry.value = value
+    return definition
+
+
 def _restore_external(fp, p, keys):
     """Restore physical values in place using the supplied optimizer keys."""
     if isinstance(fp, _FitModelSpec):
