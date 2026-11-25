@@ -459,6 +459,8 @@ class SVD(DecompositionAnalysis):
             "direct_y_kind": "none",
         }
         result = self._apply_analysis_output_geometry(result, **context)
+        if isinstance(X, NDDataset):
+            context.update(direct_x=None, direct_x_kind="none")
         return self._apply_analysis_output_metadata(result, **context)
 
     def fit_transform(self, X, Y=None, **kwargs):

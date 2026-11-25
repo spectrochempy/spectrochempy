@@ -886,6 +886,7 @@ class _set_output:
                     return None
                 try:
                     dim = dataset.dims[axis]
+                    dim = dataset.coordset.references.get(dim, dim)
                     coord = dataset.coordset[dim]
                 except (KeyError, IndexError, TypeError, ValueError):
                     return None

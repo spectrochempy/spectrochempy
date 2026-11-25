@@ -444,14 +444,28 @@ def test_svd_explicit_scores_without_coordinates():
     assert_allclose(restored.data, original, atol=1e-12)
 
 
-def test_svd_explicit_reconstruction_resolves_coordinate_references():
+@pytest.mark.parametrize("reference", ["x", "y"])
+def test_svd_explicit_reconstruction_resolves_coordinate_references(reference):
     X = scp.NDDataset(
         np.random.default_rng(4).random((4, 4)),
-        coordset=scp.CoordSet(y=scp.Coord(range(4)), x="y"),
+        coordset=scp.CoordSet(
+            **(
+                {"y": scp.Coord(range(4)), "x": "y"}
+                if reference == "x"
+                else {"x": scp.Coord(range(4)), "y": "x"}
+            )
+        ),
         name="training",
     )
+    X.author = "original author"
     model = SVD().fit(X)
-    restored = model.inverse_transform(model.transform())
+    scores = model.transform()
+    assert scores.author == X.author
+    assert_allclose(model.components.data, model.VT)
+    assert_allclose(model.get_components().data, model.VT)
+    restored = model.inverse_transform(scores)
+    assert restored.author == X.author
+    assert model.inverse_transform().author == X.author
     assert_allclose(restored.data, X.data, atol=1e-12)
     assert_allclose(restored.x.data, np.arange(4))
     assert_allclose(restored.y.data, np.arange(4))
