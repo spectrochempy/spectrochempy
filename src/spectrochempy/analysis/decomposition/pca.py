@@ -12,6 +12,7 @@ from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._analysisbase import _check_n_components
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
@@ -475,6 +476,7 @@ for reproducible results across multiple function calls.""",
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
 
+        n_components = _check_n_components(n_components)
         if n_components is None or n_components > self.n_components:
             n_components = self.n_components
         info_(self.__str__(n_components))

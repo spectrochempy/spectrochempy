@@ -61,6 +61,14 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- The ``n_components`` argument of ``transform``, ``inverse_transform`` and
+  ``get_components`` of decomposition estimators (``PCA``, ``NMF``,
+  ``FastICA``...) and of ``PCA.printev`` must be a positive integer (or
+  ``None``): ``0`` used to fail with an unrelated error and a negative value
+  silently dropped the last components. A ``ValueError`` now names the
+  invalid value. Values above the fitted number of components still warn and
+  use all the components.
+
 - The default ``WARNING`` log level hides INFO messages again, as documented:
   since 0.8.2, messages such as "This coordinate (...) is outside the axis
   limits", "... is already a masked array", "units forced to change" or reader

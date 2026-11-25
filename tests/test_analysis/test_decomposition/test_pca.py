@@ -86,6 +86,32 @@ def test_pca_n_components_validation(low_rank_pca_dataset):
         PCA(n_components="mle").fit(wide_dataset)
 
 
+@pytest.mark.parametrize("bad", [0, -1, 1.5, True, "2"])
+def test_pca_method_n_components_must_be_positive_integer(low_rank_pca_dataset, bad):
+    # n_components given to transform, inverse_transform, get_components and
+    # printev is validated in the base class (0 used to fail with an obscure
+    # error and -1 to drop the last component silently).
+    pca = PCA(n_components=3).fit(low_rank_pca_dataset)
+    match = "n_components must be a positive integer"
+    with pytest.raises(ValueError, match=match):
+        pca.transform(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.inverse_transform(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.get_components(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.printev(n_components=bad)
+
+
+def test_pca_method_n_components_valid_values(low_rank_pca_dataset):
+    pca = PCA(n_components=3).fit(low_rank_pca_dataset)
+    assert pca.transform(n_components=np.int64(2)).shape[1] == 2
+    assert pca.get_components(n_components=1).shape[0] == 1
+    assert pca.get_components(n_components=None).shape[0] == 3
+    with pytest.warns(UserWarning, match="cannot be greater"):
+        assert pca.transform(n_components=5).shape[1] == 3
+
+
 def test_pca_float_threshold_component_selection(low_rank_pca_dataset):
     dataset = low_rank_pca_dataset
 

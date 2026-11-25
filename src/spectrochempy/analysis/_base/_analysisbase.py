@@ -30,6 +30,27 @@ from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.traits import NDDatasetType
 
 
+def _check_n_components(n_components):
+    """
+    Validate a `n_components` argument passed to a method.
+
+    `None` is accepted (all the fitted components). Any other value must be a
+    positive integer; values above the number of fitted components keep the
+    existing warn-and-clip behaviour of the callers.
+    """
+    if n_components is None:
+        return None
+    if (
+        isinstance(n_components, (bool, np.bool_))
+        or not isinstance(n_components, (int, np.integer))
+        or n_components < 1
+    ):
+        raise ValueError(
+            f"n_components must be a positive integer, got {n_components!r}."
+        )
+    return int(n_components)
+
+
 # ======================================================================================
 # Base class AnalysisConfigurable
 # ======================================================================================
@@ -1246,7 +1267,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
         X_transform = self._transform(newX)
 
         # Slice according to n_components
-        n_components = kwargs.pop("n_components", self._n_components)
+        n_components = _check_n_components(kwargs.pop("n_components", None))
+        if n_components is None:
+            n_components = self._n_components
         if n_components > self._n_components:
             warnings.warn(
                 "The number of components required for reduction "
@@ -1297,7 +1320,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
             raise NotFittedError
 
         # get optional n_components
-        n_components = kwargs.pop("n_components", self._n_components)
+        n_components = _check_n_components(kwargs.pop("n_components", None))
+        if n_components is None:
+            n_components = self._n_components
         if n_components > self._n_components:
             warnings.warn(
                 "The number of components required for reduction "
@@ -1373,6 +1398,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Dataset with shape (:term:`n_components`, :term:`n_features`)
 
         """
+        n_components = _check_n_components(n_components)
         if n_components is None or n_components > self._n_components:
             n_components = self._n_components
 
