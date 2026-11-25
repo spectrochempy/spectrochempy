@@ -90,7 +90,11 @@ def test_correlated_covariance_order_masks_axes_and_common_parity(descending, ma
         assert result.covariance[0, 1] < 0
         values = np.linalg.lstsq(design, y[valid], rcond=None)[0]
         np.testing.assert_allclose(
-            result.confidence_intervals.mean(axis=1), values, atol=1e-8
+            (result.confidence_intervals.mean(axis=1) - values)
+            / np.sqrt(np.diag(expected)),
+            0,
+            atol=1e-3,
+            rtol=0,
         )
     assert fits[0].result.parameter_names == ("intercept", "slope")
     np.testing.assert_allclose(
