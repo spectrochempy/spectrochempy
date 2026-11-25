@@ -471,3 +471,26 @@ def test_svd_explicit_reconstruction_resolves_coordinate_references(reference):
     assert_allclose(restored.y.data, np.arange(4))
     assert restored.name == "training_SVD.reconstruction"
     assert "fit of training." in restored.description
+
+
+def test_svd_reconstruction_disambiguates_axis_names():
+    rng = np.random.default_rng(2)
+    training = scp.NDDataset(
+        rng.random((4, 5)),
+        coordset=[scp.Coord(range(4)), scp.Coord(range(5))],
+    )
+    model = SVD().fit(training)
+    new = scp.NDDataset(
+        rng.random((3, 5)),
+        dims=["x", "z"],
+        coordset=scp.CoordSet(x=scp.Coord([10, 20, 30]), z=scp.Coord(range(5))),
+    )
+    new[1] = scp.MASKED
+    scores = model.transform(new)
+    restored = model.inverse_transform(scores)
+    assert restored.dims == ["y", "x"]
+    assert_allclose(restored.coord(0).data, [10, 20, 30])
+    assert_allclose(restored.coord(1).data, np.arange(5))
+    assert_allclose(restored.mask, new.mask)
+    expected = scores.data @ model.VT
+    assert_allclose(restored.data[~new.mask], expected[~new.mask])

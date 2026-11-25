@@ -408,7 +408,8 @@ class SVD(DecompositionAnalysis):
             source = source_scores.copy()
             source._data = np.zeros((source_scores.shape[0], training.shape[-1]))
             source._coordset = None
-            source.dims = [source_scores.dims[0], training.dims[-1]]
+            dims = [source_scores.dims[0], training.dims[-1]]
+            source.dims = dims if dims[0] != dims[1] else list(NDDataset(data).dims)
             source.set_coordset(
                 {
                     source.dims[0]: self._copy_axis_coord(source_scores, 0),
