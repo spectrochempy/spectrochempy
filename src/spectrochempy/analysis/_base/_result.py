@@ -11,6 +11,7 @@ from scipy import stats
 from spectrochempy.utils.print import DisplayItem
 from spectrochempy.utils.print import DisplaySection
 from spectrochempy.utils.print import _html_heading
+from spectrochempy.utils.print import _local_numpyprintoptions
 from spectrochempy.utils.print import _render_sections
 
 __all__ = ["ResultBase", "AnalysisResult", "FitResult"]
@@ -102,9 +103,10 @@ class ResultBase:
 
         # --- Parameters ---
         if self._parameters:
-            params = [
-                DisplayItem("field", str(v), k) for k, v in self._parameters.items()
-            ]
+            with _local_numpyprintoptions():
+                params = [
+                    DisplayItem("field", str(v), k) for k, v in self._parameters.items()
+                ]
             sections.append(
                 DisplaySection("data", f"Parameters ({len(params)})", params)
             )
@@ -130,7 +132,8 @@ class ResultBase:
                 if hasattr(obj, "_repr_html_"):
                     diags.append(DisplayItem("html", obj._repr_html_(), name))
                 else:
-                    diags.append(DisplayItem("field", str(obj), name))
+                    with _local_numpyprintoptions():
+                        diags.append(DisplayItem("field", str(obj), name))
             sections.append(
                 DisplaySection("data", f"Diagnostics ({len(diags)})", diags)
             )
@@ -155,8 +158,9 @@ class ResultBase:
         lines.append(f"  estimator: {self._estimator}")
         if self._parameters:
             lines.append("  parameters:")
-            for name, value in self._parameters.items():
-                lines.append(f"      {name}: {value}")
+            with _local_numpyprintoptions():
+                for name, value in self._parameters.items():
+                    lines.append(f"      {name}: {value}")
         if self._outputs:
             lines.append("  outputs:")
             for name, obj in self._outputs.items():
