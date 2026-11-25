@@ -41,6 +41,7 @@ from spectrochempy.analysis.curvefitting._parameter_space import (
     _modelspec_parameter_count,
 )
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
+from spectrochempy.analysis.curvefitting._parameter_space import _transform_artifacts
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.model import Model
 from spectrochempy.analysis.curvefitting.model import _prepare_public_model
@@ -290,23 +291,45 @@ def _modelspec_parameter_names(spec):
     return names
 
 
-def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
+def _compute_covariance_matrix(
+    observed,
+    fitted,
+    jacobian,
+    diagnostics,
+    *,
+    transform_derivatives=None,
+    near_bounds=False,
+):
     """
     Compute an approximate parameter covariance matrix from the retained Jacobian.
 
     The approximation follows the local linear least-squares convention:
 
-        covariance = sigma^2 * pinv(J.T @ J)
+        covariance = D * (sigma^2 * inv(J.T @ J)) * D.T
 
     where ``sigma^2`` is the residual variance estimate based on the reduced
-    chi-square (equivalently ``rss / degrees_of_freedom``).
+    chi-square (equivalently ``rss / degrees_of_freedom``). J is the raw
+    optimizer-coordinate Jacobian and D is the diagonal physical-coordinate
+    derivative. A column-normalized SVD avoids squaring the condition number.
+    Rank deficiency, active bounds and unsuccessful fits exclude this local
+    unconstrained approximation. The diagnostics record the exclusion reason.
 
     Returns
     -------
     ndarray or None
         Immutable covariance matrix when available, otherwise ``None``.
     """
+    diagnostics["covariance_coordinates"] = "physical"
+    diagnostics["covariance_reason"] = "missing_jacobian"
     if jacobian is None:
+        return None
+
+    if diagnostics.get("success") is False:
+        diagnostics["covariance_reason"] = "not_converged"
+        return None
+
+    if near_bounds:
+        diagnostics["covariance_reason"] = "active_bounds"
         return None
 
     if observed is None or fitted is None:
@@ -317,13 +340,16 @@ def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
     n_varying_parameters = int(diagnostics.get("n_varying_parameters", 0))
 
     if degrees_of_freedom <= 0 or n_varying_parameters <= 0:
+        diagnostics["covariance_reason"] = "insufficient_degrees_of_freedom"
         return None
 
     sigma2 = float(sigma2)
     if not np.isfinite(sigma2):
+        diagnostics["covariance_reason"] = "numeric_range"
         return None
 
     jacobian_array = np.asarray(jacobian, dtype=np.float64)
+    diagnostics["covariance_reason"] = "invalid_jacobian"
     if jacobian_array.ndim != 2:
         return None
 
@@ -347,9 +373,45 @@ def _compute_covariance_matrix(observed, fitted, jacobian, diagnostics):
     if jacobian_used.shape[0] <= 0:
         return None
 
-    information = jacobian_used.T @ jacobian_used
-    covariance = sigma2 * np.linalg.pinv(information, hermitian=True)
-    covariance = 0.5 * (covariance + covariance.T)
+    derivatives = (
+        np.ones(n_varying_parameters)
+        if transform_derivatives is None
+        else np.asarray(transform_derivatives, dtype=float)
+    )
+    if derivatives.shape != (n_varying_parameters,):
+        return None
+    if not np.isfinite(jacobian_used).all() or not np.isfinite(derivatives).all():
+        diagnostics["covariance_reason"] = "numeric_range"
+        return None
+    if np.any(derivatives == 0):
+        diagnostics["covariance_reason"] = "singular_transform"
+        return None
+
+    column_scale = np.max(np.abs(jacobian_used), axis=0)
+    diagnostics["covariance_reason"] = "rank_deficient"
+    if np.any(column_scale == 0):
+        return None
+    try:
+        _, singular, right = np.linalg.svd(
+            jacobian_used / column_scale, full_matrices=False
+        )
+    except np.linalg.LinAlgError:
+        diagnostics["covariance_reason"] = "invalid_jacobian"
+        return None
+    if singular.size < n_varying_parameters or singular[-1] <= (
+        singular[0] * np.sqrt(np.finfo(float).eps)
+    ):
+        return None
+    with np.errstate(over="ignore", under="ignore", invalid="ignore", divide="ignore"):
+        physical_scale = np.sqrt(np.longdouble(sigma2)) * derivatives / column_scale
+        scaled = np.asarray((right / singular[:, None]) * physical_scale, dtype=float)
+        covariance = scaled.T @ scaled
+    if not np.isfinite(covariance).all() or (
+        sigma2 > 0 and np.any(np.diag(covariance) == 0)
+    ):
+        diagnostics["covariance_reason"] = "numeric_range"
+        return None
+    diagnostics["covariance_reason"] = None
     return _freeze_covariance_matrix(covariance)
 
 
@@ -2243,6 +2305,11 @@ class Optimize(DecompositionAnalysis):
         C order. Columns follow the free parameters in physical magnitudes,
         as identified by ``result.parameter_names`` and ``result.parameter_units``.
 
+        For 1D script and composable Python models, this remains the raw
+        optimizer-coordinate Jacobian, including the historical bound
+        transformation. Result covariance and stderr are transformed back to
+        physical free parameters; this property is preserved for compatibility.
+
         Returns
         -------
         ndarray or None
@@ -2284,6 +2351,13 @@ class Optimize(DecompositionAnalysis):
         the order is ``[name for name in sorted(fp) if not fp.fixed[name]]``.
         For a fit with ``peaks``, the order is given by
         ``result.parameter_names``, which script fits do not provide.
+
+        For 1D script and Python-model fits, covariance and its derived
+        uncertainty arrays describe physical free parameters, accounting for
+        the bound transform. They are unavailable near bounds, for deficient
+        rank, unsuccessful optimization or missing prerequisites; diagnostics
+        include ``covariance_reason``. The raw ``jacobian`` property remains
+        in optimizer coordinates for these fits.
         """
         if not self._fitted:
             raise NotFittedError(
@@ -2346,7 +2420,12 @@ class Optimize(DecompositionAnalysis):
             fitted,
             self.jacobian,
             fit_diagnostics,
+            transform_derivatives=self._solver_artifacts.get(
+                "parameter_transform_derivatives"
+            ),
+            near_bounds=self._solver_artifacts.get("near_parameter_bounds", False),
         )
+        fit_diagnostics["jacobian_coordinates"] = "optimizer"
         parameter_values = _extract_varying_parameter_values(
             getattr(self, "_model_spec", None),
         )
@@ -2496,6 +2575,7 @@ def _optimize(
         solver_result = result
     solver_meta = _normalize_solver_meta(method, solver_result, warnmess)
     solver_artifacts = _extract_solver_artifacts(method, solver_result)
+    solver_artifacts.update(_transform_artifacts(fp0, res, keys))
 
     # restore the external parameter
     fpe = _restore_external(fp0, res, keys)

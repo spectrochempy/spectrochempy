@@ -62,18 +62,34 @@ Bug Fixes
 ~~~~~~~~~
 
 - The ``n_components`` argument of ``transform``, ``inverse_transform`` and
-  ``get_components`` of decomposition estimators (``PCA``, ``NMF``,
+  ``get_components`` of decomposition estimators (``PCA``, ``NMF``, ``SVD``,
   ``FastICA``...), and of ``PCA.printev`` and ``PCA.plot_scree``, must be a
   positive integer (or ``None``): ``0`` used to fail with an unrelated error
   and a negative value silently dropped the last components. A ``ValueError``
   now names the invalid value. Values above the fitted number of components
-  still use all the components.
+  still use all the components (:pr:`1982`).
 
 - ``inverse_transform(n_components=k)`` of ``PCA``, ``NMF`` and ``FastICA``
   now reconstructs the data from the first ``k`` components only; the
   argument used to be silently ignored. ``FastICA.inverse_transform`` also
   accepts scores with fewer columns than fitted components (for instance from
-  ``transform(n_components=k)``) instead of raising a shape error.
+  ``transform(n_components=k)``) instead of raising a shape error
+  (:pr:`1982`).
+
+- 1D ``Optimize`` covariance and standard errors now account for the bound
+  transformation and describe physical free parameters for both COMMON and
+  Python models. Local uncertainty is unavailable near bounds, for
+  non-converged or rank-deficient fits, with a diagnostic exclusion reason.
+  The raw optimizer-coordinate ``jacobian`` remains unchanged (:pr:`1983`).
+
+- ``SVD.transform``, ``SVD.fit_transform``, ``SVD.inverse_transform``,
+  ``SVD.components`` and ``SVD.get_components`` no longer raise
+  ``NotImplementedError``. They return ``NDDataset`` scores
+  :math:`U \Sigma` (:math:`X V` for new data), right singular vectors
+  :math:`V^T` and rank-``n_components`` reconstructions, with the same
+  coordinates, units and metadata conventions as ``PCA``. Unlike ``PCA``,
+  SVD does not center the data. ``SVD.n_components`` is now available after
+  ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`, :pr:`1980`).
 
 - The default ``WARNING`` log level hides INFO messages again, as documented:
   since 0.8.2, messages such as "This coordinate (...) is outside the axis

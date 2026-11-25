@@ -886,6 +886,7 @@ class _set_output:
                     return None
                 try:
                     dim = dataset.dims[axis]
+                    dim = dataset.coordset.references.get(dim, dim)
                     coord = dataset.coordset[dim]
                 except (KeyError, IndexError, TypeError, ValueError):
                     return None
@@ -903,6 +904,15 @@ class _set_output:
                     if hasattr(obj, "_get_component_labels"):
                         return obj._get_component_labels(n)
                     return [f"#{i}" for i in range(n)]
+
+                obs_dim, feature_dim = X.dims
+                physical_dim = (
+                    feature_dim
+                    if self.typey in {"features", "components"}
+                    or self.typex == "features"
+                    else obs_dim
+                )
+                component_dim = "j" if physical_dim == "k" else "k"
 
                 if self.typesingle == "components":
                     # occurs when the data are 1D such as ev_ratio...
@@ -930,11 +940,11 @@ class _set_output:
                     )
                 elif self.typey == "features" and self.typex == "components":
                     # combined: dim[0]=features, dim[1]=components
-                    X_transf.dims = [X.dims[1], "k"]
+                    X_transf.dims = [feature_dim, component_dim]
                     X_transf.set_coordset(
                         {
-                            X.dims[1]: _coord_or_none(X, 1),
-                            "k": Coord(
+                            feature_dim: _coord_or_none(X, 1),
+                            component_dim: Coord(
                                 None,
                                 labels=_component_labels(X_transf.shape[-1]),
                                 title="components",
@@ -942,24 +952,24 @@ class _set_output:
                         },
                     )
                 elif self.typey == "components":
-                    X_transf.dims = ["k", X.dims[1]]
+                    X_transf.dims = [component_dim, feature_dim]
                     X_transf.set_coordset(
                         {
-                            "k": Coord(
+                            component_dim: Coord(
                                 None,
                                 labels=_component_labels(X_transf.shape[0]),
                                 title="components",
                             ),
-                            X.dims[1]: _coord_or_none(X, 1),
+                            feature_dim: _coord_or_none(X, 1),
                         },
                     )
                 elif self.typex == "components":
-                    X_transf.dims = [X.dims[0], "k"]
+                    X_transf.dims = [obs_dim, component_dim]
                     X_transf.set_coordset(
                         {
-                            X.dims[0]: _coord_or_none(X, 0),
+                            obs_dim: _coord_or_none(X, 0),
                             # cannot use X.y in case of transposed X
-                            "k": Coord(
+                            component_dim: Coord(
                                 None,
                                 labels=_component_labels(X_transf.shape[-1]),
                                 title="components",
@@ -967,23 +977,23 @@ class _set_output:
                         },
                     )
                 elif self.typex == "features":
-                    X_transf.dims = ["k", X.dims[1]]
+                    X_transf.dims = [component_dim, feature_dim]
                     X_transf.set_coordset(
                         {
-                            "k": Coord(
+                            component_dim: Coord(
                                 None,
                                 labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                                 title="components",
                             ),
-                            X.dims[1]: _coord_or_none(X, 1),
+                            feature_dim: _coord_or_none(X, 1),
                         },
                     )
                 elif self.typey == "features":
-                    X_transf.dims = [X.dims[1], "k"]
+                    X_transf.dims = [feature_dim, component_dim]
                     X_transf.set_coordset(
                         {
-                            X.dims[1]: _coord_or_none(X, 1),
-                            "k": Coord(
+                            feature_dim: _coord_or_none(X, 1),
+                            component_dim: Coord(
                                 None,
                                 labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                                 title="components",
