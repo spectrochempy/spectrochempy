@@ -494,3 +494,44 @@ def test_svd_reconstruction_disambiguates_axis_names():
     assert_allclose(restored.mask, new.mask)
     expected = scores.data @ model.VT
     assert_allclose(restored.data[~new.mask], expected[~new.mask])
+
+
+@pytest.mark.parametrize("dims", [["k", "x"], ["y", "k"]])
+def test_svd_physical_k_axis_does_not_replace_component_axis(dims):
+    X = scp.NDDataset(
+        np.random.default_rng(7).random((4, 5)),
+        dims=dims,
+        coordset=[scp.Coord([10, 20, 30, 40]), scp.Coord(range(5))],
+    )
+    X[1] = scp.MASKED
+    model = SVD().fit(X)
+    scores = model.transform()
+    assert scores.dims == ["y", "k"]
+    assert_allclose(scores.coord(0).data, [10, 20, 30, 40])
+    assert scores.coord(1).title == "components"
+    assert np.all(scores.mask[1])
+    components = model.components
+    assert components.dims == ["k", "x"]
+    assert_allclose(components.coord(1).data, np.arange(5))
+    assert components.coord(0).title == "components"
+    assert_allclose(model.get_components().data, components.data)
+    restored = model.inverse_transform(scores)
+    assert_allclose(restored.mask, X.mask)
+    assert_allclose(restored.coord(0).data, [10, 20, 30, 40])
+    assert_allclose(restored.coord(1).data, np.arange(5))
+
+
+def test_svd_new_observations_named_k_keep_coordinates():
+    model = SVD().fit(np.random.default_rng(8).random((4, 5)))
+    new = scp.NDDataset(
+        np.ones((2, 5)),
+        dims=["k", "x"],
+        coordset=[scp.Coord([10, 20]), scp.Coord(range(5))],
+    )
+    scores = model.transform(new)
+    assert scores.dims == ["y", "k"]
+    assert_allclose(scores.coord(0).data, [10, 20])
+    assert scores.coord(1).title == "components"
+    restored = model.inverse_transform(scores)
+    assert_allclose(restored.coord(0).data, [10, 20])
+    assert_allclose(model.transform().data, model.U * model.s, atol=1e-12)
