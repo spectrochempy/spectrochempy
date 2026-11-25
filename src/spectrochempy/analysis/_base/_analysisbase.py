@@ -489,14 +489,18 @@ class AnalysisConfigurable(BaseConfigurable):
             return dataset
         if axis == 0:
             try:
-                coord = source.coordset[source.dims[0]]
+                dim = source.dims[0]
+                dim = source.coordset.references.get(dim, dim)
+                coord = source.coordset[dim]
             except KeyError:
                 coord = None
             if coord is not None:
                 dataset.coordset[dataset.dims[0]] = coord.copy()
         elif axis == -1:
             try:
-                coord = source.coordset[source.dims[-1]]
+                dim = source.dims[-1]
+                dim = source.coordset.references.get(dim, dim)
+                coord = source.coordset[dim]
             except KeyError:
                 coord = None
             if coord is not None:

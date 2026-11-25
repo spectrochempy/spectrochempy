@@ -608,12 +608,11 @@ def test_failed_refit_clears_allowlisted_analysis_state(estimator):
             estimator.score(X, Y[:, 0])
 
 
-def test_svd_is_characterized_but_excluded_because_transform_is_not_implemented():
+def test_svd_transforms_but_stays_outside_the_pipeline_v1_allowlist():
     X, _ = _xy()
     svd = SVD().fit(X)
 
     assert svd._fitted is True
-    with pytest.raises(NotImplementedError):
-        svd.transform(X)
+    assert svd.transform(X).shape == (X.shape[0], min(X.shape))
     with pytest.raises(SpectroChemPyError, match="not supported"):
         clone_unfitted(svd)

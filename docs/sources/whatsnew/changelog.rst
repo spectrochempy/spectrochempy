@@ -70,6 +70,15 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- ``SVD.transform``, ``SVD.fit_transform``, ``SVD.inverse_transform``,
+  ``SVD.components`` and ``SVD.get_components`` no longer raise
+  ``NotImplementedError``. They return ``NDDataset`` scores
+  :math:`U \Sigma` (:math:`X V` for new data), right singular vectors
+  :math:`V^T` and rank-``n_components`` reconstructions, with the same
+  coordinates, units and metadata conventions as ``PCA``. Unlike ``PCA``,
+  SVD does not center the data. ``SVD.n_components`` is now available after
+  ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`, :pr:`1980`).
+
 - The default ``WARNING`` log level hides INFO messages again, as documented:
   since 0.8.2, messages such as "This coordinate (...) is outside the axis
   limits", "... is already a masked array", "units forced to change" or reader
