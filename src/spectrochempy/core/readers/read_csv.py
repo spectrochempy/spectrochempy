@@ -21,6 +21,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.exceptions import UnsupportedOriginError
 
 
@@ -148,6 +149,10 @@ def read_csv(*paths, **kwargs):
     ``scp.csv.read(...)`` or :func:`spectrochempy.read_csv` when the CSV format
     is already known.
 
+    Only the first data column is read: for a file with an x column followed by
+    several data columns, the extra columns are ignored and a warning reports
+    their number.
+
     Non-merged multi-file reads may return a list-like `ScpObjectList`
     exposing helper methods for dataset selection. See
     :func:`spectrochempy.read` for the complete description of the generic
@@ -244,15 +249,16 @@ def read_csv(*paths, **kwargs):
 
     Examples
     --------
-    Reading a single CSV file
+    Reading a CSV file made of an x column followed by one data column
+    (here from in-memory content)
 
-    >>> scp.read_csv('irdata/csv/iris.csv')
-    NDDataset: [float64] a.u. (shape: (y:150, x:4))
+    >>> scp.read_csv({'spectrum.csv': b'1,2\n2,3\n3,4\n'})
+    NDDataset: [float64] unitless (shape: (y:1, x:3))
 
     Using the explicit namespace API
 
-    >>> scp.csv.read('irdata/csv/iris.csv')
-    NDDataset: [float64] a.u. (shape: (y:150, x:4))
+    >>> scp.csv.read({'spectrum.csv': b'1,2\n2,3\n3,4\n'})
+    NDDataset: [float64] unitless (shape: (y:1, x:3))
 
     """
     kwargs["filetypes"] = ["CSV files (*.csv)"]
@@ -310,6 +316,14 @@ def _read_csv(*args, **kwargs):
         # Multiple columns: first is x, second is data
         coordx = Coord(d[0])
         data = d[1].reshape((1, coordx.size))
+        n_ignored = d.shape[0] - 2
+        if n_ignored > 0:
+            warning_(
+                f"{filename.name}: only the first data column (the second column, "
+                f"after the x column) is read; {n_ignored} additional data "
+                f"column{'s' if n_ignored > 1 else ''} ignored.",
+                stacklevel=2,
+            )
 
     # Create a second coordinate for dimension y of size 1
     coordy = Coord([0])
