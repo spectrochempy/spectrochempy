@@ -10,6 +10,7 @@ import warnings
 import numpy as np
 import traitlets as tr
 
+from spectrochempy.analysis._base._analysisbase import AnalysisSourceMetadata
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
@@ -290,9 +291,34 @@ class SVD(DecompositionAnalysis):
         (55, 2)
 
         """
-        return super().transform(X, **kwargs)
+        if not self._fitted:
+            raise NotFittedError()
+        training = self.X.copy()
+        if X is not None:
+            incoming = X if isinstance(X, NDDataset) else NDDataset(X)
+            expected = self._analysis_full_columns(training.mask)
+            actual = self._analysis_full_columns(incoming.mask)
+            expected = (
+                np.zeros(training.shape[-1], dtype=bool)
+                if expected is None
+                else expected
+            )
+            actual = (
+                np.zeros(incoming.shape[-1], dtype=bool) if actual is None else actual
+            )
+            if incoming.shape[-1] != training.shape[-1]:
+                raise ValueError(
+                    f"X must have {training.shape[-1]} features as in the fitted dataset."
+                )
+            if not np.array_equal(actual, expected):
+                raise ValueError(
+                    "Fully masked feature columns must match those used during fit (features differ)."
+                )
+        try:
+            return super().transform(X, **kwargs)
+        finally:
+            self._X = training
 
-    @_wrap_ndarray_output_to_nddataset(analysis_role="reconstruction")
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
         Transform data back to its original space.
@@ -355,6 +381,8 @@ class SVD(DecompositionAnalysis):
             )
             n_components = self._n_components
 
+        source_scores = X_transform if isinstance(X_transform, NDDataset) else None
+        supplied = X_transform is not None
         if X_transform is None:
             kw = {} if n_components is None else {"n_components": n_components}
             X_transform = self.transform(**kw).data
@@ -374,7 +402,46 @@ class SVD(DecompositionAnalysis):
                 )
             X_transform = X_transform[:, :n_components]
 
-        return self._inverse_transform(X_transform)
+        data = self._inverse_transform(X_transform)
+        if source_scores is not None:
+            training = self.X
+            source = source_scores.copy()
+            source._data = np.zeros((source_scores.shape[0], training.shape[-1]))
+            source._coordset = None
+            source.dims = [source_scores.dims[0], training.dims[-1]]
+            source.set_coordset(
+                {
+                    source.dims[0]: source_scores.coord(0).copy()
+                    if source_scores.coordset is not None
+                    else None,
+                    source.dims[-1]: training.coord(-1).copy()
+                    if training.coordset is not None
+                    else None,
+                }
+            )
+            rows = self._analysis_full_rows(source_scores.mask)
+            cols = self._analysis_full_columns(training.mask)
+            mask = np.zeros(source.shape, dtype=bool)
+            if rows is not None:
+                mask[rows, :] = True
+            if cols is not None:
+                mask[:, cols] = True
+            source._mask = mask
+            source.units = training.units
+            restored = self._analysis_restore_full_geometry(
+                NDDataset(data), AnalysisSourceMetadata(source)
+            )
+            result = self._wrap_reconstruction(restored.data, X=source)
+            return self._analysis_copy_exact_geometry(
+                result, AnalysisSourceMetadata(source)
+            )
+        if supplied:
+            return self._wrap_reconstruction(data, X=X_transform)
+        return self._wrap_reconstruction(data)
+
+    @_wrap_ndarray_output_to_nddataset(analysis_role="reconstruction")
+    def _wrap_reconstruction(self, data, X=None):
+        return data
 
     def fit_transform(self, X, Y=None, **kwargs):
         r"""

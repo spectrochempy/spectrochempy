@@ -370,3 +370,75 @@ def test_svd_fit_transform_accepts_ignored_Y(random_dataset):
     )
     assert scores.shape == (6, 6)
     assert SVD().fit(random_dataset).n_components == 6
+
+
+def test_svd_rejects_different_masked_feature_support(random_dataset):
+    training = random_dataset.copy()
+    training[:, 4] = scp.MASKED
+    model = SVD().fit(training)
+    new = random_dataset.copy()
+    new[:, 7] = scp.MASKED
+    with pytest.raises(ValueError, match="feature columns must match"):
+        model.transform(new)
+    assert_allclose(model.inverse_transform().mask, training.mask)
+
+
+def test_svd_new_data_does_not_replace_fit_data(random_dataset):
+    model = SVD().fit(random_dataset)
+    expected = model.transform().copy()
+    new = random_dataset[:3].copy()
+    new.data = new.data + 10
+    new.name = "new"
+    new.y = scp.Coord([20, 21, 22], title="new observations")
+    scores = model.transform(new)
+    assert scores.shape == (3, 6)
+    assert_allclose(scores.y.data, new.y.data)
+    assert scores.name == "new_SVD.scores"
+    assert_allclose(model.transform().data, expected.data)
+    assert_allclose(model.inverse_transform().data, random_dataset.data, atol=1e-12)
+    with pytest.raises(ValueError):
+        model.transform(np.ones((3, 2)))
+    assert_allclose(model.transform().data, expected.data)
+
+
+def test_svd_explicit_masked_scores_roundtrip(random_dataset):
+    training = random_dataset.copy()
+    training[:, 4] = scp.MASKED
+    training[2] = scp.MASKED
+    model = SVD().fit(training)
+    scores = model.transform()
+    restored = model.inverse_transform(scores)
+    assert restored.shape == training.shape
+    assert_allclose(restored.mask, training.mask)
+    assert_allclose(
+        restored.data[~training.mask], training.data[~training.mask], atol=1e-12
+    )
+    assert_allclose(restored.x.data, training.x.data)
+    assert_allclose(restored.y.data, training.y.data)
+    assert restored.units == training.units
+
+
+def test_svd_new_masked_scores_restore_their_observations(random_dataset):
+    training = random_dataset.copy()
+    training[:, 4] = scp.MASKED
+    model = SVD().fit(training)
+    new = training[:3].copy()
+    new[1] = scp.MASKED
+    new.y = scp.Coord([20, 21, 22])
+    restored = model.inverse_transform(model.transform(new))
+    assert restored.shape == new.shape
+    assert_allclose(restored.mask, new.mask)
+    assert_allclose(restored.data[~new.mask], new.data[~new.mask], atol=1e-12)
+    assert_allclose(restored.y.data, new.y.data)
+    assert_allclose(restored.x.data, training.x.data)
+    assert_allclose(
+        model.inverse_transform().data[:, :4], training.data[:, :4], atol=1e-12
+    )
+
+
+def test_svd_explicit_scores_without_coordinates():
+    original = np.random.default_rng(4).random((6, 20))
+    model = SVD().fit(original)
+    restored = model.inverse_transform(model.transform())
+    assert restored.shape == original.shape
+    assert_allclose(restored.data, original, atol=1e-12)

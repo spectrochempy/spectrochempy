@@ -70,7 +70,7 @@ Bug Fixes
   :math:`V^T` and rank-``n_components`` reconstructions, with the same
   coordinates, units and metadata conventions as ``PCA``. Unlike ``PCA``,
   SVD does not center the data. ``SVD.n_components`` is now available after
-  ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`).
+  ``fit``. ``U``, ``s`` and ``VT`` are unchanged (:issue:`1972`, :pr:`1980`).
 
 - ``asymmetricvoigtmodel`` and ``asymmetricvoigt``: a negative ``asym`` now
   gives the asymmetry on the other side of the peak instead of being silently
