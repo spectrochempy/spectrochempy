@@ -444,7 +444,10 @@ class SVD(DecompositionAnalysis):
             return None
         dim = dataset.dims[axis]
         dim = dataset.coordset.references.get(dim, dim)
-        coord = dataset.coordset[dim]
+        try:
+            coord = dataset.coordset[dim]
+        except KeyError:
+            return None
         return coord.copy() if coord is not None else None
 
     def _wrap_reconstruction(self, data, X=None):

@@ -496,7 +496,7 @@ def test_svd_reconstruction_disambiguates_axis_names():
     assert_allclose(restored.data[~new.mask], expected[~new.mask])
 
 
-@pytest.mark.parametrize("dims", [["k", "x"], ["y", "k"]])
+@pytest.mark.parametrize("dims", [["k", "x"], ["y", "k"], ["k", "j"], ["j", "k"]])
 def test_svd_physical_k_axis_does_not_replace_component_axis(dims):
     X = scp.NDDataset(
         np.random.default_rng(7).random((4, 5)),
@@ -506,16 +506,18 @@ def test_svd_physical_k_axis_does_not_replace_component_axis(dims):
     X[1] = scp.MASKED
     model = SVD().fit(X)
     scores = model.transform()
-    assert scores.dims == ["y", "k"]
+    assert scores.dims == [dims[0], "j" if dims[0] == "k" else "k"]
     assert_allclose(scores.coord(0).data, [10, 20, 30, 40])
     assert scores.coord(1).title == "components"
     assert np.all(scores.mask[1])
     components = model.components
-    assert components.dims == ["k", "x"]
+    assert components.dims == ["j" if dims[1] == "k" else "k", dims[1]]
     assert_allclose(components.coord(1).data, np.arange(5))
     assert components.coord(0).title == "components"
     assert_allclose(model.get_components().data, components.data)
     restored = model.inverse_transform(scores)
+    assert restored.dims == X.dims
+    assert model.inverse_transform().dims == X.dims
     assert_allclose(restored.mask, X.mask)
     assert_allclose(restored.coord(0).data, [10, 20, 30, 40])
     assert_allclose(restored.coord(1).data, np.arange(5))
@@ -529,7 +531,7 @@ def test_svd_new_observations_named_k_keep_coordinates():
         coordset=[scp.Coord([10, 20]), scp.Coord(range(5))],
     )
     scores = model.transform(new)
-    assert scores.dims == ["y", "k"]
+    assert scores.dims == ["k", "j"]
     assert_allclose(scores.coord(0).data, [10, 20])
     assert scores.coord(1).title == "components"
     restored = model.inverse_transform(scores)
@@ -549,3 +551,16 @@ def test_svd_components_unavailable_after_failed_refit():
         model.transform()
     with pytest.raises(NotFittedError):
         model.inverse_transform()
+
+
+@pytest.mark.parametrize("axis", ["x", "y"])
+def test_svd_explicit_reconstruction_partial_coordinates(axis):
+    coord = scp.Coord(range(5 if axis == "x" else 4))
+    X = scp.NDDataset(
+        np.random.default_rng(3).random((4, 5)),
+        coordset=scp.CoordSet(**{axis: coord}),
+    )
+    model = SVD().fit(X)
+    restored = model.inverse_transform(model.transform())
+    assert_allclose(restored.data, X.data, atol=1e-12)
+    assert_allclose(restored.coordset[axis].data, coord.data)
