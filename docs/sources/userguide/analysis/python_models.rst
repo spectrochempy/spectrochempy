@@ -122,6 +122,13 @@ Repeated fitting follows the existing 1D behavior: the last solution is the
 starting point, while ``initial_params`` stays unchanged. Create another
 estimator to start again from the original declarations.
 
+If all parameters are fixed or depend only on fixed values, an ordinary fit
+evaluates the model and residuals without invoking a solver. It reports
+``optimization_performed=False`` with an explanatory message; success means
+that evaluation completed, not that parameters were optimized. No free-parameter
+Jacobian, covariance or stderr is invented. This remains distinct from
+``dry=True``, which retains the existing starting-model preview behavior.
+
 Use the canonical ``opt.result`` for scientific outputs:
 
 * ``fitted_parameters`` maps public names to physical fitted magnitudes,

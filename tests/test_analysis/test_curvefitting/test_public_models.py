@@ -151,7 +151,8 @@ def test_parameter_identity_never_implies_sharing_and_prefix_collisions_fail():
         _ = model + scp.Linear(prefix="one_")
 
 
-def test_forward_expression_chain_auxiliary_parameters_and_negative_power():
+@pytest.mark.parametrize("dry", [False, True])
+def test_forward_expression_chain_auxiliary_parameters_and_negative_power(dry):
     model = scp.Linear()
     params = model.make_params()
     params.add("source", value=-2, vary=False)
@@ -159,11 +160,50 @@ def test_forward_expression_chain_auxiliary_parameters_and_negative_power():
     params["slope"].set(expr="square + 1")
     params["intercept"].set(expr="-square / 2")
     x = np.linspace(0, 1, 21)
-    opt = scp.Optimize(model=model, params=params, dry=True).fit(dataset(x, 5 * x - 2))
+    opt = scp.Optimize(model=model, params=params, dry=dry).fit(dataset(x, 5 * x - 2))
     np.testing.assert_allclose(opt.result.fitted.data.squeeze(), 5 * x - 2)
     assert opt.result.fitted_parameters["square"] == 4
     assert opt.result.n_varying_parameters == 0
     assert opt.result.stderr is None
+    assert opt.result.diagnostics["optimization_performed"] is False
+    assert opt.result.diagnostics["success"] is not dry
+    assert opt.result.parameters["dry"] is dry
+
+
+@pytest.mark.parametrize("method", ["least_squares", "simplex", "basinhopping"])
+def test_all_fixed_model_is_evaluated_without_a_solver(method, monkeypatch):
+    from spectrochempy.analysis.curvefitting import optimize
+
+    def unexpected_solver(*args, **kwargs):
+        pytest.fail("An all-fixed public model must not invoke an optimizer")
+
+    monkeypatch.setattr(optimize, "_run_optimizer", unexpected_solver)
+    model = scp.Linear()
+    params = model.make_params(
+        slope=scp.Parameter(2, vary=False),
+        intercept=scp.Parameter(1, vary=False),
+    )
+    x = np.linspace(0, 1, 21)
+    mask = np.zeros(x.size, dtype=bool)
+    mask[3] = True
+    opt = scp.Optimize(model=model, params=params, method=method).fit(
+        dataset(x, 2 * x + 1.5, mask)
+    )
+    result = opt.result
+    np.testing.assert_allclose(result.fitted.data.squeeze()[~mask], (2 * x + 1)[~mask])
+    np.testing.assert_array_equal(result.fitted.mask.squeeze(), mask)
+    assert result.rss == pytest.approx(5)
+    assert result.degrees_of_freedom == 20
+    assert result.n_varying_parameters == 0
+    assert result.parameter_names == ()
+    assert result.covariance is None and result.stderr is None
+    assert opt.jacobian is None
+    assert result.diagnostics["success"] is True
+    assert result.diagnostics["status"] is None
+    assert result.diagnostics["optimization_performed"] is False
+    assert "without optimization" in result.diagnostics["message"]
+    assert result.parameters["dry"] is False
+    assert result.cost == pytest.approx(2.5 if method == "least_squares" else 5)
 
 
 @pytest.mark.parametrize(

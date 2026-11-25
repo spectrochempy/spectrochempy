@@ -1322,7 +1322,23 @@ class Optimize(DecompositionAnalysis):
             "amplitude_mode": self.amplitude_mode,
             "constraints": self.constraints,
         }
-        if not self.dry:
+        evaluate_only = (
+            self._python_model_configuration is not None
+            and model_spec.count_varying() == 0
+        )
+        if not self.dry and evaluate_only:
+            residuals = np.ma.masked_invalid(
+                fun_residuals(model_spec, X.real.squeeze())
+            )
+            fopt = _scalar_from_masked(np.ma.sum(residuals**2), default=0.0)
+            if self.method in ["leastsq", "least_squares", "lm", "trf"]:
+                fopt *= 0.5
+            solver_meta = {
+                "success": True,
+                "status": None,
+                "message": "No free parameters; model evaluated without optimization.",
+            }
+        elif not self.dry:
             model_spec, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
                 model_spec,
@@ -1345,6 +1361,10 @@ class Optimize(DecompositionAnalysis):
             "ncalls": ncalls,
             **solver_meta,
         }
+        if self._python_model_configuration is not None:
+            self._fit_meta["optimization_performed"] = (
+                not self.dry and not evaluate_only
+            )
         self._fit_config = fit_config
         self._solver_artifacts = solver_artifacts
 
