@@ -130,3 +130,27 @@ def _to_external(pi, lob, upb):
         return pe[0]
 
     return pe
+
+
+def _external_transform_state(pi, lob, upb):
+    """
+    Return signed dp/du and whether the represented value is near a bound.
+
+    The neighborhood is sqrt(machine epsilon) times the interval width for
+    two finite bounds. For a single bound it is relative to the larger of
+    one, the physical magnitude and the bound magnitude. This conservative
+    neighborhood qualifies local unconstrained uncertainty, not convergence.
+    """
+    is_lob = lob is not None and lob > _LOB_THRESHOLD
+    is_upb = upb is not None and upb < _UPB_THRESHOLD
+    tolerance = np.sqrt(np.finfo(float).eps)
+    if is_lob and is_upb:
+        sine = np.sin(pi)
+        return (upb - lob) * 0.5 * np.cos(pi), 1 - abs(sine) <= 2 * tolerance
+    if is_lob or is_upb:
+        bound = lob if is_lob else upb
+        value = _to_external(pi, lob, upb)
+        derivative = pi / np.hypot(pi, 1.0)
+        near = abs(value - bound) <= tolerance * max(1.0, abs(value), abs(bound))
+        return derivative if is_lob else -derivative, near
+    return 1.0, False

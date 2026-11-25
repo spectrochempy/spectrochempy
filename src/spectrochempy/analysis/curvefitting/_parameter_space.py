@@ -11,6 +11,9 @@ It does not parse scripts, evaluate profiles, or select an optimization method.
 """
 
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
+from spectrochempy.analysis.curvefitting._parameter_transform import (
+    _external_transform_state,
+)
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
@@ -128,6 +131,19 @@ def _vector_from_prepared(parameters):
 def _internal_vector(fp):
     """Return optimizer values and keys in historical parameter order."""
     return _vector_from_prepared(_prepared_parameters(fp))
+
+
+def _transform_artifacts(definition, values, keys):
+    """Snapshot physical-coordinate derivatives in the actual solver order."""
+    parameters = {p.name: p for p in _prepared_parameters(definition) if not p.fixed}
+    states = [
+        _external_transform_state(value, *parameters[key].bounds)
+        for key, value in zip(keys, values, strict=True)
+    ]
+    return {
+        "parameter_transform_derivatives": tuple(float(state[0]) for state in states),
+        "near_parameter_bounds": any(state[1] for state in states),
+    }
 
 
 def _restore_external(fp, p, keys):
