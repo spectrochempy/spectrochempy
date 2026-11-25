@@ -10,10 +10,14 @@ __dataset_methods__ = __all__
 from copy import deepcopy
 
 import numpy as np
+from pint.errors import PintError
 
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.meta import Meta
@@ -38,7 +42,16 @@ def concatenate(*datasets, **kwargs):
            rejected, whether that dimension is the reference or its target,
            because changing only one dimension cannot preserve their shared
            geometry.
-        #. along the non-concatenated dimensions, shapes must match.
+        #. along the non-concatenated dimensions, shapes must match. The
+           coordinates of these dimensions are taken from the first dataset.
+           A warning is issued when, for one of these dimensions, an input
+           has numeric coordinate values where the first dataset has none (or
+           the reverse), or when its values differ from those of the first
+           dataset, after conversion to its units, by more than the absolute
+           tolerance used in dataset arithmetic (3 decimals, i.e. 1.5e-3 in
+           the units of the first dataset). Labels are not compared. Use
+           `align` with ``method="interpolate"`` beforehand to put the
+           datasets on common coordinates.
 
     Parameters
     ----------
@@ -151,6 +164,8 @@ def concatenate(*datasets, **kwargs):
             if ds.units != units:
                 ds.ito(units)
 
+    _warn_on_differing_coordinates(datasets, dim)
+
     # concatenate or stack the data array + mask
     # --------------------------------------------
     sss = []
@@ -184,7 +199,7 @@ def concatenate(*datasets, **kwargs):
     if concat_coord is not None:
         coords = coords._concatenate_dim(dim, [ds.coordset for ds in datasets])
 
-    out = dataset.copy()
+    out = datasets[0].copy()
     out._data = data
     if coords is not None and concat_coord is not None:
         out._coordset[dim] = coords[dim]
@@ -216,6 +231,10 @@ def stack(*datasets, **kwargs):
     #. all inputs must be valid dataset objects,
     #. units of data and axis must be compatible (rescaling is applied
        automatically if necessary).
+
+    The coordinates of the existing dimensions are taken from the first
+    dataset; a warning is issued when they differ between inputs (see
+    `concatenate`).
 
     Parameters
     ----------
@@ -301,7 +320,7 @@ def stack(*datasets, **kwargs):
         dataset._mask = dataset.mask[np.newaxis]
         newcoord = Coord([i], labels=[dataset.name])
         newcoord.name = (OrderedSet(DEFAULT_DIM_NAME) - dataset._dims).pop()
-        dataset.add_coordset(newcoord)
+        dataset.add_coordset(newcoord, dims=[newcoord.name])
         dataset.dims = [newcoord.name] + dataset.dims
 
     return concatenate(
@@ -407,7 +426,10 @@ def _normalize_datasets(datasets):
 def _coordinate_for_dimension(dataset, dim):
     """Return the non-empty coordinate for *dim*, or ``None`` when absent."""
     coordset = dataset.coordset
-    if coordset is None or dim not in coordset.names:
+    if coordset is None:
+        return None
+    dim = coordset.references.get(dim, dim)
+    if dim not in coordset.names:
         return None
     coordinate = coordset[dim]
     if coordinate.is_empty:
@@ -469,6 +491,85 @@ def _validate_concatenated_dimension_coordinates(datasets, dim):
             f"'{dim}' differ; numeric values and labels must each be present for "
             "every input or absent from every input."
         )
+
+
+_COORDINATE_DECIMAL = 3
+
+
+def _coordinates_differ(coordinate, reference):
+    """Return True when coordinate values differ beyond the arithmetic tolerance."""
+    if not _has_values(coordinate) and not _has_values(reference):
+        return False
+    if isinstance(coordinate, CoordSet) or isinstance(reference, CoordSet):
+        if not (
+            isinstance(coordinate, CoordSet)
+            and isinstance(reference, CoordSet)
+            and len(coordinate.coords) == len(reference.coords)
+        ):
+            return True
+        return any(
+            _coordinates_differ(coord, ref)
+            for coord, ref in zip(coordinate.coords, reference.coords, strict=True)
+        )
+
+    if coordinate.data is None or reference.data is None:
+        return (coordinate.data is None) != (reference.data is None)
+
+    values = coordinate.data
+    if coordinate.units != reference.units:
+        try:
+            with np.errstate(divide="ignore", invalid="ignore"):
+                values = (
+                    Quantity(values, coordinate.units or ur.dimensionless)
+                    .to(reference.units or ur.dimensionless)
+                    .magnitude
+                )
+        except PintError:
+            return True
+
+    if np.shape(values) != np.shape(reference.data):
+        return True
+    if np.array_equal(values, reference.data):
+        return False
+    try:
+        np.testing.assert_array_almost_equal(
+            values, reference.data, decimal=_COORDINATE_DECIMAL
+        )
+    except (AssertionError, TypeError):
+        return True
+    return False
+
+
+def _has_values(coordinate):
+    """Return True when the coordinate (or any coordinate of a CoordSet) has values."""
+    if coordinate is None:
+        return False
+    if isinstance(coordinate, CoordSet):
+        return any(_has_values(coord) for coord in coordinate.coords)
+    return coordinate.data is not None
+
+
+def _warn_on_differing_coordinates(datasets, dim):
+    """Warn when coordinates of non-concatenated dimensions differ between inputs."""
+    reference_dataset = datasets[0]
+    for other_dim in reference_dataset.dims:
+        if other_dim == dim:
+            continue
+        reference = _coordinate_for_dimension(reference_dataset, other_dim)
+        for dataset in datasets[1:]:
+            coordinate = _coordinate_for_dimension(dataset, other_dim)
+            if coordinate is None or reference is None:
+                differ = _has_values(coordinate) or _has_values(reference)
+            else:
+                differ = _coordinates_differ(coordinate, reference)
+            if differ:
+                warning_(
+                    f"Coordinates of dimension '{other_dim}' differ between the "
+                    "input datasets; the result keeps those of the first dataset. "
+                    'Use `scp.align(..., method="interpolate")` to put the '
+                    "datasets on common coordinates first."
+                )
+                break
 
 
 def _apply_combination_metadata(out, datasets, *, operation):

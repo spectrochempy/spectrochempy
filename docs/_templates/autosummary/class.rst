@@ -52,6 +52,10 @@
    {% endblock %}
 
 .. rubric:: Examples using {{fullname}}
+{% if fullname == "spectrochempy.Gaussian" %}
+.. _sphx_glr_backref_model_{{fullname}}:
+{% else %}
 .. _sphx_glr_backref_{{fullname}}:
+{% endif %}
 
 .. minigallery:: {{fullname}}
