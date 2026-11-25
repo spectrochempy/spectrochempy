@@ -525,6 +525,7 @@ for reproducible results across multiple function calls.""",
                 "The fit method must be used before using this method",
             )
 
+        n_components = _check_n_components(n_components)
         if n_components is None:
             n_components = self.n_components
         else:

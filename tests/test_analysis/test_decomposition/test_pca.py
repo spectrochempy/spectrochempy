@@ -101,6 +101,17 @@ def test_pca_method_n_components_must_be_positive_integer(low_rank_pca_dataset, 
         pca.get_components(n_components=bad)
     with pytest.raises(ValueError, match=match):
         pca.printev(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.plot_scree(n_components=bad)
+
+
+@pytest.mark.parametrize("bad", [0, -1])
+def test_nmf_method_n_components_must_be_positive_integer(bad):
+    rng = np.random.default_rng(0)
+    X = NDDataset(np.abs(rng.normal(size=(8, 6))))
+    nmf = scp.NMF(n_components=2, max_iter=500).fit(X)
+    with pytest.raises(ValueError, match="n_components must be a positive integer"):
+        nmf.get_components(n_components=bad)
 
 
 def test_pca_method_n_components_valid_values(low_rank_pca_dataset):
