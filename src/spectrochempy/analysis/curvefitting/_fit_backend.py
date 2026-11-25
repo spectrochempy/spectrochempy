@@ -26,7 +26,7 @@ def _nonnegative_least_squares(matrix, target):
 
 
 def _native_least_squares(objective, initial, bounds, *, args=(), max_nfev=None):
-    """Run opt-in bounded TRF without cost-change termination."""
+    """Run opt-in bounded TRF with relative step termination only."""
     return _least_squares(
         objective,
         initial,
@@ -37,7 +37,7 @@ def _native_least_squares(objective, initial, bounds, *, args=(), max_nfev=None)
         x_scale="jac",
         ftol=None,
         xtol=1e-12,
-        gtol=1e-8,
+        gtol=None,
         max_nfev=max_nfev,
     )
 

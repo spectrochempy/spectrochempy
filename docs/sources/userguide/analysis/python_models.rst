@@ -244,11 +244,12 @@ For example, with a 1D dataset ``ds``:
     print(opt.result.diagnostics)
 
 Native mode optimizes physical free magnitudes with bounded TRF, three-point
-finite differences and ``x_scale='jac'``. It sets ``ftol=None``, ``xtol=1e-12``
-and ``gtol=1e-8``: cost-change stopping is disabled to avoid
-premature cost-change stops after an endpoint start. Tight step-size stopping
-remains enabled so finite-difference gradient noise need not consume the entire
-evaluation budget near an optimum. The evaluation budget is
+finite differences and ``x_scale='jac'``. It sets ``ftol=None``, ``gtol=None``
+and ``xtol=1e-12``: cost-change and absolute scaled-gradient stopping are disabled
+because either can produce premature stops after endpoint initialization,
+including small-signal fits. Relative step-size stopping remains enabled so
+finite-difference gradient noise need not consume the entire evaluation budget
+near an optimum. The evaluation budget is
 ``max_fun_calls`` or ``4 * max_iter``; exhausting it reports solver failure.
 Three-point differences and physical stationarity probes require additional
 model calls beyond the solver's ``nfev`` counter. Native mode may cost more
@@ -258,7 +259,7 @@ The supplied initial configuration remains unchanged. As documented by
 `SciPy least_squares <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html>`_,
 TRF can adjust an endpoint internally to obtain a strictly feasible iterate;
 this is not an application-level physical epsilon or a different declaration.
-The local scaled-gradient criterion does not guarantee physical stationarity,
+The local relative step-size criterion does not guarantee physical stationarity,
 identifiability or a global optimum. Read the independent physical diagnostic
 as well as solver success. In particular, an approximate constrained solution
 can remain strictly interior: the physical check then retains both directions
@@ -268,7 +269,7 @@ when its remaining residual is above the diagnostic roundoff floor. Solver
 tolerances and the physical cosine diagnostic are different criteria.
 
 ``result.parameters['bounds_mode']`` records the selected policy. Native
-optimizations also record ``solver_method='trf'``, ``termination_policy='gradient_or_step'``,
+optimizations also record ``solver_method='trf'``, ``termination_policy='step'``,
 ``solver_gtol``, ``solver_xtol``, ``solver_optimality``, ``solver_nfev`` and
 ``solver_max_nfev``. Their raw Jacobian is
 already physical, labelled ``jacobian_coordinates='physical'``; covariance

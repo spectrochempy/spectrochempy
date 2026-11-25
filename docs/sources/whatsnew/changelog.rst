@@ -21,7 +21,7 @@ New Features
 
 - ``Optimize(bounds_mode='native')`` opts 1D COMMON and Python least-squares
   fits into physical-coordinate bounded TRF, including endpoint starts, with
-  explicit gradient/step termination and the existing uncertainty exclusions.
+  explicit relative-step termination and the existing uncertainty exclusions.
   The default transform policy and ND routes are preserved. Parameter
   declarations accept endpoints; Optimize validates the selected start policy. (:pr:`1985`)
 

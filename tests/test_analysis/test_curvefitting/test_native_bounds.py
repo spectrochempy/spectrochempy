@@ -58,7 +58,7 @@ def test_endpoint_start_recovers_interior_optimum(frontend, initial, bounds):
     assert_allclose(result.fitted.data.squeeze(), 2 * x, atol=1e-8)
     assert result.diagnostics["success"]
     assert result.diagnostics["physical_stationarity_status"] == "satisfied"
-    assert result.diagnostics["termination_policy"] == "gradient_or_step"
+    assert result.diagnostics["termination_policy"] == "step"
     assert result.parameters["bounds_mode"] == "native"
     assert result.diagnostics["jacobian_coordinates"] == "physical"
     assert_allclose(fit.jacobian[:, 0], -x, atol=1e-9)
@@ -239,3 +239,36 @@ def test_gaussian_domain_stays_strictly_positive_and_constraints_are_rejected():
         scp.Optimize(model=model, params=params, bounds_mode="native")
     with pytest.raises(ValueError, match="legacy constraints"):
         scp.Optimize(bounds_mode="native", constraints={"max_connections": 1})
+
+
+@pytest.mark.parametrize("scale", [1e-10, 1e-6, 1e-4, 1, 1e4])
+@pytest.mark.parametrize("frontend", ["python", "common"])
+def test_small_signal_and_bound_interval_do_not_terminate_on_absolute_gradient(
+    scale, frontend
+):
+    x = np.linspace(0, 1, 31)
+    result = fit_line(
+        x, 2 * scale * x, 0, (0, 4 * scale), frontend, bounds_mode="native"
+    ).result
+    assert result.diagnostics["success"]
+    assert result.diagnostics["solver_nfev"] > 1
+    assert result.diagnostics["solver_gtol"] is None
+    assert_allclose(result.fitted.data.squeeze() / scale, 2 * x, rtol=1e-8, atol=1e-10)
+
+
+@pytest.mark.parametrize("experiments", [1, 2])
+def test_native_legacy_sentinels_and_experiment_layout(experiments):
+    from spectrochempy.analysis.curvefitting._parameter_space import _restore_native
+
+    spec = _FitModelSpec(
+        common_params={"a": _ParamSpec("a", [1.0] * experiments)},
+        expvars=["a"],
+        expnumber=experiments,
+    )
+    legacy = spec.to_fitparameters()
+    values, keys, bounds = _physical_vector(legacy)
+    assert np.isneginf(bounds[:, 0]).all()
+    assert np.isposinf(bounds[:, 1]).all()
+    restored = _restore_native(legacy, values + 1, keys)
+    assert_allclose(restored.data["a"], [2.0] * experiments)
+    assert np.isscalar(restored.data["a"]) == (experiments == 1)

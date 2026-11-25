@@ -44,6 +44,7 @@ from spectrochempy.analysis.curvefitting._parameter_space import (
 from spectrochempy.analysis.curvefitting._parameter_space import _physical_vector
 from spectrochempy.analysis.curvefitting._parameter_space import _prepared_parameters
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
+from spectrochempy.analysis.curvefitting._parameter_space import _restore_native
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_physical
 from spectrochempy.analysis.curvefitting._parameter_space import _transform_artifacts
 from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
@@ -1092,7 +1093,7 @@ class Optimize(DecompositionAnalysis):
             The default preserves historical 1D transformed coordinates.
             Native mode uses bounded TRF in physical coordinates for 1D
             least_squares/leastsq only, accepting inclusive endpoint starts.
-            It disables cost-change termination, uses xtol=1e-12 and gtol=1e-8,
+            It disables cost-change and gradient termination, uses xtol=1e-12,
             three-point differences and Jacobian scaling. SciPy may adjust a
             supplied endpoint internally to obtain a strictly feasible iterate.
             ND peaks, grid callbacks and named curves retain their own policy
@@ -2612,7 +2613,7 @@ def _optimize(
         raise ValueError("Native bounds do not accept legacy constraints")
     if native and method.lower() not in ("least_squares", "leastsq"):
         raise ValueError("Native bounds require a least-squares method")
-    restore = _restore_physical if native else _restore_external
+    restore = _restore_native if native else _restore_external
     if native:
         par, keys, native_bounds = _physical_vector(fp0)
     else:
@@ -2669,8 +2670,8 @@ def _optimize(
         solver_meta.update(
             bounds_mode="native",
             solver_method="trf",
-            termination_policy="gradient_or_step",
-            solver_gtol=1e-8,
+            termination_policy="step",
+            solver_gtol=None,
             solver_xtol=1e-12,
             solver_optimality=float(result.optimality),
             solver_nfev=int(result.nfev),
