@@ -10,6 +10,8 @@ This preparation layer preserves the canonical and legacy parameter layouts.
 It does not parse scripts, evaluate profiles, or select an optimization method.
 """
 
+import numpy as np
+
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._parameter_transform import (
     _external_transform_state,
@@ -96,12 +98,13 @@ def _prepared_parameters(definition):
     parameters = []
     for key, identifier, source_name, value, bounds, fixed in declarations:
         if not fixed and source_name in definition.expvars:
+            experiment_values = [value] if np.ndim(value) == 0 else value
             for index in range(definition.expnumber):
                 parameters.append(
                     _PreparedParameter(
                         (*identifier, "experiments", index),
                         f"{key}_exp{index}",
-                        value[index],
+                        experiment_values[index],
                         bounds,
                     )
                 )

@@ -12,7 +12,9 @@ from spectrochempy.analysis.curvefitting._parameter_transform import (
     _external_transform_state,
 )
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
+from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting.optimize import _compute_covariance_matrix
+from spectrochempy.analysis.curvefitting.optimize import _optimize
 
 
 def _line(x, slope=1.0, intercept=0.0):
@@ -229,3 +231,29 @@ def test_transform_snapshot_follows_experiment_order_and_excludes_fixed(legacy):
         snapshot["parameter_transform_derivatives"], [4.0, np.sqrt(24), 1.0]
     )
     assert snapshot["near_parameter_bounds"] is False
+
+
+@pytest.mark.parametrize("n_experiments", [1, 2])
+def test_legacy_experiment_fit_retains_transform_after_scalar_restoration(
+    n_experiments,
+):
+    values = [1.0] * n_experiments
+    target = np.array([2.0, 2.5][:n_experiments])
+    definition = FitParameters()
+    definition["a"] = (values, 0, 4, False)
+    definition.expvars = ["a"]
+    definition.expnumber = n_experiments
+    x = np.linspace(0, 1, 11)
+
+    def residual(parameters, coordinate):
+        physical = np.atleast_1d(parameters["a"])
+        return ((physical - target)[:, None] * coordinate).ravel()
+
+    fitted, _, diagnostics, artifacts = _optimize(residual, definition, args=(x,))
+    assert diagnostics["success"]
+    np.testing.assert_allclose(fitted["a"], target if n_experiments > 1 else target[0])
+    assert np.isscalar(fitted["a"]) is (n_experiments == 1)
+    np.testing.assert_allclose(
+        artifacts["parameter_transform_derivatives"], np.sqrt(target * (4 - target))
+    )
+    assert artifacts["jacobian"].shape == (x.size * n_experiments, n_experiments)
