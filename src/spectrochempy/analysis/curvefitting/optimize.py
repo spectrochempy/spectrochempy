@@ -40,9 +40,14 @@ from spectrochempy.analysis.curvefitting._parameter_space import _internal_vecto
 from spectrochempy.analysis.curvefitting._parameter_space import (
     _modelspec_parameter_count,
 )
+from spectrochempy.analysis.curvefitting._parameter_space import _prepared_parameters
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
+from spectrochempy.analysis.curvefitting._parameter_space import _restore_physical
 from spectrochempy.analysis.curvefitting._parameter_space import _transform_artifacts
+from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
+from spectrochempy.analysis.curvefitting._parameter_transform import _UPB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+from spectrochempy.analysis.curvefitting._stationarity import _physical_stationarity
 from spectrochempy.analysis.curvefitting.model import Model
 from spectrochempy.analysis.curvefitting.model import _prepare_public_model
 from spectrochempy.application.application import info_
@@ -1369,6 +1374,10 @@ class Optimize(DecompositionAnalysis):
             "success": False,
             "status": None,
             "message": "",
+            "physical_stationarity_status": "not_checked",
+            "physical_stationarity_reason": "no_optimization",
+            "physical_projected_gradient": None,
+            "stationarity_evaluations": 0,
         }
         solver_artifacts = {
             "jacobian": None,
@@ -1396,6 +1405,7 @@ class Optimize(DecompositionAnalysis):
             if self.method in ["leastsq", "least_squares", "lm", "trf"]:
                 fopt *= 0.5
             solver_meta = {
+                **solver_meta,
                 "success": True,
                 "status": None,
                 "message": "No free parameters; model evaluated without optimization.",
@@ -2579,6 +2589,36 @@ def _optimize(
 
     # restore the external parameter
     fpe = _restore_external(fp0, res, keys)
+    parameters = {p.name: p for p in _prepared_parameters(fpe) if not p.fixed}
+    ordered = [parameters[key] for key in keys]
+    physical = np.array([p.value for p in ordered], dtype=float)
+    bounds = [
+        (
+            p.bounds[0]
+            if p.bounds[0] is not None and p.bounds[0] > _LOB_THRESHOLD
+            else -np.inf,
+            p.bounds[1]
+            if p.bounds[1] is not None and p.bounds[1] < _UPB_THRESHOLD
+            else np.inf,
+        )
+        for p in ordered
+    ]
+
+    def physical_residual(values):
+        trial = _restore_physical(deepcopy(fpe), values, keys)
+        return func(trial, args[0])
+
+    solver_meta.update(
+        _physical_stationarity(
+            physical_residual,
+            physical,
+            bounds,
+            getattr(solver_result, "fun", None),
+            solver_artifacts["jacobian"],
+            solver_artifacts["parameter_transform_derivatives"],
+            reference=getattr(args[0], "masked_data", args[0]),
+        )
+    )
     # for i, key in enumerate(keys):
     #    fp0.to_external(key, res[i])
 
