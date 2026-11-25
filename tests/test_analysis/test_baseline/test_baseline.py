@@ -625,6 +625,76 @@ def test_baseline_polynomial_rejects_mixed_in_and_out_of_domain_ranges(descendin
 
 
 @pytest.mark.parametrize("descending", [False, True])
+def test_baseline_polynomial_explains_integer_ranges_selecting_no_points(descending):
+    dataset = _make_simple_baseline_dataset(descending=descending)
+    original = dataset.copy()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+    blc.ranges = [[1495, 1480]]
+
+    with pytest.raises(
+        ValueError,
+        match="No baseline support points.*Integer range limits are "
+        "interpreted as indices and float limits as coordinates",
+    ):
+        blc.fit(dataset)
+
+    assert_dataset_equal(dataset, original)
+
+
+@pytest.mark.parametrize(
+    ("ranges", "start"),
+    [
+        ([[2, 5]], "Requested baseline ranges do not intersect"),
+        ([[1100.0, 1200.0], [2, 5]], "Some requested baseline ranges do not intersect"),
+    ],
+)
+def test_baseline_polynomial_explains_integer_ranges_outside_domain(ranges, start):
+    dataset = _make_simple_baseline_dataset()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+    blc.ranges = ranges
+
+    with pytest.raises(ValueError, match=start) as exc_info:
+        blc.fit(dataset)
+
+    assert str(exc_info.value).endswith(
+        "Integer range limits are interpreted as indices and float limits as "
+        "coordinates when points are selected, but this check compares all "
+        "limits with the coordinate values: give coordinates as floats."
+    )
+
+
+def test_baseline_polynomial_float_ranges_outside_domain_have_no_index_hint():
+    dataset = _make_simple_baseline_dataset()
+
+    blc = Baseline(model="polynomial", order=1, include_limits=False)
+    blc.ranges = [[2500.0, 2600.0]]
+
+    with pytest.raises(ValueError, match="do not intersect") as exc_info:
+        blc.fit(dataset)
+
+    assert "indices" not in str(exc_info.value)
+
+
+def test_baseline_polynomial_warns_for_ignored_integer_ranges():
+    dataset = _make_simple_baseline_dataset()
+    reference = Baseline(model="polynomial", order=1)
+    reference.fit(dataset)
+
+    blc = Baseline(model="polynomial", order=1)
+    blc.ranges = [[1495, 1480]]
+    with pytest.warns(
+        UserWarning,
+        match=r"Baseline ranges \[\[1480, 1495\]\] select no points and are "
+        "ignored. Integer range limits are interpreted as indices",
+    ):
+        blc.fit(dataset)
+
+    assert_dataset_equal(blc.baseline, reference.baseline)
+
+
+@pytest.mark.parametrize("descending", [False, True])
 def test_baseline_polynomial_accepts_partially_out_of_domain_ranges(descending):
     dataset = _make_simple_baseline_dataset(descending=descending)
     original = dataset.copy()

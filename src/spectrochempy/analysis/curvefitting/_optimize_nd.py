@@ -37,10 +37,15 @@ def snapshot_peaks(spec):
     return spec
 
 
-def _grid(dataset):
-    if not isinstance(dataset, NDDataset) or dataset.ndim < 2 or not dataset.size:
+def _grid(dataset, *, min_ndim=2):
+    if (
+        not isinstance(dataset, NDDataset)
+        or dataset.ndim < min_ndim
+        or not dataset.size
+    ):
         raise ValueError(
-            "ND fitting requires a nonempty NDDataset with at least two axes"
+            "ND fitting requires a nonempty NDDataset with at least "
+            + ("two axes" if min_ndim == 2 else "one axis")
         )
     if dataset.data.dtype.kind not in "iuf":
         raise ValueError("ND fitting requires real intensities")

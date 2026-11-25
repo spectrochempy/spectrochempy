@@ -12,6 +12,7 @@ return types, and dataset statelessness.
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 
 from spectrochempy import multiplot
 
@@ -157,3 +158,114 @@ class TestMultiplotStateless:
 
         # Verify datasets unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
+
+
+class TestMultiplotGridSize:
+    """Grid sizes that do not match the number of datasets (issue #1946)."""
+
+    def test_fewer_datasets_than_panels_hides_unused_axes(self, sample_1d_dataset):
+        result = multiplot(
+            [sample_1d_dataset] * 3, nrow=2, ncol=2, show=False, return_dict=True
+        )
+
+        axes = result["axes"]
+        assert axes.shape == (4,)
+        assert list(result["axes_dict"]) == ["axe11", "axe12", "axe21", "axe22"]
+        assert axes[0].get_subplotspec().get_gridspec().get_geometry() == (2, 2)
+        assert [ax.get_visible() for ax in axes] == [True, True, True, False]
+        assert [len(ax.lines) > 0 for ax in axes] == [True, True, True, False]
+
+    def test_single_dataset_on_larger_grid(self, sample_1d_dataset):
+        axes = multiplot(sample_1d_dataset, nrow=2, ncol=2, show=False)
+
+        assert axes.shape == (4,)
+        assert [ax.get_visible() for ax in axes] == [True, False, False, False]
+
+    def test_shared_x_labels_kept_above_hidden_panel(self, sample_1d_dataset):
+        axes = multiplot(
+            [sample_1d_dataset] * 3, nrow=2, ncol=2, sharex=True, show=False
+        )
+
+        # axe11 has axe21 below it; axe12 has only a hidden panel below it
+        assert not axes[0].xaxis.label.get_visible()
+        assert axes[1].xaxis.label.get_visible()
+        assert axes[2].xaxis.label.get_visible()
+
+    @pytest.mark.parametrize(
+        "grid",
+        [
+            {"nrow": 1, "ncol": 2},
+            {"nrows": 1, "ncols": 2},
+            {"nrow": 1, "ncols": 2},
+            {"nrow": 1, "ncol": 1},
+        ],
+    )
+    def test_explicit_grid_too_small_raises(self, sample_1d_dataset, grid):
+        with pytest.raises(ValueError, match="fewer panels than the 3 datasets"):
+            multiplot([sample_1d_dataset] * 3, show=False, **grid)
+
+    @pytest.mark.parametrize(
+        ("count", "grid", "geometry"),
+        [
+            (4, {"nrow": 2}, (2, 2)),
+            (4, {"ncol": 2}, (2, 2)),
+            (3, {"nrow": 1}, (1, 3)),
+            (3, {"ncol": 1}, (3, 1)),
+            (3, {"nrows": 2}, (2, 2)),
+            (3, {"ncols": 2}, (2, 2)),
+            (5, {"ncol": 3}, (2, 3)),
+            (2, {"nrow": 3}, (3, 1)),
+        ],
+    )
+    def test_missing_grid_dimension_is_inferred(
+        self, sample_1d_dataset, count, grid, geometry
+    ):
+        axes = multiplot([sample_1d_dataset] * count, show=False, **grid)
+
+        assert axes[0].get_subplotspec().get_gridspec().get_geometry() == geometry
+        assert [ax.get_visible() for ax in axes] == [True] * count + [False] * (
+            geometry[0] * geometry[1] - count
+        )
+
+    @pytest.mark.parametrize(
+        "grid",
+        [
+            {"nrow": 0},
+            {"ncol": -1},
+            {"nrows": 0},
+            {"ncols": -1},
+            {"nrow": 2, "ncol": 0},
+            {"nrow": -1, "ncol": 2},
+            {"nrow": 1.5},
+        ],
+    )
+    def test_non_positive_grid_size_raises(self, sample_1d_dataset, grid):
+        with pytest.raises(ValueError, match="must be a positive integer"):
+            multiplot([sample_1d_dataset] * 2, show=False, **grid)
+
+    @pytest.mark.parametrize(
+        ("datasets", "options"),
+        [([], {}), (None, {}), ([], {"sharex": True}), ([], {"nrow": 2})],
+    )
+    def test_no_dataset_raises(self, datasets, options):
+        with pytest.raises(ValueError, match="No dataset to plot"):
+            multiplot(datasets, show=False, **options)
+
+    @pytest.mark.parametrize(
+        ("count", "geometry"),
+        [(1, (1, 1)), (2, (1, 2)), (3, (2, 2)), (4, (2, 2)), (5, (2, 3)), (6, (2, 3))],
+    )
+    def test_automatic_grid_without_nrow_ncol(self, sample_1d_dataset, count, geometry):
+        axes = multiplot([sample_1d_dataset] * count, show=False)
+
+        assert axes[0].get_subplotspec().get_gridspec().get_geometry() == geometry
+        assert axes.shape == (geometry[0] * geometry[1],)
+        assert [ax.get_visible() for ax in axes[:count]] == [True] * count
+        assert not any(ax.get_visible() for ax in axes[count:])
+        assert all(len(ax.lines) > 0 for ax in axes[:count])
+
+    def test_with_transposed_unchanged(self, sample_2d_dataset):
+        axes = multiplot(sample_2d_dataset, method="with_transposed", show=False)
+
+        assert axes.shape == (2,)
+        assert all(ax.get_visible() for ax in axes)

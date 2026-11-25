@@ -209,9 +209,8 @@ def test_read_perkinelmer_metadata() -> None:
 def test_read_perkinelmer_invalid_file(tmp_path) -> None:
     bad = tmp_path / "bad.sp"
     bad.write_bytes(b"NOT_PEPE" + b"\x00" * 100)
-    # Importer catches parsing errors and logs warnings rather than raising.
-    ds = read_perkinelmer(bad)
-    assert ds is None
+    with pytest.raises(ValueError, match="PEPE"):
+        read_perkinelmer(bad)
 
 
 def test_sp_parser_invalid_signature_direct() -> None:

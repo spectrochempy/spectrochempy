@@ -156,7 +156,7 @@ class TestOpusSpecialTypes:
 
     def test_invalid_type(self):
         """Test behavior with invalid type specification."""
-        with pytest.warns(UserWarning):
+        with pytest.raises(ValueError, match="The data type INVALID is not present"):
             read_opus(OPUSDATA / "test.0000", type="INVALID")
 
 

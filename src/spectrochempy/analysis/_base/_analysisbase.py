@@ -2090,6 +2090,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
                 title=f"{self._Y.title} / {self._X.title}",
                 history="Computed from the LSTSQ model",
             )
+        else:
+            A = np.array(self._linear_regression.coef_, copy=True)
         return A
 
     @property

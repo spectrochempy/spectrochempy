@@ -19,6 +19,16 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``Optimize(model="saturation_recovery" or "exponential_decay", parameters=...)``
+  fits a native 1D curve from an amplitude and a positive time constant, without
+  a user function. Results retain nonuniform physical coordinates, masks and
+  units, and expose the fitted amplitude and ``tau`` with their units (:pr:`1970`).
+
+- ``Optimize(model=..., parameters=...)`` fits nonseparable physical models on
+  a full multidimensional ``NDDataset`` grid, with optional positive linear
+  amplitude projection and native ``FitResult`` outputs (:pr:`1968`).
+
+
 - ``Baseline(model="arpls")`` and ``Baseline(model="aspls")`` add explicitly
   selected reweighted baseline correction using NumPy/SciPy, also through
   ``get_baseline`` and ``basc``. They accept finite real unmasked 1D or rowwise
@@ -33,6 +43,17 @@ New Features
   baseline and peak areas: broad weak signals can be removed as background.
   Existing models and defaults are unchanged; no NMR dependency is added
   (:pr:`1932`).
+
+- Run-time hints for surprising defaults. ``align(method="inner")`` warns when
+  the intersection keeps fewer than half of the points of the sparsest
+  coordinate in the common range, or keeps irregularly spaced points from
+  regular grids, and suggests ``method="interpolate"``. ``MCRALS.fit`` lists
+  the active constraints, defaults included, in its ``INFO`` log.
+  ``Baseline`` ``ranges`` that select no points are reported, in the error
+  raised when no support remains or in a warning when they are ignored, with a
+  reminder that integer limits are indices and float limits coordinates. The
+  error for integer ranges outside the coordinate domain carries the same
+  reminder (:issue:`1954`).
 
 
 
@@ -51,6 +72,63 @@ Bug Fixes
   loggers, including plugins: ``set_loglevel("INFO")`` shows these messages,
   ``"DEBUG"`` also shows debug messages, and ``"ERROR"`` hides plugin warnings
   (:issue:`1952`).
+
+- Units of datasets and coordinates read from ``.scp`` files are now created by
+  SpectroChemPy's unit registry (``scp.ur``), as units created in memory are.
+  Combining a reread dataset with a processed one, for example
+  ``scp.trapezoid`` on the output of ``Baseline.transform()``, no longer raises
+  ``AttributeError``. The file format is unchanged (:issue:`1951`).
+
+- Reading files no longer hides reader errors. Reading a single file (path,
+  one-element list or ``content=``) with ``read`` or a format reader
+  (``read_omnic``, ``read_jcamp``, ``read_csv``, ...) raises the reader's
+  original exception, with a note naming the file, instead of a warning and
+  ``None``: for example a corrupted file, or an OMNIC ``.spg`` with inconsistent
+  x axes, as documented. A local file or given content (even empty) that
+  cannot be read is no longer looked for in the remote test data repository,
+  except a file in ``datadir`` that reports a missing file (partially
+  downloaded test data); a file downloaded from that repository that cannot be
+  read raises too. When several files, a directory or zip members are read, an
+  unreadable file is skipped with a warning giving its name and the exception
+  type (previously only the message, and file-content ``SpectroChemPyError``
+  errors aborted the whole read); if no file can be read, the first error is
+  raised instead of returning ``None`` (:issue:`1950`).
+
+- ``write_jcamp`` now writes the full label as the ``##TITLE`` of each spectrum
+  when the ``y`` coordinate has single-column labels (previously only the first
+  character was written). Single-column datetime labels no longer raise a
+  ``TypeError`` and are used as acquisition dates (:issue:`1949`).
+
+- ``asymmetricvoigtmodel`` and ``asymmetricvoigt``: a negative ``asym`` now
+  gives the asymmetry on the other side of the peak instead of being silently
+  ignored and giving the symmetric profile: the profile for ``asym = -a`` is
+  the mirror image, about ``pos``, of the profile for ``+a``. Results for
+  ``asym >= 0`` are unchanged (:issue:`1948`).
+
+- ``multiplot`` now accepts fewer datasets than ``nrow * ncol`` panels: the
+  unused panels are hidden and still returned with the other axes, instead of
+  raising "Not enough datasets given in this list". A grid given with both
+  ``nrow`` and ``ncol`` that is too small for the datasets now raises a clear
+  ``ValueError`` instead of being silently replaced. When only one of them is
+  given, the other is inferred to hold every dataset (``nrow=1`` with three
+  datasets gives a 1 x 3 grid). Without ``nrow`` and ``ncol``, the automatic
+  grid now holds every dataset: three datasets are plotted on a 2 x 2 grid
+  instead of dropping one, and five or more no longer fail with an
+  ``IndexError``; one, two and four datasets keep their layout. Calling
+  ``multiplot`` without any dataset still raises a ``ValueError``, with a
+  clearer message, and ``nrow`` or ``ncol`` values that are not positive
+  integers raise a ``ValueError`` (:issue:`1946`).
+
+- Processing context transfer, including baseline correction of imported NMR
+  spectra, accepts protected nested metadata while preserving the target's
+  read-only state and keeping source metadata independent. Copying metadata
+  preserves independently protected subtrees without temporarily unlocking
+  the source (:pr:`1969`).
+
+- ``NNLS.coef`` and ``LSTSQ.coef`` now return coefficient arrays for NumPy
+  inputs with multiple features, including multiple targets, instead of raising
+  ``UnboundLocalError``. Dataset coefficients retain their units and scalar
+  coefficients keep their existing return type (:pr:`1968`).
 
 - ``Optimize.usermodels`` now keeps each registered model in an independent
   adapter. Registering another function or configuring another optimizer no
@@ -83,12 +161,33 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Reading a single unreadable file with ``read`` or a format reader now raises
+  the reader's exception instead of emitting a warning and returning ``None``;
+  reading several files raises when none of them can be read. Replace
+  ``if ds is None:`` checks by ``try: ... except Exception: ...`` around the
+  read (:issue:`1950`).
+
+- ``plot_compare`` (and ``plot_merit``) legends now use "experimental" and
+  "calculated" instead of automatic dataset names such as
+  ``NDDataset_1a2b3c4d``; names set on the datasets remain the default labels.
+  The legend is built from the plotted lines, so it shows their line styles and
+  transparency, and lists the other labelled artists of the axes whose label is
+  not already shown (:issue:`1954`).
+
+- ``Baseline`` ``ranges`` that select no points now raise a ``ValueError``
+  instead of a ``TraitError`` when no baseline support remains
+  (:issue:`1954`).
+
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+- Passing ``labels`` to ``plot_compare`` is deprecated: it is ignored and emits
+  a ``DeprecationWarning``. Use ``exp_label``, ``calc_label`` and
+  ``resid_label`` instead (:issue:`1954`).
 
 - The experimental ``spectrochempy-cantera`` plugin and its ``PFR`` model
   (``scp.cantera.PFR`` and the deprecated alias ``scp.PFR``) will be removed in

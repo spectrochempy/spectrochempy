@@ -28,11 +28,13 @@ from spectrochempy.utils._logging import info_
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.exceptions import ProtocolError
 from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.exceptions import UnsupportedOriginError
 from spectrochempy.utils.exceptions import WrongFileFormatError
 from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
 from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.jsonutils import UNSAFE_LEGACY_LOADING_MESSAGE
 from spectrochempy.utils.objects import ScpObjectList
 
 
@@ -52,6 +54,8 @@ class Importer(HasTraits):
     def __init__(self):
         super().__init__()
 
+        self._skip_unreadable = False
+        self._skipped = []
         self.filetypes = dict(registry.filetypes)
         temp = list(zip(*registry.filetypes, strict=False))
         temp.reverse()
@@ -63,7 +67,10 @@ class Importer(HasTraits):
 
     def __call__(self, *args, **kwargs):
         self.datasets = []
+        self._skipped = []
         self.default_key = kwargs.pop("default_key", ".scp")
+        # Set by _read_dir, which itself raises when no file at all can be read.
+        skip_requested = kwargs.pop("_skip_unreadable", False)
 
         if (
             "merge" not in kwargs
@@ -86,6 +93,10 @@ class Importer(HasTraits):
         else:
             # Cancel in dialog!
             return None
+
+        self._skip_unreadable = skip_requested or (
+            sum(len(files) for files in self.files.values()) > 1
+        )
 
         for key in self.files:
             if key == "frombytes":
@@ -124,6 +135,9 @@ class Importer(HasTraits):
             else:
                 # here files are read / or remotely from the disk using filenames
                 self._switch_protocol(key, self.files, **kwargs)
+
+        if self._skipped and not self.datasets and not skip_requested:
+            raise self._skipped[0]
 
         # Directory discovery groups files by extension. Merge compatible results
         # across those groups only after all readers have completed.
@@ -223,21 +237,27 @@ class Importer(HasTraits):
             except (FileNotFoundError, OSError) as exc:
                 local_only = kwargs.get("local_only", False)
                 is_url = _is_url(filename)
-                protocol = kwargs.get("protocol", [])
-                protocol = [protocol] if isinstance(protocol, str) else protocol
-                is_topspin = "topspin" in protocol
 
-                # TopSpin data is resolved to a concrete binary before reading.
-                # Preserve errors on that local binary instead of obscuring
-                # them with a failed remote download attempt.
-                local_target_exists = not is_url and pathclean(filename).exists()
+                # Given contents, existing local paths and errors already reported
+                # by a nested read cannot be found remotely: preserve the reader
+                # error instead of obscuring it with a remote download attempt.
+                # Only a missing file within an existing path of the data directory
+                # (partially downloaded test or plugin data) is looked for remotely.
+                local_path = None if is_url else pathclean(filename)
                 if (
-                    is_topspin
-                    and isinstance(exc, OSError)
-                    and not isinstance(exc, FileNotFoundError)
-                    and local_target_exists
+                    kwargs.get("content") is not None
+                    or getattr(exc, "_scp_read_failure", False)
+                    or (
+                        local_path is not None
+                        and local_path.exists()
+                        and not (
+                            isinstance(exc, FileNotFoundError)
+                            and _is_in_datadir(local_path)
+                        )
+                    )
                 ):
-                    raise
+                    self._reraise_or_skip(filename, exc)
+                    continue
 
                 # An explicitly local request or URL cannot use the fallback.
                 if is_url or local_only:
@@ -256,13 +276,14 @@ class Importer(HasTraits):
                 except FileNotFoundError as exc:
                     raise (FileNotFoundError) from exc
 
-                except Exception as e:
+                except requests.RequestException as e:
                     warning_(str(e))
 
-            except Exception as e:
-                if isinstance(e, SpectroChemPyError):
-                    raise
-                warning_(str(e))
+                except Exception as e:
+                    self._reraise_or_skip(filename, e)
+
+            except Exception as exc:
+                self._reraise_or_skip(filename, exc)
 
             if dataset is not None:
                 if not isinstance(dataset, list):
@@ -277,6 +298,17 @@ class Importer(HasTraits):
             #     datasets[0].filename = pathclean(filename)
 
         self.datasets.extend(datasets)
+
+    def _reraise_or_skip(self, filename, exc):
+        # Reading a single file raises the reader error. Among several files, an
+        # unreadable file is skipped with a warning, unless the error concerns the
+        # call itself rather than the file.
+        exc.add_note(f"Raised while reading '{filename}'.")
+        exc._scp_read_failure = True
+        if not self._skip_unreadable or _is_call_error(exc):
+            raise exc
+        _warn_skipped_file(filename, exc)
+        self._skipped.append(exc)
 
 
 # DECORATORS
@@ -530,7 +562,12 @@ def read_dir(directory=None, **kwargs):
     - 1D spectroscopic data (e.g., :file:`.spa` files) in a given directory are merged
       into single `NDDataset`, providing their unique dimension are compatible.
       If not, an error is generated.
-    - non-readable files are ignored
+    - files with an unsupported extension are ignored.
+    - a file with a supported extension that cannot be read is skipped with a
+      warning giving its name and the error. If no file can be read, the error of
+      the first unreadable file is raised. Errors about the call rather than the
+      file (unsupported protocol or origin, legacy file requiring
+      ``allow_unsafe_legacy=True``) are always raised.
 
     Parameters
     ----------
@@ -590,20 +627,24 @@ def read_dir(directory=None, **kwargs):
 def _read_dir(*args, **kwargs):
     _, directory = args
     directory = get_directory_name(directory)
-    files = get_filenames(directory, **kwargs)
+    files = get_filenames(directory, **kwargs) or {}
     datasets = []
     valid_extensions = (
         list(zip(*registry.filetypes, strict=False))[0]
         + list(zip(*registry.aliases, strict=False))[0]
     )
+    skipped = []
     for key in [key for key in files if key[1:] in valid_extensions]:
         if key:
             importer = Importer()
-            nd = importer(files[key], **kwargs)
+            nd = importer(files[key], _skip_unreadable=True, **kwargs)
+            skipped.extend(importer._skipped)
             if nd is not None:
                 if not isinstance(nd, list):
                     nd = [nd]
                 datasets.extend(nd)
+    if skipped and not datasets:
+        raise skipped[0]
     return datasets
 
 
@@ -627,6 +668,33 @@ def _read_(*args, **kwargs):
 # ======================================================================================
 # Private functions
 # ======================================================================================
+def _is_call_error(exc):
+    # Errors on the requested protocol, origin or format, and the explicit opt-in
+    # required for unsafe legacy files, are not skipped among several files.
+    return isinstance(
+        exc, ProtocolError | UnsupportedOriginError | WrongFileFormatError
+    ) or (
+        isinstance(exc, SpectroChemPyError)
+        and exc.args[:1] == (UNSAFE_LEGACY_LOADING_MESSAGE,)
+    )
+
+
+def _is_in_datadir(path):
+    from spectrochempy.application.preferences import preferences as prefs
+
+    return path.resolve().is_relative_to(pathclean(prefs.datadir).resolve())
+
+
+def _warn_skipped_file(filename, exc):
+    cls = type(exc)
+    name = (
+        cls.__qualname__
+        if cls.__module__ == "builtins"
+        else f"{cls.__module__}.{cls.__qualname__}"
+    )
+    warning_(f"Skipped '{filename}': {name}: {exc}")
+
+
 def _is_url(filename):
     return (
         isinstance(filename, str)

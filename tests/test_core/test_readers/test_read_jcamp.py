@@ -272,8 +272,8 @@ def test_jcamp_ir_scaled_anchors_and_comments(compressed):
 )
 def test_jcamp_ir_rejects_invalid_difdup(original, replacement, message):
     payload = _DIFDUP_IR.replace(original, replacement)
-    with pytest.warns(UserWarning, match=message):
-        assert read_jcamp({"invalid.jdx": payload}) is None
+    with pytest.raises(ValueError, match=message):
+        read_jcamp({"invalid.jdx": payload})
 
 
 @pytest.mark.parametrize("anchor", [0, 1, 10])
@@ -307,8 +307,8 @@ def test_jcamp_ir_checks_count_before_allocating_the_axis(monkeypatch, table, me
     monkeypatch.setattr(np, "linspace", linspace)
     payload = _DIFDUP_IR.replace(b"##NPOINTS=5", b"##NPOINTS=1000000000")
     payload = payload.split(b"##XYDATA=", 1)[0] + table + b"##END=\n"
-    with pytest.warns(UserWarning, match=message):
-        assert read_jcamp({"truncated.jdx": payload}) is None
+    with pytest.raises(ValueError, match=message):
+        read_jcamp({"truncated.jdx": payload})
 
 
 @pytest.mark.parametrize("reader", [read_jcamp, jcamp.read])

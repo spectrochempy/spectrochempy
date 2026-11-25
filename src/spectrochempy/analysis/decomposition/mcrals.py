@@ -2005,8 +2005,6 @@ and `St`.
         ``np.ndarray``). All computation below operates on plain numpy arrays,
         never on ``NDDataset`` instances.
         """
-        state = self._init_als_state(X, Y)
-
         # Build the constraint pipelines from public ``Constraint`` objects.
         # When ``constraints=`` was provided, use those directly; otherwise
         # convert legacy traitlets through ``legacy_to_constraints``.
@@ -2027,6 +2025,15 @@ and `St`.
             spec_constraints,
             normalization,
         ) = self._build_from_public_constraints(public_constraints)
+
+        if self._active_constraints_:
+            info_("Active constraints:")
+            for constraint in self._active_constraints_:
+                info_(f"  {constraint!r}")
+        else:
+            info_("Active constraints: none")
+
+        state = self._init_als_state(X, Y)
 
         # Store internal model-profile constraints so callers can inspect
         # mutable state (``model_args``, ``extra_outputs``, etc.) after fit.
