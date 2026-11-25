@@ -29,6 +29,7 @@ from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.exceptions import SpectroChemPyError
+from spectrochempy.utils.print import _local_numpyprintoptions
 
 __all__ = [
     "ActionMassKinetics",
@@ -884,7 +885,8 @@ class ActionMassKinetics(tr.HasTraits):
                 ivp_solver_left_op,
             )
             info_("Optimization of the parameters.")
-            info_(f"         Initial parameters: {x0}")
+            with _local_numpyprintoptions():
+                info_(f"         Initial parameters: {x0}")
             info_(f"         Initial function value: {init_val:f}")
         tic = datetime.datetime.now(UTC)
 
@@ -910,7 +912,8 @@ class ActionMassKinetics(tr.HasTraits):
 
         if optimizer_options["disp"]:
             info_(f"         Optimization time: {toc - tic}")
-            info_(f"         Final parameters: {optim_res['x']}")
+            with _local_numpyprintoptions():
+                info_(f"         Final parameters: {optim_res['x']}")
 
         for i, param in enumerate(dict_param_to_optimize):
             dict_param_to_optimize[param] = optim_res["x"][i]
