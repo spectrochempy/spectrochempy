@@ -133,14 +133,32 @@ Use the canonical ``opt.result`` for scientific outputs:
 
 * ``fitted_parameters`` maps public names to physical fitted magnitudes,
   including fixed and linked values.
-* ``parameter_names`` identifies the free physical parameters in Jacobian,
-  covariance, stderr and confidence-interval order.
+* ``parameter_names`` identifies the free parameters in covariance, stderr
+  and confidence-interval order. ``opt.jacobian`` retains the raw residual
+  Jacobian with respect to the optimizer coordinates, including the historical
+  bound transformation; its columns follow that same order.
 * ``parameters`` remains the estimator run configuration, not a solution.
 * ``fitted``, ``components``, ``residuals`` and diagnostics retain their
   existing meanings. Component rows follow addition order; internal component
   labels and generated script names are implementation details.
 
-Uncertainty remains the existing local free-parameter approximation.
+Uncertainty is a local free-parameter approximation in physical magnitudes.
+The bound-transform derivatives are applied to the solver covariance; the raw
+``opt.jacobian`` remains unchanged for compatibility. This applies equally to
+Python and COMMON models. The approximation requires convergence, positive
+residual degrees of freedom and a full-rank Jacobian. Covariance, stderr,
+correlation and confidence intervals are unavailable when these conditions
+fail, or when a fitted parameter is at or near a bound.
+``diagnostics['covariance_reason']`` gives the exclusion reason, or ``None``
+when available; ``covariance_coordinates='physical'`` and
+``jacobian_coordinates='optimizer'`` identify the two coordinate systems.
+The bound neighborhood is ``sqrt(machine epsilon)`` times the interval width
+for two finite bounds, or times the maximum of one, the parameter magnitude
+and the bound magnitude for one finite bound. This is a conservative
+uncertainty qualification, not a test of physical stationarity. Historical
+solver success alone can still include an erroneous stop at a bound; the
+strictly interior starting-value requirement remains in place.
+
 Propagation to linked/derived parameters is not implemented;
 ``diagnostics['derived_uncertainty_status']`` explicitly reports
 ``'not_propagated'``. Fixed or linked parameters receive no invented stderr.

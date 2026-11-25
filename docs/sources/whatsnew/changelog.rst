@@ -70,6 +70,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- 1D ``Optimize`` covariance and standard errors now account for the bound
+  transformation and describe physical free parameters for both COMMON and
+  Python models. Local uncertainty is unavailable near bounds, for
+  non-converged or rank-deficient fits, with a diagnostic exclusion reason.
+  The raw optimizer-coordinate ``jacobian`` remains unchanged (:pr:`1983`).
+
 - ``SVD.transform``, ``SVD.fit_transform``, ``SVD.inverse_transform``,
   ``SVD.components`` and ``SVD.get_components`` no longer raise
   ``NotImplementedError``. They return ``NDDataset`` scores
