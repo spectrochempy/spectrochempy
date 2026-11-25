@@ -348,6 +348,8 @@ def test_svd_transform_errors(random_dataset):
         svd.get_components(n_components=2)
     with pytest.raises(ValueError, match="compute_uv=True"):
         svd.inverse_transform(np.ones((6, 2)))
+    with pytest.raises(ValueError, match="^inverse_transform requires"):
+        svd.inverse_transform()
 
 
 def test_svd_methods_follow_fitted_state_not_current_compute_uv(random_dataset):

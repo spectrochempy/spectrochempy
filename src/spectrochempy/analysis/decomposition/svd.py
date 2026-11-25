@@ -267,6 +267,8 @@ class SVD(DecompositionAnalysis):
         -------
         `NDDataset`
             Scores with shape (:term:`n_observations`, :term:`n_components`).
+            Like all latent factors (`PCA` scores, `MCRALS` profiles), the
+            scores have no units.
 
         Other Parameters
         ----------------
@@ -370,6 +372,9 @@ class SVD(DecompositionAnalysis):
         """
         if not self._fitted:
             raise NotFittedError
+        # Fail early, naming this method, when U and VT were not computed
+        # (otherwise the implicit transform() call below would raise first).
+        self._right_singular_vectors("inverse_transform")
 
         # Unlike the base class, n_components is honoured in all cases: the
         # reconstruction uses the first n_components scores only.
