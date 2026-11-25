@@ -87,3 +87,40 @@ def test_binary_operation_history_text_is_unchanged():
     assert _entry(ip) == (
         "Inplace binary op: imul  with `[       0        1 ...       28       29]` "
     )
+
+
+@pytest.mark.parametrize("mapping", ["parameters", "diagnostics"])
+def test_analysis_result_array_display_preserves_format_and_options(mapping):
+    from spectrochempy.analysis._base._result import AnalysisResult
+
+    expected = "[       0   0.3333 ...    2.667        3]"
+    result = AnalysisResult(
+        estimator="example", **{mapping: {"values": np.arange(10.0) / 3}}
+    )
+    with np.printoptions(precision=1, threshold=1000, edgeitems=1):
+        before = np.get_printoptions()
+        assert result._repr_sections()[-1].items[0].value == expected
+        assert expected in result._repr_html_()
+        if mapping == "parameters":
+            assert expected in repr(result)
+        assert np.get_printoptions() == before
+
+
+@pytest.mark.parametrize("mapping", ["parameters", "diagnostics"])
+def test_analysis_result_display_restores_options_after_exception(mapping):
+    from spectrochempy.analysis._base._result import AnalysisResult
+
+    class BrokenValue:
+        def __str__(self):
+            raise ValueError("cannot display")
+
+    result = AnalysisResult(estimator="example", **{mapping: {"bad": BrokenValue()}})
+    with np.printoptions(precision=1, threshold=1000, edgeitems=1):
+        before = np.get_printoptions()
+        with pytest.raises(ValueError, match="cannot display"):
+            result._repr_html_()
+        assert np.get_printoptions() == before
+        if mapping == "parameters":
+            with pytest.raises(ValueError, match="cannot display"):
+                repr(result)
+            assert np.get_printoptions() == before

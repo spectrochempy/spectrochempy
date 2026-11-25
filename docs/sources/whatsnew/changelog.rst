@@ -145,8 +145,9 @@ Bug Fixes
 
 - Printing or displaying an ``NDDataset``, ``Coord`` or ``CoordSet`` no longer
   changes the global NumPy print options; user arrays keep their own
-  ``np.set_printoptions`` settings (:issue:`1974`). The text of these objects,
-  and of binary-operation history entries, is unchanged. Array-valued pint
+  ``np.set_printoptions`` settings (:issue:`1974`, :pr:`1979`). The text of these objects,
+  analysis-result parameters and diagnostics, and binary-operation history
+  entries is unchanged. Array-valued pint
   ``Quantity`` objects (for instance ``Coord.values``), which are formatted by
   pint rather than by SpectroChemPy, now follow the user's NumPy print options.
 
