@@ -336,6 +336,16 @@ def interpolate(
       points are masked whenever a sample used by the interpolator is masked.
     - Unit conversion is performed if needed before interpolation.
     - Sequential interpolation is applied for multiple dimensions (not true N-D).
+    - Source and target coordinates are read through `Coord.data`, which is
+      rounded by default (see `Coord`); a target given as an array is
+      converted to a `Coord` with this default. A shift of either coordinate
+      is rounded to this precision (a shift below half of it is lost), which
+      matters e.g. when computing a numerical derivative with respect to a
+      small shift. To keep it, create the coordinate from an array with
+      ``rounding=False`` and, for evenly spaced values, which are
+      linearized at the given ``sigdigits``, a larger ``sigdigits``, e.g.
+      ``Coord(values, rounding=False, sigdigits=8)``. Passing an existing
+      `Coord` instead of an array keeps its settings and values.
     """
     new = dataset if inplace else dataset.copy()
 
