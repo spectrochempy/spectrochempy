@@ -114,9 +114,7 @@ def test_nmf_and_fast_ica_method_n_components_must_be_positive_integer(bad):
         nmf.get_components(n_components=bad)
     ica = scp.FastICA(n_components=2).fit(X)
     for method in (ica.transform, ica.inverse_transform, ica.get_components):
-        with pytest.raises(
-            ValueError, match="n_components must be a positive integer"
-        ):
+        with pytest.raises(ValueError, match="n_components must be a positive integer"):
             method(n_components=bad)
 
 
