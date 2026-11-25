@@ -223,7 +223,11 @@ class EFA(DecompositionAnalysis):
         """Not implemented."""
 
     @property
-    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
+    @_wrap_ndarray_output_to_nddataset(
+        units=None,
+        title="eigenvalues",
+        typex="components",
+    )
     def f_ev(self):
         """Eigenvalues for the forward analysis ( `NDDataset` )."""
         f = self._outfit[0]
@@ -232,7 +236,11 @@ class EFA(DecompositionAnalysis):
         return f
 
     @property
-    @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
+    @_wrap_ndarray_output_to_nddataset(
+        units=None,
+        title="eigenvalues",
+        typex="components",
+    )
     def b_ev(self):
         """Eigenvalues for the backward analysis ( `NDDataset` )."""
         b = self._outfit[1]
