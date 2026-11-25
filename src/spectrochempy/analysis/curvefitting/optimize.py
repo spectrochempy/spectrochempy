@@ -2421,8 +2421,9 @@ class Optimize(DecompositionAnalysis):
         uncertainty arrays describe physical free parameters, accounting for
         the bound transform. They are unavailable near bounds, for deficient
         rank, unsuccessful optimization or missing prerequisites; diagnostics
-        include ``covariance_reason``. The raw ``jacobian`` property remains
-        in optimizer coordinates for these fits.
+        include ``covariance_reason``. The raw ``jacobian`` property uses
+        optimizer coordinates in transform mode and physical magnitudes in
+        native mode, identified by ``diagnostics['jacobian_coordinates']``.
         """
         if not self._fitted:
             raise NotFittedError(
