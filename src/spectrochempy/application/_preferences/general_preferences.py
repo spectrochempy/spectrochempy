@@ -12,6 +12,7 @@ from pathlib import Path
 
 import traitlets as tr
 
+from spectrochempy.utils._logging import _apply_loglevel
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
@@ -171,6 +172,7 @@ class GeneralPreferences(MetaConfigurable):
                     stacklevel=2,
                 )
         self.parent.log_level = value
+        _apply_loglevel(self.parent.log_level)
 
     # ----------------------------------------------------------------------------------
     # Class Initialisation

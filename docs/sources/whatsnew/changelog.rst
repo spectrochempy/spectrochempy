@@ -63,6 +63,16 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- The default ``WARNING`` log level hides INFO messages again, as documented:
+  since 0.8.2, messages such as "This coordinate (...) is outside the axis
+  limits", "... is already a masked array", "units forced to change" or reader
+  notices (OMNIC, MATLAB, data download) were shown whatever the level.
+  ``set_loglevel``, ``preferences.log_level`` and the ``SpectroChemPy.log_level``
+  configuration option now apply to the ``spectrochempy`` logger and its child
+  loggers, including plugins: ``set_loglevel("INFO")`` shows these messages,
+  ``"DEBUG"`` also shows debug messages, and ``"ERROR"`` hides plugin warnings
+  (:issue:`1952`).
+
 - Units of datasets and coordinates read from ``.scp`` files are now created by
   SpectroChemPy's unit registry (``scp.ur``), as units created in memory are.
   Combining a reread dataset with a processed one, for example
