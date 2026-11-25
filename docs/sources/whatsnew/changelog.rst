@@ -19,6 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``Model``, ``Gaussian`` and ``Linear`` define composable Python models for
+  1D ``Optimize(model=..., params=...)`` fits. ``Parameter`` and ``Parameters``
+  configure initial values, fixed parameters, bounds and explicit arithmetic
+  links. The existing canonical fitting engine and result uncertainty contract
+  are reused; the DSL, ND callbacks and named recovery laws remain supported.
+
 - ``Optimize(model="saturation_recovery" or "exponential_decay", parameters=...)``
   fits a native 1D curve from an amplitude and a positive time constant, without
   a user function. Results retain nonuniform physical coordinates, masks and

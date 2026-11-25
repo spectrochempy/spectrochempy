@@ -19,6 +19,11 @@ SpectroChemPy API.
 """
 
 _LAZY_IMPORTS = {
+    "Model": "spectrochempy.analysis.curvefitting.model",
+    "Gaussian": "spectrochempy.analysis.curvefitting.model",
+    "Linear": "spectrochempy.analysis.curvefitting.model",
+    "Parameter": "spectrochempy.analysis.curvefitting.model",
+    "Parameters": "spectrochempy.analysis.curvefitting.model",
     "Correlation2DResult": "spectrochempy.analysis.correlation_spectroscopy",
     "CrossValidationResult": "spectrochempy.analysis.cross_validation",
     "GroupKFold": "spectrochempy.analysis.model_selection",
