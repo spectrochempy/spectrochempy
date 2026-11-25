@@ -296,13 +296,20 @@ for reproducible results across multiple function calls.""",
     def _inverse_transform(self, X_transform):
         # we need to  set self._pca.components_ to a compatible size but without
         # destroying the full matrix:
+        # (explained_variance_ is used too when whiten=True).
         store_components_ = self._pca.components_
+        store_explained_variance_ = self._pca.explained_variance_
         if X_transform.ndim == 1:
             X_transform = X_transform.reshape(-1, 1)
-        self._pca.components_ = self._pca.components_[: X_transform.shape[1]]
-        X = self._pca.inverse_transform(X_transform)
-        # restore
-        self._pca.components_ = store_components_
+        k = X_transform.shape[1]
+        self._pca.components_ = store_components_[:k]
+        self._pca.explained_variance_ = store_explained_variance_[:k]
+        try:
+            X = self._pca.inverse_transform(X_transform)
+        finally:
+            # restore
+            self._pca.components_ = store_components_
+            self._pca.explained_variance_ = store_explained_variance_
         return X
 
     def _get_components(self):

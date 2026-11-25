@@ -1755,9 +1755,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Other Parameters
         ----------------
-        n_components : `int`, optional, default: `None`
-            The number of components to use for the reduction (a positive
-            integer). If `None`, all fitted components are used.
+        n_components : `int`, optional
+            The number of components to use for the reduction.
 
         See Also
         --------
