@@ -141,7 +141,7 @@ Bug Fixes
 - ``read_csv`` now warns, with the file name and the number of ignored columns,
   when a CSV file has more than one data column after the x column (only the
   first data column is read), and its docstring examples show the actual
-  behavior (:issue:`1971`).
+  behavior (:issue:`1971`, :pr:`1978`).
 
 - Processing context transfer, including baseline correction of imported NMR
   spectra, accepts protected nested metadata while preserving the target's
