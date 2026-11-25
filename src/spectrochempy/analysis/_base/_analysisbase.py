@@ -1249,10 +1249,10 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        n_components : `int`, optional
-            The number of components to use for the reduction. If not given
-            the number of components is eventually the one specified or determined
-            in the `fit` process.
+        n_components : `int`, optional, default: `None`
+            The number of components to use for the reduction (a positive
+            integer). If `None`, all the components specified or determined
+            in the `fit` process are used.
 
         """
         if not self._fitted:
@@ -1308,8 +1308,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        n_components : `int`, optional
-            The number of components to use for the reconstruction.
+        n_components : `int`, optional, default: `None`
+            The number of components to use for the reconstruction (a positive
+            integer). If `None`, all fitted components are used.
 
         See Also
         --------
@@ -1343,6 +1344,10 @@ class DecompositionAnalysis(AnalysisConfigurable):
         elif X_transform is None:
             X_transform = self.transform(**kwargs).data
 
+        # Keep only the first n_components columns of the scores
+        if np.ndim(X_transform) == 2 and n_components < X_transform.shape[1]:
+            X_transform = X_transform[:, :n_components]
+
         return self._inverse_transform(X_transform)
 
     def fit_transform(self, X, Y=None, **kwargs):
@@ -1365,8 +1370,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        n_components : `int`, optional
-            The number of components to use for the reduction.
+        n_components : `int`, optional, default: `None`
+            The number of components to use for the reduction (a positive
+            integer). If `None`, all fitted components are used.
 
         """
         try:
@@ -1389,8 +1395,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Parameters
         ----------
         n_components : `int`, optional, default: `None`
-            The number of components to keep in the output dataset.
-            If `None`, all calculated components are returned.
+            The number of components to keep in the output dataset (a positive
+            integer). If `None`, all calculated components are returned.
 
         Returns
         -------
@@ -1749,8 +1755,9 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Other Parameters
         ----------------
-        n_components : `int`, optional
-            The number of components to use for the reduction.
+        n_components : `int`, optional, default: `None`
+            The number of components to use for the reduction (a positive
+            integer). If `None`, all fitted components are used.
 
         See Also
         --------

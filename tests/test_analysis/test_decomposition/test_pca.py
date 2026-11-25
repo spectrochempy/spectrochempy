@@ -123,6 +123,45 @@ def test_pca_method_n_components_valid_values(low_rank_pca_dataset):
         assert pca.transform(n_components=5).shape[1] == 3
 
 
+def test_pca_inverse_transform_uses_n_components(low_rank_pca_dataset):
+    # inverse_transform(n_components=k) used to ignore k and reconstruct with
+    # all the fitted components.
+    pca = PCA(n_components=3).fit(low_rank_pca_dataset)
+    sk = pca._pca
+    scores = sk.transform(low_rank_pca_dataset.data)
+    expected = scores[:, :1] @ sk.components_[:1] + sk.mean_
+    assert_allclose(pca.inverse_transform(n_components=1).data, expected)
+    assert_allclose(
+        pca.inverse_transform(pca.transform(), n_components=1).data, expected
+    )
+    assert_allclose(
+        pca.inverse_transform(n_components=None).data, pca.inverse_transform().data
+    )
+
+
+def test_nmf_and_fast_ica_inverse_transform_use_n_components():
+    rng = np.random.default_rng(0)
+    X = NDDataset(np.abs(rng.normal(size=(10, 8))))
+
+    nmf = scp.NMF(n_components=3, max_iter=500).fit(X)
+    W = nmf._nmf.transform(X.data)
+    assert_allclose(
+        nmf.inverse_transform(n_components=2).data,
+        W[:, :2] @ nmf._nmf.components_[:2],
+    )
+
+    ica = scp.FastICA(n_components=3).fit(X)
+    S = ica._fast_ica.transform(X.data)
+    expected = S[:, :2] @ ica._fast_ica.mixing_[:, :2].T + ica._fast_ica.mean_
+    assert_allclose(ica.inverse_transform(n_components=2).data, expected)
+    # Scores with fewer columns than fitted components used to raise
+    # (the pre-existing warning about the X_transform size is unchanged)
+    with pytest.warns(UserWarning, match="X_transform size"):
+        reconstructed = ica.inverse_transform(ica.transform(n_components=2))
+    assert_allclose(reconstructed.data, expected)
+    assert ica._fast_ica.mixing_.shape == (8, 3)
+
+
 def test_pca_float_threshold_component_selection(low_rank_pca_dataset):
     dataset = low_rank_pca_dataset
 

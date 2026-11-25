@@ -69,6 +69,12 @@ Bug Fixes
   now names the invalid value. Values above the fitted number of components
   still use all the components.
 
+- ``inverse_transform(n_components=k)`` of ``PCA``, ``NMF`` and ``FastICA``
+  now reconstructs the data from the first ``k`` components only; the
+  argument used to be silently ignored. ``FastICA.inverse_transform`` also
+  accepts scores with fewer columns than fitted components (for instance from
+  ``transform(n_components=k)``) instead of raising a shape error.
+
 - The default ``WARNING`` log level hides INFO messages again, as documented:
   since 0.8.2, messages such as "This coordinate (...) is outside the axis
   limits", "... is already a masked array", "units forced to change" or reader

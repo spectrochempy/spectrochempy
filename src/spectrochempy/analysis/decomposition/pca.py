@@ -470,7 +470,8 @@ for reproducible results across multiple function calls.""",
         Parameters
         ----------
         n_components : int, optional
-            The number of components to print.
+            The number of components to print (a positive integer). If None,
+            prints all components.
 
         """
         if not self._fitted:
@@ -495,7 +496,8 @@ for reproducible results across multiple function calls.""",
         Parameters
         ----------
         n_components : int, optional
-            Number of components to plot. If None, plots all components.
+            Number of components to plot (a positive integer). If None, plots all
+            components.
         **kwargs
             Additional keyword arguments passed to :func:`plot_scree`.
             See :func:`~spectrochempy.plotting.composite.plotscree.plot_scree`

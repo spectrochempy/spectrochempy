@@ -240,13 +240,14 @@ array of values drawn from a normal distribution is used."""
         return self._fast_ica.transform(X)
 
     def _inverse_transform(self, X_transform):
-        # we need to  set self._fast_ica.components_ to a compatible size but without
-        # destroying the full matrix:
-        store_components_ = self._fast_ica.components_
-        self._fast_ica.components_ = self._fast_ica.components_[: X_transform.shape[1]]
-        X = self._fast_ica.inverse_transform(X_transform)
-        # restore
-        self._fast_ica.components_ = store_components_
+        # sklearn reconstructs with the mixing matrix: use only its columns
+        # matching the given sources, without destroying the full matrix.
+        store_mixing_ = self._fast_ica.mixing_
+        self._fast_ica.mixing_ = self._fast_ica.mixing_[:, : X_transform.shape[1]]
+        try:
+            X = self._fast_ica.inverse_transform(X_transform)
+        finally:
+            self._fast_ica.mixing_ = store_mixing_
         return X
 
     def _get_components(self):
