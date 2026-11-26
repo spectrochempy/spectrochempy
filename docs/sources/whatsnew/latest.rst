@@ -77,7 +77,8 @@ Bug Fixes
   With ``whiten=False``, where scikit-learn ignores ``n_components`` and fits
   all the features, ``FastICA`` now uses all the fitted components by
   default (``get_components()`` used to return only ``n_components`` of
-  them) (:pr:`1982`).
+  them). ``FastICA`` with the default ``n_components=None`` no longer fails
+  in ``fit`` (:pr:`1982`).
 
 - 1D ``Optimize`` covariance and standard errors now account for the bound
   transformation and describe physical free parameters for both COMMON and

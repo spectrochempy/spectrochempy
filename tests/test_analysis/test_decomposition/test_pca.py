@@ -205,6 +205,15 @@ def test_fast_ica_without_whitening_reconstructs_with_all_fitted_components():
     )
 
 
+def test_fast_ica_default_n_components_fits_all_components():
+    # FastICA() with the default n_components=None used to fail in fit
+    rng = np.random.default_rng(0)
+    X = NDDataset(rng.random((10, 5)))
+    ica = scp.FastICA().fit(X)
+    assert ica.get_components().shape == (5, 5)
+    assert_allclose(ica.inverse_transform().data, X.data, atol=1e-10)
+
+
 def test_pca_float_threshold_component_selection(low_rank_pca_dataset):
     dataset = low_rank_pca_dataset
 
