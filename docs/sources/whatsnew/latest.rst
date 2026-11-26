@@ -68,7 +68,7 @@ Bug Fixes
 
 - Model constructors preserve the current global logging level when
   ``log_level`` is omitted or ``None``. Explicit levels still update the global
-  setting. This also applies to the IRIS and tensor plugins.
+  setting. This also applies to the IRIS and tensor plugins. (:pr:`2008`)
 
 - 1D ``Optimize`` no longer emits output-clearing control characters in quiet
   mode or terminal processes. Notebook output clearing is restricted to
