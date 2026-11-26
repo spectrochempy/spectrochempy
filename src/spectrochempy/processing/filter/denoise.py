@@ -258,7 +258,9 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1, return_mask
     -----
     Masked and non-finite values remain unchanged. Katsumoto and Whitaker operate
     separately on contiguous valid runs; Katsumoto skips runs shorter than ``size``.
-    Constant runs remain unchanged. Integer inputs allow fractional replacements.
+    Constant runs remain unchanged. Integer inputs allow fractional replacements
+    only when every source value is exactly representable as float64; otherwise
+    a ValueError is raised before processing, including for masked values.
     The existing Katsumoto circular window and Whitaker endpoint candidacy are
     retained within each run; inspect corrections near boundaries and gaps.
     Narrow spectral bands can be mistaken for spikes, especially with low thresholds
@@ -275,6 +277,10 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1, return_mask
         raise ValueError("delta must be positive and finite.")
     if np.iscomplexobj(dataset.data):
         raise ValueError("Despiking requires real data.")
+    if np.issubdtype(dataset.data.dtype, np.integer) and any(
+        int(value) != int(float(value)) for value in dataset.data.flat
+    ):
+        raise ValueError("Integer data must be exactly representable as float64.")
     if method == "neighbors":
         return _despike_output(
             dataset, _despike_neighbors(dataset, delta, dim), return_mask

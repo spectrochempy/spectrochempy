@@ -198,3 +198,31 @@ def test_float32_dtype_is_preserved(method):
     source.data[43] += 20
     result = source.despike(method=method, delta=6)
     assert result.dtype == source.dtype
+
+
+@pytest.mark.parametrize("method", METHODS)
+@pytest.mark.parametrize("masked", [False, True])
+@pytest.mark.parametrize(
+    "dtype,value",
+    [(np.int64, 2**53 + 1), (np.int64, -(2**53 + 1)), (np.uint64, 2**64 - 1)],
+)
+def test_inexact_integer_conversion_is_rejected_before_processing(
+    method, masked, dtype, value
+):
+    source = scp.NDDataset(np.full(11, value, dtype=dtype), dtype=dtype, mask=masked)
+    with pytest.raises(ValueError, match="exactly representable"):
+        source.despike(method=method, return_mask=True)
+    assert all(int(item) == value for item in source.data)
+    assert source.dtype == np.dtype(dtype)
+
+
+@pytest.mark.parametrize("method", METHODS)
+@pytest.mark.parametrize("masked", [False, True])
+def test_exact_large_integer_conversion_preserves_values(method, masked):
+    value = 2**60
+    source = scp.NDDataset(
+        np.full(11, value, dtype=np.int64), dtype=np.int64, mask=masked
+    )
+    corrected, changed = source.despike(method=method, return_mask=True)
+    assert all(int(item) == value for item in corrected.data)
+    assert not changed.data.any()
