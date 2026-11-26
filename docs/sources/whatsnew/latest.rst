@@ -68,7 +68,7 @@ Bug Fixes
 
 - ``save_as(..., directory=...)`` respects the explicit destination directory
   for imported datasets and projects instead of using their source directory.
-  Absolute filenames retain precedence (issue #1987).
+  Absolute filenames retain precedence (:pr:`2001`).
 
 - Descending unsigned integer coordinates retain their values and signed
   spacings instead of being silently replaced by zeros during linearization
