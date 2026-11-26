@@ -47,6 +47,7 @@ from spectrochempy.analysis.curvefitting._parameter_space import _prepared_param
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_native
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_physical
+from spectrochempy.analysis.curvefitting._parameter_space import _ScalarParameterSpace
 from spectrochempy.analysis.curvefitting._parameter_space import _transform_artifacts
 from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameter_transform import _UPB_THRESHOLD
@@ -1467,6 +1468,7 @@ class Optimize(DecompositionAnalysis):
                 constraints=self.constraints,
                 callback=callback,
                 bounds_mode=self.bounds_mode,
+                parameter_plan=self._parameter_plan,
             )
             self._model_spec = model_spec
 
@@ -2598,14 +2600,24 @@ def _optimize(
     xtol=1e-8,
     callback=None,
     bounds_mode="transform",
+    parameter_plan=None,
 ):
     if constraints is None:
         constraints = {}
     global keys
     use_model_spec = isinstance(fp0, _FitModelSpec)
+    space = (
+        _ScalarParameterSpace.from_plan(parameter_plan)
+        if use_model_spec and parameter_plan is not None and not parameter_plan.fallback
+        else None
+    )
 
     def internal_func(p, dat, fp, keys, *args):
-        fp = restore(fp, p, keys)
+        fp = (
+            space.restore(fp, p, physical=native)
+            if space is not None
+            else restore(fp, p, keys)
+        )
         return func(fp, dat)
 
     def internal_callback(*args):
@@ -2627,7 +2639,9 @@ def _optimize(
     if native:
         par, keys, native_bounds = _physical_vector(fp0)
     else:
-        par, keys = _internal_vector(fp0)
+        par, keys = (
+            space.internal_vector(fp0) if space is not None else _internal_vector(fp0)
+        )
 
     args = list(args)
     args.append(fp0)
@@ -2688,29 +2702,42 @@ def _optimize(
             solver_max_nfev=maxfun,
         )
     else:
-        solver_artifacts.update(_transform_artifacts(fp0, res, keys))
+        solver_artifacts.update(
+            space.transform_artifacts(res)
+            if space is not None
+            else _transform_artifacts(fp0, res, keys)
+        )
 
     # restore the external parameter
-    fpe = restore(fp0, res, keys)
-    parameters = {p.name: p for p in _prepared_parameters(fpe) if not p.fixed}
-    ordered = [parameters[key] for key in keys]
-    physical = np.array([p.value for p in ordered], dtype=float)
-    bounds = [
-        (
-            p.bounds[0]
-            if p.bounds[0] is not None and p.bounds[0] > _LOB_THRESHOLD
-            else -np.inf,
-            p.bounds[1]
-            if p.bounds[1] is not None and p.bounds[1] < _UPB_THRESHOLD
-            else np.inf,
-        )
-        for p in ordered
-    ]
+    if space is not None:
+        fpe = space.restore(fp0, res, physical=native)
+        physical = space.physical_values(fpe)
+        bounds = space.physical_bounds
+    else:
+        fpe = restore(fp0, res, keys)
+        parameters = {p.name: p for p in _prepared_parameters(fpe) if not p.fixed}
+        ordered = [parameters[key] for key in keys]
+        physical = np.array([p.value for p in ordered], dtype=float)
+        bounds = [
+            (
+                p.bounds[0]
+                if p.bounds[0] is not None and p.bounds[0] > _LOB_THRESHOLD
+                else -np.inf,
+                p.bounds[1]
+                if p.bounds[1] is not None and p.bounds[1] < _UPB_THRESHOLD
+                else np.inf,
+            )
+            for p in ordered
+        ]
     if native:
         bounds = native_bounds
 
     def physical_residual(values):
-        trial = _restore_physical(deepcopy(fpe), values, keys)
+        trial = deepcopy(fpe)
+        if space is not None:
+            space.restore(trial, values, physical=True)
+        else:
+            _restore_physical(trial, values, keys)
         return func(trial, args[0])
 
     solver_meta.update(
