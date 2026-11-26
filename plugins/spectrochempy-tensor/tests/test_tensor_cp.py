@@ -7,9 +7,13 @@
 
 """Tests for the tensor plugin CP module."""
 
+import logging
+
 import numpy as np
 import pytest
 import re
+
+import spectrochempy as scp
 
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._result import AnalysisResult
@@ -588,3 +592,30 @@ class TestCP:
         cp_unconstrained = CP(n_components=2)
         cp_unconstrained.fit(ds)
         _ = cp_unconstrained.errors  # Should not raise
+
+
+@pytest.mark.parametrize("level", ["DEBUG", "INFO", "WARNING", "ERROR"])
+@pytest.mark.parametrize("kwargs", [{}, {"log_level": None}], ids=["omitted", "none"])
+def test_constructor_preserves_global_level(level, kwargs):
+    initial = scp.get_loglevel()
+    try:
+        scp.set_loglevel(level)
+        CP(**kwargs)
+        assert scp.get_loglevel() == getattr(logging, level)
+        assert logging.getLogger("spectrochempy").level == getattr(logging, level)
+    finally:
+        scp.set_loglevel(initial)
+
+
+@pytest.mark.parametrize(
+    "level, expected", [("WARNING", logging.WARNING), (logging.INFO, logging.INFO)]
+)
+def test_constructor_explicit_level_changes_global(level, expected):
+    initial = scp.get_loglevel()
+    try:
+        scp.set_loglevel("DEBUG")
+        CP(log_level=level)
+        assert scp.get_loglevel() == expected
+        assert logging.getLogger("spectrochempy").level == expected
+    finally:
+        scp.set_loglevel(initial)

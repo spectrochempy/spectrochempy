@@ -2554,7 +2554,6 @@ def test_repr_max_length():
 def test_signature_defaults_synchronised_with_runtime():
     """inspect.signature defaults must match runtime attribute values."""
     import inspect
-    import logging
 
     sig = inspect.signature(MCRALS)
     mcr = MCRALS()
@@ -2568,7 +2567,7 @@ def test_signature_defaults_synchronised_with_runtime():
         ("max_iter", 50),
         ("maxdiv", 5),
         ("warm_start", False),
-        ("log_level", logging.WARNING),
+        ("log_level", None),
     ]:
         p = sig.parameters.get(pname)
         assert p is not None, f"{pname} missing from signature"
