@@ -16,6 +16,7 @@ __all__ = [
     "_optimize_model",
     "_optimize_nd",
     "_optimize_profiles",
+    "_parameter_plan",
     "_parameter_space",
     "_parameter_transform",
     "_parameters",
@@ -37,6 +38,7 @@ from . import _optimize_curves
 from . import _optimize_model
 from . import _optimize_nd
 from . import _optimize_profiles
+from . import _parameter_plan
 from . import _parameter_space
 from . import _parameter_transform
 from . import _parameters

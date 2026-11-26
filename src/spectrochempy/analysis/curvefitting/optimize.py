@@ -37,6 +37,7 @@ from spectrochempy.analysis.curvefitting._optimize_curves import fit_curve
 from spectrochempy.analysis.curvefitting._optimize_model import fit_callable_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
 from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
+from spectrochempy.analysis.curvefitting._parameter_plan import _compile_parameter_plan
 from spectrochempy.analysis.curvefitting._parameter_space import _internal_vector
 from spectrochempy.analysis.curvefitting._parameter_space import (
     _modelspec_parameter_count,
@@ -1263,6 +1264,7 @@ class Optimize(DecompositionAnalysis):
         return estimator
 
     def _install_model_spec(self, model_spec):
+        self._parameter_plan = None
         self._model_spec = deepcopy(model_spec)
         self.fp = self._model_spec.to_fitparameters()
         self._set_rendered_script(str(self.fp))
@@ -1300,6 +1302,8 @@ class Optimize(DecompositionAnalysis):
         self._model_spec = getattr(self, "_model_spec", None)
         if self._model_spec is None:
             self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
+
+        self._parameter_plan = _compile_parameter_plan(self._model_spec)
 
         # create model data
         modeldata, modelnames, model_A, model_a, model_b = self._get_modeldata(X)
@@ -1565,6 +1569,7 @@ class Optimize(DecompositionAnalysis):
             err = errors[0]
             raise ValueError(str(err))
         self._model_spec = spec
+        self._parameter_plan = None
         self.fp = spec.to_fitparameters()
         return proposal.value
 
@@ -1741,7 +1746,7 @@ class Optimize(DecompositionAnalysis):
 
     def _get_modelsum(self, model_spec, data, full_axis, keep, fit_axis):
         """Stream ordinary solver totals, preserving component scaling and callbacks."""
-        prepared_spec = prepare_model(model_spec)
+        prepared_spec = self._resolve_model(model_spec)
         models = [component.label for component in prepared_spec.components]
         baseline_count = sum(model.startswith("baseline") for model in models)
         baseline_first = all(
@@ -1794,7 +1799,7 @@ class Optimize(DecompositionAnalysis):
             model_spec = _FitModelSpec.from_fitparameters(self.fp)
 
         # Prepare canonical model representation.
-        prepared_spec = prepare_model(model_spec)
+        prepared_spec = self._resolve_model(model_spec)
 
         # Get the list of models
         models = [comp.label for comp in prepared_spec.components]
@@ -1805,6 +1810,10 @@ class Optimize(DecompositionAnalysis):
         return self._assemble_modeldata(
             prepared_spec, models, expedata, *self._model_grid()
         )
+
+    def _resolve_model(self, model_spec):
+        plan = getattr(self, "_parameter_plan", None)
+        return prepare_model(model_spec) if plan is None else plan.resolve(model_spec)
 
     def _assemble_modeldata(self, prepared_spec, models, expedata, x, keep, fit_axis):
         self._n_components = nbmodels = len(models)
@@ -2515,7 +2524,7 @@ class Optimize(DecompositionAnalysis):
         python_outputs = {}
         if self._python_model_configuration is not None:
             _, _, names = self._python_model_configuration
-            resolved = prepare_model(self._model_spec)
+            resolved = self._resolve_model(self._model_spec)
             inverse_names = {internal: public for public, internal in names.items()}
             python_outputs = {
                 "fitted_parameters": {
