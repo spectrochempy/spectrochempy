@@ -2608,7 +2608,9 @@ def _optimize(
     use_model_spec = isinstance(fp0, _FitModelSpec)
     space = (
         _ScalarParameterSpace.from_plan(parameter_plan)
-        if use_model_spec and parameter_plan is not None and not parameter_plan.fallback
+        if use_model_spec
+        and parameter_plan is not None
+        and parameter_plan.vector_compatible
         else None
     )
 

@@ -8,6 +8,8 @@ and other legacy Python syntax retain prepare_model's historical evaluator.
 In particular, textual expansion of forward references is not equivalent to
 evaluating their values first: this adapter preserves historical precedence.
 ND declarations retain their existing preparation and numeric scale semantics.
+Scalar vector layout qualification is independent of expression compilation:
+an uncompiled expression can retain the legacy evaluator with prepared vectors.
 """
 
 import ast
@@ -15,6 +17,7 @@ import copy
 import re
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import replace
 from graphlib import CycleError
 from graphlib import TopologicalSorter
 from numbers import Real
@@ -59,6 +62,7 @@ class _ParameterPlan:
     fallback: bool = False
     coordinate_transform: str = "legacy_bounds"
     normalization_scale: float = 1.0
+    vector_compatible: bool = False
 
     @property
     def free_names(self):
@@ -175,6 +179,7 @@ def _compile_parameter_plan(spec):
             for bound in parameter.bounds
         ):
             return fallback
+    fallback = replace(fallback, vector_compatible=True)
     references = {
         key: str(p.reference) for key, _, p in declarations if p.reference is not None
     }
@@ -245,5 +250,10 @@ def _compile_parameter_plan(spec):
         for key, identifier, p in declarations
     )
     return _ParameterPlan(
-        parameters, sources, components, tuple(steps), tuple(dependencies.items())
+        parameters,
+        sources,
+        components,
+        tuple(steps),
+        tuple(dependencies.items()),
+        vector_compatible=True,
     )

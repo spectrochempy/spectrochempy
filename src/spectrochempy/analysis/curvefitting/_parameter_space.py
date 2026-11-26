@@ -35,8 +35,8 @@ class _ScalarParameterSpace:
     @classmethod
     def from_plan(cls, plan):
         """Prepare owner positions once, without retaining mutable model objects."""
-        if plan.fallback:
-            raise ValueError("Scalar parameter vectors require a qualified plan")
+        if not plan.vector_compatible:
+            raise ValueError("Scalar parameter vectors require a qualified layout")
         indices = {label: index for index, (label, _) in enumerate(plan.components)}
         layout = _ParameterLayout(plan.parameters)
         return cls(
