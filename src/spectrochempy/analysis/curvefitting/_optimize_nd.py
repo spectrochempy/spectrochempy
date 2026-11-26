@@ -3,6 +3,7 @@
 from collections.abc import Mapping
 from collections.abc import Sequence
 from copy import deepcopy
+from dataclasses import replace
 
 import numpy as np
 from pint import Quantity as PintQuantity
@@ -10,6 +11,7 @@ from pint import Quantity as PintQuantity
 from spectrochempy.analysis.curvefitting._fit_backend import (
     _least_squares as least_squares,
 )
+from spectrochempy.analysis.curvefitting._prepared_parameter import _ParameterLayout
 from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
 from spectrochempy.analysis.curvefitting._profile_models import extended_profiles
 from spectrochempy.analysis.curvefitting._profile_models import profile_history
@@ -115,18 +117,22 @@ def _prepare_parameter(spec, name, unit, *, width=False, identifier=None):
 
 
 def _prepare_peaks(specs, intensity_unit, units):
+    """Preserve the historical peaks/bindings/bounds/names/units protocol."""
+    peaks, free, layout = _prepare_peak_layout(specs, intensity_unit, units)
+    return peaks, free, list(layout.free_bounds), layout.free_names, layout.free_units
+
+
+def _prepare_peak_layout(specs, intensity_unit, units):
     if not isinstance(specs, Sequence) or isinstance(specs, (str, bytes)) or not specs:
         raise ValueError("peaks must be a nonempty ordered sequence")
 
-    peaks, free, limits, names, parameter_units = [], [], [], [], []
+    peaks, free, parameters = [], [], []
 
     def register(target, key, parameter, name):
         target[key] = parameter.value
+        parameters.append(replace(parameter, name=name))
         if not parameter.fixed:
             free.append((target, key))
-            limits.append(parameter.bounds)
-            names.append(name)
-            parameter_units.append(parameter.unit)
 
     for index, spec in enumerate(specs):
         if not isinstance(spec, Mapping) or set(spec) != {"height", "axes"}:
@@ -173,7 +179,7 @@ def _prepare_peaks(specs, intensity_unit, units):
                 )
             peak["axes"][dim] = resolved
         peaks.append(peak)
-    return peaks, free, limits, tuple(names), tuple(parameter_units)
+    return peaks, free, _ParameterLayout(tuple(parameters))
 
 
 def _relative_value(value, origin):
@@ -325,9 +331,7 @@ def fit_separable_peaks(dataset, specs, max_calls, shared_parameters=None):
 
         return fit_profiles(dataset, specs, max_calls, shared_parameters)
     coordinates, units = _grid(dataset)
-    peaks, free, limits, names, parameter_units = _prepare_peaks(
-        specs, dataset.units, units
-    )
+    peaks, free, layout = _prepare_peak_layout(specs, dataset.units, units)
     with np.errstate(over="ignore"):
         data = np.asarray(dataset.data, dtype=np.float64)
     unmasked = ~np.asarray(dataset.mask)
@@ -341,7 +345,10 @@ def fit_separable_peaks(dataset, specs, max_calls, shared_parameters=None):
         raise ValueError("ND fitting requires observations for all free parameters")
     observed = data[valid]
 
-    initial = [target[key] for target, key in free]
+    initial = layout.free_values
+    limits = layout.free_bounds
+    names = layout.free_names
+    parameter_units = layout.free_units
     origins = [
         value if key == "center" else 0
         for (_, key), value in zip(free, initial, strict=True)
@@ -363,6 +370,8 @@ def fit_separable_peaks(dataset, specs, max_calls, shared_parameters=None):
         ],
         dtype=np.longdouble,
     )
+    layout = replace(layout, normalization_scales=tuple(scales))
+    scales = np.asarray(layout.free_scales, dtype=np.longdouble)
 
     def model(peak_list, grids, *, keep_components=False):
         total = np.zeros(dataset.shape)
