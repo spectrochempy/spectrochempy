@@ -263,6 +263,8 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1, return_mask
     a ValueError is raised before processing, including for masked values.
     The existing Katsumoto circular window and Whitaker endpoint candidacy are
     retained within each run; inspect corrections near boundaries and gaps.
+    For Katsumoto, size=3 leaves only rounding residuals after the quadratic fit
+    and can yield unstable selection; use a larger window and inspect the result.
     Narrow spectral bands can be mistaken for spikes, especially with low thresholds
     or little noise. Compare corrected spectra and band areas with the original.
 
@@ -294,7 +296,7 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1, return_mask
 
     new = dataset.copy()
     axis, name = dataset.get_axis(dim)
-    dtype = dataset.data.dtype
+    dtype = new.data.dtype
     if not np.issubdtype(dtype, np.floating):
         dtype = np.dtype(float)
     data = np.moveaxis(dataset.data, axis, -1).astype(dtype, copy=True)

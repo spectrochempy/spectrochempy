@@ -193,11 +193,15 @@ def test_injected_spike_qualification_on_narrow_band_reference(method, position)
 
 
 @pytest.mark.parametrize("method", ["katsumoto", "whitaker"])
-def test_float32_dtype_is_preserved(method):
-    source = scp.NDDataset(signal(), dtype=np.float32)
-    source.data[43] += 20
-    result = source.despike(method=method, delta=6)
-    assert result.dtype == source.dtype
+@pytest.mark.parametrize("size", [3, 5, 9])
+def test_float32_uses_historical_copy_precision(method, size):
+    source = scp.NDDataset([[10, 10, 10, 10, 100, 10, 10, 10, 10]], dtype=np.float32)
+    promoted = scp.NDDataset(source.data.astype(np.float64))
+    expected = promoted.despike(method=method, size=size, delta=2)
+    result = source.despike(method=method, size=size, delta=2)
+    np.testing.assert_array_equal(result.data, expected.data)
+    assert result.dtype == expected.dtype
+    assert source.dtype == np.dtype(np.float32)
 
 
 @pytest.mark.parametrize("method", METHODS)
