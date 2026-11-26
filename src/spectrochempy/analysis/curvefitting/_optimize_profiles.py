@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from collections.abc import Sequence
+from copy import copy
 from dataclasses import replace
 
 import numpy as np
@@ -140,6 +141,7 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
                 return value
 
         target_units[(id(target), key)] = unit
+        group["relative_step"] = group.get("relative_step", False) or positive
         group["bindings"].append((target, key, convert))
         target[key] = convert(group["parameter"].value)
 
@@ -393,7 +395,20 @@ def fit_profiles(
         jacobian = (
             analytic_at(solution.x, scaled=False)
             if residual_jacobian is not None
-            else _physical_profile_jacobian(solution.x, fitted_at, bounds, scales)
+            else _physical_profile_jacobian(
+                solution.x,
+                fitted_at,
+                bounds,
+                scales,
+                [
+                    abs((origin + value * scale) / scale)
+                    if group["relative_step"]
+                    else max(1.0, abs(value))
+                    for group, value, origin, scale in zip(
+                        groups, solution.x, origins, scales, strict=True
+                    )
+                ],
+            )
         )
         update(solution.x)
     fitted, components = model(keep_components=True, physical=True)
@@ -404,8 +419,21 @@ def fit_profiles(
     if solution is not None:
         solution.fun = residual[valid] / intensity_scale
     diagnostics = _fit_diagnostics(observed, residual[valid], len(groups))
+    covariance_solution = solution
+    if solution is not None and residual_jacobian is None and jacobian is not None:
+        covariance_solution = copy(solution)
+        mantissa, power = np.frexp(jacobian)
+        scale, scale_power = np.frexp(scales)
+        intensity, intensity_power = np.frexp(intensity_scale)
+        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+            covariance_solution.jac = np.asarray(
+                np.ldexp(
+                    mantissa * scale / intensity, power + scale_power - intensity_power
+                ),
+                dtype=float,
+            )
     covariance, reason = _physical_covariance(
-        solution, jacobian, scales, bounds, diagnostics
+        covariance_solution, jacobian, scales, bounds, diagnostics
     )
     diagnostics["covariance_reason"] = reason
     values = origins + solution.x * scales if solution is not None else []
@@ -431,12 +459,12 @@ def fit_profiles(
     ), solution
 
 
-def _physical_profile_jacobian(vector, evaluate, bounds, scales):
+def _physical_profile_jacobian(vector, evaluate, bounds, scales, step_scales):
     """Differentiate model values before residual normalization loses small tails."""
     jacobian = None
     step_factor = np.cbrt(np.finfo(float).eps)
     for index, value in enumerate(vector):
-        step = step_factor * max(1.0, abs(value))
+        step = step_factor * (step_scales[index] or 1.0)
         left = max(bounds[0, index], value - step)
         right = min(bounds[1, index], value + step)
         if left == right:

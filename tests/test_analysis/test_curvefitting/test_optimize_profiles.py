@@ -564,6 +564,153 @@ def test_kinetic_jacobian_and_covariance_are_invariant_to_time_scale(scale):
     assert_allclose(fit.result.covariance[0, 0], covariance, rtol=2e-6)
 
 
+@pytest.mark.parametrize("model", ["exponential_decay", "saturation_recovery"])
+@pytest.mark.parametrize("time_unit, unit_scale", [("s", 1.0), ("ms", 1000.0)])
+@pytest.mark.parametrize("regular", [False, True])
+@pytest.mark.parametrize("fixed_height", [False, True])
+@pytest.mark.parametrize("shared", [False, True])
+def test_kinetic_postfit_derivatives_use_fitted_scale(
+    model, time_unit, unit_scale, regular, fixed_height, shared
+):
+    times = np.linspace(0, 10, 12) if regular else np.array([0, 0.1, 0.3, 1, 3, 10])
+    times = times * 1e-6 * unit_scale
+    tau = 1e-6 * unit_scale
+    x = np.array([-1.0, 0.0, 1.0])
+    spectral = np.exp(-4 * np.log(2) * x**2)
+    second_spectral = np.exp(-4 * np.log(2) * (x - 1) ** 2)
+    exponential = np.exp(-times / tau)
+    kinetic = exponential if model == "exponential_decay" else 1 - exponential
+    values = 2 * kinetic[:, None] * spectral
+    if shared:
+        values += 0.75 * kinetic[:, None] * second_spectral
+    values += np.random.default_rng(42).normal(0, 1e-5, values.shape)
+    mask = np.zeros(values.shape, dtype=bool)
+    mask[1, 0] = True
+    grid = scp.NDDataset(
+        values[::-1],
+        mask=mask[::-1],
+        coordset=[
+            scp.Coord(times[::-1], units=time_unit, rounding=False),
+            scp.Coord(x, units="Hz"),
+        ],
+        units="V",
+    )
+    peak = {
+        "height": {"value": 2, "fixed": fixed_height},
+        "axes": {
+            "x": {
+                "model": "gaussian",
+                "parameters": {
+                    "center": {"value": 0, "fixed": True},
+                    "width": {"value": 1, "fixed": True},
+                },
+            },
+            "y": {
+                "model": model,
+                "parameters": {
+                    "tau": {
+                        "value": 2 * unit_scale,
+                        "bounds": (1e-12 * unit_scale, None),
+                    }
+                },
+            },
+        },
+    }
+    peaks = [peak]
+    shared_parameters = None
+    if shared:
+        peak["axes"]["y"]["parameters"]["tau"] = {"shared": "time"}
+        second = deepcopy(peak)
+        second["height"] = {"value": 0.75, "fixed": True}
+        second["axes"]["x"]["parameters"]["center"] = {"value": 1, "fixed": True}
+        peaks.append(second)
+        shared_parameters = {
+            "time": {"value": 2000, "bounds": (1e-9, None), "unit": "ms"}
+        }
+    fit = scp.Optimize(peaks=peaks, shared_parameters=shared_parameters).fit(grid)
+    result = fit.result.peaks[0]
+    amplitude = result["height"]
+    fitted_tau = result["axes"]["y"]["parameters"]["tau"]
+    assert_allclose(fitted_tau, tau, rtol=1e-3)
+    exponential = np.exp(-times[::-1] / fitted_tau)
+    kinetic = exponential if model == "exponential_decay" else 1 - exponential
+    tau_derivative = (-amplitude * exponential * times[::-1] / fitted_tau**2)[
+        :, None
+    ] * spectral
+    if shared:
+        tau_derivative += (-0.75 * exponential * times[::-1] / fitted_tau**2)[
+            :, None
+        ] * second_spectral
+        tau_derivative *= unit_scale / 1000
+    if model == "saturation_recovery":
+        tau_derivative *= -1
+    columns = ([] if fixed_height else [-kinetic[:, None] * spectral]) + [
+        tau_derivative
+    ]
+    reference = np.stack([column[~mask[::-1]] for column in columns], axis=-1)
+    assert_allclose(fit.jacobian, reference, rtol=2e-5, atol=1e-6)
+    parameter_scales = np.array(
+        ([1] if not fixed_height else []) + [1e-3 if shared else tau]
+    )
+    scaled_reference = reference * parameter_scales
+    variance = np.sum(fit.result.residuals.data[~mask[::-1]] ** 2) / (
+        reference.shape[0] - reference.shape[1]
+    )
+    covariance = variance * np.linalg.inv(scaled_reference.T @ scaled_reference)
+    covariance *= parameter_scales[:, None] * parameter_scales
+    assert fit.result.covariance is not None
+    assert_allclose(fit.result.covariance, covariance, rtol=3e-5, atol=0)
+
+
+@pytest.mark.parametrize("model", ["gaussian", "lorentzian"])
+@pytest.mark.parametrize("width", [1e-6, 1e-9])
+def test_narrow_profile_postfit_derivative(model, width):
+    x = np.linspace(-3, 3, 31) * width
+    y = np.array([-1.0, 0.0, 1.0])
+    spectral = (
+        np.exp(-4 * np.log(2) * (x / width) ** 2)
+        if model == "gaussian"
+        else 1 / (1 + 4 * (x / width) ** 2)
+    )
+    values = np.exp(-4 * np.log(2) * y[:, None] ** 2) * spectral
+    grid = scp.NDDataset(
+        values,
+        coordset=[
+            scp.Coord(y),
+            scp.Coord(x, units="Hz", rounding=False),
+        ],
+    )
+    peak = {
+        "height": {"value": 1, "fixed": True},
+        "axes": {
+            "x": {
+                "model": model,
+                "parameters": {
+                    "center": {"value": 0, "fixed": True},
+                    "width": {"value": 10 * width, "bounds": (width / 100, None)},
+                },
+            },
+            "y": {
+                "model": "gaussian",
+                "parameters": {
+                    "center": {"value": 0, "fixed": True},
+                    "width": {"value": 1, "fixed": True},
+                },
+            },
+        },
+    }
+    fit = scp.Optimize(peaks=[peak]).fit(grid)
+    fitted_width = fit.result.peaks[0]["axes"]["x"]["parameters"]["width"]
+    assert_allclose(fitted_width, width, rtol=1e-6)
+    factor = (
+        8 * np.log(2) * x**2 / fitted_width**3
+        if model == "gaussian"
+        else 8 * x**2 / fitted_width**3 / (1 + 4 * (x / fitted_width) ** 2)
+    )
+    reference = (-fit.predict().data * factor).ravel()
+    assert_allclose(fit.jacobian[:, 0], reference, rtol=2e-6, atol=1e-6)
+
+
 @pytest.mark.parametrize("mixed", [False, True])
 def test_general_profiles_preserve_representable_gaussian_tails(mixed):
     grid = scp.NDDataset(

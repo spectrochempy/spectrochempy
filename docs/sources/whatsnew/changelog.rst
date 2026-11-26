@@ -75,6 +75,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- General separable ND fits use fitted scales for post-fit numerical derivatives
+  of built-in widths and time constants, including shared parameters. Local
+  covariance uses the same physical Jacobian. Solver iterations and fitted
+  parameters are unchanged (issue #1988).
+
 - ``save_as(..., directory=...)`` respects the explicit destination directory
   for imported datasets and projects instead of using their source directory.
   Absolute filenames retain precedence (:pr:`2001`).
