@@ -3,6 +3,7 @@ name: spectrochempy-dev
 description: >-
   Develop, refactor, or fix bugs in SpectroChemPy. Use for any code change:
   conventions, testing, pre-commit, shared decisions, and behavior preservation.
+  Also use when preparing user-facing SpectroChemPy code or issue reproducers.
 metadata:
   audience: maintainer
   workflow: development
@@ -11,7 +12,8 @@ metadata:
 ## Trigger
 
 Use this skill when modifying source code, tests, or documentation in the
-SpectroChemPy ecosystem.
+SpectroChemPy ecosystem, or preparing code for users in answers, examples,
+notebooks, generated scripts, or issue reproducers.
 
 Read `CONTRIBUTING.md` at the start of each session.
 
@@ -239,25 +241,62 @@ internal (refactoring, tests, docs), apply the `no-changelog` label to the PR.
 * Prefer existing helpers over new ones.
 * Never add new dependencies without explicit approval.
 * Never create new public API without asking.
-* In gallery examples, notebooks, and user guides, keep calculations on
-  `NDDataset` and `Coord` when their operators and methods express the
-  calculation clearly. Use `scp.Coord.linspace()` for coordinates,
-  `scp.linspace()` for sampled values, and `scp.normal()` for normal random
-  samples. For line shapes, use the public helper for the intended model:
-  `scp.gaussian()`, `scp.lorentzian()`, `scp.voigt()`, or
-  `scp.pseudovoigt()`. Match the model's width and normalization to the
-  example before replacing a formula. Keep NumPy for interoperability,
-  low-level comparisons, and operations without a suitable public equivalent.
-* Likewise, prefer `dataset.plot()`, `scp.multiplot()`, `scp.plot_multiple()`,
-  and their `output=` lifecycle over direct Matplotlib calls. Keep Matplotlib
-  when the example demonstrates integration or needs a feature the public
-  plotting API does not expose.
-  Check this on edited examples even when the imports were already present.
 * In notebook-based tutorials and gallery examples, use `_ = expression`
   when an unused return value would appear as cell output. For example,
   `_ = dataset.plot()` hides the returned axes representation while keeping
   the figure visible. Keep useful diagnostics and intentionally displayed
   objects.
+
+---
+
+## Public SpectroChemPy API first
+
+User-facing code should present SpectroChemPy as a coherent scientific toolkit:
+users should be able to perform the demonstrated workflow with
+`import spectrochempy as scp` whenever the public API supports it. This applies to
+answers, issue reproducers, examples, guides, notebooks, generated scripts and
+plugin usage, including code adapted from an existing example.
+
+Before using NumPy or Matplotlib directly, check the public API in the target
+version through its reference documentation, public signatures or source. Use
+SCP when it expresses the required operation correctly. Familiarity with `np`
+or `plt`, fewer keystrokes, and imports already present in a file are not
+reasons to bypass an available SCP operation. Do not guess API names or use
+private interfaces to make an example appear self-contained.
+
+Keep scientific calculations on `NDDataset` and `Coord`, preserving coordinates,
+units and masks. Prefer their arithmetic, slicing and reductions, and
+`scp.MASKED` for masking. A small fixed `scp.NDDataset([...])` can make a clearer
+minimal reproducer than procedurally generated arrays. Use
+`scp.Coord.linspace()` for coordinates, `scp.linspace()` for sampled values,
+and `scp.normal()` for normal random samples when those fit the task. For line
+shapes, use `scp.gaussian()`, `scp.lorentzian()`, `scp.voigt()` or
+`scp.pseudovoigt()` with the intended width and normalization. Prefer
+`dataset.plot()`, `scp.plot_multiple()`, `scp.multiplot()` and their `output=`
+lifecycle for plotting. Do not extract `.data` merely to redo an operation that
+SCP already provides, or change the scientific model to remove an import.
+
+When no suitable public operation exists, **report the API gap**: describe the
+user operation, the version and public alternatives checked, and the capability
+missing. Keep any necessary external fallback explicit and local, with the
+reason and scientific context preserved at the boundary. Tell the maintainer
+and record the gap in the task record, linking existing follow-up when present.
+The gap is product feedback, not a reason to silently add NumPy/Matplotlib glue.
+Do not invent a public API, expand implementation scope, or publish an issue
+without the applicable authorization. Continue work that does not depend on
+resolving the gap.
+
+Direct NumPy/Matplotlib remains appropriate for explicitly requested
+interoperability, independent numerical reference comparisons, and internal
+array/backend implementation. Those are distinct from a missing user-facing
+SCP capability; explain the boundary when it appears in an example. This rule
+does not require removing the libraries from internal code or tests, or adding
+a wrapper for every external feature.
+
+Before handing off user-facing code, review its `np`, `plt` and raw-array usage:
+replace avoidable calls with verified public SCP operations, and account for
+the remaining calls and any API gaps. Run the changed example or reproducer on
+the stated version when possible; report validation limits explicitly.
 
 ---
 

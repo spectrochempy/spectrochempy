@@ -132,6 +132,14 @@ If tests are missing or insufficient, report what should be added — but do
 ### 7. Check project conventions
 
 * Code follows existing patterns.
+* User-facing code (including answers and issue reproducers) uses verified
+  public SCP operations where available, rather than avoidable NumPy,
+  Matplotlib or `.data` detours. Existing imports are not an exemption. Apply
+  the **Public SpectroChemPy API first** section of `spectrochempy-dev`.
+* Necessary external calls have an explicit purpose or a reported API gap,
+  with the target version and alternatives checked. Do not demand removal
+  of legitimate internal/backend code, interoperability or independent
+  numerical references, or invent an API to satisfy this check.
 * No unnecessary new dependencies.
 * Commit messages use correct prefix.
 * Changelog entries link to the correct PR in the owning repository, or the

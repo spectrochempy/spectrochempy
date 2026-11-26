@@ -138,16 +138,24 @@ The skills are shared by OpenCode, Codex, and Claude Code. They live only in
 
 ---
 
-## Gallery and Tutorial Handoff
+## Public SpectroChemPy API first
 
-In user guides, notebooks, and gallery examples, use the public SpectroChemPy
-API whenever it expresses the operation clearly. Prefer `dataset.plot()`,
-`scp.plot_multiple()`, and `scp.multiplot()` for plots, and dataset
-arithmetic and public helpers such as `scp.Coord.linspace()` or
-`scp.gaussian()` for calculations and profiles. Use direct Matplotlib or
-NumPy for interoperability, low-level implementation comparisons, or
-features without a suitable public equivalent. See `spectrochempy-dev`
-for examples.
+For all user-facing code, including answers and issue reproducers as well as
+guides, notebooks and gallery examples, use the public SCP API whenever it
+supports the required operation. The goal is a coherent workflow with
+`import spectrochempy as scp`, preserving coordinates, units and masks.
+Check the target version's public API before reaching for `np`, `plt` or raw
+`.data` operations; existing imports do not justify bypassing SCP.
+
+If a needed public capability is missing, report the operation, the alternatives
+checked and the API gap to the maintainer, and record it in the task record.
+Make any external fallback explicit. A gap does not authorize a new API or
+public issue. Internal numerical/backend code and deliberate interoperability
+or reference comparisons may still use NumPy/Matplotlib. See
+`.agents/skills/spectrochempy-dev/SKILL.md`, **Public SpectroChemPy API first**,
+for the full procedure and examples.
+
+## Gallery and Tutorial Handoff
 
 In notebooks, assign unused return values to `_` when IPython would
 otherwise display them. Keep figures and outputs that help the reader.
