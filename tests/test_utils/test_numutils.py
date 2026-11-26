@@ -36,6 +36,19 @@ class TestGetNDecimals:
 
 
 class TestSpacings:
+    @pytest.mark.parametrize("dtype", [np.uint32, np.uint64])
+    @pytest.mark.parametrize("offset", [0, 2**32 - 11])
+    def test_unsigned_descending_spacings(self, dtype, offset):
+        values = np.array([10 + offset, 3 + offset, 1 + offset, offset], dtype=dtype)
+        assert sorted(spacings(values)) == [-7.0, -2.0, -1.0]
+
+    def test_uint64_spacings_above_float_precision(self):
+        offset = 2**64 - 11
+        values = np.array(
+            [offset + 10, offset + 3, offset + 1, offset], dtype=np.uint64
+        )
+        assert sorted(spacings(values)) == [-7.0, -2.0, -1.0]
+
     def test_uniform_spacing(self):
         arr = np.array([1, 2, 3, 4, 5])
         assert spacings(arr) == 1.0

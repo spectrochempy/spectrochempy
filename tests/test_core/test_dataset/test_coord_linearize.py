@@ -6,6 +6,8 @@ and ensure that irregular or duplicated coordinates are never silently
 rewritten into an artificial uniform grid.
 """
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -207,3 +209,49 @@ def test_default_linearization_tolerance_preserves_one_percent_spacing_change(re
     assert coord._linearize_below == 0.1
     assert not coord.linear
     np.testing.assert_array_equal(coord.data, values)
+
+
+@pytest.mark.parametrize("dtype", [np.uint32, np.uint64, np.int64, np.float64])
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("rounding", [False, True])
+@pytest.mark.parametrize(
+    "values, linear",
+    [
+        ([0, 1, 3, 10], False),
+        ([0, 1, 2, 3], True),
+        ([0, 1, 1, 3], False),
+        ([0, 3, 1, 10], False),
+    ],
+)
+def test_integer_coordinate_geometry(dtype, reverse, rounding, values, linear):
+    values = np.array(values, dtype=dtype)
+    if reverse:
+        values = values[::-1]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        coord = Coord(values, units="s", rounding=rounding)
+        np.testing.assert_array_equal(coord.data, values)
+        assert coord.linear == linear
+        expected_spacing = np.unique(np.diff(values.astype(float)))
+        np.testing.assert_array_equal(
+            np.sort(np.atleast_1d(coord.spacing.magnitude)), expected_spacing
+        )
+        np.testing.assert_array_equal(coord.to("ms").data, values * 1000.0)
+
+
+@pytest.mark.parametrize("dtype", [np.uint32, np.uint64])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_unsigned_coordinate_native_roundtrip(tmp_path, dtype, reverse):
+    values = np.array([0, 1, 3, 10], dtype=dtype)
+    if reverse:
+        values = values[::-1]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        dataset = NDDataset(
+            np.arange(values.size, dtype=float),
+            coordset=[Coord(values, units="s", rounding=False)],
+        )
+        filename = dataset.write(tmp_path / "unsigned.scp")
+        restored = NDDataset.load(filename)
+        np.testing.assert_array_equal(restored.x.data, values)
+        assert restored.x.units == dataset.x.units

@@ -980,10 +980,12 @@ class Coord(NDMath, NDArray):
                     makeitlinear = True
 
         if makeitlinear:
+            if data.dtype.kind == "u":
+                data = data.astype(float)
             # single spacing with this precision
             # we set the number with their full precision
             # rounding will be made if necessary when reading the data property
-            nd = get_n_decimals(np.diff(self._data).max(), self._sigdigits)
+            nd = get_n_decimals(np.diff(data).max(), self._sigdigits)
             data = np.around(data, nd)
             self._data = np.linspace(data[0], data[-1], data.size)
             self._linear = True
