@@ -10,6 +10,8 @@ evaluating their values first: this adapter preserves historical precedence.
 ND declarations retain their existing preparation and numeric scale semantics.
 Scalar vector layout qualification is independent of expression compilation:
 an uncompiled expression can retain the legacy evaluator with prepared vectors.
+fallback_reason records the first conservative qualification gate, not a public
+validation error or a scientific solver diagnostic. It never changes dispatch.
 """
 
 import ast
@@ -63,6 +65,7 @@ class _ParameterPlan:
     coordinate_transform: str = "legacy_bounds"
     normalization_scale: float = 1.0
     vector_compatible: bool = False
+    fallback_reason: str | None = None
 
     @property
     def free_names(self):
@@ -164,21 +167,27 @@ def _compile_parameter_plan(spec):
     )
     components = tuple((c.label, c.model_name) for c in spec.components)
     fallback = _ParameterPlan(parameters, (), components, (), (), True)
+
+    def rejected(reason):
+        return replace(fallback, fallback_reason=reason)
+
     keys = [key for key, _, _ in declarations]
-    if (
-        spec.expvars
-        or spec.expnumber != 1
-        or spec.constraints is not None
-        or len(set(keys)) != len(keys)
-        or len({label for label, _ in components}) != len(components)
-    ):
-        return fallback
+    if spec.expvars or spec.expnumber != 1:
+        return rejected("experiment_layout")
+    if spec.constraints is not None:
+        return rejected("reserved_constraints")
+    if len(set(keys)) != len(keys):
+        return rejected("duplicate_parameter_keys")
+    if len({label for label, _ in components}) != len(components):
+        return rejected("duplicate_component_labels")
     for _, _, parameter in declarations:
-        if not isinstance(parameter.value, Real) or any(
+        if not isinstance(parameter.value, Real):
+            return rejected("non_scalar_value")
+        if any(
             bound is not None and not isinstance(bound, Real)
             for bound in parameter.bounds
         ):
-            return fallback
+            return rejected("non_scalar_bound")
     fallback = replace(fallback, vector_compatible=True)
     references = {
         key: str(p.reference) for key, _, p in declarations if p.reference is not None
@@ -187,14 +196,14 @@ def _compile_parameter_plan(spec):
     for key, expression in references.items():
         tree = _arithmetic_tree(expression)
         if tree is None:
-            return fallback
+            return rejected("unsupported_expression_syntax")
         names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
         if any(_RE_KEYWORD.fullmatch(name) is None for name in names):
-            return fallback
+            return rejected("legacy_name_tokens")
         if names - set(keys):
-            return fallback
+            return rejected("unknown_expression_names")
         if any(a != b and a in b for a in names for b in names):
-            return fallback
+            return rejected("overlapping_expression_names")
         dependencies[key] = tuple(sorted(names))
     try:
         tuple(TopologicalSorter(dependencies).static_order())
@@ -209,32 +218,32 @@ def _compile_parameter_plan(spec):
             resolved = current
             for name in _RE_KEYWORD.findall(current):
                 if name not in lookup:
-                    return fallback
+                    return rejected("legacy_text_tokens")
                 resolved = resolved.replace(name, lookup[name])
             if resolved == current:
                 break
             current = resolved
             if len(current) > 65536:
-                return fallback
+                return rejected("expression_expansion_limit")
         else:
-            return fallback
+            return rejected("expression_expansion_limit")
         tree = _arithmetic_tree(current)
         if tree is None:
-            return fallback
+            return rejected("expanded_expression_syntax")
         if any(
             node.id not in symbols.values()
             for node in ast.walk(tree)
             if isinstance(node, ast.Name)
         ):
-            return fallback
+            return rejected("expanded_expression_names")
         try:
             preserves_signs = _preserves_signed_literals(current, tree)
         except RecursionError:
             # Qualification is optional: deep legacy expressions remain valid
             # when copying/visiting their AST exceeds the interpreter limit.
-            return fallback
+            return rejected("expression_depth")
         if not preserves_signs:
-            return fallback
+            return rejected("signed_literal_precedence")
         steps.append(_ExpressionStep(key, symbols[key], current))
         lookup[key] = symbols[key]
     sources = tuple(
