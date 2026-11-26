@@ -77,7 +77,8 @@ Bug Fixes
 
 - 1D ``Optimize`` no longer emits output-clearing control characters in quiet
   mode or terminal processes. Notebook output clearing is restricted to
-  ``INFO`` and ``DEBUG`` reporting (issue #1997).
+  ``INFO`` and ``DEBUG`` reporting. The fitting gallery example also omits an
+  empty introductory code block (:pr:`2006`).
 
 - General separable ND fits use fitted scales for post-fit numerical derivatives
   of built-in widths and time constants, including shared parameters. Local
