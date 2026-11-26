@@ -98,7 +98,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     def __init__(
         self,
         *,
-        log_level="WARNING",
+        log_level=None,
         warm_start=False,
         **kwargs,
     ):

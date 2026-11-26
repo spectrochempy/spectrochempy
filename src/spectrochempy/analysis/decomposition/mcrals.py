@@ -15,7 +15,6 @@ __all__ = ["MCRALS"]
 __configurables__ = ["MCRALS"]
 
 import base64
-import logging
 from dataclasses import dataclass
 from dataclasses import field
 from types import SimpleNamespace
@@ -824,9 +823,9 @@ class MCRALS(DecompositionAnalysis):
         ``St``.
     solver_St : ``'lstsq'`` | ``'nnls'`` | ``'pnnls'``, optional, default: ``'lstsq'``
         Solver used to estimate spectral profiles ``St`` from ``X`` and ``C``.
-    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
-        The log level at startup. It can be changed later on using the
-        `set_log_level` method or by changing the ``log_level`` attribute.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes the global logging level. If None, preserve
+        the current level set by ``scp.set_loglevel()``.
     warm_start : `bool`, optional, default: `False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
@@ -1377,7 +1376,7 @@ and `St`.
     def __init__(
         self,
         *args,
-        log_level=logging.WARNING,
+        log_level=None,
         warm_start=False,
         **kwargs,
     ):
@@ -4108,7 +4107,7 @@ MCRALS.__signature__ = Signature(
         Parameter("tol_profile_change", kind=Parameter.KEYWORD_ONLY, default=None),
         Parameter("maxdiv", kind=Parameter.KEYWORD_ONLY, default=5),
         Parameter("warm_start", kind=Parameter.KEYWORD_ONLY, default=False),
-        Parameter("log_level", kind=Parameter.KEYWORD_ONLY, default=logging.WARNING),
+        Parameter("log_level", kind=Parameter.KEYWORD_ONLY, default=None),
     ]
 )
 

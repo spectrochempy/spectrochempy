@@ -12,6 +12,8 @@ import warnings
 from os import environ
 from unittest.mock import Mock
 
+import logging
+
 import numpy as np
 import pytest
 
@@ -623,3 +625,30 @@ def test_IRIS():
     iris4.fit(X, K7)
     f7 = iris4.f
     assert f7.shape == (1, q[2], X.shape[1])
+
+
+@pytest.mark.parametrize("level", ["DEBUG", "INFO", "WARNING", "ERROR"])
+@pytest.mark.parametrize("kwargs", [{}, {"log_level": None}], ids=["omitted", "none"])
+def test_constructor_preserves_global_level(level, kwargs):
+    initial = scp.get_loglevel()
+    try:
+        scp.set_loglevel(level)
+        IRIS(**kwargs)
+        assert scp.get_loglevel() == getattr(logging, level)
+        assert logging.getLogger("spectrochempy").level == getattr(logging, level)
+    finally:
+        scp.set_loglevel(initial)
+
+
+@pytest.mark.parametrize(
+    "level, expected", [("WARNING", logging.WARNING), (logging.INFO, logging.INFO)]
+)
+def test_constructor_explicit_level_changes_global(level, expected):
+    initial = scp.get_loglevel()
+    try:
+        scp.set_loglevel("DEBUG")
+        IRIS(log_level=level)
+        assert scp.get_loglevel() == expected
+        assert logging.getLogger("spectrochempy").level == expected
+    finally:
+        scp.set_loglevel(initial)

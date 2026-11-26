@@ -36,9 +36,9 @@ class EFA(DecompositionAnalysis):
 
     Parameters
     ----------
-    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
-        The log level at startup. It can be changed later on using the
-        `set_log_level` method or by changing the ``log_level`` attribute.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes the global logging level. If None, preserve
+        the current level set by ``scp.set_loglevel()``.
     warm_start : `bool`, optional, default: `False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
@@ -94,7 +94,7 @@ class EFA(DecompositionAnalysis):
     def __init__(
         self,
         *,
-        log_level="WARNING",
+        log_level=None,
         warm_start=False,
         **kwargs,
     ):

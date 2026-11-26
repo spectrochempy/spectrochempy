@@ -197,7 +197,7 @@ class PSD(BaseConfigurable):
     def __init__(
         self,
         *,
-        log_level="WARNING",
+        log_level=None,
         **kwargs,
     ):
         super().__init__(

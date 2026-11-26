@@ -9,7 +9,6 @@ Implements the base abstract classes to define models and estimators.
 (analysis, processing, ...).
 """
 
-import logging
 from contextlib import suppress
 from copy import copy
 from inspect import getattr_static
@@ -38,9 +37,9 @@ class BaseConfigurable(MetaConfigurable):
 
     Parameters
     ----------
-    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
-        The log level at startup. It can be changed later on using the
-        `set_log_level` method or by changing the ``log_level`` attribute.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes the global logging level. If None, preserve
+        the current level set by ``scp.set_loglevel()``.
     """
 
     # ----------------------------------------------------------------------------------
@@ -80,7 +79,7 @@ class BaseConfigurable(MetaConfigurable):
     def __init__(
         self,
         *,
-        log_level=logging.WARNING,
+        log_level=None,
         **kwargs,
     ):
         """
@@ -88,8 +87,8 @@ class BaseConfigurable(MetaConfigurable):
 
         Parameters
         ----------
-        log_level : int, optional
-            The log level at startup. Default is logging.WARNING.
+        log_level : str, int or None, optional
+            An explicit level changes global logging; None preserves it.
         **kwargs : dict
             Additional keyword arguments for configuration.
         """
@@ -105,7 +104,8 @@ class BaseConfigurable(MetaConfigurable):
         super().__init__(parent=app, reset=reset)
 
         # Set log_level of the console report (accessible using the log property)
-        set_loglevel(log_level)
+        if log_level is not None:
+            set_loglevel(log_level)
 
         # Initial configuration
         # ---------------------

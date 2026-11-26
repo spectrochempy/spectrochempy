@@ -37,8 +37,8 @@ def denoise(dataset, ratio=99.8, **kwargs):
     dim : str or int, optional, default='x'.
         Specify on which dimension to apply this method. If `dim` is specified as an
         integer it is equivalent to the usual `axis` numpy parameter.
-    log_level : int, optional, default: "WARNING"
-        Set the logging level for the method.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes global logging; None preserves it.
 
     """
     from spectrochempy.analysis.decomposition.pca import PCA

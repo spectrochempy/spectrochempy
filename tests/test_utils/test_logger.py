@@ -199,9 +199,8 @@ def test_app_log_level_applies_to_loggers(fresh_scp_logger):
         assert get_loglevel() == expected
 
 
-def test_model_without_log_level_resets_both_loggers(tmp_path):
-    """Known limit: a model created without log_level resets the level to WARNING,
-    consistently for get_loglevel(), scp.info_ and the "spectrochempy" logger."""
+def test_model_without_log_level_preserves_both_loggers(tmp_path):
+    """A model preserves INFO for application and shared-logger messages."""
     code = _FRESH_PRELUDE + (
         "scp.set_loglevel('INFO')\n"
         "scp.PCA()\n"
@@ -209,10 +208,11 @@ def test_model_without_log_level_resets_both_loggers(tmp_path):
         "print('logger', _logging._logger.level)\n"
     )
     out, err = _run_fresh(code, tmp_path)
-    assert "level model 30" in out
-    assert "logger 30" in out
-    assert "utils info model" not in err
-    assert "app info model" not in err
+    assert "level model 20" in out
+    assert "logger 20" in out
+    assert "utils info model" in err
+    assert "app info model" in err
+    assert "outside the axis limits" in err
 
 
 def test_lazy_configuration_keeps_default_warning(fresh_scp_logger, capsys):

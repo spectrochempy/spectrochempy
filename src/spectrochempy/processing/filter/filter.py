@@ -145,9 +145,9 @@ class Filter(ProcessingConfigurable):
 
     Parameters
     ----------
-    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
-        The log level at startup. It can be changed later on using the
-        `set_log_level` method or by changing the ``log_level`` attribute.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes the global logging level. If None, preserve
+        the current level set by ``scp.set_loglevel()``.
     method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``, ``"butterworth"``, ``"notch"``, ``"gaussian"``, ``"wavelet"``], optional, default: ``"savgol"``
         The filter method to be applied. By default, the Savitzky-Golay (savgol) filter is applied.
     size : `int`, optional, default: 5
@@ -370,7 +370,7 @@ and ‘nearest’.
     # ----------------------------------------------------------------------------------
     def __init__(
         self,
-        log_level="WARNING",
+        log_level=None,
         **kwargs,
     ):
         # call the super class for initialisation of the configuration parameters
@@ -969,8 +969,8 @@ def smooth(dataset, size=5, window="avg", dim=-1, **kwargs):
         The default 'interp' is mapped to 'reflect' for window filters.
     cval : `float`, optional, default: 0.0
         Value to fill past edges of input if mode is 'constant'.
-    log_level : `str`, optional, default: 'WARNING'
-        The log level for the filter.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes global logging; None preserves it.
 
     See Also
     --------
@@ -1155,8 +1155,8 @@ def savgol(dataset, size=5, order=2, dim=-1, delta=None, **kwargs):
         The mode parameter determines how the array borders are handled.
     cval : `float`, optional, default: 0.0
         Value to fill past edges of input if mode is 'constant'.
-    log_level : `str`, optional, default: 'WARNING'
-        The log level for the filter.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes global logging; None preserves it.
 
     See Also
     --------
@@ -1274,8 +1274,8 @@ def whittaker(dataset, lamb=1.0, order=2, dim=-1, **kwargs):
 
     Other Parameters
     ----------------
-    log_level : `str`, optional, default: 'WARNING'
-        The log level for the filter.
+    log_level : str, int or None, optional, default: None
+        An explicit level changes global logging; None preserves it.
 
     See Also
     --------
