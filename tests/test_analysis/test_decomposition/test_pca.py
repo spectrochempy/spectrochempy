@@ -186,6 +186,25 @@ def test_nmf_and_fast_ica_inverse_transform_use_n_components():
     assert ica._fast_ica.mixing_.shape == (8, 3)
 
 
+def test_fast_ica_without_whitening_reconstructs_with_all_fitted_components():
+    # With whiten=False, sklearn ignores n_components and fits all the
+    # features: "all components" must use them all.
+    rng = np.random.default_rng(0)
+    X = NDDataset(rng.random((10, 5)))
+    with pytest.warns(UserWarning, match="Ignoring n_components with whiten=False"):
+        ica = scp.FastICA(whiten=False, n_components=2).fit(X)
+    assert ica._fast_ica.components_.shape == (5, 5)
+    assert ica.transform().shape == (10, 5)
+    assert ica.get_components().shape == (5, 5)
+    assert_allclose(ica.inverse_transform().data, X.data, atol=1e-10)
+    assert_allclose(ica.inverse_transform(n_components=None).data, X.data, atol=1e-10)
+    S = ica._fast_ica.transform(X.data)
+    assert_allclose(
+        ica.inverse_transform(n_components=2).data,
+        S[:, :2] @ ica._fast_ica.mixing_[:, :2].T,
+    )
+
+
 def test_pca_float_threshold_component_selection(low_rank_pca_dataset):
     dataset = low_rank_pca_dataset
 

@@ -231,9 +231,9 @@ array of values drawn from a normal distribution is used."""
 
         # The _outfit members are np.ndarrays
         _outfit = self._fast_ica.fit(X)
-        self._n_components = int(
-            self._fast_ica.n_components,
-        )  # cast the returned int64 to int
+        # Use the number of components actually fitted: with whiten=False,
+        # sklearn ignores n_components and keeps all the features.
+        self._n_components = int(self._fast_ica.components_.shape[0])
         return _outfit
 
     def _transform(self, X):
