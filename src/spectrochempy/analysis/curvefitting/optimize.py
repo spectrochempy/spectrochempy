@@ -7,6 +7,7 @@ __all__ = ["Optimize"]
 __configurables__ = __all__
 
 import inspect
+import logging
 import re
 import sys
 from copy import deepcopy
@@ -50,10 +51,12 @@ from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.analysis.curvefitting._stationarity import _physical_stationarity
 from spectrochempy.analysis.curvefitting.model import Model
 from spectrochempy.analysis.curvefitting.model import _prepare_public_model
+from spectrochempy.application.application import get_loglevel
 from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.system import is_notebook
 
 optimize = _fit_backend.optimize
 
@@ -1355,7 +1358,8 @@ class Optimize(DecompositionAnalysis):
             if niter % everyiter != 0:
                 return
 
-            display.clear_output(wait=True)
+            if get_loglevel() <= logging.INFO and is_notebook():
+                display.clear_output(wait=True)
             info_(f"Iterations: {niter}, Calls: {ncalls} (chi2: {chi2:.5f})")
             sys.stdout.flush()
 
@@ -1451,7 +1455,8 @@ class Optimize(DecompositionAnalysis):
         self._set_rendered_script(str(fp))
 
         # log.info the results
-        display.clear_output(wait=True)
+        if get_loglevel() <= logging.INFO and is_notebook():
+            display.clear_output(wait=True)
         info_("*" * 50)
         if not self.dry:
             info_("Result:")
