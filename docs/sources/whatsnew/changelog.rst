@@ -75,6 +75,10 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- 1D ``Optimize`` no longer emits output-clearing control characters in quiet
+  mode or terminal processes. Notebook output clearing is restricted to
+  ``INFO`` and ``DEBUG`` reporting (issue #1997).
+
 - General separable ND fits use fitted scales for post-fit numerical derivatives
   of built-in widths and time constants, including shared parameters. Local
   covariance uses the same physical Jacobian. Solver iterations and fitted
