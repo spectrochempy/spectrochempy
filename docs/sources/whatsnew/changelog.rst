@@ -77,7 +77,7 @@ Bug Fixes
 
 - Descending unsigned integer coordinates retain their values and signed
   spacings instead of being silently replaced by zeros during linearization
-  (issue #1986).
+  (:pr:`1999`).
 
 - 1D ``Optimize`` covariance and standard errors now account for the bound
   transformation and describe physical free parameters for both COMMON and
