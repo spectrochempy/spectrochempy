@@ -58,7 +58,11 @@ def spacings(arr, sd=4):
     if len(arr) == 1:
         return 0
 
-    spacings = np.diff(arr)
+    arr = np.asarray(arr)
+    if arr.dtype.kind == "u":
+        spacings = np.diff(arr.astype(object)).astype(float)
+    else:
+        spacings = np.diff(arr)
     # we need to take into account only the significant digits
     nd = get_n_decimals(spacings.max(), sd)
     spacings = list(set(np.around(spacings, nd)))
