@@ -22,6 +22,7 @@ from spectrochempy.analysis.curvefitting._parameter_transform import (
 )
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
+from spectrochempy.analysis.curvefitting._prepared_parameter import _ParameterLayout
 from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
 
 
@@ -37,6 +38,7 @@ class _ScalarParameterSpace:
         if plan.fallback:
             raise ValueError("Scalar parameter vectors require a qualified plan")
         indices = {label: index for index, (label, _) in enumerate(plan.components)}
+        layout = _ParameterLayout(plan.parameters)
         return cls(
             tuple(
                 (
@@ -44,8 +46,7 @@ class _ScalarParameterSpace:
                     p.identifier[-1],
                     p,
                 )
-                for p in plan.parameters
-                if not p.fixed
+                for p in layout.free_parameters
             )
         )
 
