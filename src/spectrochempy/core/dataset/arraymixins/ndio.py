@@ -202,9 +202,10 @@ class NDIO(tr.HasTraits):
 
         Other Parameters
         ----------------
-        directory : str, optional
-            If specified, the given `directory` and the `filename` will be
-            appended.
+        directory : str or pathlib.Path, optional
+            Destination directory for a relative `filename`, overriding the
+            source directory. An absolute `filename` takes precedence. If
+            `filename` is omitted, use the current object name in this directory.
 
         See Also
         --------
@@ -237,7 +238,10 @@ class NDIO(tr.HasTraits):
         >>> filename.unlink()
 
         """
-        if filename:
+        directory = kwargs.pop("directory", None)
+        if directory is not None:
+            filename = pathclean(directory) / pathclean(filename or self.name)
+        elif filename:
             # we have a filename
             # by default it use the saved directory
             filename = pathclean(filename)

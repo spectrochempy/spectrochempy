@@ -205,7 +205,115 @@ def test_ndio_roundtrip_units_use_application_registry(tmp_path):
     assert_array_equal(results[1].data, results[0].data)
 
 
-def test_save_as_failure_preserves_identity_and_target(tmp_path):
+@pytest.fixture
+def imported_csv_dataset(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    csv = source / "spectrum.csv"
+    csv.write_text("1,10\n2,20\n3,30\n", encoding="utf-8")
+    return scp.read_csv(csv), csv
+
+
+@pytest.mark.parametrize("directory_kind", ["current", "relative", "absolute"])
+@pytest.mark.parametrize("filename_kind", ["relative", "nested", "absolute", "omitted"])
+def test_save_as_explicit_directory(
+    imported_csv_dataset, tmp_path, monkeypatch, directory_kind, filename_kind
+):
+    dataset, source = imported_csv_dataset
+    original_bytes = source.read_bytes()
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    if directory_kind == "current":
+        monkeypatch.chdir(destination)
+        directory = "."
+    else:
+        monkeypatch.chdir(tmp_path)
+        directory = "destination" if directory_kind == "relative" else destination
+    filename = {
+        "relative": "saved.scp",
+        "nested": "nested/saved",
+        "absolute": tmp_path / "absolute.scp",
+        "omitted": "",
+    }[filename_kind]
+    expected = (
+        tmp_path / "absolute.scp"
+        if filename_kind == "absolute"
+        else destination / (filename or dataset.name)
+    ).with_suffix(".scp")
+    expected.parent.mkdir(exist_ok=True)
+
+    saved = dataset.save_as(filename, directory=directory, confirm=False)
+
+    assert saved.resolve() == expected
+    assert dataset.directory.resolve() == expected.parent
+    assert dataset.name == expected.stem
+    assert_dataset_equal(NDDataset.load(saved), dataset)
+    assert source.read_bytes() == original_bytes
+    assert list(source.parent.iterdir()) == [source]
+
+
+def test_save_as_explicit_directory_with_read_only_source(
+    imported_csv_dataset, tmp_path, monkeypatch
+):
+    dataset, source = imported_csv_dataset
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    monkeypatch.chdir(destination)
+    mode = source.parent.stat().st_mode
+    source.parent.chmod(0o555)
+    try:
+        saved = dataset.save_as("saved", directory=".", confirm=False)
+        assert saved == destination / "saved.scp"
+        assert_dataset_equal(NDDataset.load(saved), dataset)
+        assert list(source.parent.iterdir()) == [source]
+    finally:
+        source.parent.chmod(mode)
+
+
+def test_save_as_without_directory_keeps_source_directory(imported_csv_dataset):
+    dataset, source = imported_csv_dataset
+    saved = dataset.save_as("saved", confirm=False)
+    assert saved == source.parent / "saved.scp"
+    assert_dataset_equal(NDDataset.load(saved), dataset)
+
+
+def test_save_as_explicit_directory_overwrites_target(
+    imported_csv_dataset, tmp_path, monkeypatch
+):
+    dataset, source = imported_csv_dataset
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    monkeypatch.chdir(destination)
+    target = destination / "saved.scp"
+    target.write_bytes(b"existing target")
+
+    saved = dataset.save_as("saved", directory=".", confirm=False)
+
+    assert saved == target
+    assert_dataset_equal(NDDataset.load(saved), dataset)
+    assert list(source.parent.iterdir()) == [source]
+
+
+def test_project_save_as_explicit_directory(tmp_path):
+    source = tmp_path / "source"
+    source.mkdir()
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    project = Project(name="source")
+    project.add_dataset(NDDataset([1.0, 2.0], name="spectrum"))
+    original = project.save_as(source / "original")
+    original_bytes = original.read_bytes()
+
+    saved = project.save_as("saved", directory=destination)
+
+    assert saved == destination / "saved.pscp"
+    assert original.read_bytes() == original_bytes
+    restored = Project.load(saved)
+    assert_dataset_equal(restored.spectrum, project.spectrum)
+
+
+@pytest.mark.parametrize("explicit_directory", [False, True])
+def test_save_as_failure_preserves_identity_and_target(tmp_path, explicit_directory):
     ds = NDDataset(np.arange(3.0), name="save_as_source")
     ds.filename = tmp_path / "initial.scp"
     target = tmp_path / "broken_save_as.scp"
@@ -216,7 +324,11 @@ def test_save_as_failure_preserves_identity_and_target(tmp_path):
         type(ds), "dump", side_effect=RuntimeError("forced dump failure")
     ):
         with pytest.raises(RuntimeError, match="forced dump failure"):
-            ds.save_as(target, confirm=False)
+            ds.save_as(
+                target.name if explicit_directory else target,
+                directory=tmp_path if explicit_directory else None,
+                confirm=False,
+            )
 
     assert not target.exists()
     assert ds.filename == original_filename
