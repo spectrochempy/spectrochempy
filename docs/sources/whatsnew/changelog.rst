@@ -25,6 +25,12 @@ New Features
   The default transform policy and ND routes are preserved. Parameter
   declarations accept endpoints; Optimize validates the selected start policy. (:pr:`1985`)
 
+- ``despike(return_mask=True)`` returns the corrected spectrum and a boolean
+  dataset identifying modified values on the original coordinates. All methods
+  support ``dim`` and independent 1D/ND traces. Masked and non-finite samples
+  are preserved; short valid runs are documented. A synthetic example qualifies
+  narrow-band distortion and shows why changes are not confirmed cosmic rays.
+
 - 1D ``Optimize.result.diagnostics`` qualifies physical first-order stationarity
   separately from solver success, including independent feasible probes near
   bounds. Starting values, solver selection, fit results and ND paths are
