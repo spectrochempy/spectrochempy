@@ -2315,6 +2315,12 @@ class Optimize(DecompositionAnalysis):
         C order. Columns follow the free parameters in physical magnitudes,
         as identified by ``result.parameter_names`` and ``result.parameter_units``.
 
+        General separable ND profiles use the fitted physical scale for numerical
+        post-fit derivatives of built-in widths and time constants. Their local
+        covariance uses this post-fit Jacobian. Finite-difference accuracy and
+        local least-squares assumptions still apply; this does not independently
+        establish convergence or stationarity.
+
         For 1D script and composable Python models, this remains the raw
         optimizer-coordinate Jacobian, including the historical bound
         transformation. Result covariance and stderr are transformed back to
