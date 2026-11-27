@@ -10,6 +10,8 @@ This preparation layer preserves the canonical and legacy parameter layouts.
 It does not parse scripts, evaluate profiles, or select an optimization method.
 """
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
@@ -21,6 +23,83 @@ from spectrochempy.analysis.curvefitting._parameter_transform import (
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_external
 from spectrochempy.analysis.curvefitting._parameter_transform import _to_internal
 from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedParameter
+
+
+@dataclass(frozen=True)
+class _ScalarParameterSpace:
+    """Bind a qualified scalar plan to transformed or physical solver coordinates."""
+
+    slots: tuple
+
+    @classmethod
+    def from_plan(cls, plan):
+        """Prepare owner positions once, without retaining mutable model objects."""
+        if plan.fallback:
+            raise ValueError("Scalar parameter vectors require a qualified plan")
+        indices = {label: index for index, (label, _) in enumerate(plan.components)}
+        return cls(
+            tuple(
+                (
+                    None if p.identifier[0] == "common" else indices[p.identifier[1]],
+                    p.identifier[-1],
+                    p,
+                )
+                for p in plan.parameters
+                if not p.fixed
+            )
+        )
+
+    @staticmethod
+    def _entry(definition, slot):
+        index, key, _ = slot
+        owner = (
+            definition.common_params
+            if index is None
+            else definition.components[index].params
+        )
+        return owner[key]
+
+    def internal_vector(self, definition):
+        """Read current magnitudes using the snapshotted free order and bounds."""
+        values = [
+            _to_internal(self._entry(definition, slot).value, *slot[2].bounds)
+            for slot in self.slots
+        ]
+        return values, [p.name for _, _, p in self.slots]
+
+    def restore(self, definition, values, *, physical=False):
+        """Restore a complete vector in place, leaving fixed and linked entries intact."""
+        if len(values) != len(self.slots):
+            raise ValueError(
+                "Parameter vector length does not match its prepared space"
+            )
+        for slot, value in zip(self.slots, values, strict=True):
+            self._entry(definition, slot).value = (
+                float(value) if physical else _to_external(value, *slot[2].bounds)
+            )
+        return definition
+
+    def physical_values(self, definition):
+        """Read the current physical free vector in solver order."""
+        return np.array(
+            [self._entry(definition, slot).value for slot in self.slots], dtype=float
+        )
+
+    @property
+    def physical_bounds(self):
+        """Apply the existing sentinel-bound interpretation for physical probes."""
+        return [
+            (
+                low if low is not None and low > _LOB_THRESHOLD else -np.inf,
+                high if high is not None and high < _UPB_THRESHOLD else np.inf,
+            )
+            for _, _, parameter in self.slots
+            for low, high in (parameter.bounds,)
+        ]
+
+    def transform_artifacts(self, values):
+        """Evaluate signed transform derivatives in the prepared solver order."""
+        return _artifacts_from_parameters((p for _, _, p in self.slots), values)
 
 
 def _modelspec_parameter_count(spec):
@@ -174,9 +253,14 @@ def _physical_vector(definition):
 def _transform_artifacts(definition, values, keys):
     """Snapshot physical-coordinate derivatives in the actual solver order."""
     parameters = {p.name: p for p in _prepared_parameters(definition) if not p.fixed}
+    return _artifacts_from_parameters((parameters[key] for key in keys), values)
+
+
+def _artifacts_from_parameters(parameters, values):
+    """Preserve bound qualification for prepared or historical parameter orders."""
     states = [
-        _external_transform_state(value, *parameters[key].bounds)
-        for key, value in zip(keys, values, strict=True)
+        _external_transform_state(value, *parameter.bounds)
+        for parameter, value in zip(parameters, values, strict=True)
     ]
     return {
         "parameter_transform_derivatives": tuple(float(state[0]) for state in states),
