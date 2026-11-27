@@ -33,7 +33,9 @@ def read_carroucell(directory=None, **kwargs):
 
     The files for a given sample are grouped in ``NDDataset`` objects (sorted by
     acquisition date).
-    The ``NDDataset`` objects are returned in a list sorted by sample number.
+    Incompatible retained grids or known signal quantities remain in separate
+    groups. With the default per-holder grouping, each group retains its
+    sample-holder name and the groups are sorted by sample number.
     When the file containing the temperature data is present, the temperature is read
     and assigned as a label to each spectrum.
 
@@ -86,7 +88,10 @@ def read_carroucell(directory=None, **kwargs):
         # merging of datasets is done in the importer if needed
     importer = Importer()
 
-    return importer(directory, **kwargs)
+    result = importer(directory, **kwargs)
+    if isinstance(result, list):
+        result.sort(key=lambda ds: re.split("-|_", ds.name)[0])
+    return result
 
 
 # --------------------------------------------------------------------------------------
@@ -121,35 +126,39 @@ def _read_carroucell(*args, **kwargs):
         return int(f.stem.split("_")[1])
 
     if spectra is not None:
-        [min, max] = spectra
-        spafilespec = [f for f in spafilespec if min <= number(f) <= max]
-        spafileback = [f for f in spafileback if min <= number(f) <= max]
+        first_spectrum, last_spectrum = spectra
+        spafilespec = [
+            f for f in spafilespec if first_spectrum <= number(f) <= last_spectrum
+        ]
+        spafileback = [
+            f for f in spafileback if first_spectrum <= number(f) <= last_spectrum
+        ]
 
     # discard BKG files
     spafiles = spafilespec
     if not discardbg:
         spafiles += spafileback
 
+    def read_holder(files, holder):
+        result = scp.read_omnic(
+            files, sortbydate=True, directory=directory, name=holder
+        )
+        groups = [result] if isinstance(result, scp.NDDataset) else result
+        for group in groups:
+            group.name = holder
+            datasets.append(group)
+
     # merge dataset with the same number
     curfilelist = [spafiles[0]]
     curprefix = prefix(spafiles[0])
     for f in spafiles[1:]:
         if prefix(f) != curprefix:
-            ds = scp.read_omnic(
-                curfilelist,
-                sortbydate=True,
-                directory=directory,
-                name=curprefix,
-            )
-            datasets.append(ds)
+            read_holder(curfilelist, curprefix)
             curfilelist = [f]
             curprefix = prefix(f)
         else:
             curfilelist.append(f)
-    ds = scp.read_omnic(
-        curfilelist, sortbydate=True, directory=directory, name=curprefix
-    )
-    datasets.append(ds)
+    read_holder(curfilelist, curprefix)
 
     # Now manage temperature
     Tfile = sorted([f for f in os.listdir(directory) if f[-4:].lower() == ".xls"])
@@ -173,8 +182,12 @@ def _read_carroucell(*args, **kwargs):
             book = xlrd.open_workbook(os.path.join(directory, Tfile))
 
             # determine experiment start and end time (thermocouple clock)
-            ti = datasets[0].y.labels[0][0] + delta_clocks
-            tf = datasets[-1].y.labels[-1][0] + delta_clocks
+            timestamps = [
+                label[0] + delta_clocks
+                for dataset in datasets
+                for label in dataset.y.labels
+            ]
+            ti, tf = min(timestamps), max(timestamps)
 
             # get thermocouple time and T information during the experiment
             t = []
@@ -211,15 +224,25 @@ def _read_carroucell(*args, **kwargs):
                     (label[0] + delta_clocks).timestamp() for label in ds.y.labels
                 ]
                 T_ds = interpolator(tstamp_ds)
-                newlabels = np.hstack((ds.y.labels, T_ds.reshape((50, 1))))
-                ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
+                newlabels = np.hstack((ds.y.labels, T_ds.reshape((-1, 1))))
+                ds.y = Coord(
+                    title=ds.y.title,
+                    data=ds.y.data,
+                    units=ds.y.units,
+                    labels=newlabels,
+                    meta=ds.y.meta.copy(),
+                )
 
     # in the case of this importer, merge is false by default, so no merge will
     # be done in the calling function _switch_protocol.
     # But in the case where all spectra have the same number, we should merge
     # the datasets. So this will be done here
 
-    if len(datasets) > 1 and datasets[0].shape[0] == 1:
+    if (
+        len(datasets) > 1
+        and all(ds.shape[0] == 1 for ds in datasets)
+        and len({ds.name for ds in datasets}) == len(datasets)
+    ):
         datasets = merge_datasets(datasets)
 
     if len(datasets) == 1:

@@ -101,6 +101,11 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Carroucell imports retain separate compatible groups from one sample holder
+  instead of failing when OMNIC returns multiple datasets. Temperature labels
+  follow each group's actual scan count and the complete imported time window,
+  preserving observation coordinates and units (:issue:`1795`, :pr:`2025`).
+
 - Automatic import merging keeps contradictory named absorbance, transmittance
   and Kubelka-Munk quantities or recognized JCAMP modalities separate instead of
   silently converting or combining them. Unknown identities remain unknown;
