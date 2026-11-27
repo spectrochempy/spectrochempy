@@ -15,6 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Composable Python 1D models accept ``scale="log"`` with an explicit positive
+  ``log_reference`` and positive physical bounds in native least-squares mode.
+  Initial configurations are copied; fitted values and uncertainty arrays remain
+  physical. COMMON syntax and ND numerical conditioning retain their behavior
+  (:pr:`2018`, :issue:`1989`).
+
 - ``Optimize(bounds_mode='native')`` opts 1D COMMON and Python least-squares
   fits into physical-coordinate bounded TRF, including endpoint starts, with
   explicit relative-step termination and the existing uncertainty exclusions.

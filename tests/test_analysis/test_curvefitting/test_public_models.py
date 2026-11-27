@@ -266,9 +266,9 @@ def test_invalid_parameter_configuration_and_capabilities():
     ):
         with pytest.raises(ValueError):
             params["slope"].set(**options)
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(ValueError, match="log_reference"):
         params["slope"].set(scale="log")
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(ValueError, match="log_reference"):
         params.add("aux", scale="log")
     with pytest.raises(ValueError, match="Unused"):
         params.add("aux")

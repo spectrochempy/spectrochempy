@@ -138,7 +138,8 @@ Use the canonical ``opt.result`` for scientific outputs:
 * ``parameter_names`` identifies the free parameters in covariance, stderr
   and confidence-interval order. ``opt.jacobian`` retains the raw residual
   Jacobian; its columns follow that same order. Transform mode uses optimizer
-  coordinates, native mode physical magnitudes.
+  coordinates. Native linear mode uses physical magnitudes; log declarations
+  use the mixed solver coordinates described below.
 * ``parameters`` remains the estimator run configuration, not a solution.
 * ``fitted``, ``components``, ``residuals`` and diagnostics retain their
   existing meanings. Component rows follow addition order; internal component
@@ -154,7 +155,9 @@ fail, or when a fitted parameter is at or near a bound.
 ``diagnostics['covariance_reason']`` gives the exclusion reason, or ``None``
 when available; ``covariance_coordinates='physical'`` and
 ``jacobian_coordinates='optimizer'`` identify the two coordinate systems in
-transform mode; native mode uses physical coordinates for both.
+transform mode. Native linear mode uses physical coordinates for both;
+with log declarations the raw Jacobian remains in mixed solver coordinates
+and only covariance and stderr are converted to physical magnitudes.
 The bound neighborhood is ``sqrt(machine epsilon)`` times the interval width
 for two finite bounds, or times the maximum of one, the parameter magnitude
 and the bound magnitude for one finite bound. This is a conservative
@@ -218,6 +221,73 @@ Dry previews and all-fixed evaluations report ``'not_checked'``; solvers
 without a retained least-squares Jacobian report ``'unavailable'``.
 The existing ND diagnostics are unchanged.
 
+Logarithmic estimation coordinates
+----------------------------------
+
+For positive parameters spanning several decades, the Python facade accepts
+``scale="log"`` with an **explicit positive** ``log_reference``. Values,
+``min`` and ``max`` remain physical magnitudes. The solver uses
+``q = ln(p / log_reference)``; the reference has the same magnitude unit as p
+and is not inferred from the initial value. ``min`` must be strictly positive,
+the initial value must be positive and feasible, and ``max`` may be omitted.
+No unit conversion is performed; quantities must be converted to compatible
+numerical magnitudes before constructing parameters.
+
+For a personal function ``decay(x, amplitude, rate, offset)`` and a dataset
+whose coordinate magnitudes are in seconds:
+
+.. code-block:: python
+
+    model = scp.Model(decay)
+    params = model.make_params(amplitude=2.0, rate=0.1, offset=0.0)
+    params["rate"].set(
+        min=0.001, max=10, scale="log", log_reference=1.0
+    )
+    opt = scp.Optimize(
+        model=model, params=params,
+        bounds_mode="native", method="least_squares",
+    ).fit(ds)
+    print(opt.result.fitted_parameters["rate"])
+    print(opt.result.parameters["parameter_coordinates"]["rate"])
+
+The rate and its reference are numerical magnitudes in inverse seconds in this
+example. ``Parameter(..., scale="log", log_reference=...)`` and
+``Parameters.add(..., scale="log", log_reference=...)`` accept the same
+declaration. Linear coordinates remain the default. ``log_reference`` is
+rejected for a linear declaration; selecting ``scale="lin"`` removes an old
+reference unless a contradictory reference is explicitly supplied.
+
+Log declarations require ``bounds_mode="native"`` and ``method="least_squares"``
+or ``"leastsq"``. This is an explicit capability check, not an automatic solver
+switch. The native stopping policy below is retained in solver coordinates;
+log coordinates do not guarantee convergence, stationarity or faster fitting.
+Overflow, underflow to zero, collapsed coordinates or a model-domain error
+raise an error rather than clipping a solver proposal. A positive endpoint is
+accepted under the native policy; this does not imply reliable convergence
+from every endpoint.
+
+An expression target has no independent estimation coordinate. Calling
+``set(expr="source")`` removes its bounds and log declaration; supplying a
+log declaration together with an expression is an error. Fixed log parameters
+retain their declaration but do not add solver coordinates. All-fixed models
+are evaluated without a solver. The supplied parameters and references are
+copied on estimator entry; ``initial_params`` remains unchanged across fits.
+A repeated fit starts from the last fitted physical values and retains the
+explicit reference. Create another estimator to reuse the original start.
+
+``result.parameters["parameter_coordinates"]`` records declarations using
+public parameter names. Fitted values, covariance, stderr and local intervals
+still describe physical free parameters in ``result.parameter_names`` order.
+``opt.jacobian`` retains the raw mixed-coordinate Jacobian, labelled
+``jacobian_coordinates="solver"``. Its log columns include ``dp/dq = p``;
+the existing covariance machinery applies this derivative once. Uncertainty
+exclusions and the absence of linked-parameter uncertainty remain unchanged.
+
+COMMON keeps its historical syntax; the rendered script lists physical values
+but does not encode the Python log declaration. Preserve the Python parameters
+for reproducibility. ND numeric ``scale`` remains numerical conditioning;
+ND log syntax, dimensional expressions and a kinetic adapter are separate work.
+
 Native bounds for one-dimensional least squares
 -----------------------------------------------
 
@@ -243,8 +313,10 @@ For example, with a 1D dataset ``ds``:
     print(opt.result.fitted_parameters)
     print(opt.result.diagnostics)
 
-Native mode optimizes physical free magnitudes with bounded TRF, three-point
-finite differences and ``x_scale='jac'``. It sets ``ftol=None``, ``gtol=None``
+With linear declarations, native mode optimizes physical free magnitudes;
+log declarations use the solver coordinates described above. Both use bounded
+TRF, three-point finite differences and ``x_scale='jac'``. The policy sets
+``ftol=None``, ``gtol=None``
 and ``xtol=1e-12``: cost-change and absolute scaled-gradient stopping are disabled
 because either can produce premature stops after endpoint initialization,
 including small-signal fits. Relative step-size stopping remains enabled so
