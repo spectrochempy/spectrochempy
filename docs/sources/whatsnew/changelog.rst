@@ -94,6 +94,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Automatic import merging keeps contradictory named absorbance, transmittance
+  and Kubelka-Munk quantities or recognized JCAMP modalities separate instead of
+  silently converting or combining them. Unknown identities remain unknown;
+  compatible scales within a signal family and explicit combination operations
+  are preserved (issue #1795).
+
 - Automatic import merging keeps incompatible retained axes or ordered
   dimensions in separate groups with a warning, instead of assembling equal-size
   spectra under one coordinate. Compatible coordinate-unit rescaling is checked

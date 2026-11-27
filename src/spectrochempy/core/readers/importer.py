@@ -25,6 +25,7 @@ from traitlets import Unicode
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
 from spectrochempy.processing.transformation.concatenate import (
     _coordinate_for_dimension,
 )
@@ -162,6 +163,9 @@ class Importer(HasTraits):
             for group in groups.values():
                 merged.extend(merge_datasets(group, **kwargs))
             self.datasets = merged
+
+        for dataset in self.datasets:
+            dataset.__dict__.pop("_import_measurement_identity", None)
 
         # now we will reset preference for this newly loaded datasets
         if len(self.datasets) > 0:
@@ -414,7 +418,11 @@ def read(*paths, **kwargs):
         No interpolation or reordering of a retained axis is performed. Reader
         restrictions and origin/shape grouping still apply. Multiple groups are
         returned as a `ScpObjectList`; ``merge=True`` does not guarantee a single
-        dataset. The explicit `stack` and `concatenate` operations are unchanged.
+        dataset. Contradictions between recognized absorbance, transmittance
+        and Kubelka-Munk signal units, or recognized JCAMP modality declarations,
+        also keep inputs separate. Missing/unknown identities are not inferred
+        from vendor origins or free-text titles. The explicit `stack` and
+        `concatenate` operations are unchanged.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -993,8 +1001,75 @@ def _import_coordinates_match(first, second):
     )
 
 
+def _import_signal_quantity(dataset):
+    """Identify explicitly named signal units without inferring free-text titles."""
+    units = dataset.units
+    if units is None or len(units._units) != 1:
+        return None
+    ((name, power),) = units._units.items()
+    if power != 1:
+        return None
+    known = {
+        "absorbance": "absorbance",
+        "transmittance": "transmittance",
+        "absolute_transmittance": "transmittance",
+        "Kubelka_Munk": "Kubelka-Munk",
+    }
+    quantities = {
+        known[root]
+        for _prefix, root, _suffix in ur.parse_unit_name(name)
+        if root in known
+    }
+    return next(iter(quantities)) if len(quantities) == 1 else None
+
+
+def _import_jcamp_modality(dataset):
+    """Read only recognized scalar JCAMP declarations, including native copies."""
+    declared = dataset.meta.get("jcamp_data_type")
+    if not isinstance(declared, str):
+        return None
+    return {
+        "INFRARED SPECTRUM": "infrared",
+        "RAMAN SPECTRUM": "Raman",
+        "UV/VIS SPECTRUM": "UV-visible",
+        "NMR SPECTRUM": "NMR spectrum",
+        "NMR FID": "NMR FID",
+    }.get(declared.strip().upper())
+
+
+def _import_identity_values(dataset, key, identify):
+    """Retain constraints across successive assembly passes within an import."""
+    identified = identify(dataset)
+    if identified is not None:
+        return {identified}
+    carried = getattr(dataset, "_import_measurement_identity", {})
+    return set(carried.get(key, ()))
+
+
+def _carry_import_identity(result, datasets):
+    """Preserve known constraints when generic combination metadata is cleared."""
+    identities = {}
+    for key, identify in (
+        ("signal quantities", _import_signal_quantity),
+        ("declared JCAMP modalities", _import_jcamp_modality),
+    ):
+        values = set()
+        for dataset in datasets:
+            values.update(_import_identity_values(dataset, key, identify))
+        identities[key] = tuple(sorted(values))
+    result._import_measurement_identity = identities
+
+
 def _import_merge_mismatch(first, second):
-    """Return why observation-axis assembly would lose retained geometry."""
+    """Return why assembly would contradict retained geometry or known identity."""
+    for identify, label in (
+        (_import_signal_quantity, "signal quantities"),
+        (_import_jcamp_modality, "declared JCAMP modalities"),
+    ):
+        identities = _import_identity_values(first, label, identify)
+        identities.update(_import_identity_values(second, label, identify))
+        if len(identities) > 1:
+            return f"{label} differ ({' versus '.join(sorted(identities))})"
     if first.dims != second.dims:
         return "dimension names or order differ"
     retained = first.dims if first.ndim == 1 else first.dims[1:]
@@ -1097,6 +1172,8 @@ def merge_datasets(datasets, **kwargs):
                 dataset = concatenate(datasets, axis=0)
                 dataset.history = f"Merged {len(datasets)} imported datasets"
 
+            _carry_import_identity(dataset, datasets)
+
             # Set merged origin and name
             origins = sorted({ds.origin for ds in datasets if ds.origin})
             if origins:
@@ -1148,6 +1225,8 @@ def merge_datasets(datasets, **kwargs):
                 else:
                     merged = concatenate(shape_group, axis=0)
                     merged.history = f"Merged {len(shape_group)} imported datasets"
+
+                _carry_import_identity(merged, shape_group)
 
                 if merged.coordset is not None and kwargs.pop("sortbydate", True):
                     merged.sort(dim=0, inplace=True)
