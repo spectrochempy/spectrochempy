@@ -12,12 +12,14 @@ from spectrochempy.analysis.curvefitting._optimize_nd import _fit_outputs
 from spectrochempy.analysis.curvefitting._optimize_nd import _grid
 from spectrochempy.analysis.curvefitting._optimize_nd import _physical_covariance
 from spectrochempy.analysis.curvefitting._optimize_nd import _prepare_parameter
+from spectrochempy.analysis.curvefitting._prepared_parameter import _ParameterLayout
 from spectrochempy.analysis.curvefitting.simulation import _parameter_value
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
 
 
-def _parameters(specs):
+def _parameter_layout(specs):
+    """Normalize physical records and existing callback conditioning scales once."""
     if not isinstance(specs, Mapping):
         raise ValueError("parameters must be a mapping of named parameter definitions")
     records, scales = [], []
@@ -35,7 +37,6 @@ def _parameters(specs):
         record = _prepare_parameter(spec, name, unit, identifier=("model", name))
         if not np.isfinite(record.value):
             raise ValueError(f"{name}: initial value must be finite")
-        records.append(record)
         if not record.fixed:
             scale = (
                 max(abs(float(record.value)), 1.0)
@@ -45,14 +46,22 @@ def _parameters(specs):
             if not np.isfinite(scale) or scale <= 0:
                 raise ValueError(f"{name}: scale must be finite and positive")
             scales.append(scale)
-    return records, np.asarray(scales, dtype=float)
+        records.append(record)
+    return _ParameterLayout(tuple(records), tuple(scales))
+
+
+def _parameters(specs):
+    """Return the historical records/scales pair from the shared layout."""
+    layout = _parameter_layout(specs)
+    return list(layout.parameters), np.asarray(layout.free_scales, dtype=float)
 
 
 def fit_callable_model(dataset, function, specs, max_calls, linear_amplitudes, options):
     """Fit a full-grid callback with a fixed, finite observation support."""
     coordinates, _ = _grid(dataset)
-    records, scales = _parameters(specs)
-    free = [record for record in records if not record.fixed]
+    layout = _parameter_layout(specs)
+    records, free = layout.parameters, layout.free_parameters
+    scales = np.asarray(layout.free_scales, dtype=float)
     options = dict(options)
     allowed = {"ftol", "xtol", "gtol", "diff_step", "x_scale"}
     if options.keys() - allowed:
@@ -133,7 +142,7 @@ def fit_callable_model(dataset, function, specs, max_calls, linear_amplitudes, o
 
     def evaluate(vector):
         nonlocal component_names
-        values.update(zip((record.name for record in free), vector, strict=True))
+        values.update(zip(layout.free_names, vector, strict=True))
         result = function(template.copy(), **values)
         if isinstance(result, Mapping):
             if not result or any(
@@ -188,8 +197,8 @@ def fit_callable_model(dataset, function, specs, max_calls, linear_amplitudes, o
             raise ValueError("The summed model must be finite on the fitting support")
         return fitted, components, dict(zip(names, amplitudes.tolist(), strict=True))
 
-    initial = np.asarray([record.value for record in free], dtype=float)
-    limits = np.asarray([record.bounds for record in free], dtype=float).reshape(-1, 2)
+    initial = np.asarray(layout.free_values, dtype=float)
+    limits = np.asarray(layout.free_bounds, dtype=float).reshape(-1, 2)
     fitted, components, amplitudes = evaluate(initial)
     n_linear = len(components) if linear_amplitudes else 0
     count_parameters = len(free) + n_linear
@@ -264,8 +273,8 @@ def fit_callable_model(dataset, function, specs, max_calls, linear_amplitudes, o
         components,
         residual,
         [values[record.name] for record in free],
-        tuple(record.name for record in free),
-        tuple(record.unit for record in free),
+        layout.free_names,
+        layout.free_units,
         jacobian,
         diagnostics,
         covariance,
