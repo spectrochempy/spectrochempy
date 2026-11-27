@@ -259,6 +259,13 @@ The supplied initial configuration remains unchanged. As documented by
 `SciPy least_squares <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html>`_,
 TRF can adjust an endpoint internally to obtain a strictly feasible iterate;
 this is not an application-level physical epsilon or a different declaration.
+An exactly fitted, non-identifiable model can still exhaust the evaluation
+budget with this step-only policy. Its zero residual does not turn solver
+failure into success; inspect the physical stationarity and rank diagnostics.
+The backend suppresses only SciPy trust-region division warnings when the final
+residual is exactly zero. Warnings from the model remain visible. An early stop
+at the diagnostic roundoff floor is not part of this policy.
+
 The local relative step-size criterion does not guarantee physical stationarity,
 identifiability or a global optimum. Read the independent physical diagnostic
 as well as solver success. In particular, an approximate constrained solution

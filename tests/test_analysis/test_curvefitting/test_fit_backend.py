@@ -77,3 +77,40 @@ def test_bounded_kinetic_residual_retains_native_solver_artifacts():
 def test_unknown_method_is_rejected():
     with pytest.raises(NotImplementedError, match="method: unsupported"):
         _run_optimizer(lambda vector: vector, [0.0], method="unsupported")
+
+
+@pytest.mark.parametrize(
+    "target, initial", [(0.0, [1.0, 1.0]), (1.0, [1.0, 1.0]), (4.0, [2.0, 2.0])]
+)
+def test_native_exact_rank_deficient_residual_keeps_budget_status(target, initial):
+    import warnings
+
+    from spectrochempy.analysis.curvefitting._fit_backend import _native_least_squares
+
+    x = np.linspace(0, 1, 21)
+    with warnings.catch_warnings(record=True) as emitted:
+        warnings.simplefilter("always")
+        result = _native_least_squares(
+            lambda p: (p[0] * p[1] - target) * x,
+            initial,
+            (-np.inf, np.inf),
+            max_nfev=100,
+        )
+    assert not emitted
+    assert np.all(result.fun == 0)
+    assert result.status in (0, 3)
+    assert result.success == (result.status == 3)
+    assert result.nfev <= 100
+
+
+def test_native_does_not_hide_user_model_warnings():
+    import warnings
+
+    from spectrochempy.analysis.curvefitting._fit_backend import _native_least_squares
+
+    def residual(p):
+        warnings.warn("model warning", RuntimeWarning, stacklevel=1)
+        return p - 1
+
+    with pytest.warns(RuntimeWarning, match="model warning"):
+        _native_least_squares(residual, [0.0], (-np.inf, np.inf), max_nfev=2)
