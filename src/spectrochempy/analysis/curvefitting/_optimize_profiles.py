@@ -15,6 +15,7 @@ from spectrochempy.analysis.curvefitting._optimize_nd import _fit_outputs
 from spectrochempy.analysis.curvefitting._optimize_nd import _grid
 from spectrochempy.analysis.curvefitting._optimize_nd import _physical_covariance
 from spectrochempy.analysis.curvefitting._optimize_nd import _prepare_parameter
+from spectrochempy.analysis.curvefitting._prepared_parameter import _ParameterLayout
 from spectrochempy.analysis.curvefitting._profile_models import axis_parameters
 from spectrochempy.analysis.curvefitting._profile_models import evaluate_profiles
 from spectrochempy.analysis.curvefitting._profile_models import profile_history
@@ -224,12 +225,9 @@ def fit_profiles(
         raise ValueError("ND fitting requires observations for all free parameters")
     observed = data[valid]
     intensity_scale = np.max(np.abs(observed)) or 1.0
-    initial = np.array(
-        [group["parameter"].value for group in groups], dtype=np.longdouble
-    )
-    limits = np.array(
-        [group["parameter"].bounds for group in groups], dtype=np.longdouble
-    ).T
+    layout = _ParameterLayout(tuple(group["parameter"] for group in groups))
+    initial = np.array(layout.free_values, dtype=np.longdouble)
+    limits = np.array(layout.free_bounds, dtype=np.longdouble).T
     binding_groups = {
         (id(target), key): group
         for group in groups
@@ -273,10 +271,12 @@ def fit_profiles(
         ],
         dtype=np.longdouble,
     )
+    layout = replace(layout, normalization_scales=tuple(scales))
+    scales = np.asarray(layout.free_scales, dtype=np.longdouble)
     bounds = np.asarray((limits - origins) / scales, dtype=float) if groups else None
     start = np.asarray((initial - origins) / scales, dtype=float)
-    names = tuple(group["parameter"].name for group in groups)
-    parameter_units = tuple(group["parameter"].unit for group in groups)
+    names = layout.free_names
+    parameter_units = layout.free_units
     group_indices = {id(group): index for index, group in enumerate(groups)}
     solver_grids = []
     centered_axes = {}
