@@ -89,7 +89,7 @@ Bug Fixes
   and Kubelka-Munk quantities or recognized JCAMP modalities separate instead of
   silently converting or combining them. Unknown identities remain unknown;
   compatible scales within a signal family and explicit combination operations
-  are preserved (issue #1795).
+  are preserved (:pr:`2020`).
 
 - Automatic import merging keeps incompatible retained axes or ordered
   dimensions in separate groups with a warning, instead of assembling equal-size
