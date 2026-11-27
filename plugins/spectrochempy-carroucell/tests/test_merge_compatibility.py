@@ -158,3 +158,30 @@ def test_last_holder_can_split_without_reordering_sample_holders(tmp_path):
     assert [ds.name for ds in result] == ["1", "2", "2"]
     assert sum(ds.shape[0] for ds in result) == 5
     assert all("_import_measurement_identity" not in ds.__dict__ for ds in result)
+
+
+@pytest.mark.parametrize("repeated_grid", [False, True])
+def test_partitioned_holders_keep_their_groups_and_names(tmp_path, repeated_grid):
+    expected = {}
+    for holder in (1, 2):
+        write_scan(tmp_path, holder, 1, 10, start=3900)
+        write_scan(tmp_path, holder, 2, 20)
+        if repeated_grid:
+            write_scan(tmp_path, holder, 3, 30)
+        expected[(str(holder), 3900)] = [holder * 100 + 1]
+        expected[(str(holder), 4000)] = [holder * 100 + 2]
+        if repeated_grid:
+            expected[(str(holder), 4000)].append(holder * 100 + 3)
+    with pytest.warns(UserWarning, match="coordinates differ"):
+        result = scp.carroucell.read(tmp_path, local_only=True)
+    assert [ds.name for ds in result] == ["1", "1", "2", "2"]
+    actual = {(ds.name, ds.x.data[0]): ds.data[:, 0].tolist() for ds in result}
+    assert actual == expected
+
+
+def test_single_scan_holder_does_not_merge_with_a_multiscan_holder(tmp_path):
+    write_scan(tmp_path, 1, 1, 10)
+    write_scan(tmp_path, 2, 1, 20)
+    write_scan(tmp_path, 2, 2, 30)
+    result = scp.carroucell.read(tmp_path, local_only=True)
+    assert [(ds.name, ds.shape) for ds in result] == [("1", (1, 2)), ("2", (2, 2))]

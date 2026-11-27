@@ -238,7 +238,11 @@ def _read_carroucell(*args, **kwargs):
     # But in the case where all spectra have the same number, we should merge
     # the datasets. So this will be done here
 
-    if len(datasets) > 1 and datasets[0].shape[0] == 1:
+    if (
+        len(datasets) > 1
+        and all(ds.shape[0] == 1 for ds in datasets)
+        and len({ds.name for ds in datasets}) == len(datasets)
+    ):
         datasets = merge_datasets(datasets)
 
     if len(datasets) == 1:
