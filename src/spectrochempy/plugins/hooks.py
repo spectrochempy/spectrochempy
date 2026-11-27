@@ -297,6 +297,20 @@ class SpectroChemPyHookSpec:
             (e.g. ``"absolute"``, ``"amax"``, ``"conjugate"``) when the
             data requires plugin-specific handling.  Return the modified
             dataset or ``None`` to fall back to the standard numpy path.
+        ``"importer.measurement_identity"``
+            ``callable(dataset: NDDataset) -> dict | None``
+            Supply plugin-owned scientific constraints for automatic import
+            assembly, including native files and nested imports. Return
+            ``None`` for inputs the plugin does not recognize. Otherwise return
+            ``{"constraints": {"plugin.fact": "known value"}, "reason": None}``.
+            Keys must be namespaced strings and values nonempty strings;
+            omit unknown facts. Different known values of the same key keep
+            inputs separate. An optional nonempty ``reason`` string refuses
+            automatic assembly for this input (for example when a new series
+            axis would be required). Exceptions and invalid descriptors propagate
+            rather than silently bypassing scientific validation. Handlers are
+            tried in registration order; the first non-None descriptor wins.
+            Explicit ``stack``/``concatenate`` are unaffected.
         ``"importer.resolve_directory_target"``
             ``callable(path: Path, **kwargs) -> Path | list[Path] | None``
             Resolve a directory passed to ``read`` into one or more concrete

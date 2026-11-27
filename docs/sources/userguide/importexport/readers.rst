@@ -114,11 +114,19 @@ transmittance, or another relative signal; only the explicitly named signal
 units above establish a family. User-defined units without a recognized root remain unclassified.
 An unknown identity does not by itself prevent otherwise compatible assembly.
 
+Plugins can supply additional known constraints. With the matching development
+NMR plugin loaded, these include nuclear species, time/frequency domain and
+decoded real/complex representation. Compatible observation-first 1D series
+remain eligible; physical multidimensional NMR acquisitions stay separate,
+because concatenating their first physical axis would not create a series axis.
+See the plugin's `compatibility guide
+<https://www.spectrochempy.fr/projects/nmr/latest/compatibility.html>`_
+for its supported metadata and version requirements.
+
 These checks do not certify complete measurement identity or preserve a full
-scientific description of each source. Nuclear species, NMR domains/encodings
-and plugin-specific rules require plugin-owned qualification. Source provenance
-and identity persistence after metadata-clearing transformations remain separate
-work. Callers remain responsible for the scientific comparability of inputs.
+scientific description of each source. Source provenance and identity
+persistence after metadata-clearing transformations remain separate work.
+Callers remain responsible for the scientific comparability of inputs.
 
 Readers supplied by plugins
 ---------------------------
