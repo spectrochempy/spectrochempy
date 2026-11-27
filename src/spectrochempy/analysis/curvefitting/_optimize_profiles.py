@@ -307,6 +307,7 @@ def fit_profiles(
             centered_axes[id(parameters)] = (index, units[dim], width)
         solver_grids.append(grid)
     offsets = initial - origins
+    centered_offsets = np.zeros_like(offsets)
 
     def update(vector):
         nonlocal offsets
@@ -335,7 +336,7 @@ def fit_profiles(
                             axes[dim] = axis
                             continue
                         index, unit, reference_width = binding
-                        value = offsets[index]
+                        value = offsets[index] - centered_offsets[index]
                         if unit is not None:
                             value = _parameter_value(
                                 Quantity(value, parameter_units[index]),
@@ -411,6 +412,17 @@ def fit_profiles(
             if represented_center:
                 solution.x = represented
         update(solution.x)
+        if centered_axes:
+            centered_offsets = offsets.copy()
+            for peak, grid in zip(peaks, solver_grids, strict=True):
+                for dim, axis in peak["axes"].items():
+                    parameters = axis["parameters"]
+                    binding = centered_axes.get(id(parameters))
+                    if binding is not None:
+                        grid[dim] = _scaled_offsets(
+                            coordinates[dim], parameters["center"], binding[2]
+                        )[0]
+            represented_center = True
 
         def fitted_at(vector):
             update(vector)
