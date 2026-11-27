@@ -3,7 +3,8 @@ Private linear/log coordinates on the common physical parameter layout.
 
 The composable Python 1D facade selects this adapter for explicit log
 declarations; public ND fitting entries do not select it yet. The private
-unprojected grid-callback backend can receive an explicitly prepared adapter.
+grid-callback backend can receive an explicitly prepared adapter. Projected
+amplitudes retain their separate inference qualification.
 For a log parameter q=ln(p/reference); otherwise q=p. The solver coordinate
 is z=q/normalization_scale. References and physical magnitudes must already
 use the same unit: unit conversion and public reference selection belong to
