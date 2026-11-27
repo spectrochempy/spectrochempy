@@ -128,6 +128,21 @@ scientific description of each source. Source provenance and identity
 persistence after metadata-clearing transformations remain separate work.
 Callers remain responsible for the scientific comparability of inputs.
 
+ZIP archives and multi-dataset members
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A ZIP member can itself contain several datasets, for example a Galactic SPC
+file with different spectral grids or a nested ZIP archive. These datasets are
+returned in a flat collection alongside the other readable members. With
+``merge=False``, the member datasets remain separate. With ``merge=True``, they
+are offered to the same geometry and known-identity checks as other imports;
+incompatible spectra stay separate without resampling or implicit signal-quantity
+conversion.
+
+The ``only`` limit counts readable members in the current archive's discovery
+order. A selected member contributes all of its returned datasets, so the final
+dataset count can exceed ``only``.
+
 Readers supplied by plugins
 ---------------------------
 

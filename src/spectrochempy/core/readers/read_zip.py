@@ -30,8 +30,9 @@ def read_zip(*paths, **kwargs):
     archive format is already known.
 
     A ZIP archive may expose one or several readable datasets. Non-merged
-    archive reads may return a list-like `ScpObjectList` exposing helper
-    methods for dataset selection. See :func:`spectrochempy.read` for the
+    archive reads may return a flat list-like `ScpObjectList` exposing helper
+    methods for dataset selection, including when a member file or nested archive
+    contains several datasets. See :func:`spectrochempy.read` for the
     complete description of the generic import convention and multi-object
     return behavior.
 
@@ -95,7 +96,8 @@ def read_zip(*paths, **kwargs):
         Limit ZIP import to the first readable files discovered in the archive.
         This is mainly useful for sampling large archives or for tests. The
         limit is applied according to archive discovery order after filtering
-        ignored entries such as ``__MACOSX`` and ``.DS_Store``.
+        ignored entries such as ``__MACOSX`` and ``.DS_Store``. A member that
+        returns several datasets still counts as one file toward this limit.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -194,7 +196,10 @@ def _read_zip(*args, **kwargs):
                 skipped.append(exc)
                 continue
             if d is not None:
-                datasets.append(d)
+                if isinstance(d, list):
+                    datasets.extend(d)
+                else:
+                    datasets.append(d)
                 count += 1
             else:
                 ignored_files.append(zipinfo.filename)
