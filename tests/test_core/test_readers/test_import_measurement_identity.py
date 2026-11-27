@@ -205,3 +205,117 @@ def test_failed_import_does_not_leak_the_nested_session(tmp_path):
     result = scp.read(paths, merge=True, sortbydate=False)
     assert result.shape == (2, 3)
     assert "_import_measurement_identity" not in result.__dict__
+
+
+@pytest.fixture
+def identity_provider(monkeypatch):
+    from spectrochempy.plugins import manager
+
+    registry = manager.plugin_manager.registry
+    original = registry.get_handler
+
+    def install(provider):
+        monkeypatch.setattr(
+            registry,
+            "get_handler",
+            lambda name: provider
+            if name == "importer.measurement_identity"
+            else original(name),
+        )
+
+    return install
+
+
+def test_plugin_constraints_survive_intermediate_assembly(identity_provider):
+    calls = []
+
+    def provider(dataset):
+        calls.append(dataset)
+        nucleus = dataset.meta.get("test_nucleus")
+        return {"constraints": {"test.nucleus": nucleus}} if nucleus else None
+
+    identity_provider(provider)
+    unknown, proton, carbon = spectrum(), spectrum(), spectrum()
+    proton.meta.test_nucleus = "1H"
+    carbon.meta.test_nucleus = "13C"
+    series = merge_datasets([unknown, proton], merge=True, sortbydate=False)[0]
+    assert len(calls) == 2
+    other = merge_datasets([carbon, carbon.copy()], merge=True, sortbydate=False)[0]
+    with pytest.warns(UserWarning, match="test.nucleus differ"):
+        assert len(merge_datasets([series, other], merge=True)) == 2
+
+
+@pytest.mark.parametrize("merge", [None, True])
+def test_plugin_can_refuse_automatic_assembly(identity_provider, merge):
+    identity_provider(lambda ds: {"constraints": {}, "reason": "needs a series axis"})
+    first, second = spectrum(), spectrum()
+    with pytest.warns(UserWarning, match="needs a series axis"):
+        result = merge_datasets([first, second], **({"merge": True} if merge else {}))
+    assert len(result) == 2
+    assert result[0] is first and result[1] is second
+
+
+@pytest.mark.parametrize(
+    "descriptor",
+    [
+        False,
+        {},
+        {"constraints": {"plain": "v"}},
+        {"constraints": {"test.key": None}},
+        {"constraints": {}, "reason": ""},
+        {"constraints": {}, "extra": True},
+    ],
+)
+def test_invalid_plugin_identity_is_not_silently_ignored(identity_provider, descriptor):
+    identity_provider(lambda ds: descriptor)
+    with pytest.raises(ValueError, match="importer.measurement_identity"):
+        merge_datasets([spectrum(), spectrum()], merge=True)
+
+
+def test_plugin_identity_errors_propagate(identity_provider):
+    def provider(dataset):
+        raise RuntimeError("invalid scientific metadata")
+
+    identity_provider(provider)
+    with pytest.raises(RuntimeError, match="invalid scientific metadata"):
+        merge_datasets([spectrum(), spectrum()], merge=True)
+    # Explicit opt-out must not consult scientific compatibility providers.
+    assert len(merge_datasets([spectrum(), spectrum()], merge=False)) == 2
+
+
+def test_plugin_identity_in_native_nested_imports(tmp_path, identity_provider):
+    identity_provider(
+        lambda ds: {"constraints": {"test.nucleus": ds.meta.test_nucleus}}
+        if ds.meta.get("test_nucleus")
+        else None
+    )
+    first, unknown, conflict = spectrum(), spectrum(), spectrum()
+    first.meta.test_nucleus = "1H"
+    conflict.meta.test_nucleus = "13C"
+    for name, ds in [("a", unknown), ("b", first), ("c", conflict), ("d", conflict)]:
+        ds.dump(tmp_path / f"{name}.scp")
+    with pytest.warns(UserWarning, match="test.nucleus differ"):
+        result = scp.read_dir(tmp_path, recursive=True, merge=True, sortbydate=False)
+    assert len(result) == 2
+    assert sum(ds.shape[0] for ds in result) == 4
+    assert all("_import_measurement_identity" not in ds.__dict__ for ds in result)
+
+
+def test_nested_identity_errors_are_not_skipped(tmp_path, identity_provider):
+    def provider(dataset):
+        if dataset.meta.get("invalid_identity"):
+            raise RuntimeError("invalid scientific metadata")
+
+    identity_provider(provider)
+    paths = []
+    for name in ["invalid", "valid"]:
+        directory = tmp_path / name
+        directory.mkdir()
+        paths.append(directory)
+        for index in range(2):
+            dataset = spectrum()
+            if name == "invalid":
+                dataset.meta.invalid_identity = True
+            dataset.dump(directory / f"{index}.scp")
+    with pytest.raises(RuntimeError, match="invalid scientific metadata"):
+        scp.read(paths, merge=True)
