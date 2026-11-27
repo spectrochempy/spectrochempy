@@ -37,6 +37,9 @@ from spectrochempy.analysis.curvefitting._optimize_curves import fit_curve
 from spectrochempy.analysis.curvefitting._optimize_model import fit_callable_model
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
 from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
+from spectrochempy.analysis.curvefitting._parameter_coordinates import (
+    _ParameterCoordinates,
+)
 from spectrochempy.analysis.curvefitting._parameter_plan import _compile_parameter_plan
 from spectrochempy.analysis.curvefitting._parameter_space import _coordinate_vector
 from spectrochempy.analysis.curvefitting._parameter_space import _internal_vector
@@ -53,6 +56,7 @@ from spectrochempy.analysis.curvefitting._parameter_space import _transform_arti
 from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameter_transform import _UPB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+from spectrochempy.analysis.curvefitting._prepared_parameter import _ParameterLayout
 from spectrochempy.analysis.curvefitting._stationarity import _bound_neighborhood
 from spectrochempy.analysis.curvefitting._stationarity import _physical_stationarity
 from spectrochempy.analysis.curvefitting.model import Model
@@ -1195,6 +1199,13 @@ class Optimize(DecompositionAnalysis):
 
     def _validate_bounds_mode(self):
         """Validate the selected policy without changing parameter declarations."""
+        if self._python_model_configuration is not None:
+            _, initial, _ = self._python_model_configuration
+            if (
+                any(getattr(p, "scale", "lin") == "log" for p in initial.values())
+                and self.bounds_mode.lower() != "native"
+            ):
+                raise ValueError("Log parameters require bounds_mode='native'")
         if self.bounds_mode.lower() == "native":
             if self.constraints:
                 raise ValueError("Native bounds do not accept legacy constraints")
@@ -1306,6 +1317,26 @@ class Optimize(DecompositionAnalysis):
             self._model_spec = _FitModelSpec.from_fitparameters(self.fp)
 
         self._parameter_plan = _compile_parameter_plan(self._model_spec)
+        parameter_coordinates = None
+        coordinate_config = None
+        if self._python_model_configuration is not None:
+            _, initial, names = self._python_model_configuration
+            if any(getattr(p, "scale", "lin") == "log" for p in initial.values()):
+                coordinate_config = {
+                    name: {"scale": p.scale, "log_reference": p.log_reference}
+                    for name, p in initial.items()
+                }
+                inverse = {internal: public for public, internal in names.items()}
+                layout = _ParameterLayout(self._parameter_plan.parameters)
+                if layout.free_parameters:
+                    declarations = [
+                        initial[inverse[p.name]] for p in layout.free_parameters
+                    ]
+                    parameter_coordinates = _ParameterCoordinates(
+                        layout,
+                        tuple(p.scale for p in declarations),
+                        tuple(p.log_reference for p in declarations),
+                    )
 
         # create model data
         modeldata, modelnames, model_A, model_a, model_b = self._get_modeldata(X)
@@ -1441,6 +1472,8 @@ class Optimize(DecompositionAnalysis):
             "amplitude_mode": self.amplitude_mode,
             "constraints": self.constraints,
         }
+        if coordinate_config is not None:
+            fit_config["parameter_coordinates"] = coordinate_config
         evaluate_only = (
             self._python_model_configuration is not None
             or self.bounds_mode.lower() == "native"
@@ -1459,6 +1492,11 @@ class Optimize(DecompositionAnalysis):
                 "message": "No free parameters; model evaluated without optimization.",
             }
         elif not self.dry:
+            coordinate_options = (
+                {"parameter_coordinates": parameter_coordinates}
+                if parameter_coordinates is not None
+                else {}
+            )
             model_spec, fopt, solver_meta, solver_artifacts = _optimize(
                 func,
                 model_spec,
@@ -1470,6 +1508,7 @@ class Optimize(DecompositionAnalysis):
                 callback=callback,
                 bounds_mode=self.bounds_mode,
                 parameter_plan=self._parameter_plan,
+                **coordinate_options,
             )
             self._model_spec = model_spec
 
@@ -2383,8 +2422,9 @@ class Optimize(DecompositionAnalysis):
 
         For 1D script and composable Python models in transform mode, this
         remains the raw optimizer-coordinate Jacobian, including the historical
-        bound transformation. Native mode instead retains the raw physical
-        Jacobian. result.diagnostics['jacobian_coordinates'] labels this space;
+        bound transformation. Native linear mode retains the raw physical
+        Jacobian; explicit log declarations retain solver-coordinate columns.
+        result.diagnostics['jacobian_coordinates'] labels this space;
         covariance and stderr always describe physical free parameters.
 
         Returns
@@ -2434,8 +2474,9 @@ class Optimize(DecompositionAnalysis):
         the bound transform. They are unavailable near bounds, for deficient
         rank, unsuccessful optimization or missing prerequisites; diagnostics
         include ``covariance_reason``. The raw ``jacobian`` property uses
-        optimizer coordinates in transform mode and physical magnitudes in
-        native mode, identified by ``diagnostics['jacobian_coordinates']``.
+        optimizer coordinates in transform mode, physical magnitudes in native
+        linear mode, and solver coordinates with explicit log declarations,
+        identified by ``diagnostics['jacobian_coordinates']``.
         """
         if not self._fitted:
             raise NotFittedError(

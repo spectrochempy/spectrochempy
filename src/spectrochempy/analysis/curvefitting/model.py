@@ -51,16 +51,38 @@ class Parameter:
         Whether the parameter is estimated. An expression implies False.
     expr : str or None, optional
         Arithmetic expression using full parameter names.
+    scale : {'lin', 'log'}, optional
+        Estimation coordinate. Values and bounds remain physical magnitudes.
+    log_reference : float or None, optional
+        Explicit positive reference in the same magnitude unit for log scale.
+        Log declarations require a positive value and strictly positive min.
     """
 
-    def __init__(self, value=0.0, *, min=None, max=None, vary=True, expr=None):
+    def __init__(
+        self,
+        value=0.0,
+        *,
+        min=None,
+        max=None,
+        vary=True,
+        expr=None,
+        scale="lin",
+        log_reference=None,
+    ):
         self.value, self.min, self.max = value, min, max
         self.vary, self.expr = vary, expr
+        self.scale, self.log_reference = scale, log_reference
         if expr is not None:
             self.vary = False
         self._validate()
 
     def _validate(self):
+        self.scale = getattr(self, "scale", "lin")
+        self.log_reference = getattr(self, "log_reference", None)
+        if self.scale not in ("lin", "log"):
+            raise ValueError("scale must be 'lin' or 'log'")
+        if self.log_reference is not None:
+            self.log_reference = _real(self.log_reference, "log_reference")
         self.value = _real(self.value, "value")
         self.min = None if self.min is None else _real(self.min, "min")
         self.max = None if self.max is None else _real(self.max, "max")
@@ -79,6 +101,21 @@ class Parameter:
             self.max is not None and self.value > self.max
         ):
             raise ValueError("Initial value lies outside its bounds")
+        if self.expr is not None and (
+            self.scale != "lin" or self.log_reference is not None
+        ):
+            raise ValueError(
+                "Expression parameters cannot declare independent coordinates"
+            )
+        if self.scale == "log":
+            if self.log_reference is None or self.log_reference <= 0:
+                raise ValueError(
+                    "Log scale requires an explicit positive log_reference"
+                )
+            if self.value <= 0 or self.min is None or self.min <= 0:
+                raise ValueError("Log scale requires a positive value and min > 0")
+        elif self.log_reference is not None:
+            raise ValueError("log_reference requires scale='log'")
 
     def set(
         self,
@@ -89,18 +126,17 @@ class Parameter:
         vary=_UNSET,
         expr=_UNSET,
         scale=_UNSET,
+        log_reference=_UNSET,
     ):
         """
         Update initial configuration atomically and return this parameter.
 
         ``expr=None`` removes a link and makes the parameter free unless vary
         is supplied. An expression replaces independent bounds on the target.
-        ``scale='log'`` is not implemented by the 1D backend.
+        Log scale requires an explicit positive reference and positive domain.
+        A link removes independent coordinates; selecting lin removes the reference
+        unless a contradictory explicit reference is supplied.
         """
-        if scale is not _UNSET and scale != "lin":
-            raise NotImplementedError(
-                "Log scale requires a separate 1D backend evolution"
-            )
         candidate = deepcopy(self)
         for name, supplied in (
             ("value", value),
@@ -108,6 +144,8 @@ class Parameter:
             ("max", max),
             ("vary", vary),
             ("expr", expr),
+            ("scale", scale),
+            ("log_reference", log_reference),
         ):
             if supplied is not _UNSET:
                 setattr(candidate, name, supplied)
@@ -118,6 +156,12 @@ class Parameter:
                 candidate.min = None
             if max is _UNSET:
                 candidate.max = None
+            if scale is _UNSET:
+                candidate.scale = "lin"
+            if log_reference is _UNSET:
+                candidate.log_reference = None
+        if scale == "lin" and log_reference is _UNSET:
+            candidate.log_reference = None
         candidate._validate()
         self.__dict__.update(candidate.__dict__)
         return self
@@ -129,8 +173,8 @@ class Parameters(MutableMapping):
 
     Assignment copies a Parameter; reusing an object never creates a tie.
     Use ``expr`` to declare a relationship explicitly. Values are numerical
-    magnitudes; unit conversion and logarithmic optimization are not provided
-    by this first 1D facade.
+    magnitudes; unit conversion is not provided. Log declarations require an
+    explicit positive reference and the qualified native 1D fitting policy.
     """
 
     def __init__(self):
@@ -161,11 +205,6 @@ class Parameters(MutableMapping):
         """Add an independent or auxiliary parameter, rejecting duplicate names."""
         if name in self:
             raise ValueError(f"Duplicate parameter {name!r}")
-        scale = options.pop("scale", "lin")
-        if scale != "lin":
-            raise NotImplementedError(
-                "Log scale requires a separate 1D backend evolution"
-            )
         self[name] = Parameter(value, **options)
         return self[name]
 
