@@ -80,7 +80,7 @@ def test_unknown_method_is_rejected():
 
 
 @pytest.mark.parametrize(
-    "target, initial", [(0.0, [1.0, 1.0]), (1.0, [1.0, 1.0]), (4.0, [2.0, 2.0])]
+    "target, initial", [(0.0, [0.0, 1.0]), (1.0, [1.0, 1.0]), (4.0, [2.0, 2.0])]
 )
 def test_native_exact_rank_deficient_residual_keeps_budget_status(target, initial):
     import warnings
