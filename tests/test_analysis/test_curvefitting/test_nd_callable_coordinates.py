@@ -365,6 +365,31 @@ def test_rank_deficient_physical_problem_has_no_covariance():
     assert fit["diagnostics"]["covariance_reason"] == "rank_deficient"
 
 
+def test_inference_normalization_overflow_cannot_hide_an_active_bound():
+    x = np.array([0.1, 0.4, 0.7, 1.0])[None, :]
+    data = small_grid(np.broadcast_to(2 * x, (3, 4)))
+    specs = {"gain": {"value": 0.75, "bounds": (0.5, 1), "scale": 1e-309}}
+    space = _ParameterCoordinates(
+        _ParameterLayout(_parameter_layout(specs).parameters, (1,)), ("log",), (0.8,)
+    )
+    with np.errstate(all="raise"):
+        fit, raw = fit_callable_model(
+            data,
+            lambda template, gain: np.broadcast_to(gain * x, template.shape),
+            specs,
+            300,
+            False,
+            {},
+            parameter_coordinates=space,
+        )
+    assert raw.success
+    np.testing.assert_allclose(fit["values"], [1], rtol=1e-6)
+    assert np.isfinite(fit["jacobian"]).all()
+    assert fit["diagnostics"]["active_parameter_bounds"] == ("gain",)
+    assert fit["covariance"] is None
+    assert fit["diagnostics"]["covariance_reason"] == "numeric_range"
+
+
 def test_exhausted_budget_preserves_solver_failure_and_excludes_covariance():
     data, model, specs, space, *_ = problem()
     fit, raw = fit_callable_model(

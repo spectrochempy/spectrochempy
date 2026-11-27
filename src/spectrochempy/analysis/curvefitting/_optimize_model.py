@@ -109,8 +109,19 @@ def _coordinate_config(coordinates):
     }
 
 
-class _JacobianRangeError(ValueError):
-    """A restored Jacobian cannot be represented in float64 magnitudes."""
+class _PhysicalRangeError(ValueError):
+    """A physical inference input cannot be represented in float64 magnitudes."""
+
+
+def _normalize_physical(values, scales):
+    """Reject lost finite anchors in the historical inference basis."""
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        normalized = values / scales
+    if np.any(np.isfinite(values) & ~np.isfinite(normalized)) or np.any(
+        (values != 0) & (normalized == 0)
+    ):
+        raise _PhysicalRangeError("Physical inference coordinates exceed float64 range")
+    return normalized
 
 
 def _rescale_jacobian(matrix, numerator, derivatives):
@@ -127,7 +138,7 @@ def _rescale_jacobian(matrix, numerator, derivatives):
             values * factors / divisor, powers + factor_powers - divisor_powers
         )
     if not np.isfinite(result).all() or np.any((matrix != 0) & (result == 0)):
-        raise _JacobianRangeError("Restored physical Jacobian is outside float64 range")
+        raise _PhysicalRangeError("Restored physical Jacobian is outside float64 range")
     return result
 
 
@@ -371,21 +382,24 @@ def fit_callable_model(
         )
     elif solution is not None:
         scaled = copy(solution)
-        scaled.x = physical_values / scales
         try:
-            scaled.jac = (
-                _rescale_jacobian(solution.jac, scales, derivatives)
-                if parameter_coordinates is not None
-                else solution.jac * scales
-            )
-        except _JacobianRangeError:
+            if parameter_coordinates is not None:
+                scaled.x = _normalize_physical(physical_values, scales)
+                scaled_limits = _normalize_physical(limits, scales[:, None])
+                scaled.jac = _rescale_jacobian(solution.jac, scales, derivatives)
+                inference_bounds = (scaled_limits[:, 0], scaled_limits[:, 1])
+            else:
+                scaled.x = solution.x / scales
+                scaled.jac = solution.jac * scales
+                inference_bounds = (limits[:, 0] / scales, limits[:, 1] / scales)
+        except _PhysicalRangeError:
             covariance, reason = None, "numeric_range"
         else:
             covariance, reason = _physical_covariance(
                 scaled,
                 jacobian,
                 scales,
-                (limits[:, 0] / scales, limits[:, 1] / scales),
+                inference_bounds,
                 diagnostics,
             )
     else:
