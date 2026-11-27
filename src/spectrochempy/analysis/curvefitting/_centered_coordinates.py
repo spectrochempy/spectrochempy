@@ -4,6 +4,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import replace
+from numbers import Integral
 
 import numpy as np
 
@@ -16,14 +17,18 @@ from spectrochempy.analysis.curvefitting._prepared_parameter import _ParameterLa
 def _magnitude(value, *, finite=True):
     if hasattr(value, "units"):
         raise ValueError("Centered coordinates require preconverted real magnitudes")
-    original = np.asarray(value)
-    if original.shape != () or original.dtype.kind not in "iuf":
+    integer = isinstance(value, Integral) and not isinstance(value, (bool, np.bool_))
+    original = value if integer else np.asarray(value)
+    if not integer and (original.shape != () or original.dtype.kind not in "iuf"):
         raise ValueError("Centered coordinates require real scalar magnitudes")
-    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
-        result = np.longdouble(original)
+    try:
+        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+            result = np.longdouble(original)
+    except OverflowError as exc:
+        raise ValueError("Centered magnitude exceeds the platform range") from exc
     if np.isnan(result) or (finite and not np.isfinite(result)):
         raise ValueError("Centered magnitude must be finite")
-    if original.dtype.kind in "iu":
+    if integer or original.dtype.kind in "iu":
         if not np.isfinite(result) or int(result) != int(original):
             raise ValueError("Integer magnitude loses precision on this platform")
     elif result != original:
@@ -152,7 +157,7 @@ class _CenteredParameterCoordinates:
     def to_physical(self, values):
         """Reconstruct physical magnitudes, retaining exact declared anchors."""
         shifted = self.to_offsets(values)
-        solver = np.asarray(values)
+        solver = np.asarray(values, dtype=float)
         if all(origin is None for origin in self.origins):
             return shifted
         result = shifted.astype(np.longdouble)

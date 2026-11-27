@@ -92,6 +92,11 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ZIP imports flatten multi-dataset members, including nested archives and
+  heterogeneous SPC files, instead of returning nested collections or failing
+  during automatic merging. Existing compatibility checks and member-based
+  ``only`` limits are preserved (:issue:`1795`, :pr:`2027`).
+
 - Native profile fits with large coordinate origins evaluate their Jacobian
   and local covariance at the center actually returned, after its finite
   precision reconstruction. Local and shared centers retain consistent

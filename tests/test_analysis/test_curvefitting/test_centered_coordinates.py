@@ -29,8 +29,8 @@ def center_layout(value, bounds=(None, None), scale=1):
     )
 
 
-def test_integer_origins_are_subtracted_before_float64_coercion():
-    origin = 2**60 + 1
+@pytest.mark.parametrize("origin", [2**60 + 1, -(2**60 + 1)])
+def test_integer_origins_are_subtracted_before_float64_coercion(origin):
     layout = center_layout(origin, (origin - 2, origin + 2), 0.5)
     if int(np.longdouble(origin)) != origin:
         with pytest.raises(ValueError, match="precision"):
@@ -57,6 +57,29 @@ def test_distinct_integer_anchors_cannot_be_silently_rounded():
     else:
         with pytest.raises(ValueError, match="precision"):
             _CenteredParameterCoordinates(layout, (origin,))
+
+
+def test_large_python_integer_support_depends_on_precision_not_numpy_dtype():
+    origin = 2**100
+    step = 2**60
+    space = _CenteredParameterCoordinates(
+        center_layout(origin + step, (origin - 2 * step, origin + 2 * step), step),
+        (origin,),
+    )
+    assert space.initial == (1,)
+    assert space.bounds == ((-2, 2),)
+    assert int(space.to_physical(space.initial)[0]) == origin + step
+    assert space.to_solver([origin - step])[0] == -1
+    for bad in (origin + 1, 2**20000):
+        with pytest.raises(ValueError):
+            _CenteredParameterCoordinates(center_layout(bad), (bad,))
+
+
+def test_anchor_lookup_uses_the_validated_float64_solver_coordinate():
+    value = np.nextafter(np.longdouble(1), np.longdouble(2))
+    space = _CenteredParameterCoordinates(center_layout(value), (0,))
+    np.testing.assert_array_equal(space.to_physical([value]), [value])
+    np.testing.assert_array_equal(space.to_physical([float(value)]), [value])
 
 
 def test_center_and_log_reference_and_conditioning_are_independent():

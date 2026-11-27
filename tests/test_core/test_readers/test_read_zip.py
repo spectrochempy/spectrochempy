@@ -8,12 +8,16 @@
 import io
 import warnings
 import zipfile
+from contextlib import nullcontext
 
+import numpy as np
 import pytest
 
+import spectrochempy as scp
 from spectrochempy import read_zip
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.utils.objects import ScpObjectList
+from tests.test_core.test_readers.test_read_spc import _make_mxy_spc, _make_xy_spc
 
 DATADIR = prefs.datadir
 AGIRDATA = DATADIR / "agirdata"
@@ -230,3 +234,85 @@ def test_read_zip_reports_ignored_files_in_nested_archives():
         datasets = read_zip({"nested_ignored.zip": content}, merge=False)
 
     assert datasets.name == "sample1"
+
+
+@pytest.mark.parametrize("options", [{}, {"merge": False}, {"merge": True}])
+@pytest.mark.parametrize("depth", [1, 2])
+def test_zip_member_groups_are_flat_and_compatible_scans_still_merge(options, depth):
+    inner = _make_synthetic_zip({"a.csv": "1,10\n2,20\n", "b.csv": "1,30\n2,40\n"})
+    for _ in range(depth - 1):
+        inner = _make_synthetic_zip({"deeper.zip": inner})
+    content = _make_synthetic_zip({"inner.zip": inner, "c.csv": "1,50\n2,60\n"})
+    result = read_zip({"outer.zip": content}, **options)
+    datasets = [result] if isinstance(result, scp.NDDataset) else result
+    assert all(isinstance(ds, scp.NDDataset) for ds in datasets)
+    rows = sorted(tuple(row) for ds in datasets for row in np.atleast_2d(ds.data))
+    assert rows == [(10, 20), (30, 40), (50, 60)]
+    if options.get("merge") is False:
+        assert sorted(ds.name for ds in datasets) == ["a", "b", "c"]
+    else:
+        assert len(datasets) == 1
+
+
+@pytest.mark.parametrize("only, expected", [(1, ["a", "b"]), (2, ["a", "b", "c"])])
+def test_zip_only_counts_members_rather_than_returned_groups(only, expected):
+    inner = _make_synthetic_zip({"a.csv": "1,10\n2,20\n", "b.csv": "1,30\n2,40\n"})
+    content = _make_synthetic_zip({"inner.zip": inner, "c.csv": "1,50\n2,60\n"})
+    result = read_zip({"outer.zip": content}, merge=False, only=only)
+    assert sorted(ds.name for ds in result) == expected
+
+
+@pytest.mark.parametrize("merge", [False, True])
+@pytest.mark.parametrize("from_path", [False, True])
+def test_zip_heterogeneous_spc_preserves_every_spectrum_and_its_axis(
+    tmp_path, merge, from_path
+):
+    multi, _, _ = _make_mxy_spc(x_lists=[[1, 2], [3, 4]], y_lists=[[10, 20], [30, 40]])
+    single = _make_xy_spc(
+        x_values=np.array([1, 2], dtype="<f4"),
+        y_values=np.array([50, 60], dtype="<f4"),
+    )
+    content = _make_synthetic_zip({"multi.spc": multi, "single.spc": single})
+    if from_path:
+        source = tmp_path / "spectra.zip"
+        source.write_bytes(content)
+    else:
+        source = {"spectra.zip": content}
+    expected_warning = (
+        pytest.warns(UserWarning, match="coordinates differ")
+        if merge
+        else nullcontext()
+    )
+    with expected_warning:
+        result = read_zip(source, merge=merge)
+    assert isinstance(result, ScpObjectList)
+    assert all(isinstance(ds, scp.NDDataset) for ds in result)
+    actual = sorted(
+        (tuple(ds.x.data), tuple(row))
+        for ds in result
+        for row in np.atleast_2d(ds.data)
+    )
+    assert actual == [((1, 2), (10, 20)), ((1, 2), (50, 60)), ((3, 4), (30, 40))]
+
+
+def test_zip_nested_native_quantity_conflicts_remain_separate(tmp_path):
+    members = {}
+    for name, units, values in (
+        ("abs", "absorbance", [0.1, 0.2]),
+        ("trans", "transmittance", [20, 30]),
+    ):
+        ds = scp.NDDataset(values, units=units, coordset=[scp.Coord([1, 2])])
+        path = ds.write(tmp_path / f"{name}.scp")
+        members[f"{name}.scp"] = path.read_bytes()
+    inner = _make_synthetic_zip(members)
+    content = _make_synthetic_zip(
+        {"inner.zip": inner, "another.scp": members["abs.scp"]}
+    )
+    with pytest.warns(UserWarning, match="signal quantities differ"):
+        result = read_zip({"quantities.zip": content}, merge=True)
+    assert isinstance(result, ScpObjectList)
+    assert all(isinstance(ds, scp.NDDataset) for ds in result)
+    trans = [ds for ds in result if ds.units == scp.ur.Unit("transmittance")]
+    assert len(trans) == 1
+    np.testing.assert_array_equal(trans[0].data, [20, 30])
+    assert sum(np.atleast_2d(ds.data).shape[0] for ds in result) == 3
