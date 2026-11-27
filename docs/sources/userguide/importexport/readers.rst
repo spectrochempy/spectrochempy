@@ -86,10 +86,39 @@ Callers must handle a single ``NDDataset`` or a ``ScpObjectList``. Observation
 coordinates may vary, and compatible intensity-unit conversion and mask assembly
 retain their existing behavior. ``merge=False`` keeps the inputs separate.
 
-This geometric check does not certify measurement identity. Reader-specific
-restrictions remain in force; a complete policy for quantities, IR/Raman/NMR
-metadata and source provenance is still outside this check. The explicit
-``scp.stack()`` and ``scp.concatenate()`` operations keep their own contracts.
+Recognized measurement identities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Automatic import assembly also keeps established quantity contradictions
+separate. The recognized signal-unit families are ``absorbance`` (including
+``a.u.``), ``transmittance``/``absolute_transmittance``, and ``Kubelka_Munk``.
+SI-prefixed forms such as ``milliabsorbance`` retain the same family. Scale
+conversion within a family remains allowed, for example fractional versus
+percentage transmittance. Import assembly does not implicitly convert between
+these different signal families. Explicit combination and unit-conversion
+operations keep their existing contracts.
+
+Recognized scalar ``meta.jcamp_data_type`` declarations distinguish infrared,
+Raman, UV-visible and NMR spectra, with ``NMR FID`` distinct from
+``NMR SPECTRUM``. Contradictory known declarations keep inputs
+separate, including declarations retained in native files. Existing stricter
+reader restrictions, such as keeping explicitly parsed UV-visible/Raman grids
+separate, still apply. A known constraint is retained through successive
+assembly passes within one import, even when an intermediate assembly clears
+non-common metadata.
+
+Missing or unrecognized identities remain unknown. Vendor ``origin``, filename
+extensions and free-text ``title`` values are not modality classifiers.
+Generic ``percent``/``%`` and dimensionless units do not distinguish reflectance,
+transmittance, or another relative signal; only the explicitly named signal
+units above establish a family. User-defined units without a recognized root remain unclassified.
+An unknown identity does not by itself prevent otherwise compatible assembly.
+
+These checks do not certify complete measurement identity or preserve a full
+scientific description of each source. Nuclear species, NMR domains/encodings
+and plugin-specific rules require plugin-owned qualification. Source provenance
+and identity persistence after metadata-clearing transformations remain separate
+work. Callers remain responsible for the scientific comparability of inputs.
 
 Readers supplied by plugins
 ---------------------------
