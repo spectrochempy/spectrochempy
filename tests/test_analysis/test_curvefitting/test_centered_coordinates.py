@@ -10,6 +10,7 @@ from scipy.optimize import least_squares
 from scipy.optimize._numdiff import approx_derivative
 
 import spectrochempy as scp
+from spectrochempy.analysis.curvefitting import _centered_coordinates
 from spectrochempy.analysis.curvefitting._centered_coordinates import (
     _CenteredParameterCoordinates,
 )
@@ -145,7 +146,7 @@ def test_invalid_coordinates_and_lost_anchors_are_rejected():
         _CenteredParameterCoordinates(layout, ())
     with pytest.raises(ValueError, match="Only linear"):
         _CenteredParameterCoordinates(layout, (1,), ("log",), (1,))
-    with pytest.raises(ValueError, match="precision"):
+    with pytest.raises(ValueError, match="bounds|collapse"):
         _CenteredParameterCoordinates(center_layout(1, (0, 2)), (1e300,))
     with pytest.raises(ValueError):
         _CenteredParameterCoordinates(center_layout(1, (2, 3)), (1,))
@@ -153,6 +154,23 @@ def test_invalid_coordinates_and_lost_anchors_are_rejected():
     for bad in ([True], [1j], [np.nan], [np.inf], [1, 2], [[1]], [1 * scp.ur.Hz]):
         with pytest.raises(ValueError):
             space.to_solver(bad)
+
+
+@pytest.mark.parametrize("bound", [0.1, 0.2, 0.3, -0.1])
+def test_double_precision_subtraction_roundoff_keeps_exact_anchors(bound, monkeypatch):
+    class DoublePrecision:
+        longdouble = np.float64
+
+        def __getattr__(self, name):
+            return getattr(np, name)
+
+    monkeypatch.setattr(_centered_coordinates, "np", DoublePrecision())
+    space = _CenteredParameterCoordinates(center_layout(1, (bound, 10)), (1,))
+    assert space.to_physical([space.bounds[0][0]])[0] == bound
+    assert space.to_physical(space.to_solver([bound]))[0] == bound
+    np.testing.assert_allclose(space.to_physical(space.to_solver([0.5])), [0.5])
+    with pytest.raises(ValueError, match="Distinct physical anchors"):
+        _CenteredParameterCoordinates(center_layout(1, (0, None)), (1e300,))
 
 
 def test_zero_or_absent_origins_and_empty_layout_preserve_legacy_mapping():

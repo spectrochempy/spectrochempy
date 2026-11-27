@@ -40,9 +40,8 @@ def _offset(value, origin, *, finite=True):
     value = _magnitude(value, finite=finite)
     with np.errstate(over="ignore", under="ignore", invalid="ignore"):
         offset = value - origin
-        reconstructed = origin + offset
-    if np.isfinite(value) and (not np.isfinite(offset) or reconstructed != value):
-        raise ValueError("Physical magnitude loses precision around its origin")
+    if np.isfinite(value) and not np.isfinite(offset):
+        raise ValueError("Physical offset exceeds the platform range")
     return offset
 
 
