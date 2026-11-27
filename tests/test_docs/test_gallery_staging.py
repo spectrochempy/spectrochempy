@@ -17,6 +17,8 @@ CONF_PATH = REPO_ROOT / "docs" / "conf.py"
 
 
 def _load_docs_conf(monkeypatch):
+    for key in ("SCPY_CORN_DATA", "SCPY_CORN_ZIP", "SCPY_CORN_SYNTHETIC"):
+        monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv("SPHINX_PATTERN", "index")
     module_name = "_spectrochempy_docs_conf_for_tests"
     sys.modules.pop(module_name, None)
