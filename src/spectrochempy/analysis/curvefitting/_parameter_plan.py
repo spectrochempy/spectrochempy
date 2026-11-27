@@ -2,7 +2,8 @@
 Private, fit-local preparation of scalar 1D parameters and expressions.
 
 The qualified language is numeric constants, COMMON names, parentheses and
-unary/binary +, -, *, /. Powers, numpy calls/constants, component-key references
+unary/binary +, -, *, / and powers with preserved signed-literal precedence.
+Other powers, numpy calls/constants, component-key references
 and other legacy Python syntax retain prepare_model's historical evaluator.
 In particular, textual expansion of forward references is not equivalent to
 evaluating their values first: this adapter preserves historical precedence.
@@ -11,6 +12,7 @@ ND declarations retain their existing preparation and numeric scale semantics.
 
 import ast
 import copy
+import re
 from dataclasses import dataclass
 from dataclasses import field
 from graphlib import CycleError
@@ -109,6 +111,7 @@ def _arithmetic_tree(expression):
         ast.Sub,
         ast.Mult,
         ast.Div,
+        ast.Pow,
         ast.UAdd,
         ast.USub,
         ast.Name,
@@ -121,6 +124,24 @@ def _arithmetic_tree(expression):
         if isinstance(node, ast.Constant) and type(node.value) not in (int, float):
             return None
     return tree
+
+
+def _preserves_signed_literals(source, tree):
+    """Keep textual negative-base semantics when replacing values by symbols."""
+    if "**" not in source:
+        return True
+    names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
+    for name in names:
+
+        class Negate(ast.NodeTransformer):
+            def visit_Name(self, node, name=name):
+                return ast.UnaryOp(ast.USub(), node) if node.id == name else node
+
+        expected = Negate().visit(copy.deepcopy(tree))
+        actual = ast.parse(re.sub(rf"\b{name}\b", f"-{name}", source), mode="eval")
+        if ast.dump(expected) != ast.dump(actual):
+            return False
+    return True
 
 
 def _compile_parameter_plan(spec):
@@ -200,6 +221,14 @@ def _compile_parameter_plan(spec):
             for node in ast.walk(tree)
             if isinstance(node, ast.Name)
         ):
+            return fallback
+        try:
+            preserves_signs = _preserves_signed_literals(current, tree)
+        except RecursionError:
+            # Qualification is optional: deep legacy expressions remain valid
+            # when copying/visiting their AST exceeds the interpreter limit.
+            return fallback
+        if not preserves_signs:
             return fallback
         steps.append(_ExpressionStep(key, symbols[key], current))
         lookup[key] = symbols[key]
