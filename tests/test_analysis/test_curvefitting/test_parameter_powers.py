@@ -147,3 +147,23 @@ $ intercept: 1, none, none
     np.testing.assert_array_equal(python.result.fitted.data, second.result.fitted.data)
     assert python.result.parameter_names == second.result.parameter_names
     assert params["source"].value == 1.5
+
+
+@pytest.mark.parametrize("terms", [250, 300, 500])
+def test_deep_power_expressions_keep_legacy_evaluation(terms):
+    expression = "+".join(["(source)**2"] * terms)
+    spec = _FitModelSpec(
+        common_params={
+            "source": _ParamSpec("source", 2.0),
+            "linked": _ParamSpec("linked", vary=False, reference=expression),
+        }
+    )
+    plan = _compile_parameter_plan(spec)
+    # No fixed AST-depth threshold: a platform may safely qualify the expression.
+    # If it cannot, preparing the optional plan must still preserve legacy fits.
+    for source in (2.0, -2.0, 0.5):
+        spec.common_params["source"].value = source
+        actual = plan.resolve(spec).common_params["linked"].value
+        expected = prepare_model(spec).common_params["linked"].value
+        assert actual == expected == source**2 * terms
+    assert spec.common_params["linked"].reference == expression

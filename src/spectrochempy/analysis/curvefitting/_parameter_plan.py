@@ -222,7 +222,13 @@ def _compile_parameter_plan(spec):
             if isinstance(node, ast.Name)
         ):
             return fallback
-        if not _preserves_signed_literals(current, tree):
+        try:
+            preserves_signs = _preserves_signed_literals(current, tree)
+        except RecursionError:
+            # Qualification is optional: deep legacy expressions remain valid
+            # when copying/visiting their AST exceeds the interpreter limit.
+            return fallback
+        if not preserves_signs:
             return fallback
         steps.append(_ExpressionStep(key, symbols[key], current))
         lookup[key] = symbols[key]
