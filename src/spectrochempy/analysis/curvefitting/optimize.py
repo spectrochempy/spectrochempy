@@ -38,6 +38,7 @@ from spectrochempy.analysis.curvefitting._optimize_model import fit_callable_mod
 from spectrochempy.analysis.curvefitting._optimize_nd import fit_separable_peaks
 from spectrochempy.analysis.curvefitting._optimize_nd import snapshot_peaks
 from spectrochempy.analysis.curvefitting._parameter_plan import _compile_parameter_plan
+from spectrochempy.analysis.curvefitting._parameter_space import _coordinate_vector
 from spectrochempy.analysis.curvefitting._parameter_space import _internal_vector
 from spectrochempy.analysis.curvefitting._parameter_space import (
     _modelspec_parameter_count,
@@ -2601,7 +2602,16 @@ def _optimize(
     callback=None,
     bounds_mode="transform",
     parameter_plan=None,
+    parameter_coordinates=None,
 ):
+    """
+    Fit using historical coordinates unless a private coordinate space is given.
+
+    Explicit lin/log coordinates require a qualified canonical scalar plan and
+    the opt-in native least-squares policy. They retain the raw solver Jacobian
+    and provide dp/dz to the existing physical covariance/stationarity machinery.
+    No public entry selects this path or chooses a log reference implicitly.
+    """
     if constraints is None:
         constraints = {}
     global keys
@@ -2615,6 +2625,8 @@ def _optimize(
     )
 
     def internal_func(p, dat, fp, keys, *args):
+        if parameter_coordinates is not None:
+            p = parameter_coordinates.to_physical(p)
         fp = (
             space.restore(fp, p, physical=native)
             if space is not None
@@ -2638,7 +2650,13 @@ def _optimize(
     if native and method.lower() not in ("least_squares", "leastsq"):
         raise ValueError("Native bounds require a least-squares method")
     restore = _restore_native if native else _restore_external
-    if native:
+    if parameter_coordinates is not None:
+        if not native:
+            raise ValueError("Explicit coordinates require native bounds")
+        par, keys, native_bounds = _coordinate_vector(
+            fp0, parameter_plan, parameter_coordinates
+        )
+    elif native:
         par, keys, native_bounds = _physical_vector(fp0)
     else:
         par, keys = (
@@ -2660,8 +2678,13 @@ def _optimize(
 
     if native:
         method = "trf"
+        solver_bounds = (
+            np.asarray(parameter_coordinates.bounds, dtype=float)
+            if parameter_coordinates is not None
+            else native_bounds
+        )
         result = _fit_backend._native_least_squares(
-            internal_func, par, native_bounds.T, args=tuple(args), max_nfev=maxfun
+            internal_func, par, solver_bounds.T, args=tuple(args), max_nfev=maxfun
         )
     else:
         result = _run_optimizer(
@@ -2686,12 +2709,23 @@ def _optimize(
         solver_result = result
     solver_meta = _normalize_solver_meta(method, solver_result, warnmess)
     solver_artifacts = _extract_solver_artifacts(method, solver_result)
+    restored_values = (
+        parameter_coordinates.to_physical(res)
+        if parameter_coordinates is not None
+        else res
+    )
     if native:
-        near = _bound_neighborhood(res, *native_bounds.T)
+        near = _bound_neighborhood(restored_values, *native_bounds.T)
         solver_artifacts.update(
-            parameter_transform_derivatives=tuple(np.ones(len(res))),
+            parameter_transform_derivatives=tuple(
+                parameter_coordinates.derivatives(res)
+                if parameter_coordinates is not None
+                else np.ones(len(res))
+            ),
             near_parameter_bounds=bool(np.any(near)),
-            jacobian_coordinates="physical",
+            jacobian_coordinates="solver"
+            if parameter_coordinates is not None
+            else "physical",
         )
         solver_meta.update(
             bounds_mode="native",
@@ -2712,7 +2746,7 @@ def _optimize(
 
     # restore the external parameter
     if space is not None:
-        fpe = space.restore(fp0, res, physical=native)
+        fpe = space.restore(fp0, restored_values, physical=native)
         physical = space.physical_values(fpe)
         bounds = space.physical_bounds
     else:
