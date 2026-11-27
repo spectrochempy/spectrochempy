@@ -1,7 +1,8 @@
 """
 Private linear/log coordinates on the common physical parameter layout.
 
-Public fitting entries do not select this opt-in numerical adapter.
+The composable Python 1D facade selects this adapter for explicit log
+declarations; ND fitting entries do not select it yet.
 For a log parameter q=ln(p/reference); otherwise q=p. The solver coordinate
 is z=q/normalization_scale. References and physical magnitudes must already
 use the same unit: unit conversion and public reference selection belong to
