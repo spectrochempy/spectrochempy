@@ -173,15 +173,17 @@ def test_solver_vectors_outputs_and_physical_diagnostics_match(
     assert histories[0] == histories[1]
 
 
-def test_unqualified_plan_keeps_historical_optimizer_path(monkeypatch):
+def test_unqualified_layout_keeps_historical_optimizer_path(monkeypatch):
     spec = _FitModelSpec(
         common_params={
             "a": _ParamSpec("a", 1.0, bounds=(0, 4)),
             "square": _ParamSpec("square", vary=False, reference="a**2"),
-        }
+        },
+        constraints={},
     )
     plan = _compile_parameter_plan(spec)
     assert plan.fallback
+    assert not plan.vector_compatible
 
     def forbidden(*args):
         pytest.fail("Unqualified plans must retain the historical adapters")
