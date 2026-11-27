@@ -2,7 +2,9 @@
 
 """Tests for spectrochempy-carroucell plugin."""
 
+from importlib import import_module
 from importlib.metadata import version
+from unittest.mock import Mock
 
 import pytest
 from spectrochempy_carroucell import CarroucellPlugin
@@ -131,13 +133,18 @@ def test_namespace_exposes_short_read_alias():
 # ------------------------------------------------------------------
 
 
-def test_reader_stub_raises_on_nonexistent_path():
-    """scp.carroucell.read_carroucell raises FileNotFoundError for non-existent paths."""
+def test_reader_stub_raises_on_nonexistent_path(tmp_path, monkeypatch):
+    """An explicitly local missing path raises without trying a remote read."""
     reader = scp.carroucell.read_carroucell
     assert callable(reader)
+    remote = Mock(side_effect=AssertionError("Unexpected remote read"))
+    monkeypatch.setattr(
+        import_module("spectrochempy.core.readers.importer"), "_read_remote", remote
+    )
 
     with pytest.raises(FileNotFoundError):
-        reader("/nonexistent/path")
+        reader(tmp_path / "missing", local_only=True)
+    remote.assert_not_called()
 
 
 # ------------------------------------------------------------------
