@@ -104,7 +104,7 @@ Bug Fixes
 - Native profile fits with large coordinate origins evaluate their Jacobian
   and local covariance at the center actually returned, after its finite
   precision reconstruction. Local and shared centers retain consistent
-  uncertainties with the fitted profile (:issue:`1989`).
+  uncertainties with the fitted profile (:issue:`1989`, :pr:`2026`).
 
 - Carroucell imports retain separate compatible groups from one sample holder
   instead of failing when OMNIC returns multiple datasets. Temperature labels
