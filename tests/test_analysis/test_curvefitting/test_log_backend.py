@@ -297,6 +297,37 @@ def test_stale_plan_is_rejected_before_objective_and_restoration(mutation):
     assert [(c.label, c.params["ampl"].value) for c in spec.components] == before
 
 
+@pytest.mark.parametrize(
+    "target", ["free_value", "fixed_value", "free_bound", "fixed_bound"]
+)
+@pytest.mark.parametrize("shape", [(), (1,)])
+def test_invalidated_scalar_qualification_rejects_arrays_before_objective(
+    target, shape
+):
+    spec = definition()
+    spec.common_params["fixed"] = _ParamSpec("fixed", 3, vary=False)
+    plan, coordinates = prepared(spec)
+    parameter = spec.common_params["a" if target.startswith("free") else "fixed"]
+    if target.endswith("value"):
+        parameter.value = np.full(shape, parameter.value)
+    else:
+        low, high = parameter.bounds
+        parameter.bounds = (np.full(shape, 0.01 if low is None else low), high)
+    assert not _compile_parameter_plan(spec).vector_compatible
+
+    def forbidden(*args):
+        pytest.fail("Non-scalar declarations must fail before model evaluation")
+
+    with pytest.raises(ValueError, match="qualified scalar"):
+        _optimize(
+            forbidden,
+            spec,
+            bounds_mode="native",
+            parameter_plan=plan,
+            parameter_coordinates=coordinates,
+        )
+
+
 def test_explicit_identity_coordinates_preserve_native_evaluation_history():
     initial = definition()
     plan = _compile_parameter_plan(initial)

@@ -11,6 +11,7 @@ It does not parse scripts, evaluate profiles, or select an optimization method.
 """
 
 from dataclasses import dataclass
+from numbers import Real
 
 import numpy as np
 
@@ -292,6 +293,12 @@ def _coordinate_vector(definition, plan, coordinates):
     if _scalar_definition_signature(definition) != plan.definition_signature:
         raise ValueError("Prepared plan must match the current canonical definition")
     records = _prepared_parameters(definition)
+    if any(
+        not isinstance(p.value, Real)
+        or any(bound is not None and not isinstance(bound, Real) for bound in p.bounds)
+        for p in records
+    ):
+        raise ValueError("Prepared plan must match a qualified scalar definition")
     if records != plan.parameters:
         raise ValueError("Prepared plan must match the current canonical definition")
     current = tuple(p for p in records if not p.fixed)
