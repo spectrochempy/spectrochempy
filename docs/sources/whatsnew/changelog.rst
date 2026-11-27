@@ -98,7 +98,7 @@ Bug Fixes
   dimensions in separate groups with a warning, instead of assembling equal-size
   spectra under one coordinate. Compatible coordinate-unit rescaling is checked
   with floating-point roundoff tolerance only; explicit ``stack`` and
-  ``concatenate`` behavior is unchanged (issue #1795).
+  ``concatenate`` behavior is unchanged (:pr:`2019`).
 
 - ``despike`` preserves masked values and raises ``ValueError`` for non-positive
   ``delta``, invalid window sizes, complex data and integer values that cannot
