@@ -231,22 +231,23 @@ array of values drawn from a normal distribution is used."""
 
         # The _outfit members are np.ndarrays
         _outfit = self._fast_ica.fit(X)
-        self._n_components = int(
-            self._fast_ica.n_components,
-        )  # cast the returned int64 to int
+        # Use the number of components actually fitted: with whiten=False,
+        # sklearn ignores n_components and keeps all the features.
+        self._n_components = int(self._fast_ica.components_.shape[0])
         return _outfit
 
     def _transform(self, X):
         return self._fast_ica.transform(X)
 
     def _inverse_transform(self, X_transform):
-        # we need to  set self._fast_ica.components_ to a compatible size but without
-        # destroying the full matrix:
-        store_components_ = self._fast_ica.components_
-        self._fast_ica.components_ = self._fast_ica.components_[: X_transform.shape[1]]
-        X = self._fast_ica.inverse_transform(X_transform)
-        # restore
-        self._fast_ica.components_ = store_components_
+        # sklearn reconstructs with the mixing matrix: use only its columns
+        # matching the given sources, without destroying the full matrix.
+        store_mixing_ = self._fast_ica.mixing_
+        self._fast_ica.mixing_ = self._fast_ica.mixing_[:, : X_transform.shape[1]]
+        try:
+            X = self._fast_ica.inverse_transform(X_transform)
+        finally:
+            self._fast_ica.mixing_ = store_mixing_
         return X
 
     def _get_components(self):

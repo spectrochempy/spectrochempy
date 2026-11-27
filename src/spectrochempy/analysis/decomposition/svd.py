@@ -13,6 +13,7 @@ import traitlets as tr
 from spectrochempy.analysis._base._analysisbase import AnalysisSourceMetadata
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._analysisbase import _check_n_components
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -273,8 +274,8 @@ class SVD(DecompositionAnalysis):
         Other Parameters
         ----------------
         n_components : `int`, optional
-            The number of components to keep. By default, all the
-            :math:`\min(M, N)` components are kept.
+            The number of components to keep (a positive integer). If `None`
+            (default), all the :math:`\min(M, N)` components are kept.
 
         Raises
         ------
@@ -349,8 +350,9 @@ class SVD(DecompositionAnalysis):
         Other Parameters
         ----------------
         n_components : `int`, optional
-            The number of components :math:`k` used for the reconstruction.
-            By default, all the components of `X_transform` are used.
+            The number of components :math:`k` used for the reconstruction (a
+            positive integer). If `None` (default), all the components of
+            `X_transform` are used.
 
         Raises
         ------
@@ -378,7 +380,7 @@ class SVD(DecompositionAnalysis):
 
         # Unlike the base class, n_components is honoured in all cases: the
         # reconstruction uses the first n_components scores only.
-        n_components = kwargs.pop("n_components", None)
+        n_components = _check_n_components(kwargs.pop("n_components", None))
         if n_components is not None and n_components > self._n_components:
             warnings.warn(
                 "The number of components required for reduction "
@@ -499,8 +501,8 @@ class SVD(DecompositionAnalysis):
         Other Parameters
         ----------------
         n_components : `int`, optional
-            The number of components to keep. By default, all the
-            :math:`\min(M, N)` components are kept.
+            The number of components to keep (a positive integer). If `None`
+            (default), all the :math:`\min(M, N)` components are kept.
 
         See Also
         --------

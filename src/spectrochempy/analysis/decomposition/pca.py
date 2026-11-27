@@ -12,6 +12,7 @@ from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._analysisbase import _check_n_components
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.analysis._base._result import AnalysisResult
 from spectrochempy.application.application import info_
@@ -295,13 +296,20 @@ for reproducible results across multiple function calls.""",
     def _inverse_transform(self, X_transform):
         # we need to  set self._pca.components_ to a compatible size but without
         # destroying the full matrix:
+        # (explained_variance_ is used too when whiten=True).
         store_components_ = self._pca.components_
+        store_explained_variance_ = self._pca.explained_variance_
         if X_transform.ndim == 1:
             X_transform = X_transform.reshape(-1, 1)
-        self._pca.components_ = self._pca.components_[: X_transform.shape[1]]
-        X = self._pca.inverse_transform(X_transform)
-        # restore
-        self._pca.components_ = store_components_
+        k = X_transform.shape[1]
+        self._pca.components_ = store_components_[:k]
+        self._pca.explained_variance_ = store_explained_variance_[:k]
+        try:
+            X = self._pca.inverse_transform(X_transform)
+        finally:
+            # restore
+            self._pca.components_ = store_components_
+            self._pca.explained_variance_ = store_explained_variance_
         return X
 
     def _get_components(self):
@@ -469,12 +477,14 @@ for reproducible results across multiple function calls.""",
         Parameters
         ----------
         n_components : int, optional
-            The number of components to print.
+            The number of components to print (a positive integer). If None,
+            prints all components.
 
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
 
+        n_components = _check_n_components(n_components)
         if n_components is None or n_components > self.n_components:
             n_components = self.n_components
         info_(self.__str__(n_components))
@@ -493,7 +503,8 @@ for reproducible results across multiple function calls.""",
         Parameters
         ----------
         n_components : int, optional
-            Number of components to plot. If None, plots all components.
+            Number of components to plot (a positive integer). If None, plots all
+            components.
         **kwargs
             Additional keyword arguments passed to :func:`plot_scree`.
             See :func:`~spectrochempy.plotting.composite.plotscree.plot_scree`
@@ -523,6 +534,7 @@ for reproducible results across multiple function calls.""",
                 "The fit method must be used before using this method",
             )
 
+        n_components = _check_n_components(n_components)
         if n_components is None:
             n_components = self.n_components
         else:

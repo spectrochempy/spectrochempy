@@ -86,6 +86,134 @@ def test_pca_n_components_validation(low_rank_pca_dataset):
         PCA(n_components="mle").fit(wide_dataset)
 
 
+@pytest.mark.parametrize("bad", [0, -1, 1.5, True, "2"])
+def test_pca_method_n_components_must_be_positive_integer(low_rank_pca_dataset, bad):
+    # n_components given to transform, inverse_transform, get_components and
+    # printev is validated in the base class (0 used to fail with an obscure
+    # error and -1 to drop the last component silently).
+    pca = PCA(n_components=3).fit(low_rank_pca_dataset)
+    match = "n_components must be a positive integer"
+    with pytest.raises(ValueError, match=match):
+        pca.transform(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.inverse_transform(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.get_components(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.printev(n_components=bad)
+    with pytest.raises(ValueError, match=match):
+        pca.plot_scree(n_components=bad)
+
+
+@pytest.mark.parametrize("bad", [0, -1])
+def test_nmf_and_fast_ica_method_n_components_must_be_positive_integer(bad):
+    rng = np.random.default_rng(0)
+    X = NDDataset(np.abs(rng.normal(size=(8, 6))))
+    nmf = scp.NMF(n_components=2, max_iter=500).fit(X)
+    with pytest.raises(ValueError, match="n_components must be a positive integer"):
+        nmf.get_components(n_components=bad)
+    ica = scp.FastICA(n_components=2).fit(X)
+    for method in (ica.transform, ica.inverse_transform, ica.get_components):
+        with pytest.raises(ValueError, match="n_components must be a positive integer"):
+            method(n_components=bad)
+
+
+def test_pca_method_n_components_valid_values(low_rank_pca_dataset):
+    pca = PCA(n_components=3).fit(low_rank_pca_dataset)
+    assert pca.transform(n_components=np.int64(2)).shape[1] == 2
+    assert pca.get_components(n_components=1).shape[0] == 1
+    assert pca.get_components(n_components=None).shape[0] == 3
+    with pytest.warns(UserWarning, match="cannot be greater"):
+        assert pca.transform(n_components=5).shape[1] == 3
+
+
+def test_pca_inverse_transform_uses_n_components(low_rank_pca_dataset):
+    # inverse_transform(n_components=k) used to ignore k and reconstruct with
+    # all the fitted components.
+    pca = PCA(n_components=3).fit(low_rank_pca_dataset)
+    sk = pca._pca
+    scores = sk.transform(low_rank_pca_dataset.data)
+    expected = scores[:, :1] @ sk.components_[:1] + sk.mean_
+    assert_allclose(pca.inverse_transform(n_components=1).data, expected)
+    assert_allclose(
+        pca.inverse_transform(pca.transform(), n_components=1).data, expected
+    )
+    assert_allclose(
+        pca.inverse_transform(n_components=None).data, pca.inverse_transform().data
+    )
+
+
+def test_pca_whiten_inverse_transform_uses_n_components():
+    rng = np.random.default_rng(0)
+    X = NDDataset(rng.normal(size=(12, 8)))
+    pca = PCA(n_components=4, whiten=True).fit(X)
+    sk = pca._pca
+    scores = sk.transform(X.data)
+    expected = (
+        scores[:, :2] @ (np.sqrt(sk.explained_variance_[:2, None]) * sk.components_[:2])
+        + sk.mean_
+    )
+    assert_allclose(pca.inverse_transform(n_components=2).data, expected)
+    with pytest.warns(UserWarning, match="X_transform size"):
+        reconstructed = pca.inverse_transform(pca.transform(n_components=2))
+    assert_allclose(reconstructed.data, expected)
+    # the fitted model is left intact
+    assert sk.components_.shape == (4, 8)
+    assert sk.explained_variance_.shape == (4,)
+    assert_allclose(pca.transform().data, scores)
+
+
+def test_nmf_and_fast_ica_inverse_transform_use_n_components():
+    rng = np.random.default_rng(0)
+    X = NDDataset(np.abs(rng.normal(size=(10, 8))))
+
+    nmf = scp.NMF(n_components=3, max_iter=500).fit(X)
+    W = nmf._nmf.transform(X.data)
+    assert_allclose(
+        nmf.inverse_transform(n_components=2).data,
+        W[:, :2] @ nmf._nmf.components_[:2],
+    )
+
+    ica = scp.FastICA(n_components=3).fit(X)
+    S = ica._fast_ica.transform(X.data)
+    expected = S[:, :2] @ ica._fast_ica.mixing_[:, :2].T + ica._fast_ica.mean_
+    assert_allclose(ica.inverse_transform(n_components=2).data, expected)
+    # Scores with fewer columns than fitted components used to raise
+    # (the pre-existing warning about the X_transform size is unchanged)
+    with pytest.warns(UserWarning, match="X_transform size"):
+        reconstructed = ica.inverse_transform(ica.transform(n_components=2))
+    assert_allclose(reconstructed.data, expected)
+    assert ica._fast_ica.mixing_.shape == (8, 3)
+
+
+def test_fast_ica_without_whitening_reconstructs_with_all_fitted_components():
+    # With whiten=False, sklearn ignores n_components and fits all the
+    # features: "all components" must use them all.
+    rng = np.random.default_rng(0)
+    X = NDDataset(rng.random((10, 5)))
+    with pytest.warns(UserWarning, match="Ignoring n_components with whiten=False"):
+        ica = scp.FastICA(whiten=False, n_components=2).fit(X)
+    assert ica._fast_ica.components_.shape == (5, 5)
+    assert ica.transform().shape == (10, 5)
+    assert ica.get_components().shape == (5, 5)
+    assert_allclose(ica.inverse_transform().data, X.data, atol=1e-10)
+    assert_allclose(ica.inverse_transform(n_components=None).data, X.data, atol=1e-10)
+    S = ica._fast_ica.transform(X.data)
+    assert_allclose(
+        ica.inverse_transform(n_components=2).data,
+        S[:, :2] @ ica._fast_ica.mixing_[:, :2].T,
+    )
+
+
+def test_fast_ica_default_n_components_fits_all_components():
+    # FastICA() with the default n_components=None used to fail in fit
+    rng = np.random.default_rng(0)
+    X = NDDataset(rng.random((10, 5)))
+    ica = scp.FastICA().fit(X)
+    assert ica.get_components().shape == (5, 5)
+    assert_allclose(ica.inverse_transform().data, X.data, atol=1e-10)
+
+
 def test_pca_float_threshold_component_selection(low_rank_pca_dataset):
     dataset = low_rank_pca_dataset
 
