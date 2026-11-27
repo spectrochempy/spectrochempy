@@ -180,8 +180,9 @@ def test_stale_coordinate_records_rejected_before_callback(field):
         )
 
 
-@pytest.mark.parametrize("case", ["type", "projection", "x_scale"])
-def test_incompatible_coordinate_configuration_fails_before_callback(case):
+@pytest.mark.parametrize("case", ["type", "x_scale"])
+@pytest.mark.parametrize("projected", [False, True])
+def test_incompatible_coordinate_configuration_fails_before_callback(case, projected):
     data, _, specs, space, *_ = problem()
 
     def forbidden(*args, **kwargs):
@@ -195,7 +196,7 @@ def test_incompatible_coordinate_configuration_fails_before_callback(case):
             forbidden,
             specs,
             300,
-            case == "projection",
+            projected,
             {"x_scale": 1} if case == "x_scale" else {},
             parameter_coordinates=object() if case == "type" else space,
         )

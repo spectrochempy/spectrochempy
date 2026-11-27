@@ -61,12 +61,10 @@ def _parameters(specs):
     return list(layout.parameters), np.asarray(layout.free_scales, dtype=float)
 
 
-def _bind_coordinates(layout, coordinates, linear_amplitudes, options):
+def _bind_coordinates(layout, coordinates, options):
     """Snapshot explicit coordinates against every current physical declaration."""
     if not isinstance(coordinates, _ParameterCoordinates):
         raise TypeError("parameter_coordinates must be a prepared coordinate space")
-    if linear_amplitudes:
-        raise ValueError("Explicit coordinates do not support projected amplitudes")
     for record in coordinates.layout.parameters:
         _real_array(record.value, (), "Physical parameter value")
         _real_array(record.bounds, (2,), "Physical parameter bounds", finite=False)
@@ -155,13 +153,19 @@ def fit_callable_model(
     """
     Fit a full-grid callback with a fixed, finite observation support.
 
-    Private explicit coordinates require matching physical declarations and no
-    projected amplitudes. Their normalization is independent of the historical
-    physical scales. The solver uses three-point differences and x_scale=1;
+    Private explicit coordinates require matching physical declarations.
+    Their normalization is independent of the historical physical scales.
+    The solver uses three-point differences and x_scale=1;
     tolerances and diff_step still apply in solver coordinates, with unchanged
     SciPy defaults unless supplied. No stopping-policy improvement is implied.
     The returned solution retains raw solver coordinates and scaled residuals;
     fit outputs, including the Jacobian and covariance, remain physical.
+    With projected nonnegative amplitudes, the Jacobian differentiates the
+    profiled residual in the nonlinear physical parameters. Its local meaning
+    requires a stable active set; no differentiability at active-set changes
+    or joint covariance is implied. Covariance remains unavailable with the
+    historical profiled_amplitudes reason. Amplitude activity retains the
+    historical exact-zero convention and can be roundoff-sensitive at a switch.
     """
     coordinates, _ = _grid(dataset)
     layout = _parameter_layout(specs)
@@ -175,7 +179,7 @@ def fit_callable_model(
         )
     if parameter_coordinates is not None:
         parameter_coordinates = _bind_coordinates(
-            layout, parameter_coordinates, linear_amplitudes, options
+            layout, parameter_coordinates, options
         )
         options["x_scale"] = 1.0
         coordinate_config = _coordinate_config(parameter_coordinates)
