@@ -79,6 +79,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- ``despike`` preserves masked values and raises ``ValueError`` for non-positive
+  ``delta``, invalid window sizes, complex data and integer values that cannot
+  be represented exactly as float64 (:pr:`2011`).
+
 - Model constructors preserve the current global logging level when
   ``log_level`` is omitted or ``None``. Explicit levels still update the global
   setting. This also applies to the IRIS and tensor plugins. (:pr:`2008`)
