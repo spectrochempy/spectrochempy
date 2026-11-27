@@ -60,8 +60,10 @@ def read_omnic(*paths, **kwargs):
     spa is read)
 
     An error is generated when an SPG file contains spectra with inconsistent
-    x-axis definitions, unless ``allow_inconsistent_x=True`` is specified. In
-    that case, a list containing one `NDDataset` per spectrum is returned.
+    x-axis definitions or contradictory known native axis/signal identities,
+    unless ``allow_inconsistent_x=True`` is specified. Inconsistent members are
+    then returned separately to import assembly; compatible subsets may still
+    merge unless ``merge=False`` is also specified.
 
     Non-merged multi-file reads may also return a list-like `ScpObjectList`
     exposing helper methods for dataset selection. See
@@ -136,9 +138,11 @@ def read_omnic(*paths, **kwargs):
     sortbydate : `bool`, optional, default: `True`
         Sort multiple filename by acquisition date.
     allow_inconsistent_x : `bool`, optional, default: `False`
-        Allow SPG files whose spectra have different x-axis definitions. When
-        enabled, return one `NDDataset` per spectrum instead of merging the
-        spectra. This option has no effect on SPA or SRS files.
+        Allow SPG member differences in x-axis definitions, units, or recognized
+        native axis/signal identities. Incompatible members stay separate, even
+        with ``merge=True``. For an inconsistent group, ``merge=False`` prevents
+        reassembly of compatible member subsets.
+        This option has no effect on SPA or SRS files.
 
     See Also
     --------
@@ -317,8 +321,10 @@ def read_spg(*paths, **kwargs):
     sortbydate : `bool`, optional, default: `True`
     Sort multiple filename by acquisition date.
     allow_inconsistent_x : `bool`, optional, default: `False`
-    Allow spectra with different x-axis definitions and return one `NDDataset`
-    per spectrum instead of a merged dataset.
+    Allow member differences in x-axis definitions, units, or recognized native
+    axis/signal identities. Incompatible members stay separate, even with
+    ``merge=True``. For an inconsistent group, ``merge=False`` prevents
+    reassembly of compatible member subsets.
 
     See Also
     --------
@@ -706,6 +712,7 @@ def _read_spg(*args, **kwargs):
     xtitles = []
     units = []
     titles = []
+    native_identities = []
 
     # Extracts positions of '02' keys
     key_is_02 = keys == 2  # ex: [T F F F F T F (...) F T ....]'
@@ -727,6 +734,12 @@ def _read_spg(*args, **kwargs):
         xtitles.append(info["xtitle"])
         units.append(info["units"])
         titles.append(info["title"])
+        native_identities.append(
+            {
+                "OMNIC spectral axis": {info["xtitle"]} - {"xaxis"},
+                "signal quantities": {info["title"]} - {"intensity"},
+            }
+        )
 
     # Extract positions of intensity and spectrum metadata blocks before
     # checking consistency because they are needed by both return paths.
@@ -769,12 +782,17 @@ def _read_spg(*args, **kwargs):
         #        history =  _readbtext(f, history_pos[0])
         #        allhistories.append(history)
 
+    known_identities = {
+        key: set().union(*(identity[key] for identity in native_identities))
+        for key in native_identities[0]
+    }
     xaxis_consistent = (
         np.ptp(nx) == 0
         and np.ptp(firstx) == 0
         and np.ptp(lastx) == 0
         and len(set(xunits)) == 1
         and len(set(units)) == 1
+        and all(len(values) <= 1 for values in known_identities.values())
     )
 
     if not xaxis_consistent:
@@ -805,6 +823,7 @@ def _read_spg(*args, **kwargs):
                 )
                 single.acquisition_date = acquisitiondates[i]
                 single.origin = "omnic"
+                single._import_measurement_identity = native_identities[i]
                 single.description = kwargs.get(
                     "description",
                     f"Omnic title: {spg_title}\nOmnic filename: {filename}",
@@ -831,6 +850,9 @@ def _read_spg(*args, **kwargs):
             inconsistencies.append(f"x-axis units differ: {list(set(xunits))}")
         if len(set(units)) != 1:
             inconsistencies.append(f"spectra units differ: {list(set(units))}")
+        for key, values in known_identities.items():
+            if len(values) > 1:
+                inconsistencies.append(f"{key} differ: {sorted(values)}")
         fid.close()
         raise ValueError(
             "Error: Inconsistent data set - "
@@ -864,13 +886,14 @@ def _read_spg(*args, **kwargs):
         timestamps,
         title="acquisition timestamp (GMT)",
         units="s",
-        labels=(acquisitiondates, spectitles),
+        labels=np.column_stack((acquisitiondates, spectitles)),
     )
 
     dataset.set_coordset(y=_y, x=_x)
     if acquisitiondates:
         dataset.acquisition_date = min(acquisitiondates)
     dataset.origin = "omnic"
+    dataset._import_measurement_identity = known_identities
 
     # Set description, date and history
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data

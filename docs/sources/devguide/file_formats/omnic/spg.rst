@@ -528,6 +528,21 @@ SPG uses the shared OMNIC X-unit and Y/data-unit code tables
 absorbance data units; the broader shared mappings apply with the SPA
 reference's scoping.
 
+Reader assembly safeguards
+---------------------------
+
+The reader rejects incompatible member grids/units and contradictory recognized
+axis or signal definitions. For inconsistent groups, ``allow_inconsistent_x=True``
+passes members separately to import assembly; known conflicts remain separate through
+subsequent assembly passes. ``merge=False`` prevents reassembly of these members.
+Unrecognized codes remain unknown, and free-text spectrum titles are not
+measurement classifiers. Member timestamps and source labels are paired by row,
+including two-member containers and date sorting.
+
+Synthetic binary regressions exercise these paths. They establish software
+behavior, not broader experimental validation of the shared native-code mappings.
+The certainty levels in :ref:`omnic-unit-codes` still apply.
+
 Open questions and limitations
 ------------------------------
 
@@ -546,5 +561,5 @@ assigned unsupported meanings:
 * the trailing bytes of the ``0x6b`` block (``+260..+263``);
 * the universality of the observed per-spectrum block sets and record
   ordering across OMNIC producers and versions;
-* the behavior of variants whose spectra carry inconsistent X-axis
-  definitions.
+* experimental qualification of variants whose spectra carry inconsistent
+  X-axis or signal definitions.
