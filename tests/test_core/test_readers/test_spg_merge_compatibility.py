@@ -217,3 +217,55 @@ def test_two_member_fixture_keeps_native_labels_timestamps_and_payloads_paired(
         assert ds.y.labels[index, 1] == label
         assert ds.y.data[index] == stamp.timestamp()
         np.testing.assert_array_equal(ds.data[index], row)
+
+
+@pytest.mark.parametrize("reader", [scp.read, scp.read_zip])
+@pytest.mark.parametrize("depth", [1, 2])
+@pytest.mark.parametrize("merge", [None, False, True])
+@pytest.mark.parametrize(
+    "field, codes, message",
+    [
+        ("ycode", [16, 11, 16], "signal quantities"),
+        ("xcode", [1, 32, 1], "spectral axis"),
+    ],
+)
+def test_zip_forwards_spg_member_separation_without_overriding_merge(
+    reader, depth, merge, field, codes, message
+):
+    content = synthetic_spg_members([{field: code} for code in codes])
+    filename = "mixed.spg"
+    for _ in range(depth):
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr(filename, content)
+        content = buffer.getvalue()
+        filename = "inner.zip"
+    source = {"outer.zip": content}
+    options = {"allow_inconsistent_x": True}
+    if merge is not None:
+        options["merge"] = merge
+    if merge is False:
+        result = reader(source, **options)
+    else:
+        with pytest.warns(UserWarning, match=message):
+            result = reader(source, **options)
+    assert isinstance(result, ScpObjectList)
+    assert sorted(ds.shape[0] for ds in result) == (
+        [1, 1, 1] if merge is False else [1, 2]
+    )
+    actual = sorted(tuple(row) for ds in result for row in ds.data)
+    assert actual == [(1, 1.5), (2, 2.5), (3, 3.5)]
+    assert all("_import_measurement_identity" not in ds.__dict__ for ds in result)
+
+
+@pytest.mark.parametrize("options", [{}, {"allow_inconsistent_x": False}])
+def test_zip_keeps_strict_spg_rejection_without_opt_in(options):
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr(
+            "mixed.spg", synthetic_spg_members([{"ycode": 16}, {"ycode": 11}])
+        )
+    with pytest.warns(UserWarning, match="Skipped"), pytest.raises(
+        ValueError, match="signal quantities"
+    ):
+        scp.read({"strict.zip": buffer.getvalue()}, **options)
