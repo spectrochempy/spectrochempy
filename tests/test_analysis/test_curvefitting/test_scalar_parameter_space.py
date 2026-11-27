@@ -125,8 +125,18 @@ def test_empty_free_vector_keeps_fixed_values():
     assert spec.common_params["fixed"].value == 2
 
 
-@pytest.mark.parametrize("method", ["least_squares", "trf", "simplex"])
-def test_solver_vectors_outputs_and_physical_diagnostics_match(definition, method):
+@pytest.mark.parametrize(
+    "method, bounds_mode",
+    [
+        ("least_squares", "transform"),
+        ("trf", "transform"),
+        ("simplex", "transform"),
+        ("least_squares", "native"),
+    ],
+)
+def test_solver_vectors_outputs_and_physical_diagnostics_match(
+    definition, method, bounds_mode
+):
     x = np.linspace(-1, 1, 31)
     design = np.column_stack([np.ones(x.size), x, x**2, np.sin(x)])
     observed = design @ [0.6, 2.2, 2.4, -0.3] + 0.001 * np.cos(7 * x)
@@ -151,6 +161,7 @@ def test_solver_vectors_outputs_and_physical_diagnostics_match(definition, metho
                 maxiter=3000,
                 maxfun=10000,
                 parameter_plan=plan,
+                bounds_mode=bounds_mode,
             )
         )
         histories.append(history)
@@ -186,8 +197,9 @@ def test_unqualified_plan_keeps_historical_optimizer_path(monkeypatch):
 
 
 @pytest.mark.parametrize("initial", [0, 0.5])
+@pytest.mark.parametrize("bounds_mode", ["transform", "native"])
 def test_estimator_uses_plan_for_vectors_and_feasible_physical_probes(
-    monkeypatch, initial
+    monkeypatch, initial, bounds_mode
 ):
     import spectrochempy.analysis.curvefitting.optimize as module
 
@@ -201,6 +213,7 @@ def test_estimator_uses_plan_for_vectors_and_feasible_physical_probes(
         autoampl=False,
         amplitude_mode="area",
         method="least_squares",
+        bounds_mode=bounds_mode,
     )
     opt.script = f"""
 COMMON:
@@ -217,6 +230,7 @@ shape: myline
     for helper in (
         "_internal_vector",
         "_restore_external",
+        "_restore_native",
         "_restore_physical",
         "_transform_artifacts",
     ):
@@ -224,7 +238,7 @@ shape: myline
     x = np.linspace(0, 1, 31)
     opt.fit(scp.NDDataset(2 * x, coordset=[scp.Coord(x)]))
     diagnostics = opt.result.diagnostics
-    if initial == 0:
+    if initial == 0 and bounds_mode == "transform":
         assert diagnostics["physical_stationarity_status"] == "not_satisfied"
         assert diagnostics["stationarity_evaluations"] == 3
         assert opt.fp["a"] == 0

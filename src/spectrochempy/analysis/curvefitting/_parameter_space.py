@@ -27,7 +27,7 @@ from spectrochempy.analysis.curvefitting._prepared_parameter import _PreparedPar
 
 @dataclass(frozen=True)
 class _ScalarParameterSpace:
-    """Bind a qualified scalar plan to the historical solver coordinates."""
+    """Bind a qualified scalar plan to transformed or physical solver coordinates."""
 
     slots: tuple
 
