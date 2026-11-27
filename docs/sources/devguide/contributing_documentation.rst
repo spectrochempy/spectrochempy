@@ -239,11 +239,38 @@ private checkout. The working copies are removed after execution and are
 outside the public test-data cache and documentation artifact inputs.
 Do not add these files to public caches, artifacts or data repositories.
 
-Pull request jobs and fork workflows do not run the private-data action and
-retain the public Eigenvector download. Local users may also point those
-two environment variables to their own Corn files. The scientific examples
-and readers otherwise use the same data and processing. External Read the
-Docs previews continue to use the public source, without a private key.
+Pull request jobs in ``test_package.yml`` generate a deterministic synthetic
+fixture instead of downloading Corn. It preserves the seven MATLAB DSO datasets,
+their dimensions, names, ordering and property labels. Spectra and properties
+share seeded latent variables, so PLS and cross-validation smoke tests exercise
+learnable relationships. These data are not experimental Corn, a scientific
+benchmark, or evidence that preprocessing improves prediction.
+
+The generator is versioned source, not a binary fixture or a new dependency.
+To run the same checks locally (Bash)::
+
+    scratch=$(mktemp -d)
+    python .github/workflows/scripts/prepare_synthetic_corn.py \
+        --directory "$scratch/data" --env-file "$scratch/env"
+    while IFS= read -r entry; do export "$entry"; done < "$scratch/env"
+    python -m pytest tests/test_core/test_readers/test_read.py -k eigenvector_corn
+    python -m pytest tests/test_docs/test_py_in_docs.py \
+        -k 'plot_cross_validation or test_nbsphinx_script_[import]'
+    unset SCPY_CORN_DATA SCPY_CORN_ZIP SCPY_CORN_SYNTHETIC
+    rm -r "$scratch"
+
+Set ``TMPDIR`` to a suitable scratch location if the default temporary filesystem
+is small. The raw MAT and ZIP carry an explicit synthetic marker, also exported
+as ``SCPY_CORN_SYNTHETIC=1``. Documentation builds reject these inputs, even if
+the marker environment variable is removed. Do not publish their plots or scores
+as real-Corn results. No generated fixture is uploaded or cached by CI.
+
+Trusted master/tag tests and documentation builds retain verified real Corn.
+The docs-artifact workflow and external Read the Docs previews keep their current
+real-data download/omission policy; they never generate synthetic Corn. Local
+users may point ``SCPY_CORN_DATA`` and ``SCPY_CORN_ZIP`` to their real Corn files.
+Readers, executable examples and tutorials use the same processing paths with
+either input; real-Corn checksums and scientific reference results are unchanged.
 
 Production uses native RTD execution: notebooks are preexecuted on RTD before
 the HTML render. The documentation artifact workflow is disabled in GitHub,

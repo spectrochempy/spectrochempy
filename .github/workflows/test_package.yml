@@ -293,6 +293,10 @@ jobs:
         with:
           ssh-key: ${{ secrets.SCPY_CORN_DATA_SSH_KEY }}
           revision: ${{ vars.SCPY_CORN_DATA_REVISION }}
+      - name: Prepare synthetic Corn for PR tests
+        if: github.event_name == 'pull_request'
+        run: python .github/workflows/scripts/prepare_synthetic_corn.py
+
       - name: Select pytest targets
         if: ${{ !matrix.core_only && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
@@ -425,7 +429,7 @@ jobs:
       - name: Remove private Corn working copies
         if: always()
         shell: bash
-        run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True)"
+        run: python -c "import os, pathlib, shutil; shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-corn', ignore_errors=True); shutil.rmtree(pathlib.Path(os.environ['RUNNER_TEMP']) / 'spectrochempy-synthetic-corn', ignore_errors=True)"
 
       - name: Retain failed test diagnostics
         if: ${{ failure() && env.SCPY_CI_REPORT_DIR != '' && !(env.ACT && matrix.pythonVersion == '3.14') }}

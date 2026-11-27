@@ -53,6 +53,7 @@ os.environ["SCP_CONFIG_HOME"] = _SCP_DOCS_CONFIG.name
 
 from corn_data import check_gallery_notices
 from corn_data import gallery_pattern
+from corn_data import require_real_data
 from corn_data import source_notice
 from data_setup import DATA as DOCS_DATA
 from data_setup import configure_data
@@ -60,6 +61,7 @@ from data_setup import verify_data
 
 import spectrochempy
 
+require_real_data()
 verify_data()
 configure_data()
 
