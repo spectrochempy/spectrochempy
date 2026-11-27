@@ -87,6 +87,24 @@ Bug Fixes
 - Descending unsigned integer coordinates retain their values and signed
   spacings instead of being silently replaced by zeros during linearization
   (:pr:`1999`).
+- The ``n_components`` argument of ``transform``, ``inverse_transform`` and
+  ``get_components`` of decomposition estimators (``PCA``, ``NMF``, ``SVD``,
+  ``FastICA``...), and of ``PCA.printev`` and ``PCA.plot_scree``, must be a
+  positive integer (or ``None``): ``0`` used to fail with an unrelated error
+  and a negative value silently dropped the last components. A ``ValueError``
+  now names the invalid value. Values above the fitted number of components
+  still use all the components (:pr:`1982`).
+
+- ``inverse_transform(n_components=k)`` of ``PCA``, ``NMF`` and ``FastICA``
+  now reconstructs the data from the first ``k`` components only; the
+  argument used to be silently ignored. ``FastICA.inverse_transform`` also
+  accepts scores with fewer columns than fitted components (for instance from
+  ``transform(n_components=k)``) instead of raising a shape error.
+  With ``whiten=False``, where scikit-learn ignores ``n_components`` and fits
+  all the features, ``FastICA`` now uses all the fitted components by
+  default (``get_components()`` used to return only ``n_components`` of
+  them). ``FastICA`` with the default ``n_components=None`` no longer fails
+  in ``fit`` (:pr:`1982`).
 
 - 1D ``Optimize`` covariance and standard errors now account for the bound
   transformation and describe physical free parameters for both COMMON and

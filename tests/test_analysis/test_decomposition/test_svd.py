@@ -188,6 +188,14 @@ def test_svd_transform_n_components(random_dataset):
     assert too_many.shape == (6, 6)
 
 
+@pytest.mark.parametrize("bad", [0, -1, 1.5, True])
+def test_svd_n_components_must_be_positive_integer(random_dataset, bad):
+    svd = SVD().fit(random_dataset)
+    for method in (svd.transform, svd.inverse_transform, svd.get_components):
+        with pytest.raises(ValueError, match="n_components must be a positive integer"):
+            method(n_components=bad)
+
+
 def test_svd_fit_transform_equals_fit_then_transform(random_dataset):
     scores = SVD().fit_transform(random_dataset)
     expected = SVD().fit(random_dataset).transform()
