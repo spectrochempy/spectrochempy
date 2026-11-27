@@ -15,6 +15,9 @@ from dataclasses import dataclass
 import numpy as np
 
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
+from spectrochempy.analysis.curvefitting._parameter_coordinates import (
+    _ParameterCoordinates,
+)
 from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameter_transform import _UPB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameter_transform import (
@@ -249,6 +252,75 @@ def _physical_vector(definition):
             "Native bounds require finite initial values inside ordered bounds"
         )
     return values, [p.name for p in parameters], bounds
+
+
+def _scalar_definition_signature(definition):
+    """Snapshot declaration order, ownership and expressions without evaluation."""
+    return (
+        tuple((c.label, c.model_name) for c in definition.components),
+        tuple(definition.expvars),
+        definition.expnumber,
+        definition.constraints is not None,
+        tuple(
+            (("common", key), p.name, None if p.reference is None else str(p.reference))
+            for key, p in definition.common_params.items()
+        ),
+        tuple(
+            (
+                ("components", c.label, key),
+                p.name,
+                None if p.reference is None else str(p.reference),
+            )
+            for c in definition.components
+            for key, p in c.params.items()
+        ),
+    )
+
+
+def _coordinate_vector(definition, plan, coordinates):
+    """Bind explicit coordinates to the current qualified canonical free vector."""
+    if not isinstance(coordinates, _ParameterCoordinates):
+        raise TypeError("parameter_coordinates must be a prepared coordinate space")
+    if (
+        not isinstance(definition, _FitModelSpec)
+        or plan is None
+        or not plan.vector_compatible
+    ):
+        raise ValueError(
+            "Explicit coordinates require a qualified canonical scalar plan"
+        )
+    if _scalar_definition_signature(definition) != plan.definition_signature:
+        raise ValueError("Prepared plan must match the current canonical definition")
+    records = _prepared_parameters(definition)
+    if records != plan.parameters:
+        raise ValueError("Prepared plan must match the current canonical definition")
+    current = tuple(p for p in records if not p.fixed)
+    planned = tuple(p for p in plan.parameters if not p.fixed)
+    prepared = coordinates.layout.free_parameters
+    identity = lambda records: tuple((p.identifier, p.name) for p in records)
+    if (
+        not current
+        or identity(current) != identity(planned)
+        or identity(current) != identity(prepared)
+    ):
+        raise ValueError(
+            "Coordinate identities must match the nonempty free parameter layout"
+        )
+    values, names, bounds = _physical_vector(definition)
+    coordinate_bounds = np.array(
+        [
+            (-np.inf if low is None else low, np.inf if high is None else high)
+            for low, high in coordinates.layout.free_bounds
+        ],
+        dtype=float,
+    )
+    if not np.array_equal(
+        values, coordinates.to_physical(coordinates.initial)
+    ) or not np.array_equal(bounds, coordinate_bounds):
+        raise ValueError(
+            "Coordinate initial values and physical bounds must match the definition"
+        )
+    return coordinates.initial, names, bounds
 
 
 def _transform_artifacts(definition, values, keys):

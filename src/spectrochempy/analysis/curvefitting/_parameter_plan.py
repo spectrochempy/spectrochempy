@@ -31,6 +31,9 @@ from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
 from spectrochempy.analysis.curvefitting._modelspec import _ParamSpec
 from spectrochempy.analysis.curvefitting._modelspec import prepare_model
 from spectrochempy.analysis.curvefitting._parameter_space import _prepared_parameters
+from spectrochempy.analysis.curvefitting._parameter_space import (
+    _scalar_definition_signature,
+)
 
 
 @dataclass(frozen=True)
@@ -66,6 +69,7 @@ class _ParameterPlan:
     normalization_scale: float = 1.0
     vector_compatible: bool = False
     fallback_reason: str | None = None
+    definition_signature: tuple = ()
 
     @property
     def free_names(self):
@@ -188,7 +192,11 @@ def _compile_parameter_plan(spec):
             for bound in parameter.bounds
         ):
             return rejected("non_scalar_bound")
-    fallback = replace(fallback, vector_compatible=True)
+    fallback = replace(
+        fallback,
+        vector_compatible=True,
+        definition_signature=_scalar_definition_signature(spec),
+    )
     references = {
         key: str(p.reference) for key, _, p in declarations if p.reference is not None
     }
@@ -265,4 +273,5 @@ def _compile_parameter_plan(spec):
         tuple(steps),
         tuple(dependencies.items()),
         vector_compatible=True,
+        definition_signature=fallback.definition_signature,
     )

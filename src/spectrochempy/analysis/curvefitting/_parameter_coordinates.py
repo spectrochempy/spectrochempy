@@ -1,7 +1,7 @@
 """
 Private linear/log coordinates on the common physical parameter layout.
 
-This opt-in numerical adapter is not selected by any existing fitting route.
+Public fitting entries do not select this opt-in numerical adapter.
 For a log parameter q=ln(p/reference); otherwise q=p. The solver coordinate
 is z=q/normalization_scale. References and physical magnitudes must already
 use the same unit: unit conversion and public reference selection belong to
