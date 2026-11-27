@@ -276,6 +276,28 @@ A plugin can implement any combination of the following methods:
     right place for plugin-owned specialized array backends.
 
 
+    ``importer.measurement_identity(dataset)`` supplies scientific constraints
+    without exposing plugin metadata conventions to Core. Return ``None`` for
+    unrecognized inputs. For recognized inputs, return a dictionary such as::
+
+        {"constraints": {"myplugin.domain": "frequency"}, "reason": None}
+
+    Constraint keys must be namespaced strings, and values nonempty strings.
+    Omit unknown facts. Known contradictory values prevent automatic assembly;
+    facts are retained across successive assembly passes within one import,
+    including nested reads and native files. Current explicit facts override
+    earlier carried facts of the same key. Temporary constraints are cleared
+    from public import outputs and are not a persistent metadata schema.
+    Set ``reason`` to a nonempty string when automatic assembly itself is
+    unsupported, such as when it would concatenate a physical dimension
+    instead of creating an observation axis. The importer warns and keeps
+    incompatible inputs separate, even with ``merge=True``. ``merge=False``
+    bypasses this check; explicit ``stack`` and ``concatenate`` are unchanged.
+    Invalid descriptors and handler exceptions propagate. As with other named
+    handlers, providers are tried in registration order and the first non-None
+    descriptor wins. Plugins must return ``None`` for unrelated datasets.
+
+
 Returning an empty list (or ``None``) from a hook is treated as "no
 contribution" and is silently ignored.
 

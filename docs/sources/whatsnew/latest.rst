@@ -15,6 +15,13 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Plugins can supply known scientific constraints through
+  ``importer.measurement_identity`` for automatic import assembly, including
+  nested reads and native files. Known contradictions or plugin refusals keep
+  inputs separate even with ``merge=True``; unknown facts remain unknown.
+  Explicit combination operations retain their behavior
+  (:pr:`2022`, :issue:`1795`).
+
 - Composable Python 1D models accept ``scale="log"`` with an explicit positive
   ``log_reference`` and positive physical bounds in native least-squares mode.
   Initial configurations are copied; fitted values and uncertainty arrays remain

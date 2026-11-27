@@ -714,11 +714,16 @@ def _read_(*args, **kwargs):
 def _is_call_error(exc):
     # Errors on the requested protocol, origin or format, and the explicit opt-in
     # required for unsafe legacy files, are not skipped among several files.
-    return isinstance(
-        exc, ProtocolError | UnsupportedOriginError | WrongFileFormatError
-    ) or (
-        isinstance(exc, SpectroChemPyError)
-        and exc.args[:1] == (UNSAFE_LEGACY_LOADING_MESSAGE,)
+    # Neither are failures of scientific import validation in nested reads.
+    return (
+        getattr(exc, "_scp_import_identity_failure", False)
+        or isinstance(
+            exc, ProtocolError | UnsupportedOriginError | WrongFileFormatError
+        )
+        or (
+            isinstance(exc, SpectroChemPyError)
+            and exc.args[:1] == (UNSAFE_LEGACY_LOADING_MESSAGE,)
+        )
     )
 
 
@@ -1062,30 +1067,75 @@ def _import_identity_values(dataset, key, identify):
     return set(carried.get(key, ()))
 
 
-def _carry_import_identity(result, datasets):
+def _import_identities(datasets):
+    """Snapshot core and plugin constraints before attempting any assembly."""
+    from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+    handler = manager_module.plugin_manager.registry.get_handler(
+        "importer.measurement_identity"
+    )
+    snapshots = {}
+    for dataset in datasets:
+        facts = dict(getattr(dataset, "_import_measurement_identity", {}))
+        for key, identify in (
+            ("signal quantities", _import_signal_quantity),
+            ("declared JCAMP modalities", _import_jcamp_modality),
+        ):
+            facts[key] = _import_identity_values(dataset, key, identify)
+        reason = None
+        descriptor = handler(dataset) if handler is not None else None
+        if descriptor is not None:
+            if not isinstance(descriptor, dict) or set(descriptor) - {
+                "constraints",
+                "reason",
+            }:
+                raise ValueError("Invalid importer.measurement_identity descriptor")
+            constraints = descriptor.get("constraints")
+            reason = descriptor.get("reason")
+            if (
+                not isinstance(constraints, dict)
+                or any(
+                    not isinstance(key, str)
+                    or "." not in key
+                    or not key.strip()
+                    or not isinstance(value, str)
+                    or not value.strip()
+                    for key, value in constraints.items()
+                )
+                or (
+                    reason is not None
+                    and (not isinstance(reason, str) or not reason.strip())
+                )
+            ):
+                raise ValueError(
+                    "Invalid importer.measurement_identity constraints or reason"
+                )
+            facts.update({key: {value} for key, value in constraints.items()})
+        snapshots[id(dataset)] = (facts, reason)
+    return snapshots
+
+
+def _carry_import_identity(result, datasets, identities):
     """Preserve known constraints when generic combination metadata is cleared."""
-    identities = {}
-    for key, identify in (
-        ("signal quantities", _import_signal_quantity),
-        ("declared JCAMP modalities", _import_jcamp_modality),
-    ):
-        values = set()
-        for dataset in datasets:
-            values.update(_import_identity_values(dataset, key, identify))
-        identities[key] = tuple(sorted(values))
-    result._import_measurement_identity = identities
+    combined = {}
+    for dataset in datasets:
+        for key, values in identities[id(dataset)][0].items():
+            combined.setdefault(key, set()).update(values)
+    result._import_measurement_identity = {
+        key: tuple(sorted(values)) for key, values in combined.items()
+    }
 
 
-def _import_merge_mismatch(first, second):
+def _import_merge_mismatch(first, second, identities):
     """Return why assembly would contradict retained geometry or known identity."""
-    for identify, label in (
-        (_import_signal_quantity, "signal quantities"),
-        (_import_jcamp_modality, "declared JCAMP modalities"),
-    ):
-        identities = _import_identity_values(first, label, identify)
-        identities.update(_import_identity_values(second, label, identify))
-        if len(identities) > 1:
-            return f"{label} differ ({' versus '.join(sorted(identities))})"
+    first_facts, first_reason = identities[id(first)]
+    second_facts, second_reason = identities[id(second)]
+    if first_reason or second_reason:
+        return first_reason or second_reason
+    for key in sorted(first_facts.keys() | second_facts.keys()):
+        values = set(first_facts.get(key, ())) | set(second_facts.get(key, ()))
+        if len(values) > 1:
+            return f"{key} differ ({' versus '.join(sorted(values))})"
     if first.dims != second.dims:
         return "dimension names or order differ"
     retained = first.dims if first.ndim == 1 else first.dims[1:]
@@ -1105,13 +1155,15 @@ def _import_merge_mismatch(first, second):
     return None
 
 
-def _compatible_import_groups(datasets, *, report=True):
+def _compatible_import_groups(datasets, identities, *, report=True):
     """Partition inputs without changing their spectral order or coordinates."""
     groups = []
     reasons = set()
     for dataset in datasets:
         for group in groups:
-            mismatches = [_import_merge_mismatch(other, dataset) for other in group]
+            mismatches = [
+                _import_merge_mismatch(other, dataset, identities) for other in group
+            ]
             if not any(mismatches):
                 group.append(dataset)
                 break
@@ -1157,6 +1209,14 @@ def merge_datasets(datasets, **kwargs):
                 merged_other = []
         return result
 
+    try:
+        identities = _import_identities(datasets)
+    except Exception as exc:
+        # A nested directory must not turn missing scientific validation into
+        # a skipped input while other files continue to be assembled.
+        exc._scp_import_identity_failure = True
+        raise
+
     # Override merge setting if explicitly set in kwargs
     if "merge" in kwargs:
         merged = kwargs["merge"]
@@ -1170,7 +1230,7 @@ def merge_datasets(datasets, **kwargs):
                     reason
                     for index, first in enumerate(datasets)
                     for second in datasets[index + 1 :]
-                    if (reason := _import_merge_mismatch(first, second))
+                    if (reason := _import_merge_mismatch(first, second, identities))
                 ),
                 None,
             )
@@ -1188,7 +1248,7 @@ def merge_datasets(datasets, **kwargs):
                 dataset = concatenate(datasets, axis=0)
                 dataset.history = f"Merged {len(datasets)} imported datasets"
 
-            _carry_import_identity(dataset, datasets)
+            _carry_import_identity(dataset, datasets, identities)
 
             # Set merged origin and name
             origins = sorted({ds.origin for ds in datasets if ds.origin})
@@ -1227,7 +1287,7 @@ def merge_datasets(datasets, **kwargs):
             compatible
             for shape_group in shape_groups.values()
             for compatible in _compatible_import_groups(
-                shape_group, report=not kwargs.get("merge", False)
+                shape_group, identities, report=not kwargs.get("merge", False)
             )
         ]
         for shape_group in compatible_groups:
@@ -1242,7 +1302,7 @@ def merge_datasets(datasets, **kwargs):
                     merged = concatenate(shape_group, axis=0)
                     merged.history = f"Merged {len(shape_group)} imported datasets"
 
-                _carry_import_identity(merged, shape_group)
+                _carry_import_identity(merged, shape_group, identities)
 
                 if merged.coordset is not None and kwargs.pop("sortbydate", True):
                     merged.sort(dim=0, inplace=True)
