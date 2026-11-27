@@ -170,3 +170,22 @@ def test_qualification_does_not_add_a_public_result_surface(expression, reason):
     np.testing.assert_allclose(
         opt.result.fitted.data.squeeze()[~mask], data.data[~mask], atol=1e-4
     )
+
+
+def test_deep_sign_qualification_keeps_layout_and_explains_optional_fallback():
+    expression = "+".join(["(source)**2"] * 500)
+    spec = _FitModelSpec(
+        common_params={
+            "source": _ParamSpec("source", 2.0),
+            "linked": _ParamSpec("linked", vary=False, reference=expression),
+        }
+    )
+    plan = _compile_parameter_plan(spec)
+    assert plan.vector_compatible
+    if plan.fallback:
+        assert plan.fallback_reason == "expression_depth"
+    else:
+        assert plan.fallback_reason is None
+    for restored in (plan, deepcopy(plan), pickle.loads(pickle.dumps(plan))):  # noqa: S301
+        assert restored.fallback_reason == plan.fallback_reason
+        assert restored.resolve(spec).common_params["linked"].value == 2000.0
