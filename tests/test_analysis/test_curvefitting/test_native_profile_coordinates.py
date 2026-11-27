@@ -244,22 +244,7 @@ def center_problem(origin=2**53, shared_center=True, intensity=1, normalization=
     return source, specs, shared, space, model
 
 
-@pytest.mark.parametrize("origin", [0, 2**53])
-@pytest.mark.parametrize("shared_center", [False, True])
-@pytest.mark.parametrize("intensity", [1, 1000])
-@pytest.mark.parametrize("normalization", [0.5, 2])
-def test_free_centers_use_stable_offsets_and_each_represented_binding(
-    origin, shared_center, intensity, normalization
-):
-    source, specs, shared, space, model = center_problem(
-        origin, shared_center, intensity, normalization
-    )
-    saved = deepcopy((specs, shared, space))
-    original = source.copy()
-    fit, solution = fit_profiles(
-        source, specs, 500, shared, parameter_coordinates=space
-    )
-    assert solution.success
+def assert_center_inference(source, fit, shared_center):
     valid = np.isfinite(source.data) & ~source.mask
     h, center, w = fit["values"]
     axes = fit["peaks"][0]["axes"]
@@ -293,6 +278,25 @@ def test_free_centers_use_stable_offsets_and_each_represented_binding(
     rss = np.sum((source.data - float(h) * g)[valid] ** 2)
     covariance = np.linalg.inv(expected.T @ expected) * rss / (valid.sum() - 3)
     np.testing.assert_allclose(fit["covariance"], covariance, rtol=8e-6, atol=0)
+
+
+@pytest.mark.parametrize("origin", [0, 2**53])
+@pytest.mark.parametrize("shared_center", [False, True])
+@pytest.mark.parametrize("intensity", [1, 1000])
+@pytest.mark.parametrize("normalization", [0.5, 2])
+def test_free_centers_use_stable_offsets_and_each_represented_binding(
+    origin, shared_center, intensity, normalization
+):
+    source, specs, shared, space, model = center_problem(
+        origin, shared_center, intensity, normalization
+    )
+    saved = deepcopy((specs, shared, space))
+    original = source.copy()
+    fit, solution = fit_profiles(
+        source, specs, 500, shared, parameter_coordinates=space
+    )
+    assert solution.success
+    assert_center_inference(source, fit, shared_center)
     np.testing.assert_allclose(
         space.to_physical(solution.x), fit["values"], rtol=0, atol=0
     )
@@ -314,6 +318,7 @@ def test_free_centers_use_stable_offsets_and_each_represented_binding(
     np.testing.assert_array_equal(fit["fitted"].x.data, source.x.data)
     assert saved == (specs, shared, space)
     if not origin:
+        valid = np.isfinite(source.data) & ~source.mask
         oracle = least_squares(
             lambda p: (source.data - model(*p))[valid],
             [1.5 * intensity, 0, 3.6],
@@ -323,6 +328,22 @@ def test_free_centers_use_stable_offsets_and_each_represented_binding(
             xtol=1e-12,
         )
         np.testing.assert_allclose(fit["values"], oracle.x, rtol=3e-6, atol=1e-8)
+
+
+@pytest.mark.parametrize("origin", [0, 2**53])
+@pytest.mark.parametrize("normalization", [1e-5, 1e5])
+def test_center_inference_at_returned_point_with_extreme_conditioning(
+    origin, normalization
+):
+    source, specs, shared, space, _ = center_problem(origin, True, 1, normalization)
+    fit, solution = fit_profiles(
+        source, specs, 500, shared, parameter_coordinates=space
+    )
+    assert solution.success
+    assert_center_inference(source, fit, True)
+    np.testing.assert_allclose(
+        space.to_physical(solution.x), fit["values"], rtol=0, atol=0
+    )
 
 
 @pytest.mark.parametrize(
@@ -457,6 +478,46 @@ def test_finite_inference_bound_lost_to_normalization_excludes_covariance(small)
     assert np.isfinite(fit["jacobian"]).all()
     assert fit["covariance"] is None
     assert fit["diagnostics"]["covariance_reason"] == "numeric_range"
+
+
+@pytest.mark.parametrize("transform", ["lin", "log"])
+@pytest.mark.parametrize("normalization", [1e-5, 1, 1e5])
+@pytest.mark.parametrize("bounded", [False, True])
+def test_physical_inference_is_independent_of_solver_normalization(
+    transform, normalization, bounded
+):
+    source = scp.NDDataset(
+        1.5 + 0.001 * np.arange(12).reshape(3, 4),
+        coordset=[scp.Coord([0, 1, 2]), scp.Coord([0, 1, 2, 3])],
+    )
+    upper = 0.8 if bounded else 3
+    specs = [
+        {
+            "height": {"value": 0.5, "bounds": (0.1, upper)},
+            "axes": {dim: {"model": flat, "parameters": {}} for dim in source.dims},
+        }
+    ]
+    _, units = _grid(source)
+    _, _, _, layout = _prepare_profile_layout(specs, {}, source.units, units)
+    space = _CenteredParameterCoordinates(
+        _ParameterLayout(layout.parameters, (normalization,)),
+        (None,),
+        (transform,),
+        (1 if transform == "log" else None,),
+    )
+    fit, solution = fit_profiles(source, specs, 300, {}, parameter_coordinates=space)
+    assert solution.success
+    expected = upper if bounded else source.data.mean()
+    np.testing.assert_allclose(fit["values"], [expected], rtol=1e-7)
+    np.testing.assert_allclose(fit["jacobian"], -1, rtol=1e-5)
+    if bounded:
+        assert fit["covariance"] is None
+        assert fit["diagnostics"]["covariance_reason"] == "active_bounds"
+    else:
+        assert fit["diagnostics"]["covariance_reason"] is None
+        np.testing.assert_allclose(
+            fit["covariance"], np.var(source.data, ddof=1) / source.size, rtol=1e-7
+        )
 
 
 def test_active_bound_and_rank_deficiency_keep_physical_inference_reasons():

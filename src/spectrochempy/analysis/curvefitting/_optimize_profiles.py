@@ -244,6 +244,8 @@ def fit_profiles(
     analytic combination is rejected. No public estimator selects this input.
     Raw solutions retain solver coordinates; results and inference remain
     physical in the historical centered/scaled basis.
+    Final numerical derivative steps are sized physically, independently
+    of solver normalization. Unrepresentable perturbations exclude inference.
     Final centers may be reconciled to their represented values. Solver
     success, including endpoint starts, does not establish physical stationarity.
     """
@@ -513,6 +515,38 @@ def fit_profiles(
             fitted, _ = model()
             return fitted[valid]
 
+        if residual_jacobian is None:
+            if parameter_coordinates is None:
+                derivative_scales = scales
+                step_scales = [
+                    abs((origin + value * scale) / scale)
+                    if group["relative_step"]
+                    else max(1.0, abs(value))
+                    for group, value, origin, scale in zip(
+                        groups, solution.x, origins, scales, strict=True
+                    )
+                ]
+            else:
+                derivative_scales = parameter_coordinates.derivatives(solution.x)
+                physical_values = parameter_coordinates.to_physical(solution.x)
+                step_scales = [
+                    (
+                        scale
+                        if "center_scale" in group
+                        else abs(value)
+                        if transform == "log" or group["relative_step"]
+                        else max(scale, abs(value))
+                    )
+                    / derivative
+                    for group, value, scale, transform, derivative in zip(
+                        groups,
+                        physical_values,
+                        scales,
+                        parameter_coordinates.transforms,
+                        derivative_scales,
+                        strict=True,
+                    )
+                ]
         jacobian = (
             analytic_at(solution.x, scaled=False)
             if residual_jacobian is not None
@@ -520,17 +554,9 @@ def fit_profiles(
                 solution.x,
                 fitted_at,
                 solver_bounds,
-                scales
-                if parameter_coordinates is None
-                else parameter_coordinates.derivatives(solution.x),
-                [
-                    abs((origin + value * scale) / scale)
-                    if group["relative_step"] and parameter_coordinates is None
-                    else max(1.0, abs(value))
-                    for group, value, origin, scale in zip(
-                        groups, solution.x, origins, scales, strict=True
-                    )
-                ],
+                derivative_scales,
+                step_scales,
+                solver_float_steps=parameter_coordinates is not None,
             )
         )
         update(solution.x)
@@ -724,12 +750,18 @@ def _profile_scaled_jacobian(matrix, scales, intensity):
         )
 
 
-def _physical_profile_jacobian(vector, evaluate, bounds, scales, step_scales):
+def _physical_profile_jacobian(
+    vector, evaluate, bounds, scales, step_scales, *, solver_float_steps=False
+):
     """Differentiate model values before residual normalization loses small tails."""
     jacobian = None
     step_factor = np.cbrt(np.finfo(float).eps)
     for index, value in enumerate(vector):
         step = step_factor * (step_scales[index] or 1.0)
+        if solver_float_steps:
+            if not np.isfinite(step) or step > np.finfo(float).max:
+                return None
+            step = float(step)
         left = max(bounds[0, index], value - step)
         right = min(bounds[1, index], value + step)
         if left == right:
