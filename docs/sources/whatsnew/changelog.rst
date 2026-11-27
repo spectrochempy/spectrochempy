@@ -104,7 +104,7 @@ Bug Fixes
 - ZIP imports flatten multi-dataset members, including nested archives and
   heterogeneous SPC files, instead of returning nested collections or failing
   during automatic merging. Existing compatibility checks and member-based
-  ``only`` limits are preserved (:issue:`1795`).
+  ``only`` limits are preserved (:issue:`1795`, :pr:`2027`).
 
 - Carroucell imports retain separate compatible groups from one sample holder
   instead of failing when OMNIC returns multiple datasets. Temperature labels
