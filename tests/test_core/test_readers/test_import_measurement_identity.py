@@ -170,3 +170,38 @@ def test_explicit_jcamp_nmr_fid_and_spectrum_are_distinct():
     second.meta.jcamp_data_type = "NMR SPECTRUM"
     with pytest.warns(UserWarning, match="declared JCAMP modalities differ"):
         assert len(merge_datasets([first, second], merge=True)) == 2
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_directory_assembly_cannot_erase_known_modality_constraints(tmp_path, nested):
+    directories, paths = [], []
+    for name, declarations in (
+        ("a", (None, "INFRARED SPECTRUM")),
+        ("b", ("RAMAN SPECTRUM", "RAMAN SPECTRUM")),
+    ):
+        directory = tmp_path / name
+        directory.mkdir()
+        directories.append(directory)
+        for index, declaration in enumerate(declarations):
+            dataset = spectrum()
+            if declaration is not None:
+                dataset.meta.jcamp_data_type = declaration
+            paths.append(dataset.dump(directory / f"{index}.scp"))
+    with pytest.warns(UserWarning, match="declared JCAMP modalities differ"):
+        result = scp.read(
+            directories if nested else paths, merge=True, sortbydate=False
+        )
+    assert len(result) == 2
+    assert all(dataset.shape == (2, 3) for dataset in result)
+    assert all(
+        "_import_measurement_identity" not in dataset.__dict__ for dataset in result
+    )
+
+
+def test_failed_import_does_not_leak_the_nested_session(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        scp.read(tmp_path / "missing.scp", local_only=True)
+    paths = [spectrum().dump(tmp_path / f"{index}.scp") for index in range(2)]
+    result = scp.read(paths, merge=True, sortbydate=False)
+    assert result.shape == (2, 3)
+    assert "_import_measurement_identity" not in result.__dict__

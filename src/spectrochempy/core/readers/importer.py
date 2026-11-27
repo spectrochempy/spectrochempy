@@ -9,6 +9,8 @@ __all__ = ["read", "read_dir"]  # , "read_remote"]
 
 import io
 import re
+from contextlib import contextmanager
+from contextvars import ContextVar
 from warnings import warn
 from zipfile import ZipFile
 
@@ -49,6 +51,18 @@ from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.jsonutils import UNSAFE_LEGACY_LOADING_MESSAGE
 from spectrochempy.utils.objects import ScpObjectList
 
+_IMPORT_DEPTH = ContextVar("spectrochempy_import_depth", default=0)
+
+
+@contextmanager
+def _import_session():
+    """Track nested import assembly without sharing state between contexts."""
+    token = _IMPORT_DEPTH.set(_IMPORT_DEPTH.get() + 1)
+    try:
+        yield
+    finally:
+        _IMPORT_DEPTH.reset(token)
+
 
 # --------------------------------------------------------------------------------------
 class Importer(HasTraits):
@@ -77,6 +91,7 @@ class Importer(HasTraits):
 
         self.alias = dict(registry.aliases)
 
+    @_import_session()
     def __call__(self, *args, **kwargs):
         self.datasets = []
         self._skipped = []
@@ -164,8 +179,9 @@ class Importer(HasTraits):
                 merged.extend(merge_datasets(group, **kwargs))
             self.datasets = merged
 
-        for dataset in self.datasets:
-            dataset.__dict__.pop("_import_measurement_identity", None)
+        if _IMPORT_DEPTH.get() == 1:
+            for dataset in self.datasets:
+                dataset.__dict__.pop("_import_measurement_identity", None)
 
         # now we will reset preference for this newly loaded datasets
         if len(self.datasets) > 0:
