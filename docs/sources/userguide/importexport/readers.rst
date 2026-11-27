@@ -57,6 +57,40 @@ Readers included with SpectroChemPy
 
 Use ``scp.read_dir(...)`` to scan a directory for supported files.
 
+Automatic merging
+-----------------
+
+``merge=True`` assembles observations, stacking 1D spectra or concatenating
+higher-dimensional datasets along their first dimension. It does not resample
+spectra. Equal array lengths alone do not establish compatibility.
+
+Inputs must have identical ordered dimension names. Each retained dimension
+must have the same coordinate representation, values and labels; all alternative
+coordinates and their active selection are checked. Missing coordinates are
+accepted only when absent from every input in the group. Numeric coordinates
+must be finite. Units with the same physical dimensionality may be rescaled for
+comparison, without changing the inputs or the retained coordinate of the first
+input. Cross-dimensional spectroscopy conversions are not applied.
+
+The comparison allows only floating-point conversion roundoff: a symmetric
+relative tolerance of eight float64 machine epsilons (about ``1.8e-15``), with
+zero absolute tolerance. This applies to the values exposed by ``Coord.data``,
+after any configured coordinate rounding or linearization. It is not an
+instrumental calibration tolerance. Shifted or reversed grids remain separate;
+use an explicit alignment/resampling workflow when that is scientifically
+justified.
+
+Incompatible geometry produces a warning and separate datasets, while compatible
+subsets may still be merged under the reader's origin and shape grouping rules.
+Callers must handle a single ``NDDataset`` or a ``ScpObjectList``. Observation
+coordinates may vary, and compatible intensity-unit conversion and mask assembly
+retain their existing behavior. ``merge=False`` keeps the inputs separate.
+
+This geometric check does not certify measurement identity. Reader-specific
+restrictions remain in force; a complete policy for quantities, IR/Raman/NMR
+metadata and source provenance is still outside this check. The explicit
+``scp.stack()`` and ``scp.concatenate()`` operations keep their own contracts.
+
 Readers supplied by plugins
 ---------------------------
 

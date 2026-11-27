@@ -6,6 +6,7 @@
 # ruff: noqa
 
 import struct
+from collections import Counter
 from datetime import datetime
 
 import numpy as np
@@ -44,13 +45,17 @@ def test_read_spc_merge_behavior(galacticdata):
         len(A_no_merge) == 286
     ), "Explicit merge=False should return 286 individual datasets"
 
-    # merge=True groups datasets by shape compatibility
-    # Since BARBITUATES.SPC has subfiles with different shapes (incompatible x-axes),
-    # they get grouped by shape but can't be merged into multi-row datasets
     A_merged = scp.read_spc("galacticdata/BARBITUATES.SPC", merge=True)
-    assert len(A_merged) < 286, "merge=True should group datasets by shape"
-    # Verify the merge operation actually occurred (reduced dataset count)
-    assert len(A_merged) == 57, "merge=True should reduce to 57 shape groups"
+    assert len(A_merged) < len(A_default)
+    expected = Counter(
+        (tuple(dataset.x.data), dataset.data[0].tobytes()) for dataset in A_default
+    )
+    actual = Counter(
+        (tuple(dataset.x.data), row.tobytes())
+        for dataset in A_merged
+        for row in dataset.data
+    )
+    assert actual == expected
 
     # Single subfile SPC should return single NDDataset regardless of merge setting
     B_default = scp.read_spc("galacticdata/BENZENE.SPC")

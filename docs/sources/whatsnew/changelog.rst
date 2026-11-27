@@ -94,6 +94,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Automatic import merging keeps incompatible retained axes or ordered
+  dimensions in separate groups with a warning, instead of assembling equal-size
+  spectra under one coordinate. Compatible coordinate-unit rescaling is checked
+  with floating-point roundoff tolerance only; explicit ``stack`` and
+  ``concatenate`` behavior is unchanged (:pr:`2019`).
+
 - ``despike`` preserves masked values and raises ``ValueError`` for non-positive
   ``delta``, invalid window sizes, complex data and integer values that cannot
   be represented exactly as float64 (:pr:`2011`).

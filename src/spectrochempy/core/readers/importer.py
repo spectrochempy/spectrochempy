@@ -12,20 +12,31 @@ import re
 from warnings import warn
 from zipfile import ZipFile
 
+import numpy as np
 import requests
 import yaml
+from pint.errors import PintError
 from traitlets import Dict
 from traitlets import HasTraits
 from traitlets import List
 from traitlets import Type
 from traitlets import Unicode
 
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.readers.filetypes import registry
+from spectrochempy.core.units import Quantity
+from spectrochempy.processing.transformation.concatenate import (
+    _coordinate_for_dimension,
+)
+from spectrochempy.processing.transformation.concatenate import (
+    _coordinate_representation,
+)
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
 from spectrochempy.utils._logging import debug_
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils._logging import warning_
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import ProtocolError
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.exceptions import UnsupportedOriginError
@@ -392,10 +403,18 @@ def read(*paths, **kwargs):
         Used only when url are specified.  If True, only downloading and saving of the
         files is performed, with no attempt to read their content.
     merge : `bool`, optional, default: `False`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+        Assemble compatible observations: stack 1D inputs or concatenate
+        higher-dimensional inputs along their first dimension. Ordered dimension
+        names and every retained coordinate must agree, including labels and
+        alternative coordinates. Compatible coordinate units are converted only
+        for comparison; the first input's coordinate is retained. Numeric values
+        must be finite and agree within eight float64 epsilons relatively, with
+        no absolute or instrumental tolerance. Shifted, reversed, missing or
+        incompatible retained axes remain in separate groups with a warning.
+        No interpolation or reordering of a retained axis is performed. Reader
+        restrictions and origin/shape grouping still apply. Multiple groups are
+        returned as a `ScpObjectList`; ``merge=True`` does not guarantee a single
+        dataset. The explicit `stack` and `concatenate` operations are unchanged.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -926,8 +945,99 @@ def group_datasets_by_origin(datasets):
     return groups
 
 
+def _import_coordinates_match(first, second):
+    """Compare retained coordinate structure and physically equivalent values."""
+    if first is None or second is None:
+        return first is None and second is None
+    if _coordinate_representation(first) != _coordinate_representation(second):
+        return False
+    if isinstance(first, CoordSet):
+        return (
+            first.default_index == second.default_index
+            and first.names == second.names
+            and all(
+                _import_coordinates_match(a, b)
+                for a, b in zip(first.coords, second.coords, strict=True)
+            )
+        )
+    if not np.array_equal(first.labels, second.labels):
+        return False
+    if first.units != second.units and (
+        first.units is None
+        or second.units is None
+        or first.units.dimensionality != second.units.dimensionality
+    ):
+        return False
+    if first.data is None:
+        return first.units == second.units
+    values = second.data
+    if first.units != second.units:
+        try:
+            values = Quantity(values, second.units).to(first.units).magnitude
+        except PintError:
+            return False
+    if np.shape(first.data) != np.shape(values):
+        return False
+    if not (np.isfinite(first.data).all() and np.isfinite(values).all()):
+        return False
+    if np.array_equal(first.data, values):
+        return True
+    if not (
+        np.issubdtype(first.data.dtype, np.number)
+        and np.issubdtype(values.dtype, np.number)
+    ):
+        return False
+    return bool(
+        np.allclose(first.data, values, rtol=8 * np.finfo(float).eps, atol=0)
+        and np.allclose(values, first.data, rtol=8 * np.finfo(float).eps, atol=0)
+    )
+
+
+def _import_merge_mismatch(first, second):
+    """Return why observation-axis assembly would lose retained geometry."""
+    if first.dims != second.dims:
+        return "dimension names or order differ"
+    retained = first.dims if first.ndim == 1 else first.dims[1:]
+    for dim in retained:
+        axis = first.dims.index(dim)
+        if first.shape[axis] != second.shape[axis]:
+            return f"sizes differ for retained dimension '{dim}'"
+        first_refs = first.coordset.references if first.coordset is not None else {}
+        second_refs = second.coordset.references if second.coordset is not None else {}
+        if first_refs.get(dim) != second_refs.get(dim):
+            return f"coordinate references differ for retained dimension '{dim}'"
+        if not _import_coordinates_match(
+            _coordinate_for_dimension(first, dim),
+            _coordinate_for_dimension(second, dim),
+        ):
+            return f"coordinates differ for retained dimension '{dim}'"
+    return None
+
+
+def _compatible_import_groups(datasets, *, report=True):
+    """Partition inputs without changing their spectral order or coordinates."""
+    groups = []
+    reasons = set()
+    for dataset in datasets:
+        for group in groups:
+            mismatches = [_import_merge_mismatch(other, dataset) for other in group]
+            if not any(mismatches):
+                group.append(dataset)
+                break
+            reasons.update(reason for reason in mismatches if reason)
+        else:
+            groups.append([dataset])
+    if report and len(groups) > 1:
+        warn(
+            "Imported datasets kept in separate groups: " + "; ".join(sorted(reasons)),
+            UserWarning,
+            stacklevel=3,
+        )
+    return groups
+
+
 def merge_datasets(datasets, **kwargs):
-    """Merge datasets based on origin and shape compatibility."""
+    """Merge compatible retained grids along the observation dimension."""
     if not datasets:
         return datasets
 
@@ -964,6 +1074,22 @@ def merge_datasets(datasets, **kwargs):
 
         # Try to merge all datasets regardless of origin
         try:
+            mismatch = next(
+                (
+                    reason
+                    for index, first in enumerate(datasets)
+                    for second in datasets[index + 1 :]
+                    if (reason := _import_merge_mismatch(first, second))
+                ),
+                None,
+            )
+            if mismatch:
+                warn(
+                    "Imported datasets kept in separate groups: " + mismatch,
+                    UserWarning,
+                    stacklevel=2,
+                )
+                raise DimensionsCompatibilityError(mismatch)
             if datasets[0].ndim == 1:
                 dataset = stack(datasets)
                 dataset.history = f"Stacked {len(datasets)} imported datasets"
@@ -992,25 +1118,6 @@ def merge_datasets(datasets, **kwargs):
     # Group datasets by origin
     groups = group_datasets_by_origin(datasets)
 
-    # If only one group with None origin and same shape, try to merge
-    if len(groups) == 1 and None in groups:
-        shapes = {tuple(ds.shape) for ds in groups[None]}
-        if len(shapes) == 1:
-            try:
-                if datasets[0].ndim == 1:
-                    dataset = stack(datasets)
-                    dataset.history = f"Stacked {len(datasets)} imported datasets"
-                else:
-                    dataset = concatenate(datasets, axis=0)
-                    dataset.history = f"Merged {len(datasets)} imported datasets"
-
-                if dataset.coordset is not None and kwargs.pop("sortbydate", True):
-                    dataset.sort(dim=0, inplace=True)
-                return [dataset]
-            except Exception as e:
-                warn(str(e), stacklevel=2)
-                return datasets
-
     # Process each group
     merged_datasets = []
     for _origin, group in groups.items():
@@ -1023,7 +1130,14 @@ def merge_datasets(datasets, **kwargs):
             shape_groups[shape].append(ds)
 
         # Try to merge each shape group
-        for shape_group in shape_groups.values():
+        compatible_groups = [
+            compatible
+            for shape_group in shape_groups.values()
+            for compatible in _compatible_import_groups(
+                shape_group, report=not kwargs.get("merge", False)
+            )
+        ]
+        for shape_group in compatible_groups:
             if len(shape_group) == 1:
                 merged_datasets.extend(shape_group)
                 continue
