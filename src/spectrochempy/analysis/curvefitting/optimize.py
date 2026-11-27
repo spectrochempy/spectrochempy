@@ -2337,6 +2337,7 @@ class Optimize(DecompositionAnalysis):
             diagnostics.update(cost=diagnostics["rss"] / 2, ncalls=solution.nfev)
         fit["jacobian"] = _freeze_jacobian_artifact(fit["jacobian"])
         fit["config"] = {
+            **fit.get("config", {}),
             "method": "trf",
             "mode": "named_curve"
             if isinstance(self._nd_model, str)
