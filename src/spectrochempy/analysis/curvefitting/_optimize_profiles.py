@@ -27,7 +27,8 @@ from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 
 
-def _prepare_profiles(specs, shared, intensity_unit, units):
+def _prepare_profiles(specs, shared, intensity_unit, units, *, include_fixed=False):
+    """Prepare bindings, optionally retaining fixed groups for private qualification."""
     if not isinstance(specs, Sequence) or isinstance(specs, (str, bytes)) or not specs:
         raise ValueError("peaks must be a nonempty ordered sequence")
     if shared is None:
@@ -201,9 +202,20 @@ def _prepare_profiles(specs, shared, intensity_unit, units):
         )
     return (
         peaks,
-        [group for group in groups if not group["parameter"].fixed],
+        groups
+        if include_fixed
+        else [group for group in groups if not group["parameter"].fixed],
         target_units,
     )
+
+
+def _prepare_profile_layout(specs, shared, intensity_unit, units):
+    """Prepare the complete physical context without selecting solver coordinates."""
+    peaks, groups, target_units = _prepare_profiles(
+        specs, shared, intensity_unit, units, include_fixed=True
+    )
+    layout = _ParameterLayout(tuple(group["parameter"] for group in groups))
+    return peaks, groups, target_units, layout
 
 
 def fit_profiles(
@@ -295,6 +307,7 @@ def fit_profiles(
             centered_axes[id(parameters)] = (index, units[dim], width)
         solver_grids.append(grid)
     offsets = initial - origins
+    centered_offsets = np.zeros_like(offsets)
 
     def update(vector):
         nonlocal offsets
@@ -323,7 +336,7 @@ def fit_profiles(
                             axes[dim] = axis
                             continue
                         index, unit, reference_width = binding
-                        value = offsets[index]
+                        value = offsets[index] - centered_offsets[index]
                         if unit is not None:
                             value = _parameter_value(
                                 Quantity(value, parameter_units[index]),
@@ -372,6 +385,7 @@ def fit_profiles(
         return matrix
 
     solution, jacobian = None, None
+    represented_center = False
     if groups:
         solution = least_squares(
             residuals,
@@ -385,7 +399,30 @@ def fit_profiles(
             max_nfev=max_calls,
             gtol=None,
         )
+        if centered_axes:
+            represented = solution.x.copy()
+            for index, group in enumerate(groups):
+                if "center_scale" in group:
+                    value = origins[index] + solution.x[index] * scales[index]
+                    represented[index] = (value - origins[index]) / scales[index]
+            precision = 8 * np.finfo(float).eps
+            represented_center = not np.allclose(
+                represented, solution.x, rtol=precision, atol=precision
+            )
+            if represented_center:
+                solution.x = represented
         update(solution.x)
+        if centered_axes:
+            centered_offsets = offsets.copy()
+            for peak, grid in zip(peaks, solver_grids, strict=True):
+                for dim, axis in peak["axes"].items():
+                    parameters = axis["parameters"]
+                    binding = centered_axes.get(id(parameters))
+                    if binding is not None:
+                        grid[dim] = _scaled_offsets(
+                            coordinates[dim], parameters["center"], binding[2]
+                        )[0]
+            represented_center = True
 
         def fitted_at(vector):
             update(vector)
@@ -420,7 +457,11 @@ def fit_profiles(
         solution.fun = residual[valid] / intensity_scale
     diagnostics = _fit_diagnostics(observed, residual[valid], len(groups))
     covariance_solution = solution
-    if solution is not None and residual_jacobian is None and jacobian is not None:
+    if (
+        solution is not None
+        and jacobian is not None
+        and (residual_jacobian is None or represented_center)
+    ):
         covariance_solution = copy(solution)
         mantissa, power = np.frexp(jacobian)
         scale, scale_power = np.frexp(scales)
@@ -432,6 +473,8 @@ def fit_profiles(
                 ),
                 dtype=float,
             )
+    if represented_center:
+        solution.jac = covariance_solution.jac if jacobian is not None else None
     covariance, reason = _physical_covariance(
         covariance_solution, jacobian, scales, bounds, diagnostics
     )
