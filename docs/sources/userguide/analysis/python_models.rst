@@ -84,12 +84,14 @@ auxiliaries are rejected. Assignment and ``copy()`` copy declarations.
 configuration atomically. Bounds are inclusive and must satisfy min < max;
 use ``vary=False`` to fix a value, not equal bounds. Initial independent values
 must lie within their bounds. None removes a bound.
-For a free parameter the initial value must be strictly inside any finite
-bounds. The current 1D bounded transform can have zero derivative exactly at an
-endpoint and falsely stop there; the facade rejects that initialization rather
-than silently moving it. Fixed values may equal a bound. If a previous fit ends
-exactly on a bound, create another estimator with an interior starting value
-before refitting. Improving that transform is a separate engine change.
+Parameter declarations accept inclusive endpoint values. In the default
+``bounds_mode='transform'``, Optimize requires free initial values strictly
+inside finite bounds. The opt-in native mode below accepts endpoints. The
+historical transform can have zero derivative exactly at an endpoint and
+falsely stop there; transform mode rejects such Python initialization. Fixed
+values may equal a bound. If a transform-mode fit ends exactly on a bound,
+create another estimator with an interior start or select native mode before
+refitting.
 
 ``set(expr="p1_width")`` explicitly links a parameter. Expressions accept full
 names, finite numerical literals, parentheses, unary signs, and ``+ - * / **``.
@@ -135,8 +137,8 @@ Use the canonical ``opt.result`` for scientific outputs:
   including fixed and linked values.
 * ``parameter_names`` identifies the free parameters in covariance, stderr
   and confidence-interval order. ``opt.jacobian`` retains the raw residual
-  Jacobian with respect to the optimizer coordinates, including the historical
-  bound transformation; its columns follow that same order.
+  Jacobian; its columns follow that same order. Transform mode uses optimizer
+  coordinates, native mode physical magnitudes.
 * ``parameters`` remains the estimator run configuration, not a solution.
 * ``fitted``, ``components``, ``residuals`` and diagnostics retain their
   existing meanings. Component rows follow addition order; internal component
@@ -151,13 +153,14 @@ correlation and confidence intervals are unavailable when these conditions
 fail, or when a fitted parameter is at or near a bound.
 ``diagnostics['covariance_reason']`` gives the exclusion reason, or ``None``
 when available; ``covariance_coordinates='physical'`` and
-``jacobian_coordinates='optimizer'`` identify the two coordinate systems.
+``jacobian_coordinates='optimizer'`` identify the two coordinate systems in
+transform mode; native mode uses physical coordinates for both.
 The bound neighborhood is ``sqrt(machine epsilon)`` times the interval width
 for two finite bounds, or times the maximum of one, the parameter magnitude
 and the bound magnitude for one finite bound. This is a conservative
 uncertainty qualification, not a test of physical stationarity. Historical
 solver success alone can still include an erroneous stop at a bound; the
-strictly interior starting-value requirement remains in place.
+strictly interior starting-value requirement remains in place in transform mode.
 
 Propagation to linked/derived parameters is not implemented;
 ``diagnostics['derived_uncertainty_status']`` explicitly reports
@@ -210,10 +213,87 @@ It does not change the solution, solver success, covariance policy or starting
 values, and it does not retry an optimization. In particular, a historical
 COMMON fit starting at an endpoint may still report solver success together
 with ``physical_stationarity_status='not_satisfied'``. The strictly interior
-starting-value requirement for composable Python models remains in place.
+starting-value requirement remains in place in the default transform mode.
 Dry previews and all-fixed evaluations report ``'not_checked'``; solvers
 without a retained least-squares Jacobian report ``'unavailable'``.
 The existing ND diagnostics are unchanged.
+
+Native bounds for one-dimensional least squares
+-----------------------------------------------
+
+``bounds_mode='native'`` is an explicit alternative for COMMON and composable
+Python 1D fits using ``method='least_squares'`` or its ``'leastsq'`` alias.
+The default ``'transform'`` preserves the historical engine and requires
+strictly interior free starts in the Python facade. Parameter declarations
+now validate their inclusive physical bounds; the estimator validates whether
+its selected policy accepts an endpoint. A fixed parameter may equal a bound.
+
+For example, with a 1D dataset ``ds``:
+
+.. code-block:: python
+
+    model = scp.Linear()
+    params = model.make_params(
+        slope=scp.Parameter(0, min=0),
+        intercept=scp.Parameter(0, vary=False),
+    )
+    opt = scp.Optimize(
+        model=model, params=params, bounds_mode="native"
+    ).fit(ds)
+    print(opt.result.fitted_parameters)
+    print(opt.result.diagnostics)
+
+Native mode optimizes physical free magnitudes with bounded TRF, three-point
+finite differences and ``x_scale='jac'``. It sets ``ftol=None``, ``gtol=None``
+and ``xtol=1e-12``: cost-change and absolute scaled-gradient stopping are disabled
+because either can produce premature stops after endpoint initialization,
+including small-signal fits. Relative step-size stopping remains enabled so
+finite-difference gradient noise need not consume the entire evaluation budget
+near an optimum. The evaluation budget is
+``max_fun_calls`` or ``4 * max_iter``; exhausting it reports solver failure.
+Three-point differences and physical stationarity probes require additional
+model calls beyond the solver's ``nfev`` counter. Native mode may cost more
+than the historical route and does not restart an optimization automatically.
+
+The supplied initial configuration remains unchanged. As documented by
+`SciPy least_squares <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html>`_,
+TRF can adjust an endpoint internally to obtain a strictly feasible iterate;
+this is not an application-level physical epsilon or a different declaration.
+An exactly fitted, non-identifiable model can still exhaust the evaluation
+budget with this step-only policy. Its zero residual does not turn solver
+failure into success; inspect the physical stationarity and rank diagnostics.
+The backend suppresses only SciPy trust-region division warnings when the final
+residual is exactly zero. Warnings from the model remain visible. An early stop
+at the diagnostic roundoff floor is not part of this policy.
+
+The local relative step-size criterion does not guarantee physical stationarity,
+identifiability or a global optimum. Read the independent physical diagnostic
+as well as solver success. In particular, an approximate constrained solution
+can remain strictly interior: the physical check then retains both directions
+and can report ``'not_satisfied'`` despite negligible remaining improvement.
+A nearly exact fit can also retain a normalized gradient above its threshold
+when its remaining residual is above the diagnostic roundoff floor. Solver
+tolerances and the physical cosine diagnostic are different criteria.
+
+``result.parameters['bounds_mode']`` records the selected policy. Native
+optimizations also record ``solver_method='trf'``, ``termination_policy='step'``,
+``solver_gtol``, ``solver_xtol``, ``solver_optimality``, ``solver_nfev`` and
+``solver_max_nfev``. Their raw Jacobian is
+already physical, labelled ``jacobian_coordinates='physical'``; covariance
+uses the identity coordinate transform and the existing physical free order.
+The default engine retains its raw optimizer-coordinate Jacobian. Neither
+mode changes the existing exclusions for unavailable uncertainty, including
+near-bound solutions. Linked uncertainty propagation remains unavailable.
+
+Native mode rejects simplex, basinhopping, legacy ``constraints``, ND peaks,
+full-grid callbacks and named recovery/decay laws. Those routes keep their
+existing policies. The existing ``solver_options`` mapping belongs to grid
+callbacks and is not a native 1D options surface. Width positivity remains a
+model-domain requirement, including ``min > 0`` for varying Gaussian widths.
+This increment adds no open/closed-bound syntax, logarithmic coordinates or
+unit-aware expressions. A new estimator is still needed to change topology;
+initial/fitted ownership and the restrictions on historical automatic options
+for composed Python models remain unchanged.
 
 Historical options and scope
 ----------------------------

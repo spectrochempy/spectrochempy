@@ -13,6 +13,8 @@ It does not parse scripts, evaluate profiles, or select an optimization method.
 import numpy as np
 
 from spectrochempy.analysis.curvefitting._modelspec import _FitModelSpec
+from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
+from spectrochempy.analysis.curvefitting._parameter_transform import _UPB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameter_transform import (
     _external_transform_state,
 )
@@ -136,6 +138,39 @@ def _internal_vector(fp):
     return _vector_from_prepared(_prepared_parameters(fp))
 
 
+def _physical_vector(definition):
+    """Prepare finite physical free values and inclusive native bounds."""
+    parameters = [p for p in _prepared_parameters(definition) if not p.fixed]
+    legacy = not isinstance(definition, _FitModelSpec)
+    values = np.array([p.value for p in parameters], dtype=float)
+    bounds = np.array(
+        [
+            (
+                -np.inf
+                if p.bounds[0] is None or (legacy and p.bounds[0] <= _LOB_THRESHOLD)
+                else p.bounds[0],
+                np.inf
+                if p.bounds[1] is None or (legacy and p.bounds[1] >= _UPB_THRESHOLD)
+                else p.bounds[1],
+            )
+            for p in parameters
+        ],
+        dtype=float,
+    ).reshape(-1, 2)
+    if (
+        values.shape != (len(parameters),)
+        or not np.isfinite(values).all()
+        or np.isnan(bounds).any()
+        or np.any(bounds[:, 0] >= bounds[:, 1])
+        or np.any(values < bounds[:, 0])
+        or np.any(values > bounds[:, 1])
+    ):
+        raise ValueError(
+            "Native bounds require finite initial values inside ordered bounds"
+        )
+    return values, [p.name for p in parameters], bounds
+
+
 def _transform_artifacts(definition, values, keys):
     """Snapshot physical-coordinate derivatives in the actual solver order."""
     parameters = {p.name: p for p in _prepared_parameters(definition) if not p.fixed}
@@ -181,6 +216,19 @@ def _restore_physical(definition, values, keys):
             owner[name] = value
         else:
             entry.value = value
+    return definition
+
+
+def _restore_native(definition, values, keys):
+    """Restore native values with the historical one-experiment scalar layout."""
+    _restore_physical(definition, values, keys)
+    if not isinstance(definition, _FitModelSpec) and definition.expnumber == 1:
+        for parameter in _prepared_parameters(definition):
+            path = parameter.identifier
+            if not parameter.fixed and len(path) > 3 and path[-2] == "experiments":
+                value = definition.data[path[1]]
+                if isinstance(value, list) and len(value) == 1:
+                    definition.data[path[1]] = value[0]
     return definition
 
 

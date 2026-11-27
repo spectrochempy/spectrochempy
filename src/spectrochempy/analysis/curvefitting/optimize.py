@@ -41,13 +41,16 @@ from spectrochempy.analysis.curvefitting._parameter_space import _internal_vecto
 from spectrochempy.analysis.curvefitting._parameter_space import (
     _modelspec_parameter_count,
 )
+from spectrochempy.analysis.curvefitting._parameter_space import _physical_vector
 from spectrochempy.analysis.curvefitting._parameter_space import _prepared_parameters
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_external
+from spectrochempy.analysis.curvefitting._parameter_space import _restore_native
 from spectrochempy.analysis.curvefitting._parameter_space import _restore_physical
 from spectrochempy.analysis.curvefitting._parameter_space import _transform_artifacts
 from spectrochempy.analysis.curvefitting._parameter_transform import _LOB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameter_transform import _UPB_THRESHOLD
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
+from spectrochempy.analysis.curvefitting._stationarity import _bound_neighborhood
 from spectrochempy.analysis.curvefitting._stationarity import _physical_stationarity
 from spectrochempy.analysis.curvefitting.model import Model
 from spectrochempy.analysis.curvefitting.model import _prepare_public_model
@@ -959,6 +962,12 @@ class Optimize(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
+    bounds_mode = tr.CaselessStrEnum(
+        ["transform", "native"],
+        default_value="transform",
+        help="1D bounds policy: historical transform or opt-in native bounded TRF.",
+    ).tag(config=True)
+
     script = tr.Unicode(help="Script defining models and parameters for fitting.").tag(
         config=True,
     )
@@ -1080,6 +1089,15 @@ class Optimize(DecompositionAnalysis):
             Full-grid model solver options: ftol, xtol, gtol, diff_step and
             x_scale. The solver is bounded TRF with linear least squares loss.
             Use max_fun_calls to limit the number of solver evaluations.
+        bounds_mode : {'transform', 'native'}, optional
+            The default preserves historical 1D transformed coordinates.
+            Native mode uses bounded TRF in physical coordinates for 1D
+            least_squares/leastsq only, accepting inclusive endpoint starts.
+            It disables cost-change and gradient termination, uses xtol=1e-12,
+            three-point differences and Jacobian scaling. SciPy may adjust a
+            supplied endpoint internally to obtain a strictly feasible iterate.
+            ND peaks, grid callbacks and named curves retain their own policy
+            and reject this option when it is set to 'native'.
         **kwargs : dict
             Additional keyword arguments.
         """
@@ -1170,6 +1188,28 @@ class Optimize(DecompositionAnalysis):
             definition, initial, names, spec, _ = public_model
             self._install_model_spec(spec)
             self._python_model_configuration = (definition, initial, names)
+        self._validate_bounds_mode()
+
+    def _validate_bounds_mode(self):
+        """Validate the selected policy without changing parameter declarations."""
+        if self.bounds_mode.lower() == "native":
+            if self.constraints:
+                raise ValueError("Native bounds do not accept legacy constraints")
+            if self._nd_peaks is not None or self._nd_model is not None:
+                raise ValueError(
+                    "bounds_mode='native' applies only to the 1D COMMON/Python path"
+                )
+            if self.method.lower() not in ("least_squares", "leastsq"):
+                raise ValueError(
+                    "Native bounds require method='least_squares' or 'leastsq'"
+                )
+        elif self._python_model_configuration is not None:
+            for _, parameter in self._model_spec._iter_varying():
+                if parameter.value in parameter.bounds:
+                    raise ValueError(
+                        "Free initial values must lie strictly inside their bounds "
+                        "in transform mode; use bounds_mode='native' for endpoint starts"
+                    )
 
     @classmethod
     def _from_callables(
@@ -1242,19 +1282,13 @@ class Optimize(DecompositionAnalysis):
     # Private methods ( overriding abstract methods)
     # ----------------------------------------------------------------------------------
     def _fit(self, X, Y=None):
+        self._validate_bounds_mode()
         if self._python_model_configuration is not None and (
             self.autobase or self.autoampl or self.amplitude_mode.lower() != "area"
         ):
             raise ValueError(
                 "Composable models require autobase=False, autoampl=False and amplitude_mode='area'"
             )
-        if self._python_model_configuration is not None:
-            for _, parameter in self._model_spec._iter_varying():
-                if parameter.value in parameter.bounds:
-                    raise ValueError(
-                        "Free initial values must lie strictly inside their bounds; "
-                        "create another Optimize with an interior starting value"
-                    )
         # NMR
         # sequence = kargs.get('sequence', 'ideal_pulse')
         # self.sequence = PulseSequence(type=sequence)
@@ -1386,9 +1420,13 @@ class Optimize(DecompositionAnalysis):
         solver_artifacts = {
             "jacobian": None,
             "jacobian_backend": None,
+            "jacobian_coordinates": "physical"
+            if self.bounds_mode.lower() == "native"
+            else "optimizer",
         }
         fit_config = {
             "method": self.method,
+            "bounds_mode": self.bounds_mode,
             "max_iter": self.max_iter,
             "max_fun_calls": self.max_fun_calls,
             "dry": self.dry,
@@ -1399,8 +1437,8 @@ class Optimize(DecompositionAnalysis):
         }
         evaluate_only = (
             self._python_model_configuration is not None
-            and model_spec.count_varying() == 0
-        )
+            or self.bounds_mode.lower() == "native"
+        ) and model_spec.count_varying() == 0
         if not self.dry and evaluate_only:
             residuals = np.ma.masked_invalid(
                 fun_residuals(model_spec, X.real.squeeze())
@@ -1424,6 +1462,7 @@ class Optimize(DecompositionAnalysis):
                 method=self.method,
                 constraints=self.constraints,
                 callback=callback,
+                bounds_mode=self.bounds_mode,
             )
             self._model_spec = model_spec
 
@@ -1437,7 +1476,10 @@ class Optimize(DecompositionAnalysis):
             "ncalls": ncalls,
             **solver_meta,
         }
-        if self._python_model_configuration is not None:
+        if (
+            self._python_model_configuration is not None
+            or self.bounds_mode.lower() == "native"
+        ):
             self._fit_meta["optimization_performed"] = (
                 not self.dry and not evaluate_only
             )
@@ -2195,6 +2237,7 @@ class Optimize(DecompositionAnalysis):
         fit_reduce : Alias of `fit_transform` (Deprecated).
 
         """
+        self._validate_bounds_mode()
         if not self._is_grid_fit:
             return super().fit(X, Y=None)
 
@@ -2326,10 +2369,11 @@ class Optimize(DecompositionAnalysis):
         local least-squares assumptions still apply; this does not independently
         establish convergence or stationarity.
 
-        For 1D script and composable Python models, this remains the raw
-        optimizer-coordinate Jacobian, including the historical bound
-        transformation. Result covariance and stderr are transformed back to
-        physical free parameters; this property is preserved for compatibility.
+        For 1D script and composable Python models in transform mode, this
+        remains the raw optimizer-coordinate Jacobian, including the historical
+        bound transformation. Native mode instead retains the raw physical
+        Jacobian. result.diagnostics['jacobian_coordinates'] labels this space;
+        covariance and stderr always describe physical free parameters.
 
         Returns
         -------
@@ -2377,8 +2421,9 @@ class Optimize(DecompositionAnalysis):
         uncertainty arrays describe physical free parameters, accounting for
         the bound transform. They are unavailable near bounds, for deficient
         rank, unsuccessful optimization or missing prerequisites; diagnostics
-        include ``covariance_reason``. The raw ``jacobian`` property remains
-        in optimizer coordinates for these fits.
+        include ``covariance_reason``. The raw ``jacobian`` property uses
+        optimizer coordinates in transform mode and physical magnitudes in
+        native mode, identified by ``diagnostics['jacobian_coordinates']``.
         """
         if not self._fitted:
             raise NotFittedError(
@@ -2446,7 +2491,9 @@ class Optimize(DecompositionAnalysis):
             ),
             near_bounds=self._solver_artifacts.get("near_parameter_bounds", False),
         )
-        fit_diagnostics["jacobian_coordinates"] = "optimizer"
+        fit_diagnostics["jacobian_coordinates"] = self._solver_artifacts.get(
+            "jacobian_coordinates", "optimizer"
+        )
         parameter_values = _extract_varying_parameter_values(
             getattr(self, "_model_spec", None),
         )
@@ -2541,6 +2588,7 @@ def _optimize(
     ftol=1e-8,
     xtol=1e-8,
     callback=None,
+    bounds_mode="transform",
 ):
     if constraints is None:
         constraints = {}
@@ -2548,7 +2596,7 @@ def _optimize(
     use_model_spec = isinstance(fp0, _FitModelSpec)
 
     def internal_func(p, dat, fp, keys, *args):
-        fp = _restore_external(fp, p, keys)
+        fp = restore(fp, p, keys)
         return func(fp, dat)
 
     def internal_callback(*args):
@@ -2559,7 +2607,18 @@ def _optimize(
     if not isinstance(fp0, FitParameters | _FitModelSpec):
         raise TypeError("fp0 is not of FitParameter or _FitModelSpec type")
 
-    par, keys = _internal_vector(fp0)
+    native = bounds_mode.lower() == "native"
+    if bounds_mode.lower() not in ("native", "transform"):
+        raise ValueError("Unknown bounds_mode")
+    if native and constraints:
+        raise ValueError("Native bounds do not accept legacy constraints")
+    if native and method.lower() not in ("least_squares", "leastsq"):
+        raise ValueError("Native bounds require a least-squares method")
+    restore = _restore_native if native else _restore_external
+    if native:
+        par, keys, native_bounds = _physical_vector(fp0)
+    else:
+        par, keys = _internal_vector(fp0)
 
     args = list(args)
     args.append(fp0)
@@ -2574,17 +2633,23 @@ def _optimize(
         n_parameters = _modelspec_parameter_count(fp0) if use_model_spec else len(fp0)
         method = "lm" if n_parameters < 10 else "trf"
 
-    result = _run_optimizer(
-        internal_func,
-        par,
-        args=tuple(args),
-        method=method,
-        maxfun=maxfun,
-        maxiter=maxiter,
-        ftol=ftol,
-        xtol=xtol,
-        callback=internal_callback,
-    )
+    if native:
+        method = "trf"
+        result = _fit_backend._native_least_squares(
+            internal_func, par, native_bounds.T, args=tuple(args), max_nfev=maxfun
+        )
+    else:
+        result = _run_optimizer(
+            internal_func,
+            par,
+            args=tuple(args),
+            method=method,
+            maxfun=maxfun,
+            maxiter=maxiter,
+            ftol=ftol,
+            xtol=xtol,
+            callback=internal_callback,
+        )
     if method.lower() in ["lm", "trf"]:
         res, fopt, warnmess = result.x, result.cost, result.message
         solver_result = result
@@ -2596,10 +2661,28 @@ def _optimize(
         solver_result = result
     solver_meta = _normalize_solver_meta(method, solver_result, warnmess)
     solver_artifacts = _extract_solver_artifacts(method, solver_result)
-    solver_artifacts.update(_transform_artifacts(fp0, res, keys))
+    if native:
+        near = _bound_neighborhood(res, *native_bounds.T)
+        solver_artifacts.update(
+            parameter_transform_derivatives=tuple(np.ones(len(res))),
+            near_parameter_bounds=bool(np.any(near)),
+            jacobian_coordinates="physical",
+        )
+        solver_meta.update(
+            bounds_mode="native",
+            solver_method="trf",
+            termination_policy="step",
+            solver_gtol=None,
+            solver_xtol=1e-12,
+            solver_optimality=float(result.optimality),
+            solver_nfev=int(result.nfev),
+            solver_max_nfev=maxfun,
+        )
+    else:
+        solver_artifacts.update(_transform_artifacts(fp0, res, keys))
 
     # restore the external parameter
-    fpe = _restore_external(fp0, res, keys)
+    fpe = restore(fp0, res, keys)
     parameters = {p.name: p for p in _prepared_parameters(fpe) if not p.fixed}
     ordered = [parameters[key] for key in keys]
     physical = np.array([p.value for p in ordered], dtype=float)
@@ -2614,6 +2697,8 @@ def _optimize(
         )
         for p in ordered
     ]
+    if native:
+        bounds = native_bounds
 
     def physical_residual(values):
         trial = _restore_physical(deepcopy(fpe), values, keys)

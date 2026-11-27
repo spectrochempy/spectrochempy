@@ -11,6 +11,8 @@ Raw solver results and backend metadata are returned without interpreting
 physical covariance or residual statistics.
 """
 
+import warnings
+
 import numpy as np
 from scipy import optimize
 
@@ -23,6 +25,51 @@ def _least_squares(objective, initial, **options):
 def _nonnegative_least_squares(matrix, target):
     """Project linear coefficients onto the nonnegative least-squares solution."""
     return optimize.nnls(matrix, target)[0]
+
+
+def _native_least_squares(objective, initial, bounds, *, args=(), max_nfev=None):
+    """Run opt-in bounded TRF with relative step termination only."""
+    result = None
+    emitted = []
+    try:
+        with warnings.catch_warnings(record=True) as emitted:
+            result = _least_squares(
+                objective,
+                initial,
+                bounds=bounds,
+                args=args,
+                method="trf",
+                jac="3-point",
+                x_scale="jac",
+                ftol=None,
+                xtol=1e-12,
+                gtol=None,
+                max_nfev=max_nfev,
+            )
+    finally:
+        # TRF can divide 0 by 0 in its trust-region algebra after an exact fit.
+        # Keep the solver's budget/status honest and suppress only those numerical
+        # warnings when the final residual really is identically zero. In particular,
+        # warnings from user models and nonzero-residual failures remain visible.
+        exact = result is not None and np.all(np.asarray(result.fun) == 0)
+        for warning in emitted:
+            algebra_warning = (
+                warning.category is RuntimeWarning
+                and warning.filename.replace("\\", "/").endswith(
+                    "/scipy/optimize/_lsq/common.py"
+                )
+                and str(warning.message)
+                in {
+                    "invalid value encountered in divide",
+                    "divide by zero encountered in divide",
+                    "divide by zero encountered in scalar divide",
+                }
+            )
+            if not (exact and algebra_warning):
+                warnings.warn_explicit(
+                    warning.message, warning.category, warning.filename, warning.lineno
+                )
+    return result
 
 
 def _run_optimizer(

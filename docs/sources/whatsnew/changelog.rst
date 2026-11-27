@@ -19,6 +19,12 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- ``Optimize(bounds_mode='native')`` opts 1D COMMON and Python least-squares
+  fits into physical-coordinate bounded TRF, including endpoint starts, with
+  explicit relative-step termination and the existing uncertainty exclusions.
+  The default transform policy and ND routes are preserved. Parameter
+  declarations accept endpoints; Optimize validates the selected start policy. (:pr:`1985`)
+
 - 1D ``Optimize.result.diagnostics`` qualifies physical first-order stationarity
   separately from solver success, including independent feasible probes near
   bounds. Starting values, solver selection, fit results and ND paths are
