@@ -128,6 +128,26 @@ scientific description of each source. Source provenance and identity
 persistence after metadata-clearing transformations remain separate work.
 Callers remain responsible for the scientific comparability of inputs.
 
+OMNIC SPG groups
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The SPG reader checks the axis and signal definitions decoded from each member's
+native header. A shared unit alone does not make wavenumber and Raman-shift axes,
+or percent transmittance and percent reflectance signals, equivalent. Free-text
+spectrum labels and user titles do not establish these identities; unrecognized
+codes remain unknown.
+
+By default, an inconsistent SPG group raises an error. Set
+``allow_inconsistent_x=True`` to read its members separately into the import
+assembly. Incompatible members remain separate even with ``merge=True``;
+compatible subsets may still assemble. Add ``merge=False`` to keep every member
+separate. Member timestamps and labels remain associated with their spectra,
+including when sorting by date.
+
+These SPG declarations are retained during one import, including nested ZIP or
+directory reads. Persistence after save/reload and equivalent SPA/SRS checks
+remain separate work.
+
 ZIP archives and multi-dataset members
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

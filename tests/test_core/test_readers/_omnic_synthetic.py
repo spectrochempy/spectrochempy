@@ -7,6 +7,42 @@
 import struct
 
 
+def synthetic_spg_members(members):
+    """Build an SPG container with independently declared member headers."""
+    start = 304 + 48 * len(members)
+    content = bytearray(start + 768 * len(members))
+    content[:18] = b"Spectral Data File"
+    struct.pack_into("<H", content, 294, 3 * len(members))
+    for index, member in enumerate(members):
+        header = start + 768 * index
+        values = member.get("data", [index + 1, index + 1.5])
+        payload = header + 320
+        label = header + 448
+        records = [(2, header, 140), (3, payload, 4 * len(values)), (107, label, 260)]
+        for offset, (key, position, length) in enumerate(records):
+            entry = 304 + 16 * (3 * index + offset)
+            struct.pack_into("<BBII", content, entry, key, 0, position, length)
+        struct.pack_into("<I", content, header + 4, len(values))
+        content[header + 8] = member.get("xcode", 1)
+        content[header + 12] = member.get("ycode", 17)
+        struct.pack_into(
+            "<ff",
+            content,
+            header + 16,
+            member.get("firstx", 4000),
+            member.get("lastx", 3999),
+        )
+        struct.pack_into("<f", content, header + 80, 15798)
+        struct.pack_into("<f", content, header + 188, 8.8617)
+        struct.pack_into(f"<{len(values)}f", content, payload, *values)
+        title = member.get("label", f"spectrum {index}").encode("latin-1")
+        content[label : label + len(title)] = title
+        struct.pack_into(
+            "<I", content, label + 256, member.get("timestamp", 4_000_000_000 + index)
+        )
+    return bytes(content)
+
+
 def synthetic_spa_with_optical_velocity(
     mirror,
     canonical=None,

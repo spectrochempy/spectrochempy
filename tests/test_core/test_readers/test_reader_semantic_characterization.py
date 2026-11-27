@@ -317,8 +317,10 @@ class TestOmnicCharacterization:
             dataset, "y", title="acquisition timestamp (GMT)", units="s"
         )
         labels = assert_label_structure(y, shape=(2, 2))
-        assert isinstance(labels[0, 0], str)
-        assert isinstance(labels[1, 0], datetime)
+        for row, timestamp in zip(labels, y.data, strict=True):
+            assert isinstance(row[0], datetime)
+            assert isinstance(row[1], str)
+            assert row[0].timestamp() == timestamp
         assert x.labels is None
 
         assert_meta_keys_present(

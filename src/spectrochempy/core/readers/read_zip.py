@@ -81,6 +81,10 @@ def read_zip(*paths, **kwargs):
         arguments, then a single `NDDataset` with merged dataset (stacked along the first
         dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
         then several NDDatasets can be returned for different groups of compatible datasets.
+    allow_inconsistent_x : `bool`, optional, default: `False`
+        Passed to SPG members, including those in nested ZIP archives. See
+        :func:`spectrochempy.read_spg` for the separation rules. Archive-level
+        assembly remains controlled by ``merge``.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -174,8 +178,15 @@ def _read_zip(*args, **kwargs):
             if extension.lower() not in supported_extensions:
                 return None
             origin = kwargs.get("origin", "")
+            member_options = {}
+            if "allow_inconsistent_x" in kwargs:
+                member_options["allow_inconsistent_x"] = kwargs["allow_inconsistent_x"]
             return read(
-                children.name, content=children.read_bytes(), origin=origin, merge=False
+                children.name,
+                content=children.read_bytes(),
+                origin=origin,
+                merge=False,
+                **member_options,
             )
 
         count = 0

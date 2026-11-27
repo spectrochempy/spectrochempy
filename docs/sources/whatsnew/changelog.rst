@@ -101,6 +101,12 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- OMNIC SPG imports reject contradictory recognized native axis and signal
+  definitions even when their units match. Opt-in member separation preserves
+  these constraints through import assembly, including nested ZIP archives.
+  Timestamp and source-label rows
+  remain paired for two-member groups and date sorting (:issue:`1795`, :pr:`2029`).
+
 - ZIP imports flatten multi-dataset members, including nested archives and
   heterogeneous SPC files, instead of returning nested collections or failing
   during automatic merging. Existing compatibility checks and member-based
