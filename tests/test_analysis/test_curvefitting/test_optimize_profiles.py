@@ -11,6 +11,7 @@ from scipy.special import voigt_profile
 
 import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis.curvefitting import _optimize_profiles
 
 
 def _stretched_recovery(t, tau, beta):
@@ -519,6 +520,162 @@ def test_general_gaussian_center_is_independent_of_coordinate_origin(
     assert abs(fitted - center) < 1e-8
     jacobian = -values * 8 * np.log(2) * (x[None, :] - center) / 0.9**2
     assert_allclose(fit.jacobian[:, 0], jacobian.ravel(), atol=2e-7, rtol=1e-5)
+
+
+@pytest.mark.parametrize("shared", [False, True])
+@pytest.mark.parametrize("analytic", [False, True])
+def test_profile_uncertainties_use_the_represented_large_center(
+    shared, analytic, monkeypatch
+):
+    origin = 2**53
+    relative_x = np.arange(-4, 8, 2)
+    relative_y = np.arange(-2, 3)
+    x = scp.Coord(origin + relative_x, units="Hz", dtype=np.int64, rounding=False)
+    y = scp.Coord(relative_y, units="Hz", rounding=False)
+    data = np.exp(
+        -np.log(2)
+        * ((relative_x[None, :] - 0.33333333) ** 2 + relative_y[:, None] ** 2)
+    )
+    data[0, -1] += 1e-7
+    source = scp.NDDataset(data, coordset=[y, x])
+    source[1, 0] = scp.MASKED
+
+    def fixed(value):
+        return {"value": value, "fixed": True}
+
+    declaration = {"value": origin}
+    peaks = [
+        {
+            "height": fixed(1),
+            "axes": {
+                "x": {
+                    "model": "gaussian",
+                    "center": {"shared": "position"} if shared else declaration,
+                    "width": fixed(2),
+                },
+                "y": {"model": "gaussian", "center": fixed(0), "width": fixed(2)},
+            },
+        }
+    ]
+    shared_parameters = {"position": declaration} if shared else {}
+    initial = deepcopy(peaks)
+    if analytic:
+        original = _optimize_profiles.fit_profiles
+
+        def residual_jacobian(prepared, names):
+            center = prepared[0]["axes"]["x"]["parameters"]["center"] - origin
+            values = np.exp(
+                -np.log(2)
+                * ((relative_x[None, :] - center) ** 2 + relative_y[:, None] ** 2)
+            )
+            return (-2 * np.log(2) * (relative_x[None, :] - center) * values)[..., None]
+
+        def fit_with_jacobian(*args, **kwargs):
+            return original(*args, residual_jacobian=residual_jacobian, **kwargs)
+
+        monkeypatch.setattr(_optimize_profiles, "fit_profiles", fit_with_jacobian)
+    fit = scp.Optimize(peaks=peaks, shared_parameters=shared_parameters).fit(source)
+    result = fit.result
+    center = result.peaks[0]["axes"]["x"]["parameters"]["center"] - origin
+    expected_model = np.exp(
+        -np.log(2) * ((relative_x[None, :] - center) ** 2 + relative_y[:, None] ** 2)
+    )
+    valid = ~source.mask
+    np.testing.assert_allclose(
+        result.fitted.data[valid], expected_model[valid], rtol=1e-14
+    )
+    expected_jacobian = -2 * np.log(2) * (relative_x[None, :] - center) * expected_model
+    np.testing.assert_allclose(
+        fit.jacobian[:, 0], expected_jacobian[valid], rtol=3e-6, atol=3e-8
+    )
+    variance = result.diagnostics["rss"] / result.diagnostics["degrees_of_freedom"]
+    covariance = variance / np.sum(expected_jacobian[valid] ** 2)
+    np.testing.assert_allclose(result.covariance, [[covariance]], rtol=3e-6, atol=0)
+    np.testing.assert_allclose(result.stderr, [np.sqrt(covariance)], rtol=3e-6, atol=0)
+    assert peaks == initial
+
+
+@pytest.mark.parametrize("analytic", [False, True])
+def test_shared_center_uncertainties_use_each_represented_unit_binding(
+    analytic, monkeypatch
+):
+    origin = 2**53
+    relative = np.arange(-4, 8, 2)
+    x = scp.Coord(origin + relative, units="Hz", dtype=np.int64, rounding=False)
+    conversion = np.longdouble(0.001)
+    y = scp.Coord(
+        (np.longdouble(origin) + relative) * conversion,
+        units="kHz",
+        dtype=np.longdouble,
+        rounding=False,
+    )
+    relative_y = np.asarray(
+        (y.data - np.longdouble(origin) * conversion) * 1000, dtype=float
+    )
+    data = np.exp(
+        -np.log(2)
+        * (
+            (relative[None, :] - 0.33333333) ** 2
+            + (relative_y[:, None] - 0.33333333) ** 2
+        )
+    )
+    data[0, -1] += 1e-7
+    source = scp.NDDataset(data, coordset=[y, x])
+    source[1, 0] = scp.MASKED
+
+    def fixed(value):
+        return {"value": value, "fixed": True}
+
+    peaks = [
+        {
+            "height": fixed(1),
+            "axes": {
+                "x": {
+                    "model": "gaussian",
+                    "center": {"shared": "position"},
+                    "width": fixed(2),
+                },
+                "y": {
+                    "model": "gaussian",
+                    "center": {"shared": "position"},
+                    "width": fixed(0.002),
+                },
+            },
+        }
+    ]
+    shared = {"position": {"value": origin, "unit": "Hz"}}
+    initial = deepcopy((peaks, shared))
+
+    def reference(prepared):
+        axes = prepared[0]["axes"]
+        cx = axes["x"]["parameters"]["center"]
+        cy = axes["y"]["parameters"]["center"]
+        dx = np.asarray(x.data.astype(np.longdouble) - cx, dtype=float)[None, :]
+        dy = np.asarray(y.data.astype(np.longdouble) - cy, dtype=float)[:, None] * 1000
+        model = np.exp(-np.log(2) * (dx**2 + dy**2))
+        return model, -2 * np.log(2) * (dx + dy) * model
+
+    if analytic:
+        original = _optimize_profiles.fit_profiles
+
+        def residual_jacobian(prepared, names):
+            return reference(prepared)[1][..., None]
+
+        def fit_with_jacobian(*args, **kwargs):
+            return original(*args, residual_jacobian=residual_jacobian, **kwargs)
+
+        monkeypatch.setattr(_optimize_profiles, "fit_profiles", fit_with_jacobian)
+    fit = scp.Optimize(peaks=peaks, shared_parameters=shared).fit(source)
+    result = fit.result
+    model, jacobian = reference(result.peaks)
+    valid = ~source.mask
+    assert_allclose(result.fitted.data[valid], model[valid], rtol=5e-14)
+    assert_allclose(fit.jacobian[:, 0], jacobian[valid], rtol=3e-6, atol=3e-8)
+    variance = result.diagnostics["rss"] / result.diagnostics["degrees_of_freedom"]
+    covariance = variance / np.sum(jacobian[valid] ** 2)
+    assert_allclose(result.covariance, [[covariance]], rtol=3e-6, atol=0)
+    assert_allclose(result.stderr, [np.sqrt(covariance)], rtol=3e-6, atol=0)
+    assert (peaks, shared) == initial
 
 
 @pytest.mark.parametrize("scale", [1.0, 1e-6, 1e-9])
