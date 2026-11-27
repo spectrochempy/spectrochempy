@@ -8,6 +8,7 @@
 
 __all__ = [
     "_callable_spec",
+    "_centered_coordinates",
     "_fit_backend",
     "_model_evaluation",
     "_models",
@@ -31,6 +32,7 @@ __all__ = [
 ]
 
 from . import _callable_spec
+from . import _centered_coordinates
 from . import _fit_backend
 from . import _model_evaluation
 from . import _models
