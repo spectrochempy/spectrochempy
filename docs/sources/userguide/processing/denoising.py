@@ -107,12 +107,20 @@ _ = nd5.plot(clear=False, ls="-", c="r")
 # %% [markdown]
 # Getting the desired results require the tuning of size and delta parameters. And sometimes may need to repeat the procedure on a previously filtered spectra.
 #
-# For example, it size or delta are badly chosen, valid peaks could be removed. So careful inspection of the results is crucial.
+# For example, if size or delta are badly chosen, valid peaks could be removed.
+# Use `return_mask=True` to inspect which samples changed on the original
+# coordinates. These changes are not confirmed cosmic rays.
 
 # %%
-nd5b = scp.despike(X, size=21, delta=2)
+nd5b, changed = scp.despike(X, size=21, delta=2, return_mask=True)
 _ = X.plot()
 _ = nd5b.plot(clear=False, ls="-", c="r")
+
+# %% [markdown]
+# The boolean diagnostic shows the positions to inspect in the corrected spectrum.
+
+# %%
+_ = changed.plot()
 
 # %% [markdown]
 # Last we can apply it to the full 2D dataset

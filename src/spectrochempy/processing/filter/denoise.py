@@ -102,13 +102,90 @@ def _despike_neighbors(dataset, delta, dim):
         excess = current - np.ma.maximum(previous, following)
         spikes = (excess > delta * noise).filled(False)
         data[1:-1][spikes] = local_mean.data[spikes]
-        new.data = np.moveaxis(data, 0, axis)
+        new._dtype = data.dtype
+        new._data = np.moveaxis(data, 0, axis)
 
     new.history = f"Removed spikes using neighbors (dim={name}, delta={delta})"
     return new
 
 
-def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
+def _despike_trace(X, size, delta, method):
+    if X.size < 2 or np.all(X[0] == X):
+        return
+    if method == "katsumoto" and X.size < size:
+        return
+    eps = np.finfo(float).eps
+    s = int((size - 1) / 2)
+    if method == "katsumoto":
+        A = savgol_filter(X, window_length=size, polyorder=2)
+
+        diff = X - A
+        std = delta * np.std(diff)
+
+        select = abs(diff) >= std
+        select = np.logical_or(select, np.roll(select, 1))
+        select = np.logical_or(select, np.roll(select, -1))
+
+        w = np.ones_like(X)
+        w[select] = 0
+
+        res = np.zeros_like(X)
+        W = np.zeros_like(X) + eps
+        r = range(-s, s + 1)
+        for j in r:
+            vj = np.roll(X, j)
+            wj = np.roll(w, j)
+            res += vj * wj
+            W += wj
+
+        A = res / W
+
+        X[select] -= (X - A)[select]
+
+    elif method == "whitaker":
+        DX = np.zeros_like(X)
+        DX[1:] = X[1:] - X[:-1]
+
+        m = np.median(DX)
+        M = np.median(np.abs(DX - m))
+        Z = (DX - m) / M if M > 0 else np.where(m == DX, 0.0, np.inf)
+        Z[0] = Z[-1] = delta + 1
+
+        select = abs(Z) >= delta
+
+        A = np.zeros_like(X)
+        for i in [j for j, x in enumerate(select) if x]:
+            indexes = np.arange(max(0, i - s), min(len(X), i + s))
+            indexes = [index for index in indexes if not select[index]]
+            if indexes != []:
+                A[i] = np.mean(X[indexes])
+            else:
+                A[i] = X[i]
+
+        X[select] -= (X - A)[select]
+
+
+def _despike_output(source, corrected, return_mask):
+    if not return_mask:
+        return corrected
+    valid = ~np.broadcast_to(source.mask, source.shape) & np.isfinite(source.data)
+    changed = valid & (source.data != corrected.data)
+    diagnostic = source.__class__(
+        changed,
+        dtype=np.bool_,
+        dims=source.dims,
+        coordset=source.coordset.copy() if source.coordset is not None else None,
+        mask=source.mask,
+        title="Points changed by despike",
+        name=f"{source.name}_despike_changes",
+    )
+    diagnostic.history = (
+        f"Correction diagnostic: {corrected.history_entries[-1]['message']}"
+    )
+    return corrected, diagnostic
+
+
+def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1, return_mask=False):
     """
     Remove spikes from the data.
 
@@ -151,8 +228,8 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
 
     Parameters
     ----------
-    dataset : `NDDataset` or a ndarray-like object
-        Input object.
+    dataset : `NDDataset`
+        Input dataset, left unchanged.
     size : int, optional, default: 9
         Size of the moving average window ('katsumoto' method) or the size of the window around the spike to estimate
         the intensities ('whitaker' method).
@@ -161,13 +238,35 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
     method : str, optional, default: 'katsumoto'
         The method to use. Can be 'katsumoto', 'whitaker', or 'neighbors'.
     dim : str or int, optional, default: -1
-        Dimension used by 'neighbors'. Each replacement uses exactly two
-        immediate neighbors, independently of ``size``.
+        Dimension used by all methods. Other dimensions are processed independently.
+        'neighbors' uses exactly two immediate neighbors, independently of ``size``.
+    return_mask : bool, optional, default: False
+        Return ``(corrected, changed)`` instead of only the corrected dataset.
+        ``changed`` is a dimensionless boolean NDDataset on the original coordinates,
+        True exactly where a finite, unmasked value was modified. It preserves the
+        input mask; masked and non-finite values have False underlying flags.
+        A changed point is not proof of a cosmic ray: genuine bands can be modified.
 
     Returns
     -------
-    `NDdataset`
-        The despike dataset
+    corrected : NDDataset
+        Corrected data, with original coordinates, units, mask and metadata.
+    changed : NDDataset, optional
+        Boolean correction diagnostic, only when ``return_mask=True``.
+
+    Notes
+    -----
+    Masked and non-finite values remain unchanged. Katsumoto and Whitaker operate
+    separately on contiguous valid runs; Katsumoto skips runs shorter than ``size``.
+    Constant runs remain unchanged. Integer inputs allow fractional replacements
+    only when every source value is exactly representable as float64; otherwise
+    a ValueError is raised before processing, including for masked values.
+    The existing Katsumoto circular window and Whitaker endpoint candidacy are
+    retained within each run; inspect corrections near boundaries and gaps.
+    For Katsumoto, size=3 leaves only rounding residuals after the quadratic fit
+    and can yield unstable selection; use a larger window and inspect the result.
+    Narrow spectral bands can be mistaken for spikes, especially with low thresholds
+    or little noise. Compare corrected spectra and band areas with the original.
 
     """
     if method not in ("katsumoto", "whitaker", "neighbors"):
@@ -176,82 +275,41 @@ def despike(dataset, size=9, delta=2, method="katsumoto", *, dim=-1):
             "Expected one of: katsumoto, whitaker, neighbors."
         )
 
+    if not np.isfinite(delta) or delta <= 0:
+        raise ValueError("delta must be positive and finite.")
+    if np.iscomplexobj(dataset.data):
+        raise ValueError("Despiking requires real data.")
+    if np.issubdtype(dataset.data.dtype, np.integer) and any(
+        int(value) != int(float(value)) for value in dataset.data.flat
+    ):
+        raise ValueError("Integer data must be exactly representable as float64.")
     if method == "neighbors":
-        return _despike_neighbors(dataset, delta, dim)
+        return _despike_output(
+            dataset, _despike_neighbors(dataset, delta, dim), return_mask
+        )
+    if not isinstance(size, (int, np.integer)) or isinstance(size, (bool, np.bool_)):
+        raise ValueError("size must be a positive integer.")
+    if size < (3 if method == "katsumoto" else 1):
+        raise ValueError(
+            "size must be at least 3 for katsumoto and positive for whitaker."
+        )
 
     new = dataset.copy()
-
-    # machine epsilon
-    eps = np.finfo(float).eps
-
-    s = int((size - 1) / 2)
-
-    for k, X in enumerate(new.data):
-        X = X.squeeze()
-
-        if method == "katsumoto":
-            # 1) first step : savgol filter
-            A = savgol_filter(X, window_length=size, polyorder=2)
-
-            # 2 and 3) second and third step : detect spike and replace spkike by the moving
-            # average and the new data are smoothed again
-            diff = X - A
-            std = delta * np.std(diff)
-
-            # spike should have a large variation with respect to the std of the difference
-            select = abs(diff) >= std
-            select = np.logical_or(select, np.roll(select, 1))
-            select = np.logical_or(select, np.roll(select, -1))
-
-            # compute weights
-            w = np.ones_like(X)
-            w[select] = 0
-
-            # now we must calculate the weighted average, but for efficiency we will compute it
-            # only around where spike peaks are, the other part should be unchanged.
-
-            res = np.zeros_like(X)
-            W = np.zeros_like(X) + eps  # to avoid division by zero
-            r = range(-s, s + 1)
-            for j in r:
-                vj = np.roll(X, j)
-                wj = np.roll(w, j)
-                res += vj * wj
-                W += wj
-
-            A = res / W
-
-            # 4) compare with original to remove spike peaks
-            X[select] -= (X - A)[select]
-
-        elif method == "whitaker":
-            # 1) detrended difference series
-            DX = np.zeros_like(X)
-            DX[1:] = X[1:] - X[:-1]
-
-            # zscore
-            m = np.median(DX)
-            M = np.median(np.abs(DX - m))
-            Z = (DX - m) / M
-            Z[0] = Z[-1] = delta + 1
-
-            # select spikes
-            select = abs(Z) >= delta
-
-            # replace spikes by average
-            A = np.zeros_like(X)
-            for i in [j for j, x in enumerate(select) if x]:
-                indexes = np.arange(max(0, i - s), min(len(X), i + s))
-                indexes = [index for index in indexes if not select[index]]
-                if indexes != []:
-                    A[i] = np.mean(X[indexes])
-                else:
-                    A[i] = X[i]
-
-            # makes change in X
-            X[select] -= (X - A)[select]
-
-        new.data[k] = X
-    new.history = f"Removed spikes using {method} (size={size}, delta={delta})"
-
-    return new
+    axis, name = dataset.get_axis(dim)
+    dtype = new.data.dtype
+    if not np.issubdtype(dtype, np.floating):
+        dtype = np.dtype(float)
+    data = np.moveaxis(dataset.data, axis, -1).astype(dtype, copy=True)
+    mask = np.moveaxis(np.broadcast_to(dataset.mask, dataset.shape), axis, -1)
+    for index in np.ndindex(data.shape[:-1]):
+        trace = data[index]
+        valid = ~mask[index] & np.isfinite(trace)
+        edges = np.flatnonzero(np.diff(np.r_[False, valid, False]))
+        for begin, end in edges.reshape(-1, 2):
+            _despike_trace(trace[begin:end], size, delta, method)
+    new._dtype = data.dtype
+    new._data = np.moveaxis(data, -1, axis)
+    new.history = (
+        f"Removed spikes using {method} (size={size}, delta={delta}, dim={name})"
+    )
+    return _despike_output(dataset, new, return_mask)
