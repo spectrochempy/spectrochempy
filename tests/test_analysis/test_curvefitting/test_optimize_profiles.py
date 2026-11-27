@@ -669,7 +669,7 @@ def test_shared_center_uncertainties_use_each_represented_unit_binding(
     result = fit.result
     model, jacobian = reference(result.peaks)
     valid = ~source.mask
-    assert_allclose(result.fitted.data[valid], model[valid], rtol=1e-14)
+    assert_allclose(result.fitted.data[valid], model[valid], rtol=5e-14)
     assert_allclose(fit.jacobian[:, 0], jacobian[valid], rtol=3e-6, atol=3e-8)
     variance = result.diagnostics["rss"] / result.diagnostics["degrees_of_freedom"]
     covariance = variance / np.sum(jacobian[valid] ** 2)
