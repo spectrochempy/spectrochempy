@@ -50,6 +50,8 @@ def test_notebook_kernel_uses_bundled_data(tmp_path, monkeypatch):
     from nbconvert.preprocessors import ExecutePreprocessor
     from sphinx.config import eval_config_file
 
+    for key in ("SCPY_CORN_DATA", "SCPY_CORN_ZIP", "SCPY_CORN_SYNTHETIC"):
+        monkeypatch.delenv(key, raising=False)
     monkeypatch.delenv("CONDA_PREFIX", raising=False)
     monkeypatch.setenv("SPHINX_PATTERN", "index")
     sources = tmp_path / "sources"

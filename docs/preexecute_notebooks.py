@@ -184,6 +184,7 @@ def verify():
 
 
 def main():
+    corn_data.require_real_data()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("operation", choices=("prepare", "execute", "verify"))
     parser.add_argument("notebook", nargs="?")

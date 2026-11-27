@@ -23,6 +23,29 @@ NOTICE_RST = (
 )
 
 
+def require_real_data():
+    """Prevent synthetic smoke-test inputs from entering documentation builds."""
+    marker = b"SPECTROCHEMPY SYNTHETIC CORN FIXTURE"
+    synthetic = os.environ.get("SCPY_CORN_SYNTHETIC") == "1"
+    raw = os.environ.get("SCPY_CORN_DATA")
+    if raw and Path(raw).is_file():
+        with Path(raw).open("rb") as stream:
+            synthetic |= marker in stream.read(116)
+    archive = os.environ.get("SCPY_CORN_ZIP")
+    if archive and Path(archive).is_file():
+        from zipfile import ZipFile
+
+        with ZipFile(archive) as bundle:
+            for name in bundle.namelist():
+                if name.lower().endswith(".mat"):
+                    with bundle.open(name) as stream:
+                        synthetic |= marker in stream.read(116)
+    if synthetic:
+        raise RuntimeError(
+            "Synthetic Corn is for tests only; documentation requires real Corn"
+        )
+
+
 def unavailable():
     missing = os.environ.get("SCPY_DOCS_CORN_UNAVAILABLE") == "1"
     if missing and (
