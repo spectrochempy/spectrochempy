@@ -86,6 +86,11 @@ Callers must handle a single ``NDDataset`` or a ``ScpObjectList``. Observation
 coordinates may vary, and compatible intensity-unit conversion and mask assembly
 retain their existing behavior. ``merge=False`` keeps the inputs separate.
 
+The observation-coordinate sort is applied independently to each assembled
+group. Set ``sortbydate=False`` to preserve the input observation order within
+every group, including groups separated by geometry or known identity. Sorting
+keeps the data, masks and observation labels associated.
+
 Recognized measurement identities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
