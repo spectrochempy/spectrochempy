@@ -1,6 +1,7 @@
 """Shared copied context and physical inference helpers for centered ND fits."""
 
 from copy import deepcopy
+from fractions import Fraction
 
 import numpy as np
 
@@ -95,3 +96,37 @@ def _scaled_physical_jacobian(matrix, scales, intensity):
             ),
             dtype=float,
         )
+
+
+def _validate_center_anchor_offsets(coordinates, index, width, *, kind):
+    """
+    Require finite anchor offsets within eight float64 epsilons of axis width.
+
+    Exact represented-scalar arithmetic detects loss even in longdouble
+    subtraction itself. The width is physical and preconverted, independent
+    of numerical conditioning; shared native centers use their narrowest
+    native axis width in the canonical parameter unit.
+    """
+    record = coordinates.layout.free_parameters[index]
+    origin = coordinates.origins[index]
+    start = np.asarray(coordinates.initial, dtype=float)
+    tolerance = Fraction(*np.longdouble(width).as_integer_ratio()) / 2**49
+    for encoded, value in zip(
+        (coordinates.initial[index], *coordinates.bounds[index]),
+        (record.value, *record.bounds),
+        strict=True,
+    ):
+        if value is None or not np.isfinite(value):
+            continue
+        probe = start.copy()
+        probe[index] = encoded
+        decoded = np.longdouble(coordinates.to_offsets(probe)[index])
+        lost = (
+            Fraction(*decoded.as_integer_ratio())
+            + Fraction(*origin.as_integer_ratio())
+            - Fraction(*np.longdouble(value).as_integer_ratio())
+        )
+        if abs(lost) > tolerance:
+            raise ValueError(
+                f"{kind} center origin loses anchor offsets relative to the axis width"
+            )

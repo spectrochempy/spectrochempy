@@ -16,6 +16,9 @@ from spectrochempy.analysis.curvefitting._coordinate_context import (
 from spectrochempy.analysis.curvefitting._coordinate_context import (
     _scaled_physical_jacobian as _profile_scaled_jacobian,
 )
+from spectrochempy.analysis.curvefitting._coordinate_context import (
+    _validate_center_anchor_offsets,
+)
 from spectrochempy.analysis.curvefitting._fit_backend import (
     _least_squares as least_squares,
 )
@@ -241,7 +244,10 @@ def fit_profiles(
     Fit separable profiles with an opt-in private coordinate adapter.
 
     Explicit coordinates require the complete physical layout and linear
-    origins for free native centers. Their conditioning owns x_scale=1;
+    origins for free native centers. Initial and finite-bound offsets must
+    remain within eight float64 epsilons of the narrowest initial native width in
+    the canonical parameter unit, independently of numerical conditioning.
+    Their conditioning owns x_scale=1;
     TRF, three-point differences and existing stopping defaults remain.
     Analytic providers retain physical columns, but cannot describe virtual
     sub-ULP center motion through their current signature, so the centered
@@ -349,6 +355,10 @@ def fit_profiles(
             if not centered and origin is not None:
                 raise ValueError(
                     "Only free native centers support explicit origins here"
+                )
+            if centered:
+                _validate_center_anchor_offsets(
+                    parameter_coordinates, index, group["center_scale"], kind="Native"
                 )
         if residual_jacobian is not None and any("center_scale" in g for g in groups):
             raise ValueError(
