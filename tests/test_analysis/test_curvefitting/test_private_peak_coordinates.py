@@ -328,9 +328,10 @@ def test_insufficient_degrees_of_freedom_precedes_rank_exclusion():
     }
     source = scp.simulate_peaks(template, [plain])
     source.mask = np.array([[True, False], [False, False]])
+    source.data[0, 1] += 0.001
     specs = [
         {
-            "height": {"value": 1, "bounds": (0.1, 3)},
+            "height": {"value": 0.9, "bounds": (0.1, 3)},
             "axes": {
                 "x": {
                     "model": "gaussian",
@@ -346,6 +347,8 @@ def test_insufficient_degrees_of_freedom_precedes_rank_exclusion():
     space = _CenteredParameterCoordinates(layout, (None, -1, None))
     fit, solution = private_fit(source, specs, space)
     assert solution.success and fit["diagnostics"]["degrees_of_freedom"] == 0
+    assert fit["diagnostics"]["rss"] > 0
+    assert np.linalg.matrix_rank(fit["jacobian"]) == 2
     assert fit["covariance"] is None
     assert fit["diagnostics"]["covariance_reason"] == "insufficient_degrees_of_freedom"
 
