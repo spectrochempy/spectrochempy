@@ -20,7 +20,9 @@ def fit_peak_coordinates(dataset, specs, max_calls, parameter_coordinates):
     """
     Fit standard 2D/3D peaks with copied, preconverted coordinate declarations.
 
-    Free centers require explicit linear origins; other free parameters must
+    Free centers require explicit linear origins retaining initial and finite
+    bound offsets to eight float64 epsilons relative to the initial axis width.
+    Other free parameters must
     remain uncentered. Log references are positive, preconverted magnitudes.
     The internal analytic Jacobian differentiates virtual centered motion.
     Nonfinite solver Jacobians raise rather than selecting an unqualified
@@ -41,14 +43,31 @@ def fit_peak_coordinates(dataset, specs, max_calls, parameter_coordinates):
     space = _bind_centered_coordinates(
         layout, parameter_coordinates, kind="historical peak"
     )
-    for (_, key), origin, transform in zip(
-        free, space.origins, space.transforms, strict=True
+    start = np.asarray(space.initial, dtype=float)
+    for index, ((target, key), origin, transform) in enumerate(
+        zip(free, space.origins, space.transforms, strict=True)
     ):
         if key == "center":
             if origin is None or transform != "lin":
                 raise ValueError(
                     "Free historical centers require explicit linear origins"
                 )
+            record = layout.free_parameters[index]
+            for encoded, value in zip(
+                (space.initial[index], *space.bounds[index]),
+                (record.value, *record.bounds),
+                strict=True,
+            ):
+                if value is None or not np.isfinite(value):
+                    continue
+                probe = start.copy()
+                probe[index] = encoded
+                decoded = np.longdouble(space.to_offsets(probe)[index])
+                exact = np.longdouble(value) - origin
+                if abs((decoded - exact) / target["width"]) > 8 * np.finfo(float).eps:
+                    raise ValueError(
+                        "Historical center origin loses anchor offsets relative to the axis width"
+                    )
         elif origin is not None:
             raise ValueError(
                 "Only free historical centers support explicit origins here"
@@ -107,7 +126,6 @@ def fit_peak_coordinates(dataset, specs, max_calls, parameter_coordinates):
             peaks, coordinates, center_origins
         )
         bindings = [(targets[id(target)], key) for target, key in free]
-        start = np.asarray(space.initial, dtype=float)
         initial_offsets = space.to_offsets(start)
         support = np.nonzero(valid)
         columns = {

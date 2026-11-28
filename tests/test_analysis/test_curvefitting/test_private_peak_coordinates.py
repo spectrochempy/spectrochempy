@@ -425,3 +425,32 @@ def test_affine_log_units_and_log_center_are_rejected():
     )
     with pytest.raises(ValueError, match="explicit linear origins"):
         private_fit(source, specs, space)
+
+
+@pytest.mark.parametrize("initial, low", [("0.1", "-4"), ("0", "-4.1")])
+@pytest.mark.parametrize("normalization", [0.25, 1, 8])
+def test_far_center_origin_cannot_lose_initial_or_finite_bound_anchors(
+    initial, low, normalization, monkeypatch
+):
+    source, specs, *_ = problem()
+    axis = specs[0]["axes"]["x"]
+    axis["center"] = {
+        "value": np.longdouble(initial),
+        "bounds": (np.longdouble(low), 4),
+    }
+    _, units = backend._grid(source)
+    _, free, layout = backend._prepare_peak_layout(specs, source.units, units)
+    space = _CenteredParameterCoordinates(
+        replace(layout, normalization_scales=(normalization,) * len(free)),
+        tuple(2**53 if key == "center" else None for _, key in free),
+    )
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Unsuitable origin must be rejected before evaluating or fitting")
+
+    monkeypatch.setattr(backend, "least_squares", forbidden)
+    monkeypatch.setattr(backend, "_separable_jacobian", forbidden)
+    with pytest.raises(
+        ValueError, match="origin loses anchor offsets relative to the axis width"
+    ):
+        private_fit(source, specs, space)
