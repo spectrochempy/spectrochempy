@@ -734,12 +734,7 @@ def _read_spg(*args, **kwargs):
         xtitles.append(info["xtitle"])
         units.append(info["units"])
         titles.append(info["title"])
-        native_identities.append(
-            {
-                "OMNIC spectral axis": {info["xtitle"]} - {"xaxis"},
-                "signal quantities": {info["title"]} - {"intensity"},
-            }
-        )
+        native_identities.append(_omnic_native_identity(info))
 
     # Extract positions of intensity and spectrum metadata blocks before
     # checking consistency because they are needed by both return paths.
@@ -1096,6 +1091,14 @@ def _attach_spa_metadata(dataset, parsed):
         dataset.meta.low_pass_filter = float(parameters["low_pass"])
 
 
+def _omnic_native_identity(info):
+    """Retain recognized native declarations for this import session only."""
+    return {
+        "OMNIC spectral axis": {info["xtitle"]} - {"xaxis"},
+        "signal quantities": {info["title"]} - {"intensity"},
+    }
+
+
 def _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg):
     """Construct and finalize one SPA Dataset from parsed native state."""
     payload = _select_spa_payload(parsed, return_ifg)
@@ -1110,6 +1113,7 @@ def _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg):
         )
         dataset.units = info["units"]
         dataset.title = info["title"]
+        dataset._import_measurement_identity = _omnic_native_identity(info)
     else:
         suffix = "sample" if return_ifg == "sample" else "background"
         default_description = (
@@ -1118,6 +1122,10 @@ def _finalize_spa_dataset(dataset, filename, kwargs, parsed, return_ifg):
         )
         dataset.units = "V"
         dataset.title = "detector signal"
+        dataset._import_measurement_identity = {
+            "OMNIC spectral axis": {"data points"},
+            "signal quantities": {"detector signal"},
+        }
     dataset.set_coordset(
         y=_build_spa_y_coord(parsed, filename, return_ifg),
         x=_build_spa_x_coord(info, payload, return_ifg),
@@ -1203,7 +1211,10 @@ def _read_srs(*args, **kwargs):
         )
 
     # in this case, filename is actually a byte content
-    fid = io.BytesIO(filename) if frombytes else open(filename, "rb")  # noqa: SIM115
+    if frombytes:
+        fid = io.BytesIO(filename)
+    else:
+        fid, kwargs = _openfid(filename, **kwargs)
     try:
         # read the file and determine whether it is a rapidscan or a high speed real time
         is_rapidscan, is_highspeed, is_tg = False, False, False
@@ -1550,6 +1561,7 @@ def _read_srs(*args, **kwargs):
 
         dataset.units = info["units"]
         dataset.title = info["title"]
+        dataset._import_measurement_identity = _omnic_native_identity(info)
         dataset.origin = "omnic"
         dataset.filename = filename
 
