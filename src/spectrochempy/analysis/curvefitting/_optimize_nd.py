@@ -322,8 +322,26 @@ def _bounded_jacobian(vector, residuals, bounds):
     return jacobian
 
 
-def fit_separable_peaks(dataset, specs, max_calls, shared_parameters=None):
-    """Fit and reconstruct on the input grid with a fixed observation support."""
+def fit_separable_peaks(
+    dataset, specs, max_calls, shared_parameters=None, *, parameter_coordinates=None
+):
+    """
+    Fit on fixed support; explicit private coordinates use qualified 2D/3D peaks.
+
+    Public entries retain the historical route. The private coordinate hook
+    accepts standard local peaks only; sharing/extended profiles have their
+    separately qualified backend, and numerical/fallback routes are not enabled.
+    """
+    if parameter_coordinates is not None:
+        if shared_parameters is not None or extended_profiles(specs):
+            raise ValueError(
+                "Historical peak coordinates cannot be combined with shared or extended profiles"
+            )
+        from spectrochempy.analysis.curvefitting._optimize_peak_coordinates import (
+            fit_peak_coordinates,
+        )
+
+        return fit_peak_coordinates(dataset, specs, max_calls, parameter_coordinates)
     if shared_parameters is not None or extended_profiles(specs):
         from spectrochempy.analysis.curvefitting._optimize_profiles import (  # noqa: PLC0415
             fit_profiles,

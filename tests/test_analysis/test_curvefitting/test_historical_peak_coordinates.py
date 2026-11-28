@@ -333,11 +333,7 @@ def test_centered_analytic_chain_and_represented_physical_covariance(
         )
 
 
-@pytest.mark.parametrize("normalization", [1e-5, 1, 1e5])
-@pytest.mark.parametrize("intensity", [1, 1000])
-def test_log_heights_are_independent_and_match_correlated_linear_inference(
-    normalization, intensity
-):
+def height_problem(intensity=1):
     x = scp.Coord.linspace(-4, 4, 25, units="Hz", rounding=False)[::-1]
     y = scp.Coord.linspace(-1, 1, 9, units="s", rounding=False)
     centers, widths = [-0.7, 0.8], [2.3, 3]
@@ -366,6 +362,15 @@ def test_log_heights_are_independent_and_match_correlated_linear_inference(
         }
         for c, w in zip(centers, widths, strict=True)
     ]
+    return source, specs, columns
+
+
+@pytest.mark.parametrize("normalization", [1e-5, 1, 1e5])
+@pytest.mark.parametrize("intensity", [1, 1000])
+def test_log_heights_are_independent_and_match_correlated_linear_inference(
+    normalization, intensity
+):
+    source, specs, columns = height_problem(intensity)
     saved = deepcopy(specs)
     fit = qualify(source, specs, normalization, height_log=True)
     assert fit["solution"].success and fit["reason"] is None

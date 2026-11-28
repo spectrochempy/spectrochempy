@@ -9,6 +9,7 @@
 __all__ = [
     "_callable_spec",
     "_centered_coordinates",
+    "_coordinate_context",
     "_fit_backend",
     "_model_evaluation",
     "_models",
@@ -16,6 +17,7 @@ __all__ = [
     "_optimize_curves",
     "_optimize_model",
     "_optimize_nd",
+    "_optimize_peak_coordinates",
     "_optimize_profiles",
     "_parameter_coordinates",
     "_parameter_plan",
@@ -33,6 +35,7 @@ __all__ = [
 
 from . import _callable_spec
 from . import _centered_coordinates
+from . import _coordinate_context
 from . import _fit_backend
 from . import _model_evaluation
 from . import _models
@@ -40,6 +43,7 @@ from . import _modelspec
 from . import _optimize_curves
 from . import _optimize_model
 from . import _optimize_nd
+from . import _optimize_peak_coordinates
 from . import _optimize_profiles
 from . import _parameter_coordinates
 from . import _parameter_plan
