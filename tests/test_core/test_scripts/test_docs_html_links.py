@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 from pathlib import Path
 
 import pytest
@@ -75,15 +76,28 @@ def test_empty_build_is_not_a_success(tmp_path):
         ("devguide/issues.rst", {"contributing-bugs-report"}),
     ],
 )
-def test_document_heading_anchors_remain_rendered(source, anchors):
+@pytest.mark.parametrize("include_gallery", [False, True])
+def test_document_heading_anchors_remain_rendered(source, anchors, include_gallery):
     docutils = pytest.importorskip("docutils.core")
     jinja2 = pytest.importorskip("jinja2")
     text = (SCRIPT.parents[1] / "sources" / source).read_text(encoding="utf-8")
-    if source.endswith(".tmpl"):
-        text = jinja2.Template(text).render(single=False, include_api=False)
-    text = text.split(".. toctree::", 1)[0]
-    parts = docutils.publish_parts(
-        text, writer_name="html5", settings_overrides={"doctitle_xform": False}
+    text = jinja2.Template(text, undefined=jinja2.StrictUndefined).render(
+        single=False,
+        include_api=False,
+        include_gallery=include_gallery,
+        current_whatsnew_doc="whatsnew/latest",
     )
+    text = text.split(".. toctree::", 1)[0]
+    diagnostics = io.StringIO()
+    parts = docutils.publish_parts(
+        text,
+        writer_name="html5",
+        settings_overrides={
+            "doctitle_xform": False,
+            "halt_level": 2,
+            "warning_stream": diagnostics,
+        },
+    )
+    assert diagnostics.getvalue() == ""
     page = checker.Page(parts["body"])
     assert anchors <= page.anchors

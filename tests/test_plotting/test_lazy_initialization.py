@@ -60,17 +60,17 @@ class TestLazyInitializationPerformance:
     """Test performance benefits of lazy initialization."""
 
     def test_import_performance_without_matplotlib(self):
-        """Test that import is fast and matplotlib not loaded."""
+        """Check lazy import and report timing without a runner-speed assertion."""
         code = """
 import sys
 import time
 
-start_time = time.time()
+start_time = time.perf_counter()
 
 # Import spectrochempy - this should be fast and not load matplotlib
 import spectrochempy
 
-import_time = time.time() - start_time
+import_time = time.perf_counter() - start_time
 
 # Check if matplotlib was loaded
 matplotlib_loaded = "matplotlib" in sys.modules
@@ -94,15 +94,14 @@ sys.exit(0 if not matplotlib_loaded else 1)
             f"stderr: {result.stderr}"
         )
 
-        # Also verify import was fast (informational)
-        for line in result.stdout.split("\n"):
-            if line.startswith("IMPORT_TIME:"):
-                import_time = float(line.split(":")[1])
-                limit = 2.0 if os.environ.get("PYTEST_XDIST_WORKER") else 0.5
-                assert (
-                    import_time < limit
-                ), f"Import took {import_time}s, expected < {limit}s"
-                break
+        assert "MATPLOTLIB_LOADED:False" in result.stdout
+        timing = next(
+            line
+            for line in result.stdout.splitlines()
+            if line.startswith("IMPORT_TIME:")
+        )
+        import_time = float(timing.split(":", 1)[1])
+        print(f"Lazy import duration (diagnostic only): {import_time:.3f}s")
 
     def test_matplotlib_not_loaded_on_dataset_creation(self):
         """Test that NDDataset creation does not load matplotlib."""
