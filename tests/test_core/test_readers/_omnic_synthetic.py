@@ -48,6 +48,7 @@ def synthetic_spa_with_optical_velocity(
     canonical=None,
     *,
     xunits=1,
+    yunits=17,
     reference_frequency=15798.0,
     raman_frequency=0.0,
     timestamp=0,
@@ -96,7 +97,7 @@ def synthetic_spa_with_optical_velocity(
     header = 400
     struct.pack_into("<I", content, header + 4, 2)
     content[header + 8] = xunits
-    content[header + 12] = 17
+    content[header + 12] = yunits
     struct.pack_into("<ff", content, header + 16, 4000.0, 3999.0)
     struct.pack_into("<I", content, header + 28, scan_points)
     struct.pack_into("<I", content, header + 32, peak_position)
@@ -118,4 +119,32 @@ def synthetic_spa_with_optical_velocity(
         struct.pack_into("<f", content, 700 + 44, sample_gain)
         struct.pack_into("<f", content, 700 + 48, canonical)
     struct.pack_into("<ff", content, payload_position, 1.0, 2.0)
+    return bytes(content)
+
+
+def synthetic_srs(*, xcode=1, ycode=17, background_xcode=1, background_ycode=17):
+    """Build a minimal TG-style SRS with independent series/background headers."""
+    content = bytearray(4096)
+    content[:18] = b"Spectral Exte File"
+    marker = b"\x02\x00\x00\x00\x18\x00\x00\x00\x00\x00"
+    for header, xunit, yunit in (
+        (400, xcode, ycode),
+        (1800, background_xcode, background_ycode),
+    ):
+        struct.pack_into("<I", content, header + 4, 2)
+        content[header + 8] = xunit
+        content[header + 12] = yunit
+        struct.pack_into("<ff", content, header + 16, 3999, 4000)
+        struct.pack_into("<ff", content, header + 80, 15798, 1)
+        struct.pack_into("<f", content, header + 188, 8.8617)
+        content[header + 152 : header + 152 + len(marker)] = marker
+    struct.pack_into("<ff", content, 400 + 1002, 0, 2)
+    struct.pack_into("<I", content, 400 + 1026, 3)
+    struct.pack_into("<ff", content, 1800 + 208, 7, 8)
+    content[3200 : 3200 + len(marker)] = marker
+    for index in range(3):
+        position = 3260 + index * 108
+        name = f"observation {index}".encode()
+        content[position : position + len(name)] = name
+        struct.pack_into("<ff", content, position + 84, index + 1, index + 2)
     return bytes(content)

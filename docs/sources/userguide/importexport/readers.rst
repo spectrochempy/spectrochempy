@@ -144,9 +144,22 @@ compatible subsets may still assemble. Add ``merge=False`` to keep every member
 separate. Member timestamps and labels remain associated with their spectra,
 including when sorting by date.
 
-These SPG declarations are retained during one import, including nested ZIP or
-directory reads. Persistence after save/reload and equivalent SPA/SRS checks
-remain separate work.
+Native SPA and SRS declarations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+SPA and SRS imports pass the same recognized native axis and signal definitions
+to automatic assembly. Known contradictions keep separate files or containers
+apart, including combinations of SPA, SPG and SRS and reads through nested ZIP
+archives or directories. Equal units alone do not establish a matching native
+signal definition. Unknown declarations remain unknown.
+
+For SRS backgrounds, the constraints come from the background's own header.
+Associated SPA sample/background interferograms use their detector-signal and
+data-points semantics, rather than inheriting the primary spectrum's declarations.
+These checks do not infer a spectroscopy modality from a free-text title.
+
+The native OMNIC constraints are retained during one import. Persistence after
+save/reload and complete source provenance remain separate work.
 
 ZIP archives and multi-dataset members
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

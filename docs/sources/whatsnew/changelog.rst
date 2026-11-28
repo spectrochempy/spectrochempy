@@ -101,6 +101,13 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Automatic OMNIC import assembly retains recognized native SPA/SRS axis and
+  signal definitions, keeping known contradictions separate across containers
+  and nested reads. SRS uses its selected series/background header; associated
+  SPA interferograms retain their own signal semantics. SRS binary-content
+  inputs, including ZIP members, use the shared reader opening path
+  (:issue:`1795`, :pr:`2032`).
+
 - OMNIC SPG imports reject contradictory recognized native axis and signal
   definitions even when their units match. Opt-in member separation preserves
   these constraints through import assembly, including nested ZIP archives.
