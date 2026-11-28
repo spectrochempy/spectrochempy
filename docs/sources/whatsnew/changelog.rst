@@ -103,7 +103,7 @@ Bug Fixes
 
 - ``sortbydate=False`` now preserves observation order in every assembled
   import group. Previously, the option was consumed by the first merged group,
-  so later groups could still be sorted (:issue:`1795`).
+  so later groups could still be sorted (:issue:`1795`, :pr:`2033`).
 
 - Automatic OMNIC import assembly retains recognized native SPA/SRS axis and
   signal definitions, keeping known contradictions separate across containers
