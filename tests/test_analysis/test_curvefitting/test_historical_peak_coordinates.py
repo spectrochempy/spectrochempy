@@ -26,6 +26,14 @@ def fixed(value):
     return {"value": value, "fixed": True}
 
 
+def assert_covariance(actual, expected, *, rtol=2e-11):
+    """Compare in standard-deviation units, including nearly zero cross terms."""
+    std = np.sqrt(np.diag(expected))
+    assert np.isfinite(std).all() and (std > 0).all()
+    scale = std[:, None] * std
+    np.testing.assert_allclose(actual / scale, expected / scale, rtol=rtol, atol=2e-13)
+
+
 def qualify(source, specs, normalization=1, *, height_log=False):
     assert source.ndim in (2, 3)
     coordinates, units = backend._grid(source)
@@ -273,7 +281,7 @@ def test_centered_analytic_chain_and_represented_physical_covariance(
     np.testing.assert_allclose(fit["jacobian"], expected, rtol=3e-12, atol=1e-13)
     rss = np.sum((source.data[valid] - fitted[valid]) ** 2)
     covariance = np.linalg.inv(expected.T @ expected) * rss / (valid.sum() - 3)
-    np.testing.assert_allclose(fit["covariance"], covariance, rtol=2e-11, atol=0)
+    assert_covariance(fit["covariance"], covariance)
     assert abs(covariance[0, 2]) > 0.1 * np.sqrt(covariance[0, 0] * covariance[2, 2])
     vh, vc, vw = fit["virtual"]
     _, virtual_expected = reference(float(vh), float(vc / hz), float(vw / hz))
@@ -302,7 +310,7 @@ def test_centered_analytic_chain_and_represented_physical_covariance(
         * (legacy_residual @ legacy_residual)
         / (valid.sum() - 3)
     )
-    np.testing.assert_allclose(result.covariance, legacy_covariance, rtol=2e-11, atol=0)
+    assert_covariance(result.covariance, legacy_covariance)
     if not origin:
         oracle = least_squares(
             lambda p: (source.data - reference(*p)[0])[valid],
@@ -373,7 +381,7 @@ def test_log_heights_are_independent_and_match_correlated_linear_inference(
     np.testing.assert_allclose(fit["values"], expected, rtol=1e-7)
     np.testing.assert_allclose(fit["jacobian"], -design, rtol=2e-13, atol=1e-14)
     np.testing.assert_allclose(fit["virtual_jacobian"], -design, rtol=2e-13, atol=1e-14)
-    np.testing.assert_allclose(fit["covariance"], covariance, rtol=2e-7)
+    assert_covariance(fit["covariance"], covariance, rtol=2e-7)
     first = fit["fitted"].copy()
     second_source = source * 0.8
     second = qualify(second_source, specs, normalization, height_log=True)
@@ -437,7 +445,7 @@ def test_negative_height_remains_linear_with_log_width(ndim, model):
         * (residual @ residual)
         / (residual.size - 3)
     )
-    np.testing.assert_allclose(fit["covariance"], covariance, rtol=2e-11)
+    assert_covariance(fit["covariance"], covariance)
 
 
 def test_exact_integer_context_retains_platform_precision_boundary():
