@@ -395,6 +395,11 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- TEST: Make lazy-import timing diagnostic on shared CI runners while retaining
+  the Matplotlib loading guard. Capture expected Conda CLI errors, check the
+  intended rejection reasons, and render gallery templates before strict
+  Docutils heading checks (:pr:`2035`).
+
 - DOC: Document defaults that can surprise where they apply: coordinate
   rounding (``Coord``, ``interpolate``), contour start level and axis reversal
   (``plot``), ``Baseline`` range limits, parameter order of ``Optimize``

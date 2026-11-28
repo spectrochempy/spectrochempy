@@ -846,7 +846,7 @@ class TestValidateRelease:
             == 0
         )
 
-    def test_pyproject_mismatch_exit_one(self, tmp_path):
+    def test_pyproject_mismatch_exit_one(self, tmp_path, capsys):
         module = load_module()
         plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
         assert (
@@ -855,8 +855,12 @@ class TestValidateRelease:
             )
             == 1
         )
+        assert (
+            "pyproject.toml version (0.1.11) != tag version (0.1.8)"
+            in capsys.readouterr().err
+        )
 
-    def test_recipe_mismatch_exit_one(self, tmp_path):
+    def test_recipe_mismatch_exit_one(self, tmp_path, capsys):
         module = load_module()
         plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
         (plugin_dir / "recipe.yaml").write_text(
@@ -868,8 +872,11 @@ class TestValidateRelease:
             )
             == 1
         )
+        assert (
+            "recipe version (0.1.8) != tag version (0.1.11)" in capsys.readouterr().err
+        )
 
-    def test_missing_recipe_exit_one(self, tmp_path):
+    def test_missing_recipe_exit_one(self, tmp_path, capsys):
         module = load_module()
         plugin_dir = self._plugin_with_version(tmp_path, "0.1.11")
         (plugin_dir / "recipe.yaml").unlink()
@@ -879,6 +886,7 @@ class TestValidateRelease:
             )
             == 1
         )
+        assert "no recipe.yaml or meta.yaml found" in capsys.readouterr().err
 
     def test_meta_yaml_jinja_version(self, tmp_path):
         module = load_module()
@@ -904,18 +912,50 @@ class TestUploadConda:
         path.write_text("dummy")
         return path
 
-    def test_refuses_existing_version_without_override(self, tmp_path, monkeypatch):
+    def test_refuses_existing_version_without_override(
+        self, tmp_path, monkeypatch, capsys
+    ):
         module = load_module()
         artifact = self._artifact(tmp_path)
         monkeypatch.setattr(
             module, "anaconda_version_labels", lambda *a, **k: ["dev", "main"]
         )
+
+        def unexpected_upload(*args, **kwargs):
+            pytest.fail("Existing versions must be refused before upload")
+
+        monkeypatch.setattr(module.subprocess, "run", unexpected_upload)
+        assert (
+            module.upload_conda(
+                artifact,
+                plugin="spectrochempy-nmr",
+                version="0.1.11",
+                token="test-token",
+                dry_run=False,
+            )
+            == 1
+        )
+        error = capsys.readouterr().err
+        assert "already exists on the 'main' label" in error
+        assert "ANACONDA_API_TOKEN is not set" not in error
+
+    def test_missing_token_refuses_before_network(self, tmp_path, monkeypatch, capsys):
+        module = load_module()
+        artifact = self._artifact(tmp_path)
+        monkeypatch.delenv("ANACONDA_API_TOKEN", raising=False)
+
+        def unexpected_network(*args, **kwargs):
+            pytest.fail("Missing credentials must be refused before network access")
+
+        monkeypatch.setattr(module, "anaconda_version_labels", unexpected_network)
+        monkeypatch.setattr(module.subprocess, "run", unexpected_network)
         assert (
             module.upload_conda(
                 artifact, plugin="spectrochempy-nmr", version="0.1.11", dry_run=False
             )
             == 1
         )
+        assert "ANACONDA_API_TOKEN is not set" in capsys.readouterr().err
 
     def test_allow_override_forces_reupload(self, tmp_path, monkeypatch):
         module = load_module()
@@ -977,7 +1017,7 @@ class TestUploadConda:
         )
         assert calls and "--force" not in calls[0]
 
-    def test_artifact_version_mismatch(self, tmp_path, monkeypatch):
+    def test_artifact_version_mismatch(self, tmp_path, monkeypatch, capsys):
         module = load_module()
         artifact = self._artifact(tmp_path, name="spectrochempy-nmr-0.1.8-0_abc.conda")
         assert (
@@ -986,6 +1026,7 @@ class TestUploadConda:
             )
             == 1
         )
+        assert "does not match spectrochempy-nmr==0.1.11" in capsys.readouterr().err
 
     def test_dry_run_skips_upload(self, tmp_path, monkeypatch):
         module = load_module()
@@ -1386,7 +1427,7 @@ class TestResolveRecipe:
             )
 
     def test_tag_recipe_with_inconsistent_version_stays_tag_not_fallback(
-        self, tmp_path
+        self, tmp_path, capsys
     ):
         """A tag that ships an inconsistent recipe must NOT fall back silently."""
         module = load_module()
@@ -1402,6 +1443,9 @@ class TestResolveRecipe:
                 argparse.Namespace(plugin_dir=str(plugin_dir), version="0.1.8")
             )
             == 1
+        )
+        assert (
+            "recipe version (0.1.4) != tag version (0.1.8)" in capsys.readouterr().err
         )
 
 
@@ -1459,10 +1503,11 @@ class TestVerifyTagExists:
             cwd=tmp_path,
         )
         assert ok is False
+        assert "does not exist" in capsys.readouterr().err
 
 
 class TestCmdDeriveTag:
-    def test_rejects_invalid_version(self, tmp_path, monkeypatch):
+    def test_rejects_invalid_version(self, tmp_path, monkeypatch, capsys):
         module = load_module()
         monkeypatch.setattr(module, "verify_tag_exists", lambda *a, **k: True)
         assert (
@@ -1471,6 +1516,7 @@ class TestCmdDeriveTag:
             )
             == 1
         )
+        assert "must be exactly three numeric components" in capsys.readouterr().err
 
     def test_derives_canonical_tag(self, tmp_path, monkeypatch, capsys):
         module = load_module()
