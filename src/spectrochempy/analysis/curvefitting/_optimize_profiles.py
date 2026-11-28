@@ -3,10 +3,15 @@
 from collections.abc import Mapping
 from collections.abc import Sequence
 from copy import copy
+from copy import deepcopy
 from dataclasses import replace
 
 import numpy as np
 
+from spectrochempy.analysis.curvefitting._centered_coordinates import (
+    _CenteredParameterCoordinates,
+)
+from spectrochempy.analysis.curvefitting._centered_coordinates import _magnitude
 from spectrochempy.analysis.curvefitting._fit_backend import (
     _least_squares as least_squares,
 )
@@ -219,11 +224,44 @@ def _prepare_profile_layout(specs, shared, intensity_unit, units):
 
 
 def fit_profiles(
-    dataset, specs, max_calls, shared, *, min_ndim=2, residual_jacobian=None
+    dataset,
+    specs,
+    max_calls,
+    shared,
+    *,
+    min_ndim=2,
+    residual_jacobian=None,
+    parameter_coordinates=None,
 ):
-    """Fit general profiles using the same observation and result contract as ND peaks."""
+    """
+    Fit separable profiles with an opt-in private coordinate adapter.
+
+    Explicit coordinates require the complete physical layout and linear
+    origins for free native centers. Their conditioning owns x_scale=1;
+    TRF, three-point differences and existing stopping defaults remain.
+    Analytic providers retain physical columns, but cannot describe virtual
+    sub-ULP center motion through their current signature, so the centered
+    analytic combination is rejected. No public estimator selects this input.
+    Raw solutions retain solver coordinates; results and inference remain
+    physical in the historical centered/scaled basis.
+    Final numerical derivative steps are sized physically, independently
+    of solver normalization. Unrepresentable perturbations exclude inference.
+    Final centers may be reconciled to their represented values. Solver
+    success, including endpoint starts, does not establish physical stationarity.
+    """
     coordinates, units = _grid(dataset, min_ndim=min_ndim)
-    peaks, groups, target_units = _prepare_profiles(specs, shared, dataset.units, units)
+    if parameter_coordinates is None:
+        peaks, groups, target_units = _prepare_profiles(
+            specs, shared, dataset.units, units
+        )
+    else:
+        peaks, complete, target_units, context = _prepare_profile_layout(
+            specs, shared, dataset.units, units
+        )
+        parameter_coordinates = _bind_profile_coordinates(
+            context, parameter_coordinates
+        )
+        groups = [group for group in complete if not group["parameter"].fixed]
     with np.errstate(over="ignore"):
         data = np.asarray(dataset.data, dtype=float)
     unmasked = ~np.asarray(dataset.mask)
@@ -285,8 +323,37 @@ def fit_profiles(
     )
     layout = replace(layout, normalization_scales=tuple(scales))
     scales = np.asarray(layout.free_scales, dtype=np.longdouble)
-    bounds = np.asarray((limits - origins) / scales, dtype=float) if groups else None
+    if parameter_coordinates is None:
+        bounds = (
+            np.asarray((limits - origins) / scales, dtype=float) if groups else None
+        )
+    else:
+        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+            bounds = (
+                np.asarray((limits - origins) / scales, dtype=float) if groups else None
+            )
     start = np.asarray((initial - origins) / scales, dtype=float)
+    solver_bounds = bounds
+    if parameter_coordinates is not None:
+        for index, group in enumerate(groups):
+            centered = "center_scale" in group
+            origin = parameter_coordinates.origins[index]
+            if centered and (
+                origin is None or parameter_coordinates.transforms[index] != "lin"
+            ):
+                raise ValueError("Free native centers require explicit linear origins")
+            if not centered and origin is not None:
+                raise ValueError(
+                    "Only free native centers support explicit origins here"
+                )
+        if residual_jacobian is not None and any("center_scale" in g for g in groups):
+            raise ValueError(
+                "Analytic Jacobians with free native centers are not qualified"
+            )
+        start = np.asarray(parameter_coordinates.initial, dtype=float)
+        solver_bounds = (
+            np.asarray(parameter_coordinates.bounds, dtype=float).reshape(-1, 2).T
+        )
     names = layout.free_names
     parameter_units = layout.free_units
     group_indices = {id(group): index for index, group in enumerate(groups)}
@@ -308,11 +375,17 @@ def fit_profiles(
         solver_grids.append(grid)
     offsets = initial - origins
     centered_offsets = np.zeros_like(offsets)
+    if parameter_coordinates is not None:
+        centered_offsets = parameter_coordinates.to_offsets(start)
 
     def update(vector):
         nonlocal offsets
-        offsets = vector * scales
-        vector = origins + offsets
+        if parameter_coordinates is None:
+            offsets = vector * scales
+            vector = origins + offsets
+        else:
+            offsets = parameter_coordinates.to_offsets(vector)
+            vector = parameter_coordinates.to_physical(vector)
         for group, value in zip(groups, vector, strict=True):
             if "center_scale" not in group:
                 value = float(value)
@@ -375,7 +448,12 @@ def fit_profiles(
             raise ValueError("Profile Jacobian must match the grid and free parameters")
         matrix = matrix[valid]
         if scaled:
-            matrix = matrix * scales / intensity_scale
+            derivatives = (
+                scales
+                if parameter_coordinates is None
+                else parameter_coordinates.derivatives(vector)
+            )
+            matrix = matrix * derivatives / intensity_scale
         with np.errstate(over="ignore", invalid="ignore"):
             matrix = np.asarray(matrix, dtype=float)
         if not np.isfinite(matrix).all():
@@ -390,21 +468,29 @@ def fit_profiles(
         solution = least_squares(
             residuals,
             start,
-            bounds=bounds,
+            bounds=solver_bounds,
             method="trf",
             jac=(lambda vector: analytic_at(vector, scaled=True))
             if residual_jacobian is not None
             else "3-point",
-            x_scale="jac",
+            x_scale="jac" if parameter_coordinates is None else 1.0,
             max_nfev=max_calls,
             gtol=None,
         )
         if centered_axes:
             represented = solution.x.copy()
-            for index, group in enumerate(groups):
-                if "center_scale" in group:
-                    value = origins[index] + solution.x[index] * scales[index]
-                    represented[index] = (value - origins[index]) / scales[index]
+            if parameter_coordinates is None:
+                for index, group in enumerate(groups):
+                    if "center_scale" in group:
+                        value = origins[index] + solution.x[index] * scales[index]
+                        represented[index] = (value - origins[index]) / scales[index]
+            else:
+                encoded = parameter_coordinates.to_solver(
+                    parameter_coordinates.to_physical(solution.x)
+                )
+                for index, group in enumerate(groups):
+                    if "center_scale" in group:
+                        represented[index] = encoded[index]
             precision = 8 * np.finfo(float).eps
             represented_center = not np.allclose(
                 represented, solution.x, rtol=precision, atol=precision
@@ -429,22 +515,48 @@ def fit_profiles(
             fitted, _ = model()
             return fitted[valid]
 
-        jacobian = (
-            analytic_at(solution.x, scaled=False)
-            if residual_jacobian is not None
-            else _physical_profile_jacobian(
-                solution.x,
-                fitted_at,
-                bounds,
-                scales,
-                [
+        if residual_jacobian is None:
+            if parameter_coordinates is None:
+                derivative_scales = scales
+                step_scales = [
                     abs((origin + value * scale) / scale)
                     if group["relative_step"]
                     else max(1.0, abs(value))
                     for group, value, origin, scale in zip(
                         groups, solution.x, origins, scales, strict=True
                     )
-                ],
+                ]
+            else:
+                derivative_scales = parameter_coordinates.derivatives(solution.x)
+                physical_values = parameter_coordinates.to_physical(solution.x)
+                step_scales = [
+                    (
+                        scale
+                        if "center_scale" in group
+                        else abs(value)
+                        if transform == "log" or group["relative_step"]
+                        else max(scale, abs(value))
+                    )
+                    / derivative
+                    for group, value, scale, transform, derivative in zip(
+                        groups,
+                        physical_values,
+                        scales,
+                        parameter_coordinates.transforms,
+                        derivative_scales,
+                        strict=True,
+                    )
+                ]
+        jacobian = (
+            analytic_at(solution.x, scaled=False)
+            if residual_jacobian is not None
+            else _physical_profile_jacobian(
+                solution.x,
+                fitted_at,
+                solver_bounds,
+                derivative_scales,
+                step_scales,
+                solver_float_steps=parameter_coordinates is not None,
             )
         )
         update(solution.x)
@@ -460,28 +572,67 @@ def fit_profiles(
     if (
         solution is not None
         and jacobian is not None
-        and (residual_jacobian is None or represented_center)
+        and (
+            residual_jacobian is None
+            or represented_center
+            or parameter_coordinates is not None
+        )
     ):
         covariance_solution = copy(solution)
-        mantissa, power = np.frexp(jacobian)
-        scale, scale_power = np.frexp(scales)
-        intensity, intensity_power = np.frexp(intensity_scale)
-        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
-            covariance_solution.jac = np.asarray(
-                np.ldexp(
-                    mantissa * scale / intensity, power + scale_power - intensity_power
-                ),
-                dtype=float,
-            )
-    if represented_center:
+        covariance_solution.jac = _profile_scaled_jacobian(
+            jacobian, scales, intensity_scale
+        )
+    if represented_center and parameter_coordinates is None:
         solution.jac = covariance_solution.jac if jacobian is not None else None
-    covariance, reason = _physical_covariance(
-        covariance_solution, jacobian, scales, bounds, diagnostics
-    )
+    numeric_range = False
+    if parameter_coordinates is not None and solution is not None:
+        if covariance_solution is solution:
+            covariance_solution = copy(solution)
+        physical = parameter_coordinates.to_physical(solution.x)
+        with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+            displacement = physical - origins
+            covariance_solution.x = np.asarray(displacement / scales, dtype=float)
+        numeric_range = (
+            np.any(~np.isfinite(covariance_solution.x))
+            or np.any((displacement != 0) & (covariance_solution.x == 0))
+            or np.any(np.isfinite(limits) & ~np.isfinite(bounds))
+            or np.any(((limits - origins) != 0) & (bounds == 0))
+            or (
+                covariance_solution.jac is not None
+                and not np.isfinite(covariance_solution.jac).all()
+            )
+            or (
+                jacobian is not None
+                and np.any((jacobian != 0) & (covariance_solution.jac == 0))
+            )
+        )
+        solution.jac = (
+            _profile_scaled_jacobian(
+                jacobian, parameter_coordinates.derivatives(solution.x), intensity_scale
+            )
+            if jacobian is not None
+            else None
+        )
+    if numeric_range:
+        covariance, reason = None, "numeric_range"
+    else:
+        covariance, reason = _physical_covariance(
+            covariance_solution, jacobian, scales, bounds, diagnostics
+        )
     diagnostics["covariance_reason"] = reason
-    values = origins + solution.x * scales if solution is not None else []
+    if solution is None:
+        values = []
+    elif parameter_coordinates is None:
+        values = origins + solution.x * scales
+    else:
+        values = parameter_coordinates.to_physical(solution.x)
     exported = public_profiles(peaks, target_units)
-    return _fit_outputs(
+    coordinate_config = (
+        _profile_coordinate_config(parameter_coordinates)
+        if parameter_coordinates is not None
+        else None
+    )
+    fit = _fit_outputs(
         dataset,
         data,
         valid,
@@ -498,16 +649,119 @@ def fit_profiles(
         history_parameters={
             "profile_specification": profile_history(specs),
             "shared_parameters": profile_history(shared or {}),
+            **(
+                {"parameter_coordinates": profile_history(coordinate_config)}
+                if coordinate_config is not None
+                else {}
+            ),
         },
-    ), solution
+    )
+    if coordinate_config is not None:
+        fit["config"] = {"parameter_coordinates": coordinate_config}
+        diagnostics.update(
+            jacobian_coordinates="physical", covariance_coordinates="physical"
+        )
+    return fit, solution
 
 
-def _physical_profile_jacobian(vector, evaluate, bounds, scales, step_scales):
+def _bind_profile_coordinates(layout, coordinates):
+    """Copy an adapter only after matching every physical declaration, fixes included."""
+    if not isinstance(coordinates, _CenteredParameterCoordinates):
+        raise TypeError(
+            "Profile coordinates require a prepared centered coordinate space"
+        )
+    if len(coordinates.layout.parameters) != len(layout.parameters):
+        raise ValueError(
+            "Coordinate declarations must match the complete profile layout"
+        )
+    for supplied, expected in zip(
+        coordinates.layout.parameters, layout.parameters, strict=True
+    ):
+        metadata = (supplied.identifier, supplied.name, supplied.fixed, supplied.unit)
+        if metadata != (
+            expected.identifier,
+            expected.name,
+            expected.fixed,
+            expected.unit,
+        ):
+            raise ValueError(
+                "Coordinate declarations must match the complete profile layout"
+            )
+        if not isinstance(supplied.fixed, (bool, np.bool_)):
+            raise ValueError("Coordinate fixed flags must be boolean")
+        for a, b in zip(
+            (supplied.value, *supplied.bounds),
+            (expected.value, *expected.bounds),
+            strict=True,
+        ):
+            if _magnitude(a, finite=False) != _magnitude(b, finite=False):
+                raise ValueError(
+                    "Coordinate declarations must match the complete profile layout"
+                )
+    for record, transform in zip(
+        layout.free_parameters, coordinates.transforms, strict=True
+    ):
+        if (
+            transform == "log"
+            and record.unit is not None
+            and ur.Quantity(0, record.unit).to_base_units().magnitude != 0
+        ):
+            raise ValueError("Log coordinates require multiplicative parameter units")
+    return deepcopy(coordinates)
+
+
+def _profile_coordinate_config(coordinates):
+    """Keep exact initial magnitudes separate from physical fitted values."""
+    return {
+        p.name: {
+            "coordinate_transform": transform,
+            "normalization_scale": float(scale),
+            "log_reference": reference,
+            "origin": origin,
+            "initial_value": deepcopy(p.value),
+            "bounds": [
+                deepcopy(b) if b is not None and np.isfinite(b) else None
+                for b in p.bounds
+            ],
+            "unit": str(p.unit) if p.unit is not None else None,
+        }
+        for p, transform, scale, reference, origin in zip(
+            coordinates.layout.free_parameters,
+            coordinates.transforms,
+            coordinates.layout.free_scales,
+            coordinates.references,
+            coordinates.origins,
+            strict=True,
+        )
+    }
+
+
+def _profile_scaled_jacobian(matrix, scales, intensity):
+    """Scale physical columns without an overflowing intermediate product."""
+    mantissa, power = np.frexp(matrix)
+    scale, scale_power = np.frexp(scales)
+    amplitude, amplitude_power = np.frexp(intensity)
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        return np.asarray(
+            np.ldexp(
+                mantissa * scale / amplitude, power + scale_power - amplitude_power
+            ),
+            dtype=float,
+        )
+
+
+def _physical_profile_jacobian(
+    vector, evaluate, bounds, scales, step_scales, *, solver_float_steps=False
+):
     """Differentiate model values before residual normalization loses small tails."""
     jacobian = None
     step_factor = np.cbrt(np.finfo(float).eps)
     for index, value in enumerate(vector):
         step = step_factor * (step_scales[index] or 1.0)
+        if solver_float_steps:
+            if not np.isfinite(step) or step > np.finfo(float).max:
+                return None
+            step = float(step)
         left = max(bounds[0, index], value - step)
         right = min(bounds[1, index], value + step)
         if left == right:
