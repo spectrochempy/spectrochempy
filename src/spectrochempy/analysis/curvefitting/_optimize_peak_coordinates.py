@@ -1,7 +1,6 @@
 """Explicit private coordinate wiring for the historical analytic peak route."""
 
 from copy import copy
-from fractions import Fraction
 
 import numpy as np
 
@@ -12,6 +11,9 @@ from spectrochempy.analysis.curvefitting._coordinate_context import (
 from spectrochempy.analysis.curvefitting._coordinate_context import _coordinate_config
 from spectrochempy.analysis.curvefitting._coordinate_context import (
     _scaled_physical_jacobian,
+)
+from spectrochempy.analysis.curvefitting._coordinate_context import (
+    _validate_center_anchor_offsets,
 )
 from spectrochempy.analysis.curvefitting._profile_models import profile_history
 from spectrochempy.analysis.curvefitting.simulation import _evaluate_separable_peak
@@ -53,29 +55,9 @@ def fit_peak_coordinates(dataset, specs, max_calls, parameter_coordinates):
                 raise ValueError(
                     "Free historical centers require explicit linear origins"
                 )
-            record = layout.free_parameters[index]
-            for encoded, value in zip(
-                (space.initial[index], *space.bounds[index]),
-                (record.value, *record.bounds),
-                strict=True,
-            ):
-                if value is None or not np.isfinite(value):
-                    continue
-                probe = start.copy()
-                probe[index] = encoded
-                decoded = np.longdouble(space.to_offsets(probe)[index])
-                lost = (
-                    Fraction(*decoded.as_integer_ratio())
-                    + Fraction(*origin.as_integer_ratio())
-                    - Fraction(*np.longdouble(value).as_integer_ratio())
-                )
-                tolerance = (
-                    Fraction(*np.longdouble(target["width"]).as_integer_ratio()) / 2**49
-                )
-                if abs(lost) > tolerance:
-                    raise ValueError(
-                        "Historical center origin loses anchor offsets relative to the axis width"
-                    )
+            _validate_center_anchor_offsets(
+                space, index, target["width"], kind="Historical"
+            )
         elif origin is not None:
             raise ValueError(
                 "Only free historical centers support explicit origins here"
