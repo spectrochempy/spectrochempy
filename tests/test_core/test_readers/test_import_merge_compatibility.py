@@ -182,3 +182,54 @@ def test_different_origins_cannot_bypass_geometry_check():
     first.origin, second.origin = "ir", "raman"
     with pytest.warns(UserWarning, match="separate groups"):
         assert len(merge_datasets([first, second], merge=True)) == 2
+
+
+@pytest.mark.parametrize("sortbydate", [None, False, True])
+@pytest.mark.parametrize("complex_data", [False, True])
+@pytest.mark.parametrize("partition", ["geometry", "quantity", "origin"])
+def test_sort_option_applies_to_every_compatible_group(
+    sortbydate, complex_data, partition
+):
+    inputs = []
+    for index, timestamp in enumerate([40, 30, 20, 10]):
+        values = np.array([[index + 1, index + 11, index + 21]], dtype=float)
+        if complex_data:
+            values = values + 1j * (values + 100)
+        dataset = scp.NDDataset(values)
+        dataset.set_coordset(
+            y=scp.Coord([timestamp], labels=[f"source {index}"]),
+            x=scp.Coord([1, 2, 4 if partition == "geometry" and index % 2 else 3]),
+        )
+        dataset.origin = (
+            f"source {index % 2}" if partition == "origin" else "same source"
+        )
+        if partition == "quantity":
+            dataset.units = "transmittance" if index % 2 else "absorbance"
+        dataset[0, index % 3] = scp.MASKED
+        inputs.append(dataset)
+    before = [dataset.copy() for dataset in inputs]
+    options = {} if sortbydate is None else {"sortbydate": sortbydate}
+    if partition == "origin":
+        result = merge_datasets(inputs, **options)
+    else:
+        with pytest.warns(UserWarning, match="kept in separate groups"):
+            result = merge_datasets(inputs, merge=True, **options)
+    assert len(result) == 2
+    for group, indices in zip(result, [[0, 2], [1, 3]], strict=True):
+        if sortbydate is not False:
+            indices = list(reversed(indices))
+        np.testing.assert_array_equal(
+            group.data, np.concatenate([inputs[index].data for index in indices])
+        )
+        np.testing.assert_array_equal(
+            group.mask, np.concatenate([inputs[index].mask for index in indices])
+        )
+        np.testing.assert_array_equal(
+            group.y.data, [inputs[i].y.data[0] for i in indices]
+        )
+        assert group.y.labels.tolist() == [f"source {i}" for i in indices]
+        assert np.iscomplexobj(group.data) is complex_data
+    for dataset, snapshot in zip(inputs, before, strict=True):
+        np.testing.assert_array_equal(dataset.data, snapshot.data)
+        np.testing.assert_array_equal(dataset.mask, snapshot.mask)
+        assert dataset.coordset == snapshot.coordset

@@ -269,3 +269,46 @@ def test_zip_keeps_strict_spg_rejection_without_opt_in(options):
         ValueError, match="signal quantities"
     ):
         scp.read({"strict.zip": buffer.getvalue()}, **options)
+
+
+@pytest.mark.parametrize("sortbydate", [None, False, True])
+@pytest.mark.parametrize("nested", [False, True])
+def test_spg_sort_option_reaches_every_separated_group(sortbydate, nested):
+    members = [
+        {
+            "ycode": code,
+            "timestamp": 4_000_000_040 - index * 10,
+            "label": f"source {index}",
+            "data": [index + 1, np.nan],
+        }
+        for index, code in enumerate([15, 31, 15, 31])
+    ]
+    content = synthetic_spg_members(members)
+    filename = "mixed.spg"
+    if nested:
+        for _ in range(2):
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, "w") as archive:
+                archive.writestr(filename, content)
+            content = buffer.getvalue()
+            filename = "inner.zip"
+    options = {} if sortbydate is None else {"sortbydate": sortbydate}
+    with pytest.warns(UserWarning, match="signal quantities"):
+        result = scp.read(
+            {filename: content}, allow_inconsistent_x=True, merge=True, **options
+        )
+    assert isinstance(result, ScpObjectList)
+    assert len(result) == 2
+    for title, indices in [("single beam", [0, 2]), ("Raman intensity", [1, 3])]:
+        if sortbydate is not False:
+            indices = list(reversed(indices))
+        group = next(dataset for dataset in result if dataset.title == title)
+        np.testing.assert_array_equal(
+            group.data, [members[index]["data"] for index in indices]
+        )
+        assert not np.any(group.mask)
+        assert group.y.labels[:, 1].tolist() == [f"source {i}" for i in indices]
+        assert group.y.data.tolist() == [
+            label[0].timestamp() for label in group.y.labels
+        ]
+        assert "_import_measurement_identity" not in group.__dict__

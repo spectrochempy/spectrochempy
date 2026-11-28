@@ -1257,7 +1257,7 @@ def merge_datasets(datasets, **kwargs):
                 dataset.origin = merged_name
                 dataset.name = merged_name  # Set name to same as origin
 
-            if dataset.coordset is not None and kwargs.pop("sortbydate", True):
+            if dataset.coordset is not None and kwargs.get("sortbydate", True):
                 dataset.sort(dim=0, inplace=True)
 
             # Remove any filename that might have been set
@@ -1304,7 +1304,7 @@ def merge_datasets(datasets, **kwargs):
 
                 _carry_import_identity(merged, shape_group, identities)
 
-                if merged.coordset is not None and kwargs.pop("sortbydate", True):
+                if merged.coordset is not None and kwargs.get("sortbydate", True):
                     merged.sort(dim=0, inplace=True)
                 merged_datasets.append(merged)
             except Exception as e:
