@@ -1,6 +1,7 @@
 """Explicit private coordinate wiring for the historical analytic peak route."""
 
 from copy import copy
+from fractions import Fraction
 
 import numpy as np
 
@@ -63,8 +64,15 @@ def fit_peak_coordinates(dataset, specs, max_calls, parameter_coordinates):
                 probe = start.copy()
                 probe[index] = encoded
                 decoded = np.longdouble(space.to_offsets(probe)[index])
-                exact = np.longdouble(value) - origin
-                if abs((decoded - exact) / target["width"]) > 8 * np.finfo(float).eps:
+                lost = (
+                    Fraction(*decoded.as_integer_ratio())
+                    + Fraction(*origin.as_integer_ratio())
+                    - Fraction(*np.longdouble(value).as_integer_ratio())
+                )
+                tolerance = (
+                    Fraction(*np.longdouble(target["width"]).as_integer_ratio()) / 2**49
+                )
+                if abs(lost) > tolerance:
                     raise ValueError(
                         "Historical center origin loses anchor offsets relative to the axis width"
                     )

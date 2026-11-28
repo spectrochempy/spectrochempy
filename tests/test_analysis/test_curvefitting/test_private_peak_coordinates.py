@@ -454,3 +454,31 @@ def test_far_center_origin_cannot_lose_initial_or_finite_bound_anchors(
         ValueError, match="origin loses anchor offsets relative to the axis width"
     ):
         private_fit(source, specs, space)
+
+
+@pytest.mark.parametrize("normalization", [1, 8])
+def test_origin_subtraction_cannot_conceal_lost_open_bound_initial(
+    normalization, monkeypatch
+):
+    source, specs, *_ = problem()
+    specs[0]["axes"]["x"]["center"] = {
+        "value": np.longdouble("0.1"),
+        "bounds": (None, None),
+    }
+    _, units = backend._grid(source)
+    _, free, layout = backend._prepare_peak_layout(specs, source.units, units)
+    space = _CenteredParameterCoordinates(
+        replace(layout, normalization_scales=(normalization,) * len(free)),
+        tuple(2**80 if key == "center" else None for _, key in free),
+    )
+
+    def forbidden(*args, **kwargs):
+        pytest.fail(
+            "Lost anchor must be rejected even when longdouble subtraction loses it"
+        )
+
+    monkeypatch.setattr(backend, "least_squares", forbidden)
+    with pytest.raises(
+        ValueError, match="origin loses anchor offsets relative to the axis width"
+    ):
+        private_fit(source, specs, space)
